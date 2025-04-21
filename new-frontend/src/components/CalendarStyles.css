@@ -1,106 +1,78 @@
-/* Calendar Styles */
+/* Basic Calendar Styles */
 .rbc-calendar {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  width: 100%;
+  height: 100%;
 }
 
-/* Make buttons more visible and clickable */
+/* Button Group Styling */
 .rbc-btn-group {
   display: flex;
   margin-bottom: 10px;
+  gap: 2px;
 }
 
 .rbc-btn-group button {
   background-color: #f3f4f6;
   border: 1px solid #d1d5db;
   color: #374151;
-  padding: 6px 12px;
+  padding: 8px 12px;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s;
+  border-radius: 4px;
+  transition: all 0.2s ease;
 }
 
 .rbc-btn-group button:hover {
   background-color: #e5e7eb;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .rbc-btn-group button.rbc-active {
   background-color: #3b82f6;
   color: white;
   border-color: #2563eb;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
 }
 
-.rbc-btn-group button.rbc-active:hover {
-  background-color: #2563eb;
+/* Toolbar Styling */
+.rbc-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding: 8px;
+  background-color: #f9fafb;
+  border-radius: 6px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
-/* Improve event styling */
-.rbc-event {
+.rbc-toolbar-label {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+  padding: 4px 8px;
   border-radius: 4px;
-  padding: 2px 5px;
+  background-color: #f3f4f6;
+}
+
+/* Event Styling */
+.rbc-event {
   background-color: #3b82f6;
+  border-radius: 4px;
   color: white;
-  cursor: pointer;
+  padding: 2px 5px;
 }
 
-.rbc-event:hover {
-  background-color: #2563eb;
-}
-
-/* Improve time slot styling */
-.rbc-time-slot {
-  border-top: 1px solid #f3f4f6;
-}
-
-.rbc-timeslot-group {
-  min-height: 40px;
-}
-
-/* Improve day/week view */
-.rbc-time-view {
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-}
-
-.rbc-time-header {
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.rbc-time-header-content {
-  border-left: 1px solid #e5e7eb;
-}
-
-.rbc-time-content {
-  border-top: 1px solid #e5e7eb;
-}
-
-/* Improve month view */
-.rbc-month-view {
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-}
-
-.rbc-month-header {
-  font-weight: 600;
-}
-
-.rbc-header {
-  padding: 10px 3px;
-  font-weight: 600;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.rbc-date-cell {
-  padding: 5px;
-  text-align: right;
-}
-
-/* Today highlight */
+/* Today Highlight */
 .rbc-today {
   background-color: #eff6ff;
 }
 
-/* Improve toolbar */
+/* Toolbar Styling */
 .rbc-toolbar {
   margin-bottom: 15px;
 }
@@ -111,35 +83,51 @@
   color: #1f2937;
 }
 
-/* Fix z-index for popups */
-.rbc-overlay {
-  z-index: 1000;
-}
-
-/* Make time gutter more readable */
-.rbc-time-gutter .rbc-timeslot-group {
-  text-align: right;
-  padding-right: 10px;
+/* Time Gutter */
+.rbc-time-gutter {
   font-size: 12px;
-  color: #6b7280;
 }
 
-/* Improve selection highlight */
-.rbc-slot-selection {
-  background-color: rgba(59, 130, 246, 0.2);
+/* Make time slots more compact */
+.rbc-timeslot-group {
+  min-height: 30px;
 }
 
-/* Fix event overlapping */
-.rbc-event-overlaps {
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+.rbc-time-slot {
+  height: 30px;
 }
 
-/* Make current time indicator more visible */
+/* Compact day cells in month view */
+.rbc-month-row {
+  min-height: 70px;
+}
+
+/* Compact header */
+.rbc-toolbar {
+  margin-bottom: 8px;
+  padding: 4px;
+}
+
+/* Time View */
+.rbc-time-view {
+  border: 1px solid #e5e7eb;
+}
+
+/* Month View */
+.rbc-month-view {
+  border: 1px solid #e5e7eb;
+}
+
+/* Header */
+.rbc-header {
+  padding: 8px 3px;
+  font-weight: 600;
+}
+
+/* Current Time Indicator */
 .rbc-current-time-indicator {
   height: 2px;
   background-color: #ef4444;
   position: absolute;
   z-index: 3;
-  left: 0;
-  right: 0;
 }

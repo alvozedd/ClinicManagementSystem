@@ -1,6 +1,8 @@
 import { useState, useContext } from 'react'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import AuthContext from './context/AuthContext'
 import Dashboard from './Dashboard'
+import WelcomePage from './components/WelcomePage'
 
 function App() {
   const [username, setUsername] = useState('')
@@ -45,14 +47,15 @@ function App() {
     setLoading(false)
   }
 
-  // If user is logged in, show dashboard
-  if (userInfo) {
-    return <Dashboard />
+  // Protected route component
+  const ProtectedRoute = ({ children }) => {
+    return userInfo ? children : <Navigate to="/login" replace />
   }
 
-  // Otherwise show login form
-  return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-8 sm:px-6 lg:px-8 fade-in overflow-hidden">
+  // Login form component
+  const LoginForm = () => {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-8 sm:px-6 lg:px-8 fade-in overflow-hidden">
 
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
@@ -165,6 +168,50 @@ function App() {
         </div>
       </div>
     </div>
+  )
+  }
+
+  // Home component with links to booking and login
+  const Home = () => {
+    return (
+      <div className="min-h-screen bg-gradient-to-r from-blue-700 to-blue-500 text-white">
+        <div className="container mx-auto px-4 py-16 text-center">
+          <h1 className="text-4xl font-bold mb-4">UroHealth Central</h1>
+          <p className="text-xl mb-8">Advanced Clinic Management System</p>
+
+          <div className="flex flex-col md:flex-row justify-center gap-6 mt-8">
+            <a
+              href="/book"
+              className="bg-white text-blue-600 hover:bg-blue-50 px-8 py-3 rounded-md font-medium text-lg transition duration-200 inline-flex items-center justify-center"
+            >
+              Book an Appointment
+            </a>
+            <a
+              href="/login"
+              className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-blue-600 px-8 py-3 rounded-md font-medium text-lg transition duration-200 inline-flex items-center justify-center"
+            >
+              Staff Login
+            </a>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<LoginForm />} />
+        <Route path="/book" element={<WelcomePage />} />
+        <Route path="/dashboard" element={
+          <ProtectedRoute>
+            <Dashboard />
+          </ProtectedRoute>
+        } />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Router>
   )
 }
 

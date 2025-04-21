@@ -1,20 +1,48 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 function SimplifiedDiagnosisModal({ appointment, onClose, onSave }) {
   const [diagnosis, setDiagnosis] = useState('');
   const [treatment, setTreatment] = useState('');
   const [followUp, setFollowUp] = useState('');
+  const [files, setFiles] = useState([]);
+  const [existingFiles, setExistingFiles] = useState([]);
+  const fileInputRef = useRef(null);
 
   useEffect(() => {
     if (appointment && appointment.diagnosis) {
       setDiagnosis(appointment.diagnosis.notes || '');
       setTreatment(appointment.diagnosis.treatment || '');
       setFollowUp(appointment.diagnosis.followUp || '');
+      setExistingFiles(appointment.diagnosis.files || []);
     }
   }, [appointment]);
 
+  const handleFileChange = (e) => {
+    const selectedFiles = Array.from(e.target.files);
+    setFiles(prevFiles => [...prevFiles, ...selectedFiles]);
+  };
+
+  const removeFile = (index, isExisting = false) => {
+    if (isExisting) {
+      setExistingFiles(prevFiles => prevFiles.filter((_, i) => i !== index));
+    } else {
+      setFiles(prevFiles => prevFiles.filter((_, i) => i !== index));
+    }
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    // Process files - in a real app, you would upload these to a server
+    // Here we'll just store file metadata
+    const fileData = files.map(file => ({
+      name: file.name,
+      type: file.type,
+      size: file.size,
+      lastModified: file.lastModified,
+      // In a real app, this would be a URL to the uploaded file
+      url: URL.createObjectURL(file)
+    }));
 
     const updatedAppointment = {
       ...appointment,
@@ -22,6 +50,7 @@ function SimplifiedDiagnosisModal({ appointment, onClose, onSave }) {
         notes: diagnosis,
         treatment: treatment,
         followUp: followUp,
+        files: [...existingFiles, ...fileData],
         updatedAt: new Date().toISOString()
       }
     };
@@ -97,6 +126,94 @@ function SimplifiedDiagnosisModal({ appointment, onClose, onSave }) {
                 placeholder="Enter follow-up instructions..."
               ></textarea>
             </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Upload Files</label>
+              <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
+                <div className="space-y-1 text-center">
+                  <svg
+                    className="mx-auto h-12 w-12 text-gray-400"
+                    stroke="currentColor"
+                    fill="none"
+                    viewBox="0 0 48 48"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                      strokeWidth={2}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                  <div className="flex text-sm text-gray-600">
+                    <label
+                      htmlFor="file-upload"
+                      className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500"
+                    >
+                      <span>Upload files</span>
+                      <input
+                        id="file-upload"
+                        name="file-upload"
+                        type="file"
+                        className="sr-only"
+                        multiple
+                        onChange={handleFileChange}
+                        ref={fileInputRef}
+                      />
+                    </label>
+                    <p className="pl-1">or drag and drop</p>
+                  </div>
+                  <p className="text-xs text-gray-500">PDF, PNG, JPG, GIF up to 10MB</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Display selected files */}
+            {(files.length > 0 || existingFiles.length > 0) && (
+              <div className="mt-4">
+                <h4 className="text-sm font-medium text-gray-700 mb-2">Attached Files:</h4>
+                <ul className="divide-y divide-gray-200 border border-gray-200 rounded-md">
+                  {existingFiles.map((file, index) => (
+                    <li key={`existing-${index}`} className="pl-3 pr-4 py-3 flex items-center justify-between text-sm">
+                      <div className="w-0 flex-1 flex items-center">
+                        <svg className="flex-shrink-0 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M8 4a3 3 0 00-3 3v4a5 5 0 0010 0V7a1 1 0 112 0v4a7 7 0 11-14 0V7a5 5 0 0110 0v4a3 3 0 11-6 0V7a1 1 0 012 0v4a1 1 0 102 0V7a3 3 0 00-3-3z" clipRule="evenodd" />
+                        </svg>
+                        <span className="ml-2 flex-1 w-0 truncate">{file.name}</span>
+                      </div>
+                      <div className="ml-4 flex-shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => removeFile(index, true)}
+                          className="font-medium text-red-600 hover:text-red-500"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </li>
+                  ))}
+                  {files.map((file, index) => (
+                    <li key={`new-${index}`} className="pl-3 pr-4 py-3 flex items-center justify-between text-sm">
+                      <div className="w-0 flex-1 flex items-center">
+                        <svg className="flex-shrink-0 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                          <path fillRule="evenodd" d="M8 4a3 3 0 00-3 3v4a5 5 0 0010 0V7a1 1 0 112 0v4a7 7 0 11-14 0V7a5 5 0 0110 0v4a3 3 0 11-6 0V7a1 1 0 012 0v4a1 1 0 102 0V7a3 3 0 00-3-3z" clipRule="evenodd" />
+                        </svg>
+                        <span className="ml-2 flex-1 w-0 truncate">{file.name}</span>
+                      </div>
+                      <div className="ml-4 flex-shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => removeFile(index)}
+                          className="font-medium text-red-600 hover:text-red-500"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
             <div className="flex justify-end space-x-3 mt-6">
               <button

@@ -5,6 +5,7 @@ function AddPatientForm({ onSave, onCancel }) {
     firstName: '',
     lastName: '',
     dateOfBirth: '',
+    yearOfBirth: '',
     gender: '',
     phone: '',
     email: '',
@@ -70,7 +71,7 @@ function AddPatientForm({ onSave, onCancel }) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Other Names</label>
             <input
               type="text"
               name="lastName"
@@ -82,15 +83,27 @@ function AddPatientForm({ onSave, onCancel }) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Year of Birth</label>
             <input
-              type="date"
-              name="dateOfBirth"
-              value={formData.dateOfBirth}
-              onChange={handleChange}
+              type="number"
+              name="yearOfBirth"
+              value={formData.yearOfBirth || ''}
+              onChange={(e) => {
+                const year = e.target.value;
+                // Create a date string with just the year (Jan 1 of that year)
+                const dateOfBirth = year ? `${year}-01-01` : '';
+                setFormData(prev => ({
+                  ...prev,
+                  yearOfBirth: year,
+                  dateOfBirth: dateOfBirth
+                }));
+              }}
+              min="1900"
+              max={new Date().getFullYear()}
+              placeholder="YYYY"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              required
             />
+            <p className="text-xs text-gray-500 mt-1">Only year is required</p>
           </div>
 
           <div>

@@ -1,7 +1,8 @@
 // Mock data for the UroHealth Central application
+import { STORAGE_KEYS, loadFromLocalStorage, saveToLocalStorage } from '../utils/localStorage';
 
-// Patients data
-export const patients = [
+// Initial patients data (used only if no data exists in localStorage)
+const initialPatients = [
   {
     id: 'P001',
     firstName: 'John',
@@ -129,8 +130,8 @@ export const patients = [
   }
 ];
 
-// Appointments data
-export const appointments = [
+// Initial appointments data (used only if no data exists in localStorage)
+const initialAppointments = [
   {
     id: 'A001',
     patientId: 'P001',
@@ -217,8 +218,8 @@ export const appointments = [
   }
 ];
 
-// Medical reports data
-export const reports = [
+// Initial medical reports data (used only if no data exists in localStorage)
+const initialReports = [
   {
     id: 'R001',
     patientId: 'P001',
@@ -314,4 +315,22 @@ export const getRecentReports = () => {
   return [...reports].sort((a, b) =>
     new Date(b.date) - new Date(a.date)
   ).slice(0, 5); // Get top 5
+};
+
+// Load data from localStorage or use initial data if not available
+export const patients = loadFromLocalStorage(STORAGE_KEYS.PATIENTS, initialPatients);
+export const appointments = loadFromLocalStorage(STORAGE_KEYS.APPOINTMENTS, initialAppointments);
+export const reports = loadFromLocalStorage(STORAGE_KEYS.REPORTS, initialReports);
+
+// Save data to localStorage
+export const savePatients = (data) => {
+  saveToLocalStorage(STORAGE_KEYS.PATIENTS, data);
+};
+
+export const saveAppointments = (data) => {
+  saveToLocalStorage(STORAGE_KEYS.APPOINTMENTS, data);
+};
+
+export const saveReports = (data) => {
+  saveToLocalStorage(STORAGE_KEYS.REPORTS, data);
 };

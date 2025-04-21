@@ -1,6 +1,6 @@
-import { useContext, useState } from 'react'
+import { useContext, useState, useEffect } from 'react'
 import AuthContext from './context/AuthContext'
-import { patients, appointments, reports, getTodaysAppointments, getRecentPatients, getRecentReports } from './data/mockData'
+import { patients, appointments, reports, getTodaysAppointments, getRecentPatients, getRecentReports, savePatients, saveAppointments, saveReports } from './data/mockData'
 import EditPatientModal from './components/EditPatientModal'
 import EditAppointmentModal from './components/EditAppointmentModal'
 import EditReportModal from './components/EditReportModal'
@@ -22,6 +22,19 @@ function Dashboard() {
   const [patientsData, setPatientsData] = useState(patients)
   const [appointmentsData, setAppointmentsData] = useState(appointments)
   const [reportsData, setReportsData] = useState(reports)
+
+  // Save data to localStorage whenever it changes
+  useEffect(() => {
+    savePatients(patientsData);
+  }, [patientsData]);
+
+  useEffect(() => {
+    saveAppointments(appointmentsData);
+  }, [appointmentsData]);
+
+  useEffect(() => {
+    saveReports(reportsData);
+  }, [reportsData]);
 
   // Get data for dashboard
   const todaysAppointments = getTodaysAppointments()
@@ -151,6 +164,7 @@ function Dashboard() {
 
   const handleLogout = () => {
     logout()
+    // Use window.location to ensure full page reload
     window.location.href = '/'
   }
 

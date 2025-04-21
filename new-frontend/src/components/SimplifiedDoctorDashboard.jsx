@@ -13,7 +13,7 @@ function SimplifiedDoctorDashboard({
   onDiagnoseAppointment,
   username
 }) {
-  const [activeTab, setActiveTab] = useState('appointments');
+  const [activeTab, setActiveTab] = useState('patient-management');
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [diagnosingAppointment, setDiagnosingAppointment] = useState(null);
   const [showAddPatientForm, setShowAddPatientForm] = useState(false);
@@ -88,6 +88,21 @@ function SimplifiedDoctorDashboard({
       {/* Simple Tab Navigation */}
       <div className="flex border-b mb-6">
         <button
+          onClick={() => setActiveTab('patient-management')}
+          className={`py-3 px-6 font-medium text-base border-b-2 -mb-px ${
+            activeTab === 'patient-management'
+              ? 'border-blue-500 text-blue-600'
+              : 'border-transparent text-gray-500 hover:text-gray-700'
+          }`}
+        >
+          <div className="flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+            </svg>
+            Patient Management
+          </div>
+        </button>
+        <button
           onClick={() => setActiveTab('appointments')}
           className={`py-3 px-6 font-medium text-base border-b-2 -mb-px ${
             activeTab === 'appointments'
@@ -115,21 +130,6 @@ function SimplifiedDoctorDashboard({
               <path fillRule="evenodd" d="M5 2a1 1 0 011 1v1h8V3a1 1 0 112 0v1h1a2 2 0 012 2v10a2 2 0 01-2 2H3a2 2 0 01-2-2V6a2 2 0 012-2h1V3a1 1 0 011-1zm11 14V6H4v10h12z" clipRule="evenodd" />
             </svg>
             Calendar
-          </div>
-        </button>
-        <button
-          onClick={() => setActiveTab('patient-management')}
-          className={`py-3 px-6 font-medium text-base border-b-2 -mb-px ${
-            activeTab === 'patient-management'
-              ? 'border-blue-500 text-blue-600'
-              : 'border-transparent text-gray-500 hover:text-gray-700'
-          }`}
-        >
-          <div className="flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-              <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
-            </svg>
-            Patient Management
           </div>
         </button>
       </div>

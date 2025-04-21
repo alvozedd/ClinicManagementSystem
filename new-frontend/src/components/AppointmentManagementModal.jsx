@@ -1,26 +1,27 @@
 import { useState, useEffect } from 'react';
 
 function AppointmentManagementModal({ appointment, onClose, onSave, isNew = false }) {
+  // Initialize with empty values, will be populated in useEffect
   const [formData, setFormData] = useState({
-    date: new Date().toISOString().split('T')[0],
-    time: '09:00',
-    type: 'Consultation',
+    date: '',
+    time: '',
+    type: '',
     reason: '',
-    status: 'Scheduled',
+    status: '',
     notes: ''
   });
 
   useEffect(() => {
-    if (appointment && !isNew) {
-      setFormData({
-        date: appointment.date || new Date().toISOString().split('T')[0],
-        time: appointment.time || '09:00',
-        type: appointment.type || 'Consultation',
-        reason: appointment.reason || '',
-        status: appointment.status || 'Scheduled',
-        notes: appointment.notes || ''
-      });
-    }
+    // For both new and existing appointments, properly initialize the form
+    setFormData({
+      // For existing appointments, use their values; for new ones, use defaults
+      date: appointment?.date || new Date().toISOString().split('T')[0],
+      time: appointment?.time || '09:00',
+      type: appointment?.type || 'Consultation',
+      reason: appointment?.reason || '',
+      status: appointment?.status || 'Scheduled',
+      notes: appointment?.notes || ''
+    });
   }, [appointment, isNew]);
 
   const handleChange = (e) => {
@@ -33,12 +34,26 @@ function AppointmentManagementModal({ appointment, onClose, onSave, isNew = fals
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
+    // Create a properly structured updated appointment
     const updatedAppointment = {
-      ...appointment,
-      ...formData
+      // Preserve the original ID and patient information
+      id: appointment?.id || `new-${Date.now()}`,
+      patientId: appointment?.patientId,
+      patientName: appointment?.patientName,
+      // Use the form data for appointment details
+      date: formData.date,
+      time: formData.time,
+      type: formData.type,
+      reason: formData.reason,
+      status: formData.status,
+      notes: formData.notes,
+      // Preserve any diagnosis information if it exists
+      diagnosis: appointment?.diagnosis,
+      diagnosisDate: appointment?.diagnosisDate
     };
-    
+
+    console.log('Saving appointment:', updatedAppointment);
     onSave(updatedAppointment);
   };
 
@@ -119,8 +134,7 @@ function AppointmentManagementModal({ appointment, onClose, onSave, isNew = fals
                 value={formData.reason}
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Reason for appointment"
-                required
+                placeholder="Reason for appointment (optional)"
               />
             </div>
 
