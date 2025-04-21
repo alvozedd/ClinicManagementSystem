@@ -1,0 +1,145 @@
+/* Calendar Styles */
+.rbc-calendar {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* Make buttons more visible and clickable */
+.rbc-btn-group {
+  display: flex;
+  margin-bottom: 10px;
+}
+
+.rbc-btn-group button {
+  background-color: #f3f4f6;
+  border: 1px solid #d1d5db;
+  color: #374151;
+  padding: 6px 12px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.rbc-btn-group button:hover {
+  background-color: #e5e7eb;
+}
+
+.rbc-btn-group button.rbc-active {
+  background-color: #3b82f6;
+  color: white;
+  border-color: #2563eb;
+}
+
+.rbc-btn-group button.rbc-active:hover {
+  background-color: #2563eb;
+}
+
+/* Improve event styling */
+.rbc-event {
+  border-radius: 4px;
+  padding: 2px 5px;
+  background-color: #3b82f6;
+  color: white;
+  cursor: pointer;
+}
+
+.rbc-event:hover {
+  background-color: #2563eb;
+}
+
+/* Improve time slot styling */
+.rbc-time-slot {
+  border-top: 1px solid #f3f4f6;
+}
+
+.rbc-timeslot-group {
+  min-height: 40px;
+}
+
+/* Improve day/week view */
+.rbc-time-view {
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+}
+
+.rbc-time-header {
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.rbc-time-header-content {
+  border-left: 1px solid #e5e7eb;
+}
+
+.rbc-time-content {
+  border-top: 1px solid #e5e7eb;
+}
+
+/* Improve month view */
+.rbc-month-view {
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+}
+
+.rbc-month-header {
+  font-weight: 600;
+}
+
+.rbc-header {
+  padding: 10px 3px;
+  font-weight: 600;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.rbc-date-cell {
+  padding: 5px;
+  text-align: right;
+}
+
+/* Today highlight */
+.rbc-today {
+  background-color: #eff6ff;
+}
+
+/* Improve toolbar */
+.rbc-toolbar {
+  margin-bottom: 15px;
+}
+
+.rbc-toolbar-label {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+/* Fix z-index for popups */
+.rbc-overlay {
+  z-index: 1000;
+}
+
+/* Make time gutter more readable */
+.rbc-time-gutter .rbc-timeslot-group {
+  text-align: right;
+  padding-right: 10px;
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* Improve selection highlight */
+.rbc-slot-selection {
+  background-color: rgba(59, 130, 246, 0.2);
+}
+
+/* Fix event overlapping */
+.rbc-event-overlaps {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* Make current time indicator more visible */
+.rbc-current-time-indicator {
+  height: 2px;
+  background-color: #ef4444;
+  position: absolute;
+  z-index: 3;
+  left: 0;
+  right: 0;
+}
