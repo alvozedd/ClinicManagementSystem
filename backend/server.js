@@ -11,7 +11,7 @@ const diagnosisRoutes = require('./routes/diagnosisRoutes');
 // Load environment variables
 dotenv.config();
 
-// Connect to MongoDB Memory Server
+// Connect to MongoDB
 connectDB();
 
 const app = express();
