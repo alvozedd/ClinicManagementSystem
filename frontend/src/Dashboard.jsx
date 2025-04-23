@@ -147,16 +147,25 @@ function Dashboard() {
       const mongoId = patientToDelete._id;
       console.log('Found patient to delete with MongoDB ID:', mongoId);
 
-      // Delete patient via API
-      await apiService.deletePatient(mongoId);
+      try {
+        // Delete patient via API
+        await apiService.deletePatient(mongoId);
 
-      // Remove the patient from the local state
-      const updatedPatients = patientsData.filter(p => p._id !== mongoId);
-      setPatientsData(updatedPatients);
+        // Remove the patient from the local state
+        const updatedPatients = patientsData.filter(p => p._id !== mongoId);
+        setPatientsData(updatedPatients);
 
-      // Also remove all appointments associated with this patient from local state
-      const updatedAppointments = appointmentsData.filter(a => a.patient_id !== mongoId);
-      setAppointmentsData(updatedAppointments);
+        // Also remove all appointments associated with this patient from local state
+        const updatedAppointments = appointmentsData.filter(a => a.patient_id !== mongoId);
+        setAppointmentsData(updatedAppointments);
+      } catch (deleteError) {
+        // Check if this is a permission error
+        if (deleteError.includes('Not authorized as an admin')) {
+          alert('The backend server needs to be restarted to apply permission changes. Please contact the administrator.');
+        } else {
+          throw deleteError;
+        }
+      }
 
       // Show success message
       alert('Patient deleted successfully');
@@ -332,6 +341,7 @@ function Dashboard() {
           onDiagnoseAppointment={handleSaveDiagnosis}
           onDeletePatient={handleDeletePatient}
           username={userInfo?.username}
+          userRole={userInfo?.role}
         />
       );
     }
@@ -345,6 +355,7 @@ function Dashboard() {
           onUpdatePatient={handleUpdatePatient}
           onDiagnoseAppointment={handleSaveDiagnosis}
           username={userInfo?.username}
+          userRole={userInfo?.role}
         />
       );
     }
