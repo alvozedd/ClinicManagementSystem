@@ -5,13 +5,16 @@ const Appointment = require('../models/appointmentModel');
 // @route   POST /api/appointments
 // @access  Private/Doctor/Secretary
 const createAppointment = asyncHandler(async (req, res) => {
-  const { patient_id, appointment_date, optional_time, notes } = req.body;
+  const { patient_id, appointment_date, optional_time, notes, status, type, reason } = req.body;
 
   const appointment = await Appointment.create({
     patient_id,
     appointment_date,
     optional_time,
     notes,
+    status: status || 'Scheduled',
+    type: type || 'Consultation',
+    reason,
     created_by_user_id: req.user._id,
   });
 
@@ -77,6 +80,19 @@ const updateAppointment = asyncHandler(async (req, res) => {
 
     if (req.body.notes !== undefined) {
       appointment.notes = req.body.notes;
+    }
+
+    // Update the new fields
+    if (req.body.status !== undefined) {
+      appointment.status = req.body.status;
+    }
+
+    if (req.body.type !== undefined) {
+      appointment.type = req.body.type;
+    }
+
+    if (req.body.reason !== undefined) {
+      appointment.reason = req.body.reason;
     }
 
     const updatedAppointment = await appointment.save();

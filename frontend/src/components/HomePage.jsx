@@ -58,7 +58,10 @@ function HomePage() {
         patient_id: newPatient._id,
         appointment_date: new Date(formData.appointmentDate),
         optional_time: '09:00', // Default time set to 9:00 AM
-        notes: `Type: ${formData.appointmentType}\nReason: ${formData.appointmentReason || 'Not specified'}\nStatus: Pending\nBooked online by patient. Time to be confirmed by secretary.`
+        notes: `Booked online by patient. Time to be confirmed by secretary.`,
+        status: 'Pending',
+        type: formData.appointmentType,
+        reason: formData.appointmentReason || 'Not specified'
       };
 
       console.log('Creating new appointment:', appointmentData);

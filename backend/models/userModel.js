@@ -25,7 +25,12 @@ const userSchema = mongoose.Schema(
 
 // Method to check if entered password matches the hashed password
 userSchema.methods.matchPassword = async function (enteredPassword) {
-  return await bcrypt.compare(enteredPassword, this.password);
+  console.log('Comparing passwords:');
+  console.log('Entered password length:', enteredPassword.length);
+  console.log('Stored password (hashed):', this.password);
+  const isMatch = await bcrypt.compare(enteredPassword, this.password);
+  console.log('Password match result:', isMatch);
+  return isMatch;
 };
 
 // Middleware to hash password before saving

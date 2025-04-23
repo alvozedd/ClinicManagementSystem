@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Login</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+    }
+    input {
+      width: 100%;
+      padding: 8px;
+      box-sizing: border-box;
+    }
+    button {
+      padding: 10px 15px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    .error {
+      color: red;
+      margin-top: 10px;
+    }
+    .success {
+      color: green;
+      margin-top: 10px;
+    }
+    #result {
+      margin-top: 20px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      background-color: #f9f9f9;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <h1>Test Login</h1>
+  
+  <div class="form-group">
+    <label for="api-url">API URL:</label>
+    <input type="text" id="api-url" value="http://localhost:5000/api">
+  </div>
+  
+  <div class="form-group">
+    <label for="username">Username:</label>
+    <input type="text" id="username" value="admin@urohealth.com">
+  </div>
+  
+  <div class="form-group">
+    <label for="password">Password:</label>
+    <input type="password" id="password" value="admin123">
+  </div>
+  
+  <button id="login-btn">Login</button>
+  
+  <div id="status"></div>
+  <div id="result"></div>
+  
+  <script>
+    document.getElementById('login-btn').addEventListener('click', async () => {
+      const apiUrl = document.getElementById('api-url').value;
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      const statusEl = document.getElementById('status');
+      const resultEl = document.getElementById('result');
+      
+      statusEl.className = '';
+      statusEl.textContent = 'Logging in...';
+      resultEl.textContent = '';
+      
+      try {
+        console.log(`Sending login request to: ${apiUrl}/users/login`);
+        
+        const response = await fetch(`${apiUrl}/users/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password }),
+        });
+        
+        console.log('Response status:', response.status);
+        
+        // Check if the response is JSON
+        const contentType = response.headers.get('content-type');
+        if (contentType && contentType.includes('application/json')) {
+          const data = await response.json();
+          
+          if (response.ok) {
+            statusEl.className = 'success';
+            statusEl.textContent = 'Login successful!';
+            resultEl.textContent = JSON.stringify(data, null, 2);
+          } else {
+            statusEl.className = 'error';
+            statusEl.textContent = `Login failed: ${data.message || response.statusText}`;
+            resultEl.textContent = JSON.stringify(data, null, 2);
+          }
+        } else {
+          // Not JSON, likely an HTML error page
+          const text = await response.text();
+          statusEl.className = 'error';
+          statusEl.textContent = `Server returned non-JSON response. Status: ${response.status}`;
+          resultEl.textContent = text.substring(0, 500) + '...';
+        }
+      } catch (error) {
+        statusEl.className = 'error';
+        statusEl.textContent = `Network error: ${error.toString()}`;
+        console.error('Error:', error);
+      }
+    });
+  </script>
+</body>
+</html>

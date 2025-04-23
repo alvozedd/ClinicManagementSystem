@@ -17,6 +17,18 @@ const appointmentSchema = mongoose.Schema(
     notes: {
       type: String,
     },
+    status: {
+      type: String,
+      enum: ['Pending', 'Scheduled', 'Completed', 'Cancelled', 'Rescheduled', 'No-show'],
+      default: 'Scheduled',
+    },
+    type: {
+      type: String,
+      default: 'Consultation',
+    },
+    reason: {
+      type: String,
+    },
     created_by_user_id: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,

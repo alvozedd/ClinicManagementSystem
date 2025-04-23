@@ -9,11 +9,19 @@ const authUser = asyncHandler(async (req, res) => {
   const { username, password } = req.body;
 
   console.log('Login attempt with username:', username);
+  console.log('Request body:', req.body);
 
   // Find user by username (which is stored in the email field)
   const user = await User.findOne({ email: username });
 
   console.log('User found:', user ? 'Yes' : 'No');
+  if (user) {
+    console.log('User details:', {
+      _id: user._id,
+      email: user.email,
+      role: user.role,
+    });
+  }
 
   if (user) {
     const isMatch = await user.matchPassword(password);

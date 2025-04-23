@@ -15,7 +15,7 @@ export const transformPatientFromBackend = (backendPatient) => {
 
   // Create a date of birth string from year_of_birth if available
   let dateOfBirth = '';
-  if (backendPatient.year_of_birth) {
+  if (backendPatient.year_of_birth && !isNaN(backendPatient.year_of_birth)) {
     dateOfBirth = `${backendPatient.year_of_birth}-01-01`; // January 1st of the birth year
   }
 
@@ -99,27 +99,29 @@ export const transformAppointmentFromBackend = (backendAppointment) => {
   const time = backendAppointment.optional_time ||
                `${appointmentDate.getHours().toString().padStart(2, '0')}:${appointmentDate.getMinutes().toString().padStart(2, '0')}`;
 
-  // Parse notes to extract status and type
-  let status = 'Scheduled';
-  let type = 'Consultation';
-  let reason = '';
+  // Use the status, type, and reason fields directly if available
+  let status = backendAppointment.status || 'Scheduled';
+  let type = backendAppointment.type || 'Consultation';
+  let reason = backendAppointment.reason || '';
 
-  if (backendAppointment.notes) {
+  // For backward compatibility, still check notes if the fields are not set
+  if ((!backendAppointment.status || !backendAppointment.type) && backendAppointment.notes) {
     const notesLines = backendAppointment.notes.split('\n');
 
     // Try to extract type and reason from notes
     for (const line of notesLines) {
-      if (line.startsWith('Type:')) {
+      if (line.startsWith('Type:') && !backendAppointment.type) {
         type = line.replace('Type:', '').trim();
-      } else if (line.startsWith('Reason:')) {
+      } else if (line.startsWith('Reason:') && !backendAppointment.reason) {
         reason = line.replace('Reason:', '').trim();
-      } else if (line.startsWith('Status:')) {
+      } else if (line.startsWith('Status:') && !backendAppointment.status) {
         status = line.replace('Status:', '').trim();
       }
     }
-
-    console.log(`Extracted status from appointment ${backendAppointment._id}: ${status}`);
   }
+
+  console.log(`Status for appointment ${backendAppointment._id}: ${status}`);
+
 
   // Get patient name from populated patient_id field
   let patientName = 'Unknown';
@@ -169,62 +171,41 @@ export const transformAppointmentsFromBackend = (backendAppointments) => {
  * @returns {Object} - Appointment object in backend format
  */
 export const transformAppointmentToBackend = (frontendAppointment, existingAppointment = null) => {
-  // If we have existing notes, try to preserve other information while updating status
-  let notes = '';
-
   // Log the status we're trying to set
   console.log(`Setting appointment status to: ${frontendAppointment.status}`);
 
+  // For backward compatibility, still maintain notes with status, type, and reason
+  let notes = '';
+
   if (existingAppointment && existingAppointment.notes) {
-    // Parse existing notes to extract components
+    // Keep any existing notes that don't relate to status, type, or reason
     const existingNotes = existingAppointment.notes;
     const notesLines = existingNotes.split('\n');
-    let typeFound = false;
-    let reasonFound = false;
-    let statusFound = false;
+    const otherLines = notesLines.filter(line =>
+      !line.startsWith('Type:') &&
+      !line.startsWith('Reason:') &&
+      !line.startsWith('Status:'));
 
-    // Create a new notes string, replacing only the status line
-    const updatedLines = notesLines.map(line => {
-      if (line.startsWith('Type:')) {
-        typeFound = true;
-        return `Type: ${frontendAppointment.type || existingAppointment.type || 'Consultation'}`;
-      } else if (line.startsWith('Reason:')) {
-        reasonFound = true;
-        return `Reason: ${frontendAppointment.reason || existingAppointment.reason || 'Not specified'}`;
-      } else if (line.startsWith('Status:')) {
-        statusFound = true;
-        // Ensure we use the new status if provided
-        return `Status: ${frontendAppointment.status || existingAppointment.status || 'Scheduled'}`;
-      }
-      return line;
-    });
+    // Add the status, type, and reason lines
+    otherLines.push(`Type: ${frontendAppointment.type || existingAppointment.type || 'Consultation'}`);
+    otherLines.push(`Reason: ${frontendAppointment.reason || existingAppointment.reason || 'Not specified'}`);
+    otherLines.push(`Status: ${frontendAppointment.status || existingAppointment.status || 'Scheduled'}`);
 
-    // Add any missing components
-    if (!typeFound) {
-      updatedLines.push(`Type: ${frontendAppointment.type || existingAppointment.type || 'Consultation'}`);
-    }
-    if (!reasonFound) {
-      updatedLines.push(`Reason: ${frontendAppointment.reason || existingAppointment.reason || 'Not specified'}`);
-    }
-    if (!statusFound) {
-      updatedLines.push(`Status: ${frontendAppointment.status || existingAppointment.status || 'Scheduled'}`);
-    }
-
-    notes = updatedLines.join('\n');
+    notes = otherLines.join('\n');
   } else {
     // No existing notes, create new ones
     notes = `Type: ${frontendAppointment.type || 'Consultation'}\nReason: ${frontendAppointment.reason || 'Not specified'}\nStatus: ${frontendAppointment.status || 'Scheduled'}`;
   }
 
-  console.log(`Final notes with status: ${notes}`);
-
-  // Always force the notes to be updated, never use frontendAppointment.notes
-  // This ensures our status is always included in the notes
-
+  // Return the appointment with both the notes field (for backward compatibility)
+  // and the dedicated status, type, and reason fields
   return {
     patient_id: frontendAppointment.patientId || frontendAppointment.patient_id,
     appointment_date: new Date(frontendAppointment.date),
     optional_time: frontendAppointment.time || '',
-    notes: notes // Always use our constructed notes to ensure status is included
+    notes: notes, // Keep notes for backward compatibility
+    status: frontendAppointment.status || 'Scheduled',
+    type: frontendAppointment.type || 'Consultation',
+    reason: frontendAppointment.reason || ''
   };
 };
