@@ -60,6 +60,32 @@ function Dashboard() {
         const diagnosesResponse = await apiService.getDiagnoses();
         console.log('Diagnoses from API:', diagnosesResponse);
         setReportsData(diagnosesResponse);
+
+        // Link diagnoses to appointments
+        if (diagnosesResponse && diagnosesResponse.length > 0 && transformedAppointments.length > 0) {
+          console.log('Linking diagnoses to appointments...');
+          const appointmentsWithDiagnoses = transformedAppointments.map(appointment => {
+            // Find a diagnosis for this appointment
+            const diagnosis = diagnosesResponse.find(d => d.appointment_id === appointment._id);
+            if (diagnosis) {
+              console.log(`Found diagnosis for appointment ${appointment._id}:`, diagnosis);
+              return {
+                ...appointment,
+                diagnosis: {
+                  notes: diagnosis.diagnosis_text,
+                  treatment: '',
+                  followUp: '',
+                  files: [],
+                  updatedAt: diagnosis.updatedAt || diagnosis.createdAt
+                }
+              };
+            }
+            return appointment;
+          });
+
+          console.log('Appointments with diagnoses:', appointmentsWithDiagnoses);
+          setAppointmentsData(appointmentsWithDiagnoses);
+        }
       } catch (error) {
         console.error('Error fetching data from API:', error);
         setError('Failed to load data. Please try again later.');
@@ -360,6 +386,25 @@ function Dashboard() {
 
         // Add to reports data
         setReportsData(prev => [...prev, diagnosisResponse]);
+
+        // Also update the appointment in the local state to include the diagnosis
+        // This ensures the diagnosis is displayed immediately without needing a refresh
+        const diagnosisObj = {
+          notes: diagnosisText,
+          treatment: '',
+          followUp: '',
+          files: [],
+          updatedAt: new Date().toISOString()
+        };
+
+        // Update the appointment with the diagnosis
+        setAppointmentsData(prev =>
+          prev.map(a => a._id === appointmentResponse._id ? {
+            ...a,
+            diagnosis: diagnosisObj,
+            status: 'Completed'
+          } : a)
+        );
       }
 
       // Refresh data from API to ensure we have the latest data

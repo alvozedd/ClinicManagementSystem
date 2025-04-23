@@ -17,6 +17,7 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
 
   // Get previous diagnoses
   const previousDiagnoses = sortedAppointments.filter(a => a.diagnosis);
+  console.log('Previous diagnoses:', previousDiagnoses);
 
   // Calculate age from date of birth
   const calculateAge = (dateOfBirth) => {
