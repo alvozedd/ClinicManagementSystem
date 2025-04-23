@@ -1,0 +1,6 @@
+{
+  "deploy": {
+    "rootDir": "backend",
+    "startCommand": "npm start"
+  }
+}
