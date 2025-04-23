@@ -44,9 +44,9 @@ function HomePage() {
         name: `${formData.firstName} ${formData.lastName}`,
         gender: formData.gender,
         phone: formData.phone,
-        next_of_kin_name: '',
-        next_of_kin_relationship: '',
-        next_of_kin_phone: ''
+        next_of_kin_name: 'Not Provided',
+        next_of_kin_relationship: 'Not Provided',
+        next_of_kin_phone: '0000000000'
       };
 
       console.log('Creating new patient:', patientData);
