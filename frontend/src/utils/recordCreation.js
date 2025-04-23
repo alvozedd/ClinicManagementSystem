@@ -11,15 +11,19 @@
 export const createPatientRecord = (patientData, createdBy) => {
   // Generate a new patient ID
   const patientId = 'P' + Math.floor(Math.random() * 10000).toString().padStart(3, '0');
-  
+
   // Get current date and time
   const now = new Date();
   const createdAt = now.toISOString();
-  
-  // Create the complete patient object
+
+  // Create the complete patient object with default values for required fields
   return {
     id: patientId,
     ...patientData,
+    // Ensure next_of_kin fields have default values if not provided
+    nextOfKinName: patientData.nextOfKinName || 'Not Provided',
+    nextOfKinRelationship: patientData.nextOfKinRelationship || 'Not Provided',
+    nextOfKinPhone: patientData.nextOfKinPhone || '0000000000',
     lastVisit: now.toISOString().split('T')[0],
     medicalHistory: [],
     medications: [],
@@ -40,11 +44,11 @@ export const createPatientRecord = (patientData, createdBy) => {
 export const createAppointmentRecord = (appointmentData, patient, createdBy) => {
   // Generate a new appointment ID
   const appointmentId = 'A' + Math.floor(Math.random() * 10000).toString().padStart(3, '0');
-  
+
   // Get current date and time
   const now = new Date();
   const createdAt = now.toISOString();
-  
+
   // Create the complete appointment object
   return {
     id: appointmentId,

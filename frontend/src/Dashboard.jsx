@@ -84,9 +84,9 @@ function Dashboard() {
           name: `${updatedPatient.firstName} ${updatedPatient.lastName}`,
           gender: updatedPatient.gender,
           phone: updatedPatient.phone,
-          next_of_kin_name: updatedPatient.nextOfKinName || '',
-          next_of_kin_relationship: updatedPatient.nextOfKinRelationship || '',
-          next_of_kin_phone: updatedPatient.nextOfKinPhone || ''
+          next_of_kin_name: updatedPatient.nextOfKinName || 'Not Provided',
+          next_of_kin_relationship: updatedPatient.nextOfKinRelationship || 'Not Provided',
+          next_of_kin_phone: updatedPatient.nextOfKinPhone || '0000000000'
         });
 
         // Update local state
@@ -100,9 +100,9 @@ function Dashboard() {
           name: `${updatedPatient.firstName} ${updatedPatient.lastName}`,
           gender: updatedPatient.gender,
           phone: updatedPatient.phone,
-          next_of_kin_name: updatedPatient.nextOfKinName || '',
-          next_of_kin_relationship: updatedPatient.nextOfKinRelationship || '',
-          next_of_kin_phone: updatedPatient.nextOfKinPhone || ''
+          next_of_kin_name: updatedPatient.nextOfKinName || 'Not Provided',
+          next_of_kin_relationship: updatedPatient.nextOfKinRelationship || 'Not Provided',
+          next_of_kin_phone: updatedPatient.nextOfKinPhone || '0000000000'
         });
 
         // Add to local state
