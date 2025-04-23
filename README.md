@@ -106,7 +106,7 @@ The application should now be running at http://localhost:5173
 - `GET /api/patients` - Get all patients
 - `GET /api/patients/:id` - Get patient by ID
 - `PUT /api/patients/:id` - Update patient (Secretary only)
-- `DELETE /api/patients/:id` - Delete patient (Admin only)
+- `DELETE /api/patients/:id` - Delete patient (Doctor/Secretary)
 
 ### Appointments
 - `POST /api/appointments` - Create a new appointment (Secretary only)

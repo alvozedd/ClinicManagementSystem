@@ -24,6 +24,6 @@ router
   .route('/:id')
   .get(protect, getPatientById)
   .put(protect, doctorOrSecretary, updatePatient)
-  .delete(protect, admin, deletePatient);
+  .delete(protect, doctorOrSecretary, deletePatient);
 
 module.exports = router;
