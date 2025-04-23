@@ -16,6 +16,14 @@ function Dashboard() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState(null)
 
+  // Debug function to check user info and token
+  useEffect(() => {
+    console.log('Current user info:', userInfo);
+    const storedUserInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+    console.log('Stored user info:', storedUserInfo);
+    console.log('Auth token:', storedUserInfo.token);
+  }, [userInfo]);
+
   // Load data from API when component mounts or refresh is triggered
   useEffect(() => {
     const fetchData = async () => {
@@ -51,6 +59,8 @@ function Dashboard() {
   // Handler for updating patient information
   const handleUpdatePatient = async (updatedPatient) => {
     try {
+      console.log('Updating patient with role:', userInfo?.role);
+
       // Check if the patient exists in the current patients array
       const patientExists = patientsData.some(p => p._id === updatedPatient._id);
 
@@ -64,6 +74,22 @@ function Dashboard() {
         updatedPatient = patientWithoutAppointments;
       }
 
+      // If we're using localStorage for development/testing
+      if (!import.meta.env.VITE_API_URL) {
+        console.log('Using localStorage for patient data (no API URL configured)');
+        // Update local state only
+        if (patientExists) {
+          const updatedPatients = patientsData.map(p =>
+            p._id === updatedPatient._id ? { ...p, ...updatedPatient } : p
+          );
+          setPatientsData(updatedPatients);
+        } else {
+          setPatientsData([...patientsData, { ...updatedPatient, _id: Date.now().toString() }]);
+        }
+        return updatedPatient;
+      }
+
+      // Otherwise use the API
       let response;
       // Update or add the patient via API
       if (patientExists) {
@@ -102,6 +128,23 @@ function Dashboard() {
     } catch (error) {
       console.error('Error saving patient:', error);
       setError('Failed to save patient. Please try again.');
+
+      // Fallback to localStorage if API fails
+      console.log('Falling back to localStorage due to API error');
+      if (confirm('Unable to save to database. Would you like to save locally instead?')) {
+        // Update local state only
+        const patientExists = patientsData.some(p => p._id === updatedPatient._id);
+        if (patientExists) {
+          const updatedPatients = patientsData.map(p =>
+            p._id === updatedPatient._id ? { ...p, ...updatedPatient } : p
+          );
+          setPatientsData(updatedPatients);
+        } else {
+          setPatientsData([...patientsData, { ...updatedPatient, _id: Date.now().toString() }]);
+        }
+        return updatedPatient;
+      }
+
       throw error;
     }
   };
