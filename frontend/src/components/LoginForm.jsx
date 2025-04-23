@@ -27,17 +27,21 @@ function LoginForm() {
     setError('');
 
     try {
+      console.log('Attempting login with:', { username });
+
       // Import the API service
       const apiService = (await import('../utils/apiService')).default;
+      console.log('API URL:', import.meta.env.VITE_API_URL || 'http://localhost:5000/api');
 
       // Call the login API
       const data = await apiService.login(username, password);
+      console.log('Login response:', data);
 
       // Use the login function from AuthContext
       login(data);
     } catch (err) {
-      setError('Something went wrong. Please try again.');
-      console.error('Login error:', err);
+      console.error('Login error details:', err);
+      setError(`Login failed: ${err.toString()}`);
     } finally {
       setLoading(false);
     }

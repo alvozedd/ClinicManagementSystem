@@ -8,20 +8,34 @@ const generateToken = require('../utils/generateToken');
 const authUser = asyncHandler(async (req, res) => {
   const { username, password } = req.body;
 
+  console.log('Login attempt with username:', username);
+
   // Find user by username (which is stored in the email field)
   const user = await User.findOne({ email: username });
 
-  if (user && (await user.matchPassword(password))) {
-    res.json({
-      _id: user._id,
-      username: user.email, // Return email as username
-      role: user.role,
-      token: generateToken(user._id),
-    });
-  } else {
-    res.status(401);
-    throw new Error('Invalid username or password');
+  console.log('User found:', user ? 'Yes' : 'No');
+
+  if (user) {
+    const isMatch = await user.matchPassword(password);
+    console.log('Password match:', isMatch ? 'Yes' : 'No');
+
+    if (isMatch) {
+      const token = generateToken(user._id);
+      console.log('Token generated successfully');
+
+      res.json({
+        _id: user._id,
+        username: user.email, // Return email as username
+        role: user.role,
+        token: token,
+      });
+      return;
+    }
   }
+
+  console.log('Authentication failed');
+  res.status(401);
+  throw new Error('Invalid username or password');
 });
 
 // @desc    Register a new user
