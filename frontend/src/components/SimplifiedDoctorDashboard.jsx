@@ -6,7 +6,6 @@ import SimplifiedDiagnosisModal from './SimplifiedDiagnosisModal';
 import AddPatientForm from './AddPatientForm';
 import DoctorCalendarView from './DoctorCalendarView';
 import PatientNavigator from './PatientNavigator';
-import { createAppointmentRecord } from '../utils/recordCreation';
 import DoctorPatientSearchAppointmentModal from './DoctorPatientSearchAppointmentModal';
 import AppointmentManagementModal from './AppointmentManagementModal';
 import { FaCalendarAlt, FaUserMd, FaClipboardList, FaSearch, FaUserPlus, FaEye, FaArrowLeft, FaTimes, FaPlus, FaUser } from 'react-icons/fa';
@@ -43,13 +42,24 @@ function SimplifiedDoctorDashboard({
   const [editingAppointment, setEditingAppointment] = useState(null);
   const [statusFilter, setStatusFilter] = useState('all');
 
-  // Get today's appointments - recalculate whenever appointments change
-  const todaysAppointments = getTodaysAppointments();
+  // State for today's appointments
+  const [todaysAppointments, setTodaysAppointments] = useState([]);
 
-  // Log today's appointments whenever they change
+  // Fetch today's appointments whenever appointments change
   useEffect(() => {
-    console.log('Doctor dashboard - Today\'s appointments updated:', todaysAppointments);
-  }, [todaysAppointments, appointments]);
+    const fetchTodaysAppointments = async () => {
+      try {
+        const appointments = await getTodaysAppointments();
+        setTodaysAppointments(appointments);
+        console.log('Doctor dashboard - Today\'s appointments updated:', appointments);
+      } catch (error) {
+        console.error('Error fetching today\'s appointments:', error);
+        setTodaysAppointments([]);
+      }
+    };
+
+    fetchTodaysAppointments();
+  }, [appointments]);
 
   // Filter upcoming appointments (excluding today's)
   const upcomingAppointments = appointments

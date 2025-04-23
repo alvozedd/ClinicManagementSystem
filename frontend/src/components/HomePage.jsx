@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { savePatients, saveAppointments, getPatients, getAppointments } from '../data/mockData';
-import { createPatientRecord, createAppointmentRecord } from '../utils/recordCreation';
+import apiService from '../utils/apiService';
 
 function HomePage() {
   const navigate = useNavigate();
@@ -34,70 +33,39 @@ function HomePage() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
     try {
-      // 1. Create a new patient with 'visitor' as creator
-      const dateOfBirth = formData.yearOfBirth ? `${formData.yearOfBirth}-01-01` : '';
-
+      // 1. Create a new patient with API
       const patientData = {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        dateOfBirth: dateOfBirth,
-        yearOfBirth: formData.yearOfBirth,
+        name: `${formData.firstName} ${formData.lastName}`,
         gender: formData.gender,
         phone: formData.phone,
-        email: formData.email || '',
-        address: ''
+        next_of_kin_name: '',
+        next_of_kin_relationship: '',
+        next_of_kin_phone: ''
       };
 
-      const newPatient = createPatientRecord(patientData, 'visitor');
+      console.log('Creating new patient:', patientData);
+      const newPatient = await apiService.createPatient(patientData);
+      console.log('New patient created:', newPatient);
 
-      // 2. Create a new appointment with 'visitor' as creator
+      // 2. Create a new appointment with API
       const appointmentData = {
-        date: formData.appointmentDate,
-        time: '09:00', // Default time set to 9:00 AM
-        type: formData.appointmentType,
-        reason: formData.appointmentReason,
-        status: 'Pending',
-        notes: 'Booked online by patient. Time to be confirmed by secretary.'
+        patient_id: newPatient._id,
+        appointment_date: new Date(formData.appointmentDate),
+        optional_time: '09:00', // Default time set to 9:00 AM
+        notes: `Type: ${formData.appointmentType}\nReason: ${formData.appointmentReason || 'Not specified'}\nStatus: Pending\nBooked online by patient. Time to be confirmed by secretary.`
       };
 
-      const newAppointment = createAppointmentRecord(appointmentData, newPatient, 'visitor');
+      console.log('Creating new appointment:', appointmentData);
+      const newAppointment = await apiService.createAppointment(appointmentData);
+      console.log('New appointment created:', newAppointment);
 
-      // 3. Save both to our mock database
-      // Get fresh data from localStorage
-      const currentPatients = getPatients();
-      const currentAppointments = getAppointments();
-
-      // Add new records to the current data
-      const updatedPatients = [...currentPatients, newPatient];
-      const updatedAppointments = [...currentAppointments, newAppointment];
-
-      console.log('HomePage - Before saving - Current patients:', currentPatients);
-      console.log('HomePage - Before saving - Current appointments:', currentAppointments);
-      console.log('HomePage - New patient to be added:', newPatient);
-      console.log('HomePage - New appointment to be added:', newAppointment);
-
-      // Save updated data to localStorage
-      console.log('HomePage - SAVING TO LOCALSTORAGE - Patients:', updatedPatients);
-      console.log('HomePage - SAVING TO LOCALSTORAGE - Appointments:', updatedAppointments);
-
-      savePatients(updatedPatients);
-      saveAppointments(updatedAppointments);
-
-      // Verify data was saved correctly by reading it back
-      const verifyPatients = getPatients();
-      const verifyAppointments = getAppointments();
-      console.log('HomePage - VERIFICATION - Patients after save:', verifyPatients);
-      console.log('HomePage - VERIFICATION - Appointments after save:', verifyAppointments);
-      console.log('HomePage - VERIFICATION - New patient in saved data:', verifyPatients.some(p => p.id === newPatient.id));
-      console.log('HomePage - VERIFICATION - New appointment in saved data:', verifyAppointments.some(a => a.id === newAppointment.id));
-
-      // 4. Show success message
+      // 3. Show success message
       setBookingSuccess(true);
       setShowBookingForm(false);
     } catch (err) {

@@ -22,13 +22,24 @@ function SimplifiedSecretaryDashboard({
   const [showAddAppointmentForm, setShowAddAppointmentForm] = useState(false);
   const [statusFilter, setStatusFilter] = useState('all');
 
-  // Get today's appointments - recalculate whenever appointments change
-  const todaysAppointments = getTodaysAppointments();
+  // State for today's appointments
+  const [todaysAppointments, setTodaysAppointments] = useState([]);
 
-  // Log today's appointments whenever they change
+  // Fetch today's appointments whenever appointments change
   useEffect(() => {
-    console.log('Secretary dashboard - Today\'s appointments updated:', todaysAppointments);
-  }, [todaysAppointments, appointments]);
+    const fetchTodaysAppointments = async () => {
+      try {
+        const appointments = await getTodaysAppointments();
+        setTodaysAppointments(appointments);
+        console.log('Secretary dashboard - Today\'s appointments updated:', appointments);
+      } catch (error) {
+        console.error('Error fetching today\'s appointments:', error);
+        setTodaysAppointments([]);
+      }
+    };
+
+    fetchTodaysAppointments();
+  }, [appointments]);
 
   // Calculate analytics
   const totalPatients = patients.length;

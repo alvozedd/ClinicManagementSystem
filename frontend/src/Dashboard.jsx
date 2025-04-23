@@ -19,6 +19,7 @@ function Dashboard() {
   // Debug function to check user info and token
   useEffect(() => {
     console.log('Current user info:', userInfo);
+    // We still need to keep the auth token in localStorage for API calls
     const storedUserInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
     console.log('Stored user info:', storedUserInfo);
     console.log('Auth token:', storedUserInfo.token);

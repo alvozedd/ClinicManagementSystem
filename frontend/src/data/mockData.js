@@ -1,95 +1,187 @@
-// Mock data for the UroHealth Central application
-import { STORAGE_KEYS, loadFromLocalStorage, saveToLocalStorage } from '../utils/localStorage';
+// Data service for the UroHealth Central application
+import apiService from '../utils/apiService';
 
 // Get current date for created/updated timestamps
 const now = new Date().toISOString();
 
-// Empty initial patients data (so user can add their own test data)
+// Empty initial data arrays (used as fallbacks)
 const initialPatients = [];
-
-// Empty initial appointments data
 const initialAppointments = [];
-
-// Empty initial medical reports data
 const initialReports = [];
 
+// Cache for API data to reduce API calls
+let patientsCache = [];
+let appointmentsCache = [];
+let reportsCache = [];
+let lastFetchTime = {
+  patients: 0,
+  appointments: 0,
+  reports: 0
+};
+
+// Cache expiration time (5 minutes)
+const CACHE_EXPIRATION = 5 * 60 * 1000;
+
 // Today's appointments (for dashboard)
-export const getTodaysAppointments = () => {
-  // Get today's date in YYYY-MM-DD format
-  const today = new Date();
-  const formattedDate = today.toISOString().split('T')[0];
+export const getTodaysAppointments = async () => {
+  try {
+    // Get today's date in YYYY-MM-DD format
+    const today = new Date();
+    const formattedDate = today.toISOString().split('T')[0];
 
-  // Get fresh appointments data from localStorage
-  const currentAppointments = getAppointments();
+    // Get fresh appointments data from API
+    const currentAppointments = await getAppointments();
 
-  console.log('Today\'s date:', formattedDate);
-  console.log('All appointments (fresh from localStorage):', currentAppointments);
+    console.log('Today\'s date:', formattedDate);
+    console.log('All appointments (from API):', currentAppointments);
 
-  if (currentAppointments.length === 0) {
+    if (!currentAppointments || currentAppointments.length === 0) {
+      return [];
+    }
+
+    // Filter appointments for today
+    const todaysAppointments = currentAppointments.filter(appointment => {
+      // Extract date part from appointment_date (which is in ISO format from the API)
+      const appointmentDate = new Date(appointment.appointment_date).toISOString().split('T')[0];
+      console.log(`Comparing appointment date: ${appointmentDate} with today: ${formattedDate}`);
+      return appointmentDate === formattedDate;
+    }).sort((a, b) => {
+      // Sort by optional_time if available
+      if (a.optional_time && b.optional_time) {
+        return a.optional_time.localeCompare(b.optional_time);
+      }
+      return 0;
+    });
+
+    console.log('Today\'s appointments:', todaysAppointments);
+    return todaysAppointments;
+  } catch (error) {
+    console.error('Error getting today\'s appointments:', error);
     return [];
   }
-
-  // Filter appointments for today
-  const todaysAppointments = currentAppointments.filter(appointment => {
-    console.log(`Comparing appointment date: ${appointment.date} with today: ${formattedDate}`);
-    return appointment.date === formattedDate;
-  }).sort((a, b) => a.time.localeCompare(b.time));
-
-  console.log('Today\'s appointments:', todaysAppointments);
-  return todaysAppointments;
 };
 
 // Recent patients (for dashboard)
-export const getRecentPatients = () => {
-  // Get fresh patients data from localStorage
-  const currentPatients = getPatients();
+export const getRecentPatients = async () => {
+  try {
+    // Get fresh patients data from API
+    const currentPatients = await getPatients();
 
-  console.log('Getting recent patients, total patients:', currentPatients.length);
+    console.log('Getting recent patients, total patients:', currentPatients.length);
 
-  if (currentPatients.length === 0) {
+    if (!currentPatients || currentPatients.length === 0) {
+      return [];
+    }
+
+    // Sort patients by createdAt date (most recent first)
+    return [...currentPatients].sort((a, b) =>
+      new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
+    ).slice(0, 5); // Get top 5
+  } catch (error) {
+    console.error('Error getting recent patients:', error);
     return [];
   }
-
-  // Sort patients by last visit date (most recent first)
-  return [...currentPatients].sort((a, b) =>
-    new Date(b.lastVisit || 0) - new Date(a.lastVisit || 0)
-  ).slice(0, 5); // Get top 5
 };
 
 // Recent reports (for dashboard)
-export const getRecentReports = () => {
-  // Get fresh reports data from localStorage
-  const currentReports = getReports();
+export const getRecentReports = async () => {
+  try {
+    // Get fresh reports data from API
+    const currentReports = await getReports();
 
-  if (currentReports.length === 0) {
+    if (!currentReports || currentReports.length === 0) {
+      return [];
+    }
+
+    // Sort reports by createdAt date (most recent first)
+    return [...currentReports].sort((a, b) =>
+      new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
+    ).slice(0, 5); // Get top 5
+  } catch (error) {
+    console.error('Error getting recent reports:', error);
     return [];
   }
-
-  // Sort reports by date (most recent first)
-  return [...currentReports].sort((a, b) =>
-    new Date(b.date) - new Date(a.date)
-  ).slice(0, 5); // Get top 5
 };
 
-// Functions to get fresh data from localStorage
-export const getPatients = () => loadFromLocalStorage(STORAGE_KEYS.PATIENTS, initialPatients);
-export const getAppointments = () => loadFromLocalStorage(STORAGE_KEYS.APPOINTMENTS, initialAppointments);
-export const getReports = () => loadFromLocalStorage(STORAGE_KEYS.REPORTS, initialReports);
+// Functions to get fresh data from API with caching
+export const getPatients = async () => {
+  try {
+    // Check if cache is valid
+    const now = Date.now();
+    if (patientsCache.length > 0 && (now - lastFetchTime.patients) < CACHE_EXPIRATION) {
+      return patientsCache;
+    }
 
-// For backward compatibility
-export const patients = getPatients();
-export const appointments = getAppointments();
-export const reports = getReports();
+    // Fetch from API
+    const patients = await apiService.getPatients();
 
-// Save data to localStorage
-export const savePatients = (data) => {
-  saveToLocalStorage(STORAGE_KEYS.PATIENTS, data);
+    // Update cache
+    patientsCache = patients;
+    lastFetchTime.patients = now;
+
+    return patients;
+  } catch (error) {
+    console.error('Error fetching patients from API:', error);
+    return patientsCache.length > 0 ? patientsCache : initialPatients;
+  }
 };
 
-export const saveAppointments = (data) => {
-  saveToLocalStorage(STORAGE_KEYS.APPOINTMENTS, data);
+export const getAppointments = async () => {
+  try {
+    // Check if cache is valid
+    const now = Date.now();
+    if (appointmentsCache.length > 0 && (now - lastFetchTime.appointments) < CACHE_EXPIRATION) {
+      return appointmentsCache;
+    }
+
+    // Fetch from API
+    const appointments = await apiService.getAppointments();
+
+    // Update cache
+    appointmentsCache = appointments;
+    lastFetchTime.appointments = now;
+
+    return appointments;
+  } catch (error) {
+    console.error('Error fetching appointments from API:', error);
+    return appointmentsCache.length > 0 ? appointmentsCache : initialAppointments;
+  }
 };
 
-export const saveReports = (data) => {
-  saveToLocalStorage(STORAGE_KEYS.REPORTS, data);
+export const getReports = async () => {
+  try {
+    // Check if cache is valid
+    const now = Date.now();
+    if (reportsCache.length > 0 && (now - lastFetchTime.reports) < CACHE_EXPIRATION) {
+      return reportsCache;
+    }
+
+    // Fetch from API
+    const reports = await apiService.getDiagnoses();
+
+    // Update cache
+    reportsCache = reports;
+    lastFetchTime.reports = now;
+
+    return reports;
+  } catch (error) {
+    console.error('Error fetching reports from API:', error);
+    return reportsCache.length > 0 ? reportsCache : initialReports;
+  }
+};
+
+// Save functions now use API calls
+export const savePatients = async (data) => {
+  console.warn('savePatients is deprecated. Use apiService directly.');
+  return false;
+};
+
+export const saveAppointments = async (data) => {
+  console.warn('saveAppointments is deprecated. Use apiService directly.');
+  return false;
+};
+
+export const saveReports = async (data) => {
+  console.warn('saveReports is deprecated. Use apiService directly.');
+  return false;
 };

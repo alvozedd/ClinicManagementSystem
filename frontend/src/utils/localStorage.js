@@ -1,4 +1,9 @@
-// Local storage keys
+// This file is kept for backward compatibility
+// It now uses API calls instead of localStorage
+
+import apiService from './apiService';
+
+// Storage keys (kept for backward compatibility)
 export const STORAGE_KEYS = {
   PATIENTS: 'clinic_patients',
   APPOINTMENTS: 'clinic_appointments',
@@ -6,59 +11,29 @@ export const STORAGE_KEYS = {
   USERS: 'clinic_users'
 };
 
-// Save data to local storage
+// These functions are deprecated and should not be used directly
+// They are kept for backward compatibility
+
+// Save data to API instead of localStorage
 export const saveToLocalStorage = (key, data) => {
-  try {
-    console.log(`Saving to localStorage - Key: ${key}, Data:`, data);
-    const jsonData = JSON.stringify(data);
-    localStorage.setItem(key, jsonData);
-    console.log(`Data saved to localStorage - Key: ${key}, JSON length: ${jsonData.length}`);
-    return true;
-  } catch (error) {
-    console.error(`Error saving to localStorage (${key}):`, error);
-    return false;
-  }
+  console.warn('saveToLocalStorage is deprecated. Use API calls directly.');
+  return false;
 };
 
-// Load data from local storage
+// Load data from API instead of localStorage
 export const loadFromLocalStorage = (key, defaultValue = []) => {
-  try {
-    console.log(`Loading from localStorage - Key: ${key}`);
-    const storedData = localStorage.getItem(key);
-    console.log(`Raw data from localStorage - Key: ${key}, Data:`, storedData);
-
-    if (!storedData) {
-      console.log(`No data found in localStorage for key: ${key}, using default value`);
-      return defaultValue;
-    }
-
-    const parsedData = JSON.parse(storedData);
-    console.log(`Parsed data from localStorage - Key: ${key}, Items: ${parsedData.length}`);
-    return parsedData;
-  } catch (error) {
-    console.error(`Error loading from localStorage (${key}):`, error);
-    return defaultValue;
-  }
+  console.warn('loadFromLocalStorage is deprecated. Use API calls directly.');
+  return defaultValue;
 };
 
-// Clear specific data from local storage
+// Clear specific data - no longer needed with API
 export const clearLocalStorage = (key) => {
-  try {
-    localStorage.removeItem(key);
-    return true;
-  } catch (error) {
-    console.error(`Error clearing localStorage (${key}):`, error);
-    return false;
-  }
+  console.warn('clearLocalStorage is deprecated. Use API calls directly.');
+  return false;
 };
 
-// Clear all clinic data from local storage
+// Clear all clinic data - no longer needed with API
 export const clearAllClinicData = () => {
-  try {
-    Object.values(STORAGE_KEYS).forEach(key => localStorage.removeItem(key));
-    return true;
-  } catch (error) {
-    console.error('Error clearing all clinic data:', error);
-    return false;
-  }
+  console.warn('clearAllClinicData is deprecated. Use API calls directly.');
+  return false;
 };
