@@ -66,12 +66,24 @@ const updateAppointment = asyncHandler(async (req, res) => {
   const appointment = await Appointment.findById(req.params.id);
 
   if (appointment) {
-    appointment.appointment_date = req.body.appointment_date || appointment.appointment_date;
-    appointment.optional_time = req.body.optional_time || appointment.optional_time;
-    appointment.notes = req.body.notes || appointment.notes;
+    // Always update fields that are provided in the request body
+    if (req.body.appointment_date !== undefined) {
+      appointment.appointment_date = req.body.appointment_date;
+    }
+
+    if (req.body.optional_time !== undefined) {
+      appointment.optional_time = req.body.optional_time;
+    }
+
+    if (req.body.notes !== undefined) {
+      appointment.notes = req.body.notes;
+    }
 
     const updatedAppointment = await appointment.save();
-    res.json(updatedAppointment);
+
+    // Populate patient information before returning
+    const populatedAppointment = await Appointment.findById(updatedAppointment._id).populate('patient_id', 'name');
+    res.json(populatedAppointment);
   } else {
     res.status(404);
     throw new Error('Appointment not found');

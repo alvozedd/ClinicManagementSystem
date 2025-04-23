@@ -141,11 +141,52 @@ export const transformAppointmentsFromBackend = (backendAppointments) => {
 /**
  * Transform an appointment from frontend format to backend format for creating/updating
  * @param {Object} frontendAppointment - Appointment object in frontend format
+ * @param {Object} existingAppointment - Optional existing appointment data from backend
  * @returns {Object} - Appointment object in backend format
  */
-export const transformAppointmentToBackend = (frontendAppointment) => {
-  // Construct notes with type, reason, and status
-  const notes = `Type: ${frontendAppointment.type || 'Consultation'}\nReason: ${frontendAppointment.reason || 'Not specified'}\nStatus: ${frontendAppointment.status || 'Scheduled'}`;
+export const transformAppointmentToBackend = (frontendAppointment, existingAppointment = null) => {
+  // If we have existing notes, try to preserve other information while updating status
+  let notes = '';
+
+  if (existingAppointment && existingAppointment.notes) {
+    // Parse existing notes to extract components
+    const existingNotes = existingAppointment.notes;
+    const notesLines = existingNotes.split('\n');
+    let typeFound = false;
+    let reasonFound = false;
+    let statusFound = false;
+
+    // Create a new notes string, replacing only the status line
+    const updatedLines = notesLines.map(line => {
+      if (line.startsWith('Type:')) {
+        typeFound = true;
+        return `Type: ${frontendAppointment.type || existingAppointment.type || 'Consultation'}`;
+      } else if (line.startsWith('Reason:')) {
+        reasonFound = true;
+        return `Reason: ${frontendAppointment.reason || existingAppointment.reason || 'Not specified'}`;
+      } else if (line.startsWith('Status:')) {
+        statusFound = true;
+        return `Status: ${frontendAppointment.status || existingAppointment.status || 'Scheduled'}`;
+      }
+      return line;
+    });
+
+    // Add any missing components
+    if (!typeFound) {
+      updatedLines.push(`Type: ${frontendAppointment.type || existingAppointment.type || 'Consultation'}`);
+    }
+    if (!reasonFound) {
+      updatedLines.push(`Reason: ${frontendAppointment.reason || existingAppointment.reason || 'Not specified'}`);
+    }
+    if (!statusFound) {
+      updatedLines.push(`Status: ${frontendAppointment.status || existingAppointment.status || 'Scheduled'}`);
+    }
+
+    notes = updatedLines.join('\n');
+  } else {
+    // No existing notes, create new ones
+    notes = `Type: ${frontendAppointment.type || 'Consultation'}\nReason: ${frontendAppointment.reason || 'Not specified'}\nStatus: ${frontendAppointment.status || 'Scheduled'}`;
+  }
 
   return {
     patient_id: frontendAppointment.patientId || frontendAppointment.patient_id,

@@ -196,13 +196,21 @@ function Dashboard() {
         const isNewAppointment = !appointment._id || appointment.id?.toString().startsWith('new-');
 
         if (!isNewAppointment) {
+          // Find the existing appointment in our state
+          const existingAppointment = appointmentsData.find(a => a._id === appointment._id);
+          console.log('Found existing appointment:', existingAppointment);
+
           // Update existing appointment via API
-          const response = await apiService.updateAppointment(appointment._id, {
-            patient_id: patientId,
-            appointment_date: new Date(appointment.date),
-            optional_time: appointment.time || '',
-            notes: appointment.notes || ''
-          });
+          const appointmentData = transformAppointmentToBackend({
+            patientId: patientId,
+            date: appointment.date,
+            time: appointment.time || '',
+            status: appointment.status,
+            type: appointment.type,
+            reason: appointment.reason
+          }, existingAppointment);
+
+          const response = await apiService.updateAppointment(appointment._id, appointmentData);
 
           console.log('Updated appointment in database:', response);
 
@@ -268,8 +276,12 @@ function Dashboard() {
         // Add to local state
         setAppointmentsData(prev => [...prev, appointmentResponse]);
       } else {
+        // Find the existing appointment in our state
+        const existingAppointment = appointmentsData.find(a => a._id === appointmentToSave._id);
+        console.log('Found existing appointment:', existingAppointment);
+
         // Update existing appointment via API
-        const appointmentData = transformAppointmentToBackend(appointmentToSave);
+        const appointmentData = transformAppointmentToBackend(appointmentToSave, existingAppointment);
         appointmentResponse = await apiService.updateAppointment(appointmentToSave._id, appointmentData);
 
         console.log('Updated appointment in database:', appointmentResponse);
