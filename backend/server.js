@@ -18,7 +18,7 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: ['https://golden-dodol-d33740.netlify.app', 'http://localhost:5173'],
+  origin: ['https://golden-dodol-d33740.netlify.app', 'http://localhost:5173', 'https://urohealth-central.netlify.app'],
   credentials: true
 }));
 app.use(express.json());
