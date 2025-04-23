@@ -30,39 +30,57 @@ function SimplifiedDiagnosisModal({ appointment, onClose, onSave }) {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Process files - in a real app, you would upload these to a server
-    // Here we'll just store file metadata
-    const fileData = files.map(file => ({
-      name: file.name,
-      type: file.type,
-      size: file.size,
-      lastModified: file.lastModified,
-      // In a real app, this would be a URL to the uploaded file
-      url: URL.createObjectURL(file)
-    }));
+    try {
+      // Process files - create file data objects with URLs
+      const fileData = [];
 
-    // Create a structured diagnosis object
-    const diagnosisObj = {
-      notes: diagnosis,
-      treatment: treatment,
-      followUp: followUp,
-      files: [...existingFiles, ...fileData],
-      updatedAt: new Date().toISOString()
-    };
+      // Process existing files
+      if (existingFiles && existingFiles.length > 0) {
+        fileData.push(...existingFiles);
+      }
 
-    // For API compatibility, convert the diagnosis object to a string
-    // The backend expects a diagnosis_text field
-    const updatedAppointment = {
-      ...appointment,
-      diagnosis: diagnosisObj,
-      // Also include a text representation for the API
-      diagnosisText: JSON.stringify(diagnosisObj)
-    };
+      // Process new files
+      if (files && files.length > 0) {
+        for (const file of files) {
+          // Create a URL for the file (in a real implementation, this would upload to a server)
+          const url = URL.createObjectURL(file);
 
-    onSave(updatedAppointment);
+          fileData.push({
+            name: file.name,
+            type: file.type,
+            size: file.size,
+            lastModified: file.lastModified,
+            url: url
+          });
+        }
+      }
+
+      // Create a structured diagnosis object
+      const diagnosisObj = {
+        notes: diagnosis,
+        treatment: treatment,
+        followUp: followUp,
+        files: fileData,
+        updatedAt: new Date().toISOString()
+      };
+
+      // For API compatibility, convert the diagnosis object to a string
+      // The backend expects a diagnosis_text field
+      const updatedAppointment = {
+        ...appointment,
+        diagnosis: diagnosisObj,
+        // Also include a text representation for the API
+        diagnosisText: JSON.stringify(diagnosisObj)
+      };
+
+      onSave(updatedAppointment);
+    } catch (error) {
+      console.error('Error saving diagnosis:', error);
+      alert('Failed to save diagnosis. Please try again.');
+    }
   };
 
   return (

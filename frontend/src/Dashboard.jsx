@@ -69,15 +69,30 @@ function Dashboard() {
             const diagnosis = diagnosesResponse.find(d => d.appointment_id === appointment._id);
             if (diagnosis) {
               console.log(`Found diagnosis for appointment ${appointment._id}:`, diagnosis);
+
+              // Try to parse the diagnosis_text as JSON to get structured data
+              let diagnosisObj = {
+                notes: diagnosis.diagnosis_text,
+                treatment: '',
+                followUp: '',
+                files: [],
+                updatedAt: diagnosis.updatedAt || diagnosis.createdAt
+              };
+
+              try {
+                // Try to parse the diagnosis_text as JSON
+                const parsedDiagnosis = JSON.parse(diagnosis.diagnosis_text);
+                if (parsedDiagnosis && typeof parsedDiagnosis === 'object') {
+                  diagnosisObj = parsedDiagnosis;
+                  console.log('Successfully parsed diagnosis JSON:', diagnosisObj);
+                }
+              } catch (e) {
+                console.log('Diagnosis text is not valid JSON, using as plain text');
+              }
+
               return {
                 ...appointment,
-                diagnosis: {
-                  notes: diagnosis.diagnosis_text,
-                  treatment: '',
-                  followUp: '',
-                  files: [],
-                  updatedAt: diagnosis.updatedAt || diagnosis.createdAt
-                }
+                diagnosis: diagnosisObj
               };
             }
             return appointment;
@@ -342,12 +357,38 @@ function Dashboard() {
       if (appointmentToSave.diagnosis) {
         // Use the diagnosisText field if available, otherwise extract from the diagnosis object
         let diagnosisText;
+        let diagnosisObj;
+
         if (appointmentToSave.diagnosisText) {
           diagnosisText = appointmentToSave.diagnosisText;
+          try {
+            // Try to parse the JSON string to get the diagnosis object
+            diagnosisObj = JSON.parse(diagnosisText);
+          } catch (e) {
+            console.error('Error parsing diagnosis text:', e);
+            // If parsing fails, create a simple diagnosis object
+            diagnosisObj = {
+              notes: diagnosisText,
+              treatment: '',
+              followUp: '',
+              files: [],
+              updatedAt: new Date().toISOString()
+            };
+          }
         } else if (typeof appointmentToSave.diagnosis === 'object') {
-          diagnosisText = appointmentToSave.diagnosis.notes || JSON.stringify(appointmentToSave.diagnosis);
+          // If it's already an object, use it directly
+          diagnosisObj = appointmentToSave.diagnosis;
+          diagnosisText = JSON.stringify(diagnosisObj);
         } else {
+          // Fallback to simple string
           diagnosisText = appointmentToSave.diagnosis;
+          diagnosisObj = {
+            notes: diagnosisText,
+            treatment: '',
+            followUp: '',
+            files: [],
+            updatedAt: new Date().toISOString()
+          };
         }
 
         const diagnosisResponse = await apiService.createDiagnosis({
@@ -359,16 +400,6 @@ function Dashboard() {
 
         // Add to reports data
         setReportsData(prev => [...prev, diagnosisResponse]);
-
-        // Also update the appointment in the local state to include the diagnosis
-        // This ensures the diagnosis is displayed immediately without needing a refresh
-        const diagnosisObj = {
-          notes: diagnosisText,
-          treatment: '',
-          followUp: '',
-          files: [],
-          updatedAt: new Date().toISOString()
-        };
 
         // Update the appointment with the diagnosis
         setAppointmentsData(prev =>
