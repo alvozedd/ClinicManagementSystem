@@ -44,15 +44,22 @@ function SimplifiedDiagnosisModal({ appointment, onClose, onSave }) {
       url: URL.createObjectURL(file)
     }));
 
+    // Create a structured diagnosis object
+    const diagnosisObj = {
+      notes: diagnosis,
+      treatment: treatment,
+      followUp: followUp,
+      files: [...existingFiles, ...fileData],
+      updatedAt: new Date().toISOString()
+    };
+
+    // For API compatibility, convert the diagnosis object to a string
+    // The backend expects a diagnosis_text field
     const updatedAppointment = {
       ...appointment,
-      diagnosis: {
-        notes: diagnosis,
-        treatment: treatment,
-        followUp: followUp,
-        files: [...existingFiles, ...fileData],
-        updatedAt: new Date().toISOString()
-      }
+      diagnosis: diagnosisObj,
+      // Also include a text representation for the API
+      diagnosisText: JSON.stringify(diagnosisObj)
     };
 
     onSave(updatedAppointment);

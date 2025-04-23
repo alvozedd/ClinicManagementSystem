@@ -74,22 +74,7 @@ function Dashboard() {
         updatedPatient = patientWithoutAppointments;
       }
 
-      // If we're using localStorage for development/testing
-      if (!import.meta.env.VITE_API_URL) {
-        console.log('Using localStorage for patient data (no API URL configured)');
-        // Update local state only
-        if (patientExists) {
-          const updatedPatients = patientsData.map(p =>
-            p._id === updatedPatient._id ? { ...p, ...updatedPatient } : p
-          );
-          setPatientsData(updatedPatients);
-        } else {
-          setPatientsData([...patientsData, { ...updatedPatient, _id: Date.now().toString() }]);
-        }
-        return updatedPatient;
-      }
-
-      // Otherwise use the API
+      // Use the API to save patient data
       let response;
       // Update or add the patient via API
       if (patientExists) {
@@ -124,27 +109,15 @@ function Dashboard() {
       }
 
       console.log('Patient saved to database:', response);
+
+      // Refresh data from API to ensure we have the latest data
+      setRefreshTrigger(prev => prev + 1);
+
       return response;
     } catch (error) {
       console.error('Error saving patient:', error);
       setError('Failed to save patient. Please try again.');
-
-      // Fallback to localStorage if API fails
-      console.log('Falling back to localStorage due to API error');
-      if (confirm('Unable to save to database. Would you like to save locally instead?')) {
-        // Update local state only
-        const patientExists = patientsData.some(p => p._id === updatedPatient._id);
-        if (patientExists) {
-          const updatedPatients = patientsData.map(p =>
-            p._id === updatedPatient._id ? { ...p, ...updatedPatient } : p
-          );
-          setPatientsData(updatedPatients);
-        } else {
-          setPatientsData([...patientsData, { ...updatedPatient, _id: Date.now().toString() }]);
-        }
-        return updatedPatient;
-      }
-
+      alert('Failed to save patient to database. Please try again.');
       throw error;
     }
   };
@@ -217,9 +190,13 @@ function Dashboard() {
           setAppointmentsData(prev => [...prev, response]);
         }
       }
+
+      // Refresh data from API to ensure we have the latest data
+      setRefreshTrigger(prev => prev + 1);
     } catch (error) {
       console.error('Error updating appointments:', error);
       setError('Failed to update appointments. Please try again.');
+      alert('Failed to update appointments. Please try again.');
     }
   };
 
@@ -274,9 +251,19 @@ function Dashboard() {
 
       // If there's a diagnosis, save it
       if (appointmentToSave.diagnosis) {
+        // Use the diagnosisText field if available, otherwise extract from the diagnosis object
+        let diagnosisText;
+        if (appointmentToSave.diagnosisText) {
+          diagnosisText = appointmentToSave.diagnosisText;
+        } else if (typeof appointmentToSave.diagnosis === 'object') {
+          diagnosisText = appointmentToSave.diagnosis.notes || JSON.stringify(appointmentToSave.diagnosis);
+        } else {
+          diagnosisText = appointmentToSave.diagnosis;
+        }
+
         const diagnosisResponse = await apiService.createDiagnosis({
           appointment_id: appointmentResponse._id,
-          diagnosis_text: appointmentToSave.diagnosis
+          diagnosis_text: diagnosisText
         });
 
         console.log('Saved diagnosis to database:', diagnosisResponse);
@@ -284,6 +271,9 @@ function Dashboard() {
         // Add to reports data
         setReportsData(prev => [...prev, diagnosisResponse]);
       }
+
+      // Refresh data from API to ensure we have the latest data
+      setRefreshTrigger(prev => prev + 1);
 
       // Show success message
       if (updatedAppointment.diagnosis) {
@@ -294,7 +284,7 @@ function Dashboard() {
     } catch (error) {
       console.error('Error saving diagnosis/appointment:', error);
       setError('Failed to save. Please try again.');
-      alert('Failed to save. Please try again.');
+      alert('Failed to save diagnosis/appointment. Please try again.');
     }
   }
 
