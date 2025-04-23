@@ -17,41 +17,24 @@ function LoginForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!username || !password) {
       setError('Please enter both username and password');
       return;
     }
-    
+
     setLoading(true);
     setError('');
 
     try {
-      // Mock authentication for demonstration
-      const mockUsers = [
-        { _id: '1', username: 'admin', password: 'admin123', role: 'admin' },
-        { _id: '2', username: 'doctor', password: 'doctor123', role: 'doctor' },
-        { _id: '3', username: 'secretary', password: 'secretary123', role: 'secretary' },
-      ];
+      // Import the API service
+      const apiService = (await import('../utils/apiService')).default;
 
-      const user = mockUsers.find(
-        (u) => u.username === username && u.password === password
-      );
+      // Call the login API
+      const data = await apiService.login(username, password);
 
-      if (user) {
-        // Create a data object similar to what the API would return
-        const data = {
-          _id: user._id,
-          username: user.username,
-          role: user.role,
-          token: 'mock-jwt-token',
-        };
-
-        // Use the login function from AuthContext
-        login(data);
-      } else {
-        setError('Invalid username or password');
-      }
+      // Use the login function from AuthContext
+      login(data);
     } catch (err) {
       setError('Something went wrong. Please try again.');
       console.error('Login error:', err);
@@ -160,25 +143,7 @@ function LoginForm() {
             </div>
           </form>
 
-          <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">Demo Accounts</span>
-              </div>
-            </div>
 
-            <div className="mt-6 grid grid-cols-1 gap-3">
-              <div className="text-sm text-center text-gray-600">
-                <p className="mb-2">Use these credentials to test the system:</p>
-                <p><strong>Admin:</strong> admin / admin123</p>
-                <p><strong>Doctor:</strong> doctor / doctor123</p>
-                <p><strong>Secretary:</strong> secretary / secretary123</p>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>

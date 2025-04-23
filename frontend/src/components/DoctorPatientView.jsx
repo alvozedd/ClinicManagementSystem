@@ -226,13 +226,24 @@ function DoctorPatientView({ patient, appointments, onClose, onUpdatePatient, on
               ) : patient.gender} •
               {editMode ? (
                 <input
-                  type="date"
+                  type="number"
                   name="dateOfBirth"
-                  value={editedPatient.dateOfBirth}
-                  onChange={handleInputChange}
-                  className="bg-blue-500 px-2 py-1 rounded mx-2"
+                  value={editedPatient.dateOfBirth ? new Date(editedPatient.dateOfBirth).getFullYear() : ''}
+                  onChange={(e) => {
+                    const year = e.target.value;
+                    // Create a date with just the year (Jan 1 of that year)
+                    const dateStr = `${year}-01-01`;
+                    setEditedPatient(prev => ({
+                      ...prev,
+                      dateOfBirth: dateStr
+                    }));
+                  }}
+                  min="1900"
+                  max={new Date().getFullYear()}
+                  className="bg-blue-500 px-2 py-1 rounded mx-2 w-24"
+                  placeholder="Year"
                 />
-              ) : patient.dateOfBirth} •
+              ) : patient.dateOfBirth ? new Date(patient.dateOfBirth).getFullYear() : 'Unknown'} •
               {calculateAge(editMode ? editedPatient.dateOfBirth : patient.dateOfBirth)} years
             </p>
           </div>
@@ -571,6 +582,14 @@ function DoctorPatientView({ patient, appointments, onClose, onUpdatePatient, on
                               <p className="text-sm">{truncateText(appointment.diagnosis.treatment, 100)}</p>
                             </div>
                           )}
+                          {appointment.diagnosis.files && appointment.diagnosis.files.length > 0 && (
+                            <div className="mt-2 flex items-center">
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-blue-600 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M8 4a3 3 0 00-3 3v4a5 5 0 0010 0V7a1 1 0 112 0v4a7 7 0 11-14 0V7a5 5 0 0110 0v4a3 3 0 11-6 0V7a1 1 0 012 0v4a1 1 0 102 0V7a3 3 0 00-3-3z" clipRule="evenodd" />
+                              </svg>
+                              <p className="text-xs text-blue-600 font-medium">{appointment.diagnosis.files.length} {appointment.diagnosis.files.length === 1 ? 'file' : 'files'} attached</p>
+                            </div>
+                          )}
                           <button
                             onClick={() => onDiagnoseAppointment(appointment)}
                             className="mt-3 text-sm text-blue-600 hover:text-blue-800 font-medium"
@@ -664,6 +683,51 @@ function DoctorPatientView({ patient, appointments, onClose, onUpdatePatient, on
                             <div className="mt-3 bg-white p-3 rounded-lg">
                               <p className="text-base font-medium text-blue-800 mb-1">Treatment Plan:</p>
                               <p className="text-base">{appointment.diagnosis.treatment}</p>
+                            </div>
+                          )}
+
+                          {appointment.diagnosis.files && appointment.diagnosis.files.length > 0 && (
+                            <div className="mt-3 border-t border-blue-200 pt-3">
+                              <p className="text-base font-medium text-blue-800 mb-2">Attached Files:</p>
+                              <div className="space-y-2">
+                                {appointment.diagnosis.files.map((file, index) => (
+                                  <div key={index} className="flex items-center justify-between bg-white p-2 rounded border border-blue-100">
+                                    <div className="flex items-center">
+                                      {file.type && file.type.includes('pdf') ? (
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-red-500 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                          <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" />
+                                        </svg>
+                                      ) : file.type && file.type.includes('image') ? (
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-500 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                          <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
+                                        </svg>
+                                      ) : (
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-500 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                          <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" />
+                                        </svg>
+                                      )}
+                                      <span className="text-sm">{file.name}</span>
+                                    </div>
+                                    <div className="flex space-x-2">
+                                      <a
+                                        href={file.url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-xs bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700"
+                                      >
+                                        View
+                                      </a>
+                                      <a
+                                        href={file.url}
+                                        download={file.name}
+                                        className="text-xs bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700"
+                                      >
+                                        Download
+                                      </a>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
                             </div>
                           )}
 

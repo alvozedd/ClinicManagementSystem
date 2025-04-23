@@ -6,20 +6,21 @@ const generateToken = require('../utils/generateToken');
 // @route   POST /api/users/login
 // @access  Public
 const authUser = asyncHandler(async (req, res) => {
-  const { email, password } = req.body;
+  const { username, password } = req.body;
 
-  const user = await User.findOne({ email });
+  // Find user by username (which is stored in the email field)
+  const user = await User.findOne({ email: username });
 
   if (user && (await user.matchPassword(password))) {
     res.json({
       _id: user._id,
-      email: user.email,
+      username: user.email, // Return email as username
       role: user.role,
       token: generateToken(user._id),
     });
   } else {
     res.status(401);
-    throw new Error('Invalid email or password');
+    throw new Error('Invalid username or password');
   }
 });
 

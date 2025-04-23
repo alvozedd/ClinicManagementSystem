@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { FaUser } from 'react-icons/fa';
 import { getCreatorLabel } from '../utils/recordCreation';
 import AppointmentManagementModal from './AppointmentManagementModal';
 import SimplifiedDiagnosisModal from './SimplifiedDiagnosisModal';
@@ -147,13 +148,24 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
                     </select>
                   </div>
                   <div>
-                    <label className="text-xs block mb-1">Date of Birth</label>
+                    <label className="text-xs block mb-1">Year of Birth</label>
                     <input
-                      type="date"
+                      type="number"
                       name="dateOfBirth"
-                      value={editedPatient.dateOfBirth}
-                      onChange={handleInputChange}
+                      value={editedPatient.dateOfBirth ? new Date(editedPatient.dateOfBirth).getFullYear() : ''}
+                      onChange={(e) => {
+                        const year = e.target.value;
+                        // Create a date with just the year (Jan 1 of that year)
+                        const dateStr = `${year}-01-01`;
+                        setEditedPatient(prev => ({
+                          ...prev,
+                          dateOfBirth: dateStr
+                        }));
+                      }}
+                      min="1900"
+                      max={new Date().getFullYear()}
                       className="border border-blue-300 rounded px-2 py-1 w-full bg-blue-50"
+                      placeholder="Year"
                     />
                   </div>
                 </div>
@@ -311,14 +323,25 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Year of Birth</label>
                     <input
-                      type="date"
+                      type="number"
                       name="dateOfBirth"
-                      value={editedPatient.dateOfBirth}
-                      onChange={handleInputChange}
+                      value={editedPatient.dateOfBirth ? new Date(editedPatient.dateOfBirth).getFullYear() : ''}
+                      onChange={(e) => {
+                        const year = e.target.value;
+                        // Create a date with just the year (Jan 1 of that year)
+                        const dateStr = `${year}-01-01`;
+                        setEditedPatient(prev => ({
+                          ...prev,
+                          dateOfBirth: dateStr
+                        }));
+                      }}
+                      min="1900"
+                      max={new Date().getFullYear()}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                       required
+                      placeholder="Enter year of birth"
                     />
                   </div>
                   <div>
@@ -463,8 +486,8 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="border-b pb-2">
-                    <p className="text-sm text-gray-500">Date of Birth</p>
-                    <p className="font-medium">{patient.dateOfBirth} ({calculateAge(patient.dateOfBirth)} years)</p>
+                    <p className="text-sm text-gray-500">Year of Birth</p>
+                    <p className="font-medium">{patient.dateOfBirth ? new Date(patient.dateOfBirth).getFullYear() : 'Not provided'} ({calculateAge(patient.dateOfBirth)} years)</p>
                   </div>
                   <div className="border-b pb-2">
                     <p className="text-sm text-gray-500">Gender</p>
@@ -496,12 +519,15 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
                   <div className="border-b pb-2 mb-2">
                     <p className="text-sm text-gray-500">Record Created By</p>
                     <div className="flex items-center mt-1">
-                      <span className={`px-2 py-1 rounded-md text-sm font-medium ${
-                        patient.createdBy === 'doctor' ? 'bg-blue-100 text-blue-800' :
-                        patient.createdBy === 'secretary' ? 'bg-green-100 text-green-800' :
-                        'bg-purple-100 text-purple-800'
+                      <span className={`px-3 py-1.5 rounded-md text-sm font-medium ${
+                        patient.createdBy === 'doctor' ? 'bg-blue-100 text-blue-800 border border-blue-200' :
+                        patient.createdBy === 'secretary' ? 'bg-green-100 text-green-800 border border-green-200' :
+                        'bg-purple-100 text-purple-800 border border-purple-200'
                       }`}>
-                        {getCreatorLabel(patient.createdBy)}
+                        <span className="flex items-center">
+                          <FaUser className="mr-2" />
+                          {getCreatorLabel(patient.createdBy)}
+                        </span>
                       </span>
                       {patient.createdAt && (
                         <span className="text-sm text-gray-500 ml-2">
@@ -683,6 +709,51 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
                           <p className="mt-1">{appointment.diagnosis.followUp}</p>
                         </div>
                       )}
+
+                      {appointment.diagnosis.files && appointment.diagnosis.files.length > 0 && (
+                        <div className="mt-4 border-t border-blue-100 pt-3">
+                          <p className="font-medium text-blue-800 mb-2">Attached Files:</p>
+                          <div className="space-y-2">
+                            {appointment.diagnosis.files.map((file, index) => (
+                              <div key={index} className="flex items-center justify-between bg-blue-50 p-2 rounded">
+                                <div className="flex items-center">
+                                  {file.type && file.type.includes('pdf') ? (
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-red-500 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                      <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" />
+                                    </svg>
+                                  ) : file.type && file.type.includes('image') ? (
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-500 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                      <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
+                                    </svg>
+                                  ) : (
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-500 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                      <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" />
+                                    </svg>
+                                  )}
+                                  <span className="text-sm">{file.name}</span>
+                                </div>
+                                <div className="flex space-x-2">
+                                  <a
+                                    href={file.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-xs bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700"
+                                  >
+                                    View
+                                  </a>
+                                  <a
+                                    href={file.url}
+                                    download={file.name}
+                                    className="text-xs bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700"
+                                  >
+                                    Download
+                                  </a>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -759,6 +830,51 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
                       <div className="mt-3 p-3 bg-blue-50 rounded-lg">
                         <p className="font-medium text-blue-800">Diagnosis:</p>
                         <p className="mt-1">{appointment.diagnosis.notes}</p>
+
+                        {appointment.diagnosis.files && appointment.diagnosis.files.length > 0 && (
+                          <div className="mt-3 border-t border-blue-200 pt-3">
+                            <p className="font-medium text-blue-800 mb-2">Attached Files:</p>
+                            <div className="space-y-2">
+                              {appointment.diagnosis.files.map((file, index) => (
+                                <div key={index} className="flex items-center justify-between bg-white p-2 rounded border border-blue-100">
+                                  <div className="flex items-center">
+                                    {file.type && file.type.includes('pdf') ? (
+                                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-red-500 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" />
+                                      </svg>
+                                    ) : file.type && file.type.includes('image') ? (
+                                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-500 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
+                                      </svg>
+                                    ) : (
+                                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-500 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" />
+                                      </svg>
+                                    )}
+                                    <span className="text-sm">{file.name}</span>
+                                  </div>
+                                  <div className="flex space-x-2">
+                                    <a
+                                      href={file.url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-xs bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700"
+                                    >
+                                      View
+                                    </a>
+                                    <a
+                                      href={file.url}
+                                      download={file.name}
+                                      className="text-xs bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700"
+                                    >
+                                      Download
+                                    </a>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
 
                         <div className="mt-3 flex justify-end">
                           <button

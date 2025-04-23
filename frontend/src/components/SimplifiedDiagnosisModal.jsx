@@ -157,6 +157,7 @@ function SimplifiedDiagnosisModal({ appointment, onClose, onSave }) {
                         type="file"
                         className="sr-only"
                         multiple
+                        accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
                         onChange={handleFileChange}
                         ref={fileInputRef}
                       />
@@ -181,7 +182,16 @@ function SimplifiedDiagnosisModal({ appointment, onClose, onSave }) {
                         </svg>
                         <span className="ml-2 flex-1 w-0 truncate">{file.name}</span>
                       </div>
-                      <div className="ml-4 flex-shrink-0">
+                      <div className="ml-4 flex-shrink-0 flex space-x-2">
+                        <a
+                          href={file.url}
+                          download={file.name}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-medium text-blue-600 hover:text-blue-500"
+                        >
+                          Download
+                        </a>
                         <button
                           type="button"
                           onClick={() => removeFile(index, true)}
@@ -200,7 +210,16 @@ function SimplifiedDiagnosisModal({ appointment, onClose, onSave }) {
                         </svg>
                         <span className="ml-2 flex-1 w-0 truncate">{file.name}</span>
                       </div>
-                      <div className="ml-4 flex-shrink-0">
+                      <div className="ml-4 flex-shrink-0 flex space-x-2">
+                        <a
+                          href={URL.createObjectURL(file)}
+                          download={file.name}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-medium text-blue-600 hover:text-blue-500"
+                        >
+                          Download
+                        </a>
                         <button
                           type="button"
                           onClick={() => removeFile(index)}

@@ -223,7 +223,7 @@ function PatientSearch({ patients, onSelectPatient }) {
                   {patient.createdBy && (
                     <p className="text-xs text-gray-500 flex items-center mt-1">
                       <FaUser className="mr-1" size={10} />
-                      Added by: <span className="font-medium ml-1">
+                      Added by: <span className={`font-medium ml-1 px-2 py-0.5 rounded-full ${patient.createdBy === 'visitor' ? 'bg-purple-100 text-purple-800' : patient.createdBy === 'doctor' ? 'bg-blue-100 text-blue-800' : patient.createdBy === 'secretary' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
                         {patient.createdBy === 'visitor' ? 'Patient (Online)' :
                          patient.createdBy === 'doctor' ? 'Doctor' :
                          patient.createdBy === 'secretary' ? 'Secretary' :

@@ -113,6 +113,10 @@ function HomePage() {
       {/* Header with blue background */}
       <div className="bg-blue-800 text-white fixed top-0 left-0 right-0 z-50 shadow-md">
         <div className="absolute inset-0 bg-gradient-to-r from-blue-900 to-blue-700" style={{zIndex: 0}}></div>
+        <div className="absolute inset-0 opacity-40" style={{zIndex: 1}}>
+          <div className="absolute top-0 left-0 w-full h-full" style={{backgroundImage: "url('data:image/svg+xml,%3Csvg width=\"20\" height=\"20\" viewBox=\"0 0 20 20\" xmlns=\"http://www.w3.org/2000/svg\",%3E%3Cg fill=\"none\" fill-rule=\"evenodd\",%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"0.6\",%3E%3Cpath d=\"M0 0h10v10H0V0zm10 10h10v10H10V10z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')", backgroundSize: "20px 20px"}}>
+          </div>
+        </div>
         <div className="max-w-6xl mx-auto px-4 py-2">
           {/* Header */}
           <header className="flex justify-between items-center py-3 relative z-10">
@@ -158,12 +162,12 @@ function HomePage() {
               >Contact</button>
               <Link
                 to="/login"
-                className="bg-white text-blue-800 hover:bg-blue-100 px-4 py-2 rounded-lg text-sm font-medium transition duration-200 flex items-center gap-2"
+                className="bg-white text-blue-800 hover:bg-blue-100 p-2 rounded-lg text-sm font-medium transition duration-200 flex items-center justify-center"
+                aria-label="Staff Login"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
-                <span>Staff Login</span>
               </Link>
             </div>
           </header>
@@ -177,6 +181,10 @@ function HomePage() {
             /* Success message */
             <div className="py-12 bg-blue-800 text-white relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-r from-blue-900 to-blue-700"></div>
+              <div className="absolute inset-0 opacity-40">
+                <div className="absolute top-0 left-0 w-full h-full" style={{backgroundImage: "url('data:image/svg+xml,%3Csvg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\",%3E%3Cg fill=\"none\" fill-rule=\"evenodd\",%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"0.6\",%3E%3Cpath d=\"M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')", backgroundSize: "30px 30px"}}>
+                </div>
+              </div>
               <div className="max-w-2xl mx-auto bg-white rounded-xl shadow-md p-8 text-gray-800 relative z-10">
               <div className="text-center">
                 <div className="inline-block bg-green-100 p-4 rounded-full mb-4">
@@ -215,6 +223,10 @@ function HomePage() {
             /* Booking form */
             <div className="py-12 bg-blue-800 text-white relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-r from-blue-900 to-blue-700"></div>
+              <div className="absolute inset-0 opacity-40">
+                <div className="absolute top-0 left-0 w-full h-full" style={{backgroundImage: "url('data:image/svg+xml,%3Csvg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\",%3E%3Cg fill=\"none\" fill-rule=\"evenodd\",%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"0.6\",%3E%3Cpath d=\"M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')", backgroundSize: "30px 30px"}}>
+                </div>
+              </div>
               <div className="max-w-2xl mx-auto bg-white rounded-xl shadow-md p-8 text-gray-800 relative z-10">
               <h2 className="text-3xl font-bold text-blue-700 mb-6 text-center">Book Your Appointment</h2>
 
@@ -407,6 +419,10 @@ function HomePage() {
               {/* Home content */}
               <div className="text-center bg-blue-800 text-white relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-900 to-blue-700"></div>
+                <div className="absolute inset-0 opacity-40">
+                  <div className="absolute top-0 left-0 w-full h-full" style={{backgroundImage: "url('data:image/svg+xml,%3Csvg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\",%3E%3Cg fill=\"none\" fill-rule=\"evenodd\",%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"0.6\",%3E%3Cpath d=\"M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')", backgroundSize: "30px 30px"}}>
+                  </div>
+                </div>
                 {/* Hero Section - Blue Background */}
                 <div className="max-w-4xl mx-auto py-32 text-center relative">
                   <h2 className="text-6xl font-bold mb-6 text-white">Expert Urological & Surgical<br />Care</h2>
@@ -586,81 +602,7 @@ function HomePage() {
                       </div>
                     </div>
 
-                    <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 transition-all duration-300 hover:shadow-md hover:border-blue-200">
-                      <div className="flex items-center mb-4">
-                        <svg className="w-5 h-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                        </svg>
-                        <h3 className="text-lg font-semibold text-blue-800">Send us a message</h3>
-                      </div>
-                      <p className="text-sm text-gray-500 mb-6">We'll get back to you within 24 hours</p>
 
-                      <form className="space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">Your Name *</label>
-                            <input
-                              type="text"
-                              id="name"
-                              className="w-full px-4 py-2 rounded-md bg-white text-gray-800 placeholder-gray-400 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                              placeholder="John Doe"
-                              required
-                            />
-                          </div>
-                          <div>
-                            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email Address *</label>
-                            <input
-                              type="email"
-                              id="email"
-                              className="w-full px-4 py-2 rounded-md bg-white text-gray-800 placeholder-gray-400 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                              placeholder="john@example.com"
-                              required
-                            />
-                          </div>
-                        </div>
-                        <div>
-                          <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">Phone Number (Optional)</label>
-                          <input
-                            type="tel"
-                            id="phone"
-                            className="w-full px-4 py-2 rounded-md bg-white text-gray-800 placeholder-gray-400 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="+254 7XX XXX XXX"
-                          />
-                        </div>
-                        <div>
-                          <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-1">Subject</label>
-                          <select
-                            id="subject"
-                            className="w-full px-4 py-2 rounded-md bg-white text-gray-800 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          >
-                            <option value="">Select a subject</option>
-                            <option value="appointment">Appointment Inquiry</option>
-                            <option value="consultation">Consultation</option>
-                            <option value="general">General Inquiry</option>
-                            <option value="feedback">Feedback</option>
-                          </select>
-                        </div>
-                        <div>
-                          <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">Your Message *</label>
-                          <textarea
-                            id="message"
-                            rows="4"
-                            className="w-full px-4 py-2 rounded-md bg-white text-gray-800 placeholder-gray-400 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="How can we help you?"
-                            required
-                          ></textarea>
-                        </div>
-                        <button
-                          type="submit"
-                          className="w-full bg-blue-600 text-white hover:bg-blue-700 py-3 px-4 rounded-md font-medium transition duration-200 flex items-center justify-center"
-                        >
-                          <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
-                          </svg>
-                          Send Message
-                        </button>
-                      </form>
-                    </div>
                   </div>
                 </div>
               </div>
@@ -732,8 +674,9 @@ function HomePage() {
 
         {/* Footer */}
         <footer className="py-12 bg-blue-800 text-white relative overflow-hidden">
-          <div className="absolute inset-0 opacity-10">
-            <div className="absolute top-0 left-0 w-full h-full" style={{backgroundImage: "radial-gradient(circle, #ffffff 1px, transparent 1px)", backgroundSize: "20px 20px"}}></div>
+          <div className="absolute inset-0 opacity-40">
+            <div className="absolute top-0 left-0 w-full h-full" style={{backgroundImage: "url('data:image/svg+xml,%3Csvg width=\"20\" height=\"20\" viewBox=\"0 0 20 20\" xmlns=\"http://www.w3.org/2000/svg\",%3E%3Cg fill=\"none\" fill-rule=\"evenodd\",%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"0.6\",%3E%3Cpath d=\"M0 0h10v10H0V0zm10 10h10v10H10V10z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')", backgroundSize: "20px 20px"}}>
+            </div>
           </div>
           <div className="max-w-5xl mx-auto px-4">
             <div className="flex flex-col md:flex-row justify-between mb-8">

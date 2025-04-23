@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { savePatients, saveAppointments, getPatients, getAppointments } from '../data/mockData';
 import { createPatientRecord, createAppointmentRecord } from '../utils/recordCreation';
-import { FaPhone, FaEnvelope, FaMapMarkerAlt, FaClock, FaArrowRight, FaInfoCircle, FaCalendarAlt, FaUserMd, FaHospital } from 'react-icons/fa';
+import { FaPhone, FaEnvelope, FaMapMarkerAlt, FaClock, FaArrowRight, FaInfoCircle, FaCalendarAlt, FaUserMd, FaHospital, FaUserLock } from 'react-icons/fa';
 
 function WelcomePage() {
   const [step, setStep] = useState(1); // 1: Form, 2: Success
@@ -63,7 +63,7 @@ function WelcomePage() {
         type: formData.appointmentType,
         reason: formData.appointmentReason,
         status: 'Scheduled',
-        notes: 'Booked online by patient. Time to be confirmed by secretary.'
+        notes: 'Booked online by patient.'
       };
 
       const newAppointment = createAppointmentRecord(appointmentData, newPatient, 'visitor');
@@ -119,8 +119,12 @@ function WelcomePage() {
           </div>
 
           <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden border border-blue-100">
-            <div className="bg-blue-600 p-6">
-              <h1 className="text-2xl font-bold text-white text-center">Booking Confirmed!</h1>
+            <div className="bg-blue-600 p-6 relative">
+              <div className="absolute inset-0 opacity-15">
+                <div className="absolute top-0 left-0 w-full h-full" style={{backgroundImage: "url('data:image/svg+xml,%3Csvg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\",%3E%3Cg fill=\"none\" fill-rule=\"evenodd\",%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"0.4\",%3E%3Cpath d=\"M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')"}}
+                </div>
+              </div>
+              <h1 className="text-2xl font-bold text-white text-center relative z-10">Booking Confirmed!</h1>
             </div>
             <div className="p-6">
               <div className="mb-6 bg-blue-50 p-4 rounded-lg border border-blue-200">
@@ -129,15 +133,13 @@ function WelcomePage() {
                 <p className="text-blue-900 font-bold mt-2">
                   {formData.appointmentDate}
                 </p>
-                <p className="text-blue-700 mt-1">
-                  Our staff will contact you to confirm the exact time.
-                </p>
+
               </div>
 
               <div className="mb-6">
                 <h2 className="text-lg font-semibold text-blue-800 mb-2">What happens next?</h2>
                 <ol className="list-decimal pl-5 space-y-2 text-gray-700">
-                  <li>You'll receive a confirmation call from our staff</li>
+                  <li>Please arrive at the clinic at your scheduled time</li>
                   <li>Please arrive 15 minutes before your appointment time</li>
                   <li>Bring any relevant medical records or test results</li>
                 </ol>
@@ -163,7 +165,12 @@ function WelcomePage() {
 
   // Booking form
   return (
-    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white py-8">
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white py-8 relative">
+      {/* Subtle background pattern */}
+      <div className="absolute inset-0 opacity-5 pointer-events-none">
+        <div className="absolute top-0 left-0 w-full h-full" style={{backgroundImage: "url('data:image/svg+xml,%3Csvg width=\"40\" height=\"40\" viewBox=\"0 0 40 40\" xmlns=\"http://www.w3.org/2000/svg\",%3E%3Cg fill=\"none\" fill-rule=\"evenodd\",%3E%3Cg fill=\"%233b82f6\" fill-opacity=\"0.2\",%3E%3Cpath d=\"M0 38.59l2.83-2.83 1.41 1.41L1.41 40H0v-1.41zM0 1.4l2.83 2.83 1.41-1.41L1.41 0H0v1.41zM38.59 40l-2.83-2.83 1.41-1.41L40 38.59V40h-1.41zM40 1.41l-2.83 2.83-1.41-1.41L38.59 0H40v1.41zM20 18.6l2.83-2.83 1.41 1.41L21.41 20l2.83 2.83-1.41 1.41L20 21.41l-2.83 2.83-1.41-1.41L18.59 20l-2.83-2.83 1.41-1.41L20 18.59z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')"}}
+        </div>
+      </div>
       <div className="max-w-6xl mx-auto px-4">
         {/* Header with clinic name and navigation */}
         <div className="flex justify-between items-center mb-8">
@@ -179,24 +186,52 @@ function WelcomePage() {
           <div className="hidden md:flex space-x-4 items-center">
             <a href="#services" className="text-blue-600 hover:text-blue-800 font-medium">Services</a>
             <a href="#about" className="text-blue-600 hover:text-blue-800 font-medium">About Us</a>
-            <Link to="/login" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition duration-200">
-              Staff Login
+            <Link to="/login" className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-md text-sm font-medium transition duration-200 flex items-center justify-center">
+              <FaUserLock className="text-lg" />
             </Link>
           </div>
         </div>
 
         {/* Hero section */}
-        <div className="mb-12 bg-gradient-to-r from-blue-600 to-blue-500 rounded-xl overflow-hidden shadow-xl">
-          <div className="grid grid-cols-1 md:grid-cols-2">
+        <div className="mb-12 bg-gradient-to-r from-blue-600 to-blue-500 rounded-xl overflow-hidden shadow-xl relative">
+          {/* Pattern overlay */}
+          <div className="absolute inset-0 opacity-40">
+            <div className="absolute top-0 left-0 w-full h-full" style={{backgroundImage: "url('data:image/svg+xml,%3Csvg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\",%3E%3Cg fill=\"none\" fill-rule=\"evenodd\",%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"0.6\",%3E%3Cpath d=\"M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')", backgroundSize: "30px 30px"}}
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 relative z-10">
             <div className="p-8 md:p-12 flex flex-col justify-center">
-              <h1 className="text-3xl md:text-4xl font-bold text-white mb-4">Expert Urological Care</h1>
+              <h1 className="text-3xl md:text-4xl font-bold text-white mb-6">Expert Urological &amp; Surgical<br />Care</h1>
               <p className="text-blue-100 mb-6 text-lg">Specialized medical care with a patient-centered approach</p>
               <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
-                <a href="#booking" className="bg-white text-blue-600 hover:bg-blue-50 px-6 py-3 rounded-md font-medium text-base transition duration-200 inline-flex items-center justify-center shadow-md">
+                <a href="#booking" className="bg-white text-blue-600 hover:bg-blue-50 px-6 py-3 rounded-md font-medium text-base transition-all duration-500 ease-in-out transform hover:scale-105 inline-flex items-center justify-center shadow-md" onClick={(e) => {
+                    e.preventDefault();
+                    const bookingElement = document.getElementById('booking');
+                    if (bookingElement) {
+                      // Scroll with offset to ensure the element is visible
+                      const yOffset = -80; // Adjust this value as needed
+                      const y = bookingElement.getBoundingClientRect().top + window.pageYOffset + yOffset;
+                      window.scrollTo({top: y, behavior: 'smooth'});
+                    }
+                  }}>
                   <FaCalendarAlt className="mr-2" />
                   Book Appointment
                 </a>
-                <a href="#contact" className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-blue-600 px-6 py-3 rounded-md font-medium text-base transition duration-200 inline-flex items-center justify-center">
+                <a
+                  href="#contact"
+                  className="bg-transparent border-2 border-white text-white hover:bg-white hover:text-blue-600 px-6 py-3 rounded-md font-medium text-base transition duration-300 inline-flex items-center justify-center"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    const contactElement = document.getElementById('contact');
+                    if (contactElement) {
+                      // Scroll with offset to ensure the element is visible
+                      const yOffset = -80; // Adjust this value as needed
+                      const y = contactElement.getBoundingClientRect().top + window.pageYOffset + yOffset;
+                      window.scrollTo({top: y, behavior: 'smooth'});
+                    }
+                  }}
+                >
+                  <FaPhone className="mr-2" />
                   Contact Us
                 </a>
               </div>
@@ -212,47 +247,79 @@ function WelcomePage() {
           </div>
         </div>
 
-        <div id="booking" className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div id="booking" className="scroll-mt-24 w-full"></div> {/* Anchor point with scroll margin */}
           {/* Left column - Contact info and map */}
-          <div id="contact" className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-lg overflow-hidden mb-6 border border-blue-100">
-              <div className="bg-blue-600 p-4">
-                <h2 className="text-xl font-semibold text-white">Contact Information</h2>
+          <div className="lg:col-span-1 mx-auto max-w-md w-full flex justify-center">
+            <div id="contact" className="scroll-mt-24"></div> {/* Anchor point with scroll margin */}
+            <div className="bg-white rounded-lg shadow-lg overflow-hidden mb-6 border border-blue-100 w-full">
+              <div className="bg-blue-600 p-4 relative">
+                <div className="absolute inset-0 opacity-40">
+                  <div className="absolute top-0 left-0 w-full h-full" style={{backgroundImage: "url('data:image/svg+xml,%3Csvg width=\"20\" height=\"20\" viewBox=\"0 0 20 20\" xmlns=\"http://www.w3.org/2000/svg\",%3E%3Cg fill=\"none\" fill-rule=\"evenodd\",%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"0.6\",%3E%3Cpath d=\"M0 0h10v10H0V0zm10 10h10v10H10V10z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')", backgroundSize: "20px 20px"}}
+                  </div>
+                </div>
+                <h2 className="text-xl font-semibold text-white relative z-10">Contact Information</h2>
               </div>
               <div className="p-4 space-y-4">
-                <div className="flex items-center">
-                  <FaPhone className="text-blue-600 mr-3" />
-                  <a href="tel:+254722396296" className="text-gray-700 hover:text-blue-600 transition duration-200">
-                    +254 722 396 296
-                  </a>
-                </div>
-                <div className="flex items-center">
-                  <FaPhone className="text-blue-600 mr-3" />
-                  <a href="tel:+254733396296" className="text-gray-700 hover:text-blue-600 transition duration-200">
-                    +254 733 396 296
-                  </a>
-                </div>
-                <div className="flex items-center">
-                  <FaEnvelope className="text-blue-600 mr-3" />
-                  <a href="mailto:info@urohealthcentral.com" className="text-gray-700 hover:text-blue-600 transition duration-200">
-                    info@urohealthcentral.com
-                  </a>
-                </div>
-                <div className="flex items-center">
-                  <FaMapMarkerAlt className="text-blue-600 mr-3 flex-shrink-0" />
-                  <span className="text-gray-700">Catering Building, 1st Floor<br />P.O. Box 31-10100<br />Nyeri, Kenya</span>
-                </div>
-                <div className="flex items-center">
-                  <FaClock className="text-blue-600 mr-3" />
-                  <span className="text-gray-700">Mon-Fri: 8:00 AM - 5:00 PM</span>
+                <a href="tel:+254722396296" className="w-full block bg-blue-50 hover:bg-blue-100 py-2 px-4 rounded-md transition duration-200 text-blue-700 font-medium">
+                  <div className="flex items-center mb-1">
+                    <FaPhone className="text-blue-600 mr-2" />
+                    <span>+254 722 396 296</span>
+                  </div>
+                  <span className="text-sm text-gray-600 ml-6">Mobile</span>
+                </a>
+
+                <a href="tel:+254733396296" className="w-full block bg-blue-50 hover:bg-blue-100 py-2 px-4 rounded-md transition duration-200 text-blue-700 font-medium">
+                  <div className="flex items-center mb-1">
+                    <FaPhone className="text-blue-600 mr-2" />
+                    <span>+254 733 396 296</span>
+                  </div>
+                  <span className="text-sm text-gray-600 ml-6">Office</span>
+                </a>
+
+                <a href="mailto:info@urohealthcentral.com" className="w-full block bg-blue-50 hover:bg-blue-100 py-2 px-4 rounded-md transition duration-200 text-blue-700 font-medium">
+                  <div className="flex items-center mb-1">
+                    <FaEnvelope className="text-blue-600 mr-2" />
+                    <span>info@urohealthcentral.com</span>
+                  </div>
+                  <span className="text-sm text-gray-600 ml-6">Email Us</span>
+                </a>
+
+                <div className="w-full block bg-blue-50 py-2 px-4 rounded-md text-blue-700 font-medium">
+                  <div className="flex items-center mb-1">
+                    <FaClock className="text-blue-600 mr-2" />
+                    <span>Mon-Fri: 8:00 AM - 5:00 PM</span>
+                  </div>
+                  <span className="text-sm text-gray-600 ml-6">Working Hours</span>
                 </div>
               </div>
             </div>
 
             {/* Google Maps Embed */}
-            <div className="bg-white rounded-lg shadow-lg overflow-hidden border border-blue-100">
-              <div className="bg-blue-600 p-4">
-                <h2 className="text-xl font-semibold text-white">Find Us</h2>
+            <div className="bg-white rounded-lg shadow-lg overflow-hidden border border-blue-100 w-full">
+              <div className="bg-blue-600 p-4 relative">
+                <div className="absolute inset-0 opacity-40">
+                  <div className="absolute top-0 left-0 w-full h-full" style={{backgroundImage: "url('data:image/svg+xml,%3Csvg width=\"20\" height=\"20\" viewBox=\"0 0 20 20\" xmlns=\"http://www.w3.org/2000/svg\",%3E%3Cg fill=\"none\" fill-rule=\"evenodd\",%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"0.6\",%3E%3Cpath d=\"M0 0h10v10H0V0zm10 10h10v10H10V10z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')", backgroundSize: "20px 20px"}}
+                  </div>
+                </div>
+                <h2 className="text-xl font-semibold text-white relative z-10">Find Us</h2>
+              </div>
+              <div className="p-4 mb-2">
+                <div className="flex items-center mb-2">
+                  <FaMapMarkerAlt className="text-blue-600 mr-3 flex-shrink-0" />
+                  <span className="text-gray-700">Catering Building, 1st Floor<br />P.O. Box 31-10100<br />Nyeri, Kenya</span>
+                </div>
+                <a
+                  href="https://maps.google.com/?q=Catering+Building,+Nyeri,+Kenya"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full block bg-blue-50 hover:bg-blue-100 py-2 px-4 rounded-md transition duration-200 text-blue-700 font-medium"
+                >
+                  <div className="flex items-center">
+                    <FaMapMarkerAlt className="text-blue-600 mr-2" />
+                    <span>Open in Google Maps</span>
+                  </div>
+                </a>
               </div>
               <div className="p-0">
                 <iframe
@@ -273,9 +340,13 @@ function WelcomePage() {
           {/* Right column - Booking form */}
           <div className="lg:col-span-2">
             <div className="bg-white rounded-lg shadow-lg overflow-hidden border border-blue-100">
-              <div className="bg-blue-600 p-6">
-                <h1 className="text-2xl font-bold text-white">Book Your Appointment</h1>
-                <p className="text-blue-100 mt-2">Complete this form to schedule your visit</p>
+              <div className="bg-blue-600 p-6 relative">
+                <div className="absolute inset-0 opacity-40">
+                  <div className="absolute top-0 left-0 w-full h-full" style={{backgroundImage: "url('data:image/svg+xml,%3Csvg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\",%3E%3Cg fill=\"none\" fill-rule=\"evenodd\",%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"0.6\",%3E%3Cpath d=\"M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')", backgroundSize: "30px 30px"}}
+                  </div>
+                </div>
+                <h1 className="text-2xl font-bold text-white relative z-10">Book Your Appointment</h1>
+                <p className="text-blue-100 mt-2 relative z-10">Complete this form to schedule your visit</p>
               </div>
               <div className="p-6">
                 {error && (
@@ -406,7 +477,7 @@ function WelcomePage() {
                         className="w-full px-3 py-2 border border-blue-200 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 shadow-sm"
                         required
                       />
-                      <p className="text-xs text-gray-500 mt-1">Our clinic hours are 8:00 AM to 5:00 PM. We'll contact you to confirm the exact time.</p>
+                      <p className="text-xs text-gray-500 mt-1">Our clinic hours are 8:00 AM to 5:00 PM.</p>
                     </div>
 
                     <div className="mt-4">
@@ -494,7 +565,16 @@ function WelcomePage() {
               </div>
               <h3 className="font-semibold text-blue-800 text-xl mb-2">Consultations</h3>
               <p className="text-gray-600">Comprehensive evaluation and diagnosis of urological conditions by our expert consultants.</p>
-              <a href="#booking" className="text-blue-600 hover:text-blue-800 font-medium mt-4 inline-block">Book a consultation →</a>
+              <a href="#booking" className="text-blue-600 hover:text-blue-800 font-medium mt-4 inline-block transition-all duration-500 ease-in-out transform hover:translate-x-1" onClick={(e) => {
+                  e.preventDefault();
+                  const bookingElement = document.getElementById('booking');
+                  if (bookingElement) {
+                    // Scroll with offset to ensure the element is visible
+                    const yOffset = -80; // Adjust this value as needed
+                    const y = bookingElement.getBoundingClientRect().top + window.pageYOffset + yOffset;
+                    window.scrollTo({top: y, behavior: 'smooth'});
+                  }
+                }}>Book a consultation →</a>
             </div>
 
             <div className="bg-white rounded-lg shadow-lg p-6 border border-blue-100 hover:shadow-xl transition-shadow duration-300">
@@ -506,7 +586,16 @@ function WelcomePage() {
               </div>
               <h3 className="font-semibold text-blue-800 text-xl mb-2">Diagnostics</h3>
               <p className="text-gray-600">Advanced diagnostic procedures including ultrasound, cystoscopy, and urodynamic studies.</p>
-              <a href="#booking" className="text-blue-600 hover:text-blue-800 font-medium mt-4 inline-block">Learn more →</a>
+              <a href="#booking" className="text-blue-600 hover:text-blue-800 font-medium mt-4 inline-block transition-all duration-500 ease-in-out transform hover:translate-x-1" onClick={(e) => {
+                  e.preventDefault();
+                  const bookingElement = document.getElementById('booking');
+                  if (bookingElement) {
+                    // Scroll with offset to ensure the element is visible
+                    const yOffset = -80; // Adjust this value as needed
+                    const y = bookingElement.getBoundingClientRect().top + window.pageYOffset + yOffset;
+                    window.scrollTo({top: y, behavior: 'smooth'});
+                  }
+                }}>Learn more →</a>
             </div>
 
             <div className="bg-white rounded-lg shadow-lg p-6 border border-blue-100 hover:shadow-xl transition-shadow duration-300">
@@ -521,7 +610,16 @@ function WelcomePage() {
               </div>
               <h3 className="font-semibold text-blue-800 text-xl mb-2">Treatments</h3>
               <p className="text-gray-600">Comprehensive treatment options for various urological conditions, from medication to surgical interventions.</p>
-              <a href="#booking" className="text-blue-600 hover:text-blue-800 font-medium mt-4 inline-block">Schedule now →</a>
+              <a href="#booking" className="text-blue-600 hover:text-blue-800 font-medium mt-4 inline-block transition-all duration-500 ease-in-out transform hover:translate-x-1" onClick={(e) => {
+                  e.preventDefault();
+                  const bookingElement = document.getElementById('booking');
+                  if (bookingElement) {
+                    // Scroll with offset to ensure the element is visible
+                    const yOffset = -80; // Adjust this value as needed
+                    const y = bookingElement.getBoundingClientRect().top + window.pageYOffset + yOffset;
+                    window.scrollTo({top: y, behavior: 'smooth'});
+                  }
+                }}>Schedule now →</a>
             </div>
           </div>
         </div>
@@ -592,35 +690,56 @@ function WelcomePage() {
         </div>
 
         {/* Footer */}
-        <div className="mt-16 pt-8 border-t border-blue-100">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+        <div className="mt-16 pt-8 border-t border-blue-100 bg-blue-600 text-white relative">
+          {/* Footer pattern */}
+          <div className="absolute inset-0 opacity-40">
+            <div className="absolute top-0 left-0 w-full h-full" style={{backgroundImage: "url('data:image/svg+xml,%3Csvg width=\"20\" height=\"20\" viewBox=\"0 0 20 20\" xmlns=\"http://www.w3.org/2000/svg\",%3E%3Cg fill=\"none\" fill-rule=\"evenodd\",%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"0.6\",%3E%3Cpath d=\"M0 0h10v10H0V0zm10 10h10v10H10V10z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')", backgroundSize: "20px 20px"}}
+            </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8 relative z-10 px-4 py-6">
             <div>
-              <h3 className="font-bold text-blue-800 mb-4">UroHealth Central</h3>
-              <p className="text-gray-600 text-sm">Providing specialized urological care with a patient-centered approach since 2010.</p>
+              <h3 className="font-bold text-white mb-4">UroHealth Central</h3>
+              <p className="text-blue-100 text-sm">Providing specialized urological care with a patient-centered approach since 2010.</p>
             </div>
 
             <div>
-              <h3 className="font-bold text-blue-800 mb-4">Quick Links</h3>
+              <h3 className="font-bold text-white mb-4">Quick Links</h3>
               <ul className="space-y-2 text-sm">
-                <li><a href="#services" className="text-gray-600 hover:text-blue-600">Services</a></li>
-                <li><a href="#about" className="text-gray-600 hover:text-blue-600">About Us</a></li>
-                <li><a href="#booking" className="text-gray-600 hover:text-blue-600">Book Appointment</a></li>
-                <li><Link to="/login" className="text-gray-600 hover:text-blue-600">Staff Login</Link></li>
+                <li><a href="#services" className="text-blue-100 hover:text-white">Services</a></li>
+                <li><a href="#about" className="text-blue-100 hover:text-white">About Us</a></li>
+                <li><a href="#booking" className="text-blue-100 hover:text-white">Book Appointment</a></li>
+                <li><a href="#contact" className="text-blue-100 hover:text-white">Contact</a></li>
+                <li><a href="#location" className="text-blue-100 hover:text-white">Find Us</a></li>
+                <li><Link to="/login" className="text-blue-100 hover:text-white">Staff Login</Link></li>
               </ul>
             </div>
 
             <div>
-              <h3 className="font-bold text-blue-800 mb-4">Contact</h3>
+              <h3 className="font-bold text-white mb-4">Contact</h3>
               <ul className="space-y-2 text-sm">
-                <li className="flex items-center"><FaPhone className="text-blue-600 mr-2" /> +254 722 396 296</li>
-                <li className="flex items-center"><FaEnvelope className="text-blue-600 mr-2" /> info@urohealthcentral.com</li>
-                <li className="flex items-center"><FaMapMarkerAlt className="text-blue-600 mr-2" /> Catering Building, Nyeri</li>
-                <li className="flex items-center"><FaClock className="text-blue-600 mr-2" /> Mon-Fri: 8:00 AM - 5:00 PM</li>
+                <li>
+                  <a href="tel:+254722396296" className="flex items-center text-blue-100 hover:text-white transition duration-200">
+                    <FaPhone className="text-blue-200 mr-2" /> +254 722 396 296
+                  </a>
+                </li>
+                <li>
+                  <a href="mailto:info@urohealthcentral.com" className="flex items-center text-blue-100 hover:text-white transition duration-200">
+                    <FaEnvelope className="text-blue-200 mr-2" /> info@urohealthcentral.com
+                  </a>
+                </li>
+                <li>
+                  <a href="https://maps.google.com/?q=Catering+Building,+Nyeri,+Kenya" target="_blank" rel="noopener noreferrer" className="flex items-center text-blue-100 hover:text-white transition duration-200">
+                    <FaMapMarkerAlt className="text-blue-200 mr-2" /> Catering Building, Nyeri
+                  </a>
+                </li>
+                <li className="flex items-center text-blue-100">
+                  <FaClock className="text-blue-200 mr-2" /> Mon-Fri: 8:00 AM - 5:00 PM
+                </li>
               </ul>
             </div>
 
             <div>
-              <h3 className="font-bold text-blue-800 mb-4">Connect With Us</h3>
+              <h3 className="font-bold text-white mb-4">Connect With Us</h3>
               <div className="flex space-x-4">
                 <a href="#" className="bg-blue-100 hover:bg-blue-200 text-blue-600 p-2 rounded-full transition duration-200">
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
@@ -641,7 +760,7 @@ function WelcomePage() {
             </div>
           </div>
 
-          <div className="text-center text-blue-500 text-sm pt-4 border-t border-blue-100">
+          <div className="text-center text-blue-100 text-sm pt-4 border-t border-blue-800 relative z-10">
             <p>&copy; {new Date().getFullYear()} UroHealth Central Ltd. All rights reserved.</p>
           </div>
         </div>

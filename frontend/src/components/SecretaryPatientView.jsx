@@ -172,13 +172,24 @@ function SecretaryPatientView({ patient, patients, appointments, onClose, onUpda
                     </select>
                   </div>
                   <div>
-                    <label className="text-xs block mb-1">Date of Birth</label>
+                    <label className="text-xs block mb-1">Year of Birth</label>
                     <input
-                      type="date"
+                      type="number"
                       name="dateOfBirth"
-                      value={editedPatient.dateOfBirth}
-                      onChange={handleInputChange}
+                      value={editedPatient.dateOfBirth ? new Date(editedPatient.dateOfBirth).getFullYear() : ''}
+                      onChange={(e) => {
+                        const year = e.target.value;
+                        // Create a date with just the year (Jan 1 of that year)
+                        const dateStr = `${year}-01-01`;
+                        setEditedPatient(prev => ({
+                          ...prev,
+                          dateOfBirth: dateStr
+                        }));
+                      }}
+                      min="1900"
+                      max={new Date().getFullYear()}
                       className="border border-blue-300 rounded px-2 py-1 w-full bg-blue-50"
+                      placeholder="Year"
                     />
                   </div>
                 </div>

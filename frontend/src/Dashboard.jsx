@@ -260,8 +260,12 @@ function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-gradient-to-r from-blue-700 to-blue-600 text-white shadow-md">
-        <div className="container mx-auto px-4 py-3">
+      <header className="bg-gradient-to-r from-blue-700 to-blue-600 text-white shadow-md relative">
+        <div className="absolute inset-0 opacity-40">
+          <div className="absolute top-0 left-0 w-full h-full" style={{backgroundImage: "url('data:image/svg+xml,%3Csvg width=\"20\" height=\"20\" viewBox=\"0 0 20 20\" xmlns=\"http://www.w3.org/2000/svg\",%3E%3Cg fill=\"none\" fill-rule=\"evenodd\",%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"0.6\",%3E%3Cpath d=\"M0 0h10v10H0V0zm10 10h10v10H10V10z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')", backgroundSize: "20px 20px"}}>
+          </div>
+        </div>
+        <div className="container mx-auto px-4 py-3 relative z-10">
           <div className="flex justify-between items-center">
             <div className="text-lg font-bold flex items-center">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
