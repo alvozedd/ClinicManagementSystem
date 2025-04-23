@@ -18,8 +18,17 @@ const app = express();
 
 // CORS configuration
 app.use((req, res, next) => {
-  // Set CORS headers directly
-  res.header('Access-Control-Allow-Origin', 'https://urohealtltd.netlify.app');
+  // Get the origin from the request
+  const origin = req.headers.origin;
+
+  // Allow the specific origin that sent the request
+  if (origin) {
+    res.header('Access-Control-Allow-Origin', origin);
+  } else {
+    // Fallback for requests without origin header
+    res.header('Access-Control-Allow-Origin', '*');
+  }
+
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
   res.header('Access-Control-Allow-Credentials', 'true');
