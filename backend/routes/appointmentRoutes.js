@@ -8,14 +8,24 @@ const {
   updateAppointment,
   deleteAppointment,
 } = require('../controllers/appointmentController');
-const { protect, secretary } = require('../middleware/authMiddleware');
+const { protect, secretary, doctor } = require('../middleware/authMiddleware');
 
-router.route('/').post(protect, secretary, createAppointment).get(protect, getAppointments);
+// Create a middleware that allows both doctors and secretaries
+const doctorOrSecretary = (req, res, next) => {
+  if (req.user && (req.user.role === 'doctor' || req.user.role === 'secretary' || req.user.role === 'admin')) {
+    next();
+  } else {
+    res.status(403);
+    throw new Error('Not authorized as a doctor or secretary');
+  }
+};
+
+router.route('/').post(protect, doctorOrSecretary, createAppointment).get(protect, getAppointments);
 router.route('/patient/:id').get(protect, getAppointmentsByPatientId);
 router
   .route('/:id')
   .get(protect, getAppointmentById)
-  .put(protect, secretary, updateAppointment)
-  .delete(protect, secretary, deleteAppointment);
+  .put(protect, doctorOrSecretary, updateAppointment)
+  .delete(protect, doctorOrSecretary, deleteAppointment);
 
 module.exports = router;
