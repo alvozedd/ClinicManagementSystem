@@ -3,6 +3,9 @@ import { FaUser } from 'react-icons/fa';
 import { getCreatorLabel } from '../utils/recordCreation';
 import AppointmentManagementModal from './AppointmentManagementModal';
 import SimplifiedDiagnosisModal from './SimplifiedDiagnosisModal';
+import MedicalHistoryManager from './MedicalHistoryManager';
+import AllergiesManager from './AllergiesManager';
+import MedicationsManager from './MedicationsManager';
 
 function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient, onDiagnoseAppointment, onDeletePatient }) {
   const [activeTab, setActiveTab] = useState('biodata');
@@ -11,6 +14,11 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
   const [managingAppointment, setManagingAppointment] = useState(null);
   const [isNewAppointment, setIsNewAppointment] = useState(false);
   const [diagnosingAppointment, setDiagnosingAppointment] = useState(null);
+
+  // State for medical history, allergies, and medications
+  const [editedMedicalHistory, setEditedMedicalHistory] = useState([...patient.medicalHistory || []]);
+  const [editedAllergies, setEditedAllergies] = useState([...patient.allergies || []]);
+  const [editedMedications, setEditedMedications] = useState([...patient.medications || []]);
 
   // Sort appointments by date (most recent first)
   const sortedAppointments = [...appointments].sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -44,13 +52,24 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
 
   // Handle saving patient changes
   const handleSaveChanges = () => {
-    onUpdatePatient(editedPatient);
+    // Combine all edited data
+    const updatedPatient = {
+      ...editedPatient,
+      medicalHistory: editedMedicalHistory,
+      allergies: editedAllergies,
+      medications: editedMedications
+    };
+
+    onUpdatePatient(updatedPatient);
     setEditMode(false);
   };
 
   // Handle canceling edits
   const handleCancelEdit = () => {
     setEditedPatient({...patient});
+    setEditedMedicalHistory([...patient.medicalHistory || []]);
+    setEditedAllergies([...patient.allergies || []]);
+    setEditedMedications([...patient.medications || []]);
     setEditMode(false);
   };
 
@@ -573,8 +592,21 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
         <div className="space-y-6">
           {/* Medical History */}
           <div className="border rounded-lg p-4">
-            <h3 className="font-semibold text-lg mb-2">Medical History</h3>
-            {patient.medicalHistory && patient.medicalHistory.length > 0 ? (
+            <div className="flex justify-between items-center mb-2">
+              <h3 className="font-semibold text-lg">Medical History</h3>
+              {editMode && (
+                <div className="text-sm text-blue-600">
+                  Add or remove medical conditions below
+                </div>
+              )}
+            </div>
+
+            {editMode ? (
+              <MedicalHistoryManager
+                medicalHistory={editedMedicalHistory}
+                onUpdate={setEditedMedicalHistory}
+              />
+            ) : patient.medicalHistory && patient.medicalHistory.length > 0 ? (
               <div className="space-y-2">
                 {patient.medicalHistory.map((condition, index) => (
                   <div key={index} className="p-2 bg-gray-50 rounded">
@@ -592,8 +624,21 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
 
           {/* Allergies */}
           <div className="border rounded-lg p-4">
-            <h3 className="font-semibold text-lg mb-2">Allergies</h3>
-            {patient.allergies && patient.allergies.length > 0 ? (
+            <div className="flex justify-between items-center mb-2">
+              <h3 className="font-semibold text-lg">Allergies</h3>
+              {editMode && (
+                <div className="text-sm text-blue-600">
+                  Add or remove allergies below
+                </div>
+              )}
+            </div>
+
+            {editMode ? (
+              <AllergiesManager
+                allergies={editedAllergies}
+                onUpdate={setEditedAllergies}
+              />
+            ) : patient.allergies && patient.allergies.length > 0 ? (
               <div className="flex flex-wrap gap-2">
                 {patient.allergies.map((allergy, index) => (
                   <span key={index} className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm">
@@ -608,8 +653,21 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
 
           {/* Medications */}
           <div className="border rounded-lg p-4">
-            <h3 className="font-semibold text-lg mb-2">Current Medications</h3>
-            {patient.medications && patient.medications.length > 0 ? (
+            <div className="flex justify-between items-center mb-2">
+              <h3 className="font-semibold text-lg">Current Medications</h3>
+              {editMode && (
+                <div className="text-sm text-blue-600">
+                  Add or remove medications below
+                </div>
+              )}
+            </div>
+
+            {editMode ? (
+              <MedicationsManager
+                medications={editedMedications}
+                onUpdate={setEditedMedications}
+              />
+            ) : patient.medications && patient.medications.length > 0 ? (
               <div className="space-y-2">
                 {patient.medications.map((medication, index) => (
                   <div key={index} className="p-2 bg-gray-50 rounded">

@@ -12,6 +12,9 @@ const createPatient = asyncHandler(async (req, res) => {
     next_of_kin_name,
     next_of_kin_relationship,
     next_of_kin_phone,
+    medicalHistory,
+    allergies,
+    medications,
   } = req.body;
 
   const patient = await Patient.create({
@@ -21,6 +24,9 @@ const createPatient = asyncHandler(async (req, res) => {
     next_of_kin_name,
     next_of_kin_relationship,
     next_of_kin_phone,
+    medicalHistory: medicalHistory || [],
+    allergies: allergies || [],
+    medications: medications || [],
     created_by_user_id: req.user._id,
   });
 
@@ -61,12 +67,28 @@ const updatePatient = asyncHandler(async (req, res) => {
   const patient = await Patient.findById(req.params.id);
 
   if (patient) {
+    // Update basic patient information
     patient.name = req.body.name || patient.name;
     patient.gender = req.body.gender || patient.gender;
     patient.phone = req.body.phone || patient.phone;
     patient.next_of_kin_name = req.body.next_of_kin_name || patient.next_of_kin_name;
     patient.next_of_kin_relationship = req.body.next_of_kin_relationship || patient.next_of_kin_relationship;
     patient.next_of_kin_phone = req.body.next_of_kin_phone || patient.next_of_kin_phone;
+
+    // Update medical history if provided
+    if (req.body.medicalHistory) {
+      patient.medicalHistory = req.body.medicalHistory;
+    }
+
+    // Update allergies if provided
+    if (req.body.allergies) {
+      patient.allergies = req.body.allergies;
+    }
+
+    // Update medications if provided
+    if (req.body.medications) {
+      patient.medications = req.body.medications;
+    }
 
     const updatedPatient = await patient.save();
     res.json(updatedPatient);

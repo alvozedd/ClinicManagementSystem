@@ -29,9 +29,10 @@ export const transformPatientFromBackend = (backendPatient) => {
     updatedAt: backendPatient.updatedAt || new Date().toISOString(),
     // Additional frontend-only fields
     lastVisit: backendPatient.updatedAt ? new Date(backendPatient.updatedAt).toISOString().split('T')[0] : '',
-    medicalHistory: [],
-    medications: [],
-    allergies: []
+    // Include medical history, medications, and allergies from backend
+    medicalHistory: backendPatient.medicalHistory || [],
+    medications: backendPatient.medications || [],
+    allergies: backendPatient.allergies || []
   };
 };
 
@@ -57,7 +58,11 @@ export const transformPatientToBackend = (frontendPatient) => {
     phone: frontendPatient.phone || '',
     next_of_kin_name: frontendPatient.nextOfKinName || 'Not Provided',
     next_of_kin_relationship: frontendPatient.nextOfKinRelationship || 'Not Provided',
-    next_of_kin_phone: frontendPatient.nextOfKinPhone || '0000000000'
+    next_of_kin_phone: frontendPatient.nextOfKinPhone || '0000000000',
+    // Include medical history, medications, and allergies
+    medicalHistory: frontendPatient.medicalHistory || [],
+    allergies: frontendPatient.allergies || [],
+    medications: frontendPatient.medications || []
   };
 };
 
