@@ -9,8 +9,7 @@ function EditPatientModal({ patient, onClose, onSave }) {
     phone: '',
     email: '',
     address: '',
-    insuranceProvider: '',
-    insuranceNumber: '',
+
     allergies: '',
     nextOfKinName: '',
     nextOfKinRelationship: '',
@@ -27,8 +26,7 @@ function EditPatientModal({ patient, onClose, onSave }) {
         phone: patient.phone || '',
         email: patient.email || '',
         address: patient.address || '',
-        insuranceProvider: patient.insuranceProvider || '',
-        insuranceNumber: patient.insuranceNumber || '',
+
         allergies: patient.allergies ? patient.allergies.join(', ') : '',
         nextOfKinName: patient.nextOfKinName || '',
         nextOfKinRelationship: patient.nextOfKinRelationship || '',
@@ -106,15 +104,23 @@ function EditPatientModal({ patient, onClose, onSave }) {
               <input
                 type="number"
                 name="dateOfBirth"
-                value={formData.dateOfBirth ? new Date(formData.dateOfBirth).getFullYear() : ''}
+                value={formData.dateOfBirth && !isNaN(new Date(formData.dateOfBirth).getFullYear()) ? new Date(formData.dateOfBirth).getFullYear() : ''}
                 onChange={(e) => {
                   const year = e.target.value;
-                  // Create a date with just the year (Jan 1 of that year)
-                  const dateStr = `${year}-01-01`;
-                  setFormData(prev => ({
-                    ...prev,
-                    dateOfBirth: dateStr
-                  }));
+                  if (year && !isNaN(year)) {
+                    // Create a date with just the year (Jan 1 of that year)
+                    const dateStr = `${year}-01-01`;
+                    setFormData(prev => ({
+                      ...prev,
+                      dateOfBirth: dateStr
+                    }));
+                  } else {
+                    // If input is empty or invalid, clear the date
+                    setFormData(prev => ({
+                      ...prev,
+                      dateOfBirth: ''
+                    }));
+                  }
                 }}
                 min="1900"
                 max={new Date().getFullYear()}
@@ -177,29 +183,7 @@ function EditPatientModal({ patient, onClose, onSave }) {
               />
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Insurance Provider</label>
-              <input
-                type="text"
-                name="insuranceProvider"
-                value={formData.insuranceProvider}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                required
-              />
-            </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Insurance Number</label>
-              <input
-                type="text"
-                name="insuranceNumber"
-                value={formData.insuranceNumber}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                required
-              />
-            </div>
 
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-1">Allergies (comma separated)</label>

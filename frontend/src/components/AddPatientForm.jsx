@@ -102,13 +102,22 @@ function AddPatientForm({ onSave, onCancel, createdBy = 'secretary' }) {
               value={formData.yearOfBirth || ''}
               onChange={(e) => {
                 const year = e.target.value;
-                // Create a date string with just the year (Jan 1 of that year)
-                const dateOfBirth = year ? `${year}-01-01` : '';
-                setFormData(prev => ({
-                  ...prev,
-                  yearOfBirth: year,
-                  dateOfBirth: dateOfBirth
-                }));
+                if (year && !isNaN(year)) {
+                  // Create a date string with just the year (Jan 1 of that year)
+                  const dateOfBirth = `${year}-01-01`;
+                  setFormData(prev => ({
+                    ...prev,
+                    yearOfBirth: year,
+                    dateOfBirth: dateOfBirth
+                  }));
+                } else {
+                  // If input is empty or invalid, clear the date
+                  setFormData(prev => ({
+                    ...prev,
+                    yearOfBirth: '',
+                    dateOfBirth: ''
+                  }));
+                }
               }}
               min="1900"
               max={new Date().getFullYear()}

@@ -155,15 +155,23 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
                     <input
                       type="number"
                       name="dateOfBirth"
-                      value={editedPatient.dateOfBirth ? new Date(editedPatient.dateOfBirth).getFullYear() : ''}
+                      value={editedPatient.dateOfBirth && !isNaN(new Date(editedPatient.dateOfBirth).getFullYear()) ? new Date(editedPatient.dateOfBirth).getFullYear() : ''}
                       onChange={(e) => {
                         const year = e.target.value;
-                        // Create a date with just the year (Jan 1 of that year)
-                        const dateStr = `${year}-01-01`;
-                        setEditedPatient(prev => ({
-                          ...prev,
-                          dateOfBirth: dateStr
-                        }));
+                        if (year && !isNaN(year)) {
+                          // Create a date with just the year (Jan 1 of that year)
+                          const dateStr = `${year}-01-01`;
+                          setEditedPatient(prev => ({
+                            ...prev,
+                            dateOfBirth: dateStr
+                          }));
+                        } else {
+                          // If input is empty or invalid, clear the date
+                          setEditedPatient(prev => ({
+                            ...prev,
+                            dateOfBirth: ''
+                          }));
+                        }
                       }}
                       min="1900"
                       max={new Date().getFullYear()}
@@ -330,15 +338,23 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
                     <input
                       type="number"
                       name="dateOfBirth"
-                      value={editedPatient.dateOfBirth ? new Date(editedPatient.dateOfBirth).getFullYear() : ''}
+                      value={editedPatient.dateOfBirth && !isNaN(new Date(editedPatient.dateOfBirth).getFullYear()) ? new Date(editedPatient.dateOfBirth).getFullYear() : ''}
                       onChange={(e) => {
                         const year = e.target.value;
-                        // Create a date with just the year (Jan 1 of that year)
-                        const dateStr = `${year}-01-01`;
-                        setEditedPatient(prev => ({
-                          ...prev,
-                          dateOfBirth: dateStr
-                        }));
+                        if (year && !isNaN(year)) {
+                          // Create a date with just the year (Jan 1 of that year)
+                          const dateStr = `${year}-01-01`;
+                          setEditedPatient(prev => ({
+                            ...prev,
+                            dateOfBirth: dateStr
+                          }));
+                        } else {
+                          // If input is empty or invalid, clear the date
+                          setEditedPatient(prev => ({
+                            ...prev,
+                            dateOfBirth: ''
+                          }));
+                        }
                       }}
                       min="1900"
                       max={new Date().getFullYear()}
@@ -434,30 +450,7 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
                   />
                 </div>
 
-                <h4 className="font-medium text-gray-700 border-b pb-1 mt-6 mb-3">Insurance Information</h4>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Insurance Provider (Optional)</label>
-                    <input
-                      type="text"
-                      name="insuranceProvider"
-                      value={editedPatient.insuranceProvider || ''}
-                      onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Insurance Number (Optional)</label>
-                    <input
-                      type="text"
-                      name="insuranceNumber"
-                      value={editedPatient.insuranceNumber || ''}
-                      onChange={handleInputChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                    />
-                  </div>
-                </div>
 
                 <div className="flex justify-end space-x-2 mt-4">
                   <button
