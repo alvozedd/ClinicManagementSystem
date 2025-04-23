@@ -16,13 +16,23 @@ connectDB();
 
 const app = express();
 
-// Middleware
-app.use(cors({
-  origin: ['https://golden-dodol-d33740.netlify.app', 'http://localhost:5173', 'https://urohealth-central.netlify.app', 'https://urohealth.netlify.app', 'https://urohealtltd.netlify.app', 'https://urohealth-ltd.netlify.app', '*'],
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+// CORS configuration
+app.use((req, res, next) => {
+  // Set CORS headers directly
+  res.header('Access-Control-Allow-Origin', 'https://urohealtltd.netlify.app');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.header('Access-Control-Allow-Credentials', 'true');
+
+  // Handle OPTIONS method
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
+  next();
+});
+
+// Parse JSON bodies
 app.use(express.json());
 
 // Routes
