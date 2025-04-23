@@ -1,7 +1,6 @@
 import { useContext, useState, useEffect } from 'react'
 import AuthContext from './context/AuthContext'
-import { savePatients, saveAppointments, saveReports } from './data/mockData'
-import { STORAGE_KEYS, loadFromLocalStorage } from './utils/localStorage'
+import apiService from './utils/apiService'
 import SimplifiedDoctorDashboard from './components/SimplifiedDoctorDashboard'
 import SimplifiedSecretaryDashboard from './components/SimplifiedSecretaryDashboard'
 import AdminDashboard from './components/AdminDashboard'
@@ -14,199 +13,245 @@ function Dashboard() {
   const [appointmentsData, setAppointmentsData] = useState([])
   const [reportsData, setReportsData] = useState([])
   const [refreshTrigger, setRefreshTrigger] = useState(0) // Used to trigger data refresh
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState(null)
 
-  // Load data from localStorage when component mounts or refresh is triggered
+  // Load data from API when component mounts or refresh is triggered
   useEffect(() => {
-    const loadedPatients = loadFromLocalStorage(STORAGE_KEYS.PATIENTS, []);
-    const loadedAppointments = loadFromLocalStorage(STORAGE_KEYS.APPOINTMENTS, []);
-    const loadedReports = loadFromLocalStorage(STORAGE_KEYS.REPORTS, []);
+    const fetchData = async () => {
+      try {
+        // Show loading state
+        setIsLoading(true);
 
-    console.log('Dashboard - Loading data from localStorage:');
-    console.log('Patients:', loadedPatients);
-    console.log('Appointments:', loadedAppointments);
-    console.log('STORAGE KEYS USED:', STORAGE_KEYS);
-    console.log('Raw localStorage content for patients:', localStorage.getItem(STORAGE_KEYS.PATIENTS));
-    console.log('Raw localStorage content for appointments:', localStorage.getItem(STORAGE_KEYS.APPOINTMENTS));
+        // Fetch patients from API
+        const patientsResponse = await apiService.getPatients();
+        console.log('Patients from API:', patientsResponse);
+        setPatientsData(patientsResponse);
 
-    // Check for visitor-created records
-    const visitorPatients = loadedPatients.filter(p => p.createdBy === 'visitor');
-    const visitorAppointments = loadedAppointments.filter(a => a.createdBy === 'visitor');
-    console.log('Visitor-created patients:', visitorPatients);
-    console.log('Visitor-created appointments:', visitorAppointments);
+        // Fetch appointments from API
+        const appointmentsResponse = await apiService.getAppointments();
+        console.log('Appointments from API:', appointmentsResponse);
+        setAppointmentsData(appointmentsResponse);
 
-    setPatientsData(loadedPatients);
-    setAppointmentsData(loadedAppointments);
-    setReportsData(loadedReports);
-  }, [refreshTrigger]) // Re-run when refreshTrigger changes
+        // Fetch diagnoses from API
+        const diagnosesResponse = await apiService.getDiagnoses();
+        console.log('Diagnoses from API:', diagnosesResponse);
+        setReportsData(diagnosesResponse);
+      } catch (error) {
+        console.error('Error fetching data from API:', error);
+        setError('Failed to load data. Please try again later.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  // Save data to localStorage whenever it changes
-  useEffect(() => {
-    savePatients(patientsData);
-  }, [patientsData]);
-
-  useEffect(() => {
-    saveAppointments(appointmentsData);
-  }, [appointmentsData]);
-
-  useEffect(() => {
-    saveReports(reportsData);
-  }, [reportsData]);
+    fetchData();
+  }, [refreshTrigger]); // Re-run when refreshTrigger changes
 
   // Handler for updating patient information
-  const handleUpdatePatient = (updatedPatient) => {
-    // Check if the patient exists in the current patients array
-    const patientExists = patientsData.some(p => p.id === updatedPatient.id);
+  const handleUpdatePatient = async (updatedPatient) => {
+    try {
+      // Check if the patient exists in the current patients array
+      const patientExists = patientsData.some(p => p._id === updatedPatient._id);
 
-    // Handle appointments separately if they exist in the update
-    if (updatedPatient.appointments) {
-      // Process the appointments
-      handleAppointmentUpdates(updatedPatient.appointments, updatedPatient.id);
+      // Handle appointments separately if they exist in the update
+      if (updatedPatient.appointments) {
+        // Process the appointments
+        await handleAppointmentUpdates(updatedPatient.appointments, updatedPatient._id);
 
-      // Remove appointments from the patient object to avoid duplication
-      const { appointments, ...patientWithoutAppointments } = updatedPatient;
-      updatedPatient = patientWithoutAppointments;
+        // Remove appointments from the patient object to avoid duplication
+        const { appointments, ...patientWithoutAppointments } = updatedPatient;
+        updatedPatient = patientWithoutAppointments;
+      }
+
+      let response;
+      // Update or add the patient via API
+      if (patientExists) {
+        // Update existing patient
+        response = await apiService.updatePatient(updatedPatient._id, {
+          name: `${updatedPatient.firstName} ${updatedPatient.lastName}`,
+          gender: updatedPatient.gender,
+          phone: updatedPatient.phone,
+          next_of_kin_name: updatedPatient.nextOfKinName || '',
+          next_of_kin_relationship: updatedPatient.nextOfKinRelationship || '',
+          next_of_kin_phone: updatedPatient.nextOfKinPhone || ''
+        });
+
+        // Update local state
+        const updatedPatients = patientsData.map(p =>
+          p._id === updatedPatient._id ? { ...p, ...response } : p
+        );
+        setPatientsData(updatedPatients);
+      } else {
+        // Add new patient
+        response = await apiService.createPatient({
+          name: `${updatedPatient.firstName} ${updatedPatient.lastName}`,
+          gender: updatedPatient.gender,
+          phone: updatedPatient.phone,
+          next_of_kin_name: updatedPatient.nextOfKinName || '',
+          next_of_kin_relationship: updatedPatient.nextOfKinRelationship || '',
+          next_of_kin_phone: updatedPatient.nextOfKinPhone || ''
+        });
+
+        // Add to local state
+        setPatientsData([...patientsData, response]);
+      }
+
+      console.log('Patient saved to database:', response);
+      return response;
+    } catch (error) {
+      console.error('Error saving patient:', error);
+      setError('Failed to save patient. Please try again.');
+      throw error;
     }
-
-    // Update or add the patient
-    if (patientExists) {
-      // Update existing patient
-      const updatedPatients = patientsData.map(p =>
-        p.id === updatedPatient.id ? { ...p, ...updatedPatient } : p
-      );
-      setPatientsData(updatedPatients);
-    } else {
-      // Add new patient
-      setPatientsData([...patientsData, updatedPatient]);
-    }
-
-    // Immediately save to localStorage
-    savePatients(patientExists ?
-      patientsData.map(p => p.id === updatedPatient.id ? { ...p, ...updatedPatient } : p) :
-      [...patientsData, updatedPatient]);
   };
 
   // Handler for deleting a patient
-  const handleDeletePatient = (patientId) => {
+  const handleDeletePatient = async (patientId) => {
     // Confirm deletion with the user
     if (!window.confirm('Are you sure you want to delete this patient? This action cannot be undone.')) {
       return; // User cancelled the deletion
     }
 
-    // Remove the patient from the patients array
-    const updatedPatients = patientsData.filter(p => p.id !== patientId);
-    setPatientsData(updatedPatients);
+    try {
+      // Delete patient via API
+      await apiService.deletePatient(patientId);
 
-    // Also remove all appointments associated with this patient
-    const updatedAppointments = appointmentsData.filter(a => a.patientId !== patientId);
-    setAppointmentsData(updatedAppointments);
+      // Remove the patient from the local state
+      const updatedPatients = patientsData.filter(p => p._id !== patientId);
+      setPatientsData(updatedPatients);
 
-    // Save changes to localStorage
-    savePatients(updatedPatients);
-    saveAppointments(updatedAppointments);
+      // Also remove all appointments associated with this patient from local state
+      const updatedAppointments = appointmentsData.filter(a => a.patient_id !== patientId);
+      setAppointmentsData(updatedAppointments);
 
-    // Show success message
-    alert('Patient deleted successfully');
+      // Show success message
+      alert('Patient deleted successfully');
+    } catch (error) {
+      console.error('Error deleting patient:', error);
+      setError('Failed to delete patient. Please try again.');
+      alert('Failed to delete patient. Please try again.');
+    }
   };
 
   // Helper function to handle appointment updates
-  const handleAppointmentUpdates = (appointments, patientId) => {
+  const handleAppointmentUpdates = async (appointments, patientId) => {
     if (!appointments || !appointments.length) return;
 
-    // Process each appointment
-    let updatedAppointmentsData = [...appointmentsData];
-    let hasChanges = false;
+    try {
+      // Process each appointment
+      for (const appointment of appointments) {
+        // Check if this is a new appointment or an update
+        const isNewAppointment = !appointment._id || appointment.id?.toString().startsWith('new-');
 
-    appointments.forEach(appointment => {
-      // Check if this is a new appointment or an update
-      const existingAppointmentIndex = updatedAppointmentsData.findIndex(a => a.id === appointment.id);
+        if (!isNewAppointment) {
+          // Update existing appointment via API
+          const response = await apiService.updateAppointment(appointment._id, {
+            patient_id: patientId,
+            appointment_date: new Date(appointment.date),
+            optional_time: appointment.time || '',
+            notes: appointment.notes || ''
+          });
 
-      if (existingAppointmentIndex >= 0) {
-        // Update existing appointment
-        updatedAppointmentsData[existingAppointmentIndex] = {
-          ...updatedAppointmentsData[existingAppointmentIndex],
-          ...appointment,
-          updatedAt: new Date().toISOString()
-        };
-        hasChanges = true;
-      } else {
-        // Add new appointment
-        updatedAppointmentsData.push({
-          ...appointment,
-          patientId: patientId,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        });
-        hasChanges = true;
+          console.log('Updated appointment in database:', response);
+
+          // Update in local state
+          setAppointmentsData(prev =>
+            prev.map(a => a._id === appointment._id ? response : a)
+          );
+        } else {
+          // Add new appointment via API
+          const response = await apiService.createAppointment({
+            patient_id: patientId,
+            appointment_date: new Date(appointment.date),
+            optional_time: appointment.time || '',
+            notes: appointment.notes || ''
+          });
+
+          console.log('Added new appointment to database:', response);
+
+          // Add to local state
+          setAppointmentsData(prev => [...prev, response]);
+        }
       }
-    });
-
-    if (hasChanges) {
-      setAppointmentsData(updatedAppointmentsData);
-      // Immediately save to localStorage
-      saveAppointments(updatedAppointmentsData);
+    } catch (error) {
+      console.error('Error updating appointments:', error);
+      setError('Failed to update appointments. Please try again.');
     }
   };
 
   // Handler for saving diagnosis or updating appointments
-  const handleSaveDiagnosis = (updatedAppointment) => {
-    console.log('Dashboard - Handling appointment update:', updatedAppointment);
+  const handleSaveDiagnosis = async (updatedAppointment) => {
+    try {
+      console.log('Dashboard - Handling appointment update:', updatedAppointment);
 
-    // Check if this is a new appointment (ID starts with 'new-')
-    const isNewAppointment = updatedAppointment.id.toString().startsWith('new-');
+      // Check if this is a new appointment (ID starts with 'new-')
+      const isNewAppointment = !updatedAppointment._id || updatedAppointment.id?.toString().startsWith('new-');
 
-    // For diagnosis, ensure the appointment status is set to Completed
-    let appointmentToSave = updatedAppointment;
-    if (updatedAppointment.diagnosis && !isNewAppointment) {
-      appointmentToSave = {
-        ...updatedAppointment,
-        status: 'Completed',
-        updatedAt: new Date().toISOString()
-      };
-    }
+      // For diagnosis, ensure the appointment status is set to Completed
+      let appointmentToSave = updatedAppointment;
+      if (updatedAppointment.diagnosis && !isNewAppointment) {
+        appointmentToSave = {
+          ...updatedAppointment,
+          status: 'Completed'
+        };
+      }
 
-    // Check for duplicate appointments with the same patient and date
-    // This prevents creating multiple appointments when just changing status
-    const hasDuplicate = !isNewAppointment && appointmentsData.some(a =>
-      a.id !== appointmentToSave.id &&
-      a.patientId === appointmentToSave.patientId &&
-      a.date === appointmentToSave.date &&
-      a.time === appointmentToSave.time
-    );
+      // Handle the appointment update/creation
+      let appointmentResponse;
+      if (isNewAppointment) {
+        // Create a new appointment via API
+        appointmentResponse = await apiService.createAppointment({
+          patient_id: appointmentToSave.patientId || appointmentToSave.patient_id,
+          appointment_date: new Date(appointmentToSave.date),
+          optional_time: appointmentToSave.time || '',
+          notes: appointmentToSave.notes || ''
+        });
 
-    if (hasDuplicate) {
-      console.warn('Detected potential duplicate appointment. Ensuring update only.');
-    }
+        console.log('Created new appointment in database:', appointmentResponse);
 
-    // Update the appointments array
-    let updatedAppointments;
-    if (isNewAppointment) {
-      // Generate a proper ID for new appointments
-      const newId = `appointment-${Date.now()}`;
-      appointmentToSave = {
-        ...appointmentToSave,
-        id: newId
-      };
+        // Add to local state
+        setAppointmentsData(prev => [...prev, appointmentResponse]);
+      } else {
+        // Update existing appointment via API
+        appointmentResponse = await apiService.updateAppointment(appointmentToSave._id, {
+          patient_id: appointmentToSave.patientId || appointmentToSave.patient_id,
+          appointment_date: new Date(appointmentToSave.date),
+          optional_time: appointmentToSave.time || '',
+          notes: appointmentToSave.notes || ''
+        });
 
-      // For new appointments, add to the array
-      updatedAppointments = [...appointmentsData, appointmentToSave];
-      console.log('Added new appointment:', appointmentToSave);
-    } else {
-      // For existing appointments, update in the array
-      updatedAppointments = appointmentsData.map(a =>
-        a.id === appointmentToSave.id ? appointmentToSave : a
-      );
-      console.log('Updated existing appointment:', appointmentToSave);
-    }
+        console.log('Updated appointment in database:', appointmentResponse);
 
-    // Update state and save to localStorage
-    setAppointmentsData(updatedAppointments);
-    saveAppointments(updatedAppointments);
+        // Update in local state
+        setAppointmentsData(prev =>
+          prev.map(a => a._id === appointmentToSave._id ? appointmentResponse : a)
+        );
+      }
 
-    // Show success message
-    if (updatedAppointment.diagnosis) {
-      alert('Consultation information saved successfully!');
-    } else {
-      alert('Appointment saved successfully!');
+      // If there's a diagnosis, save it
+      if (appointmentToSave.diagnosis) {
+        const diagnosisResponse = await apiService.createDiagnosis({
+          appointment_id: appointmentResponse._id,
+          diagnosis_text: appointmentToSave.diagnosis
+        });
+
+        console.log('Saved diagnosis to database:', diagnosisResponse);
+
+        // Add to reports data
+        setReportsData(prev => [...prev, diagnosisResponse]);
+      }
+
+      // Show success message
+      if (updatedAppointment.diagnosis) {
+        alert('Consultation information saved successfully!');
+      } else {
+        alert('Appointment saved successfully!');
+      }
+    } catch (error) {
+      console.error('Error saving diagnosis/appointment:', error);
+      setError('Failed to save. Please try again.');
+      alert('Failed to save. Please try again.');
     }
   }
 
@@ -279,12 +324,12 @@ function Dashboard() {
               </span>
               <button
                 onClick={() => {
-                  console.log('Refreshing data from localStorage...');
+                  console.log('Refreshing data from API...');
                   setRefreshTrigger(prev => prev + 1);
-                  alert('Data refreshed from localStorage');
+                  alert('Data refreshed from database');
                 }}
                 className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm mr-2"
-                title="Refresh data from localStorage"
+                title="Refresh data from database"
               >
                 Refresh Data
               </button>
