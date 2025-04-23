@@ -60,3 +60,97 @@ export const transformPatientToBackend = (frontendPatient) => {
     next_of_kin_phone: frontendPatient.nextOfKinPhone || '0000000000'
   };
 };
+
+/**
+ * Transform an appointment from the backend format to the frontend format
+ * @param {Object} backendAppointment - Appointment object from the backend API
+ * @returns {Object} - Appointment object in the frontend format
+ */
+export const transformAppointmentFromBackend = (backendAppointment) => {
+  if (!backendAppointment) return null;
+
+  // Extract date and time from appointment_date
+  const appointmentDate = new Date(backendAppointment.appointment_date);
+  const date = appointmentDate.toISOString().split('T')[0];
+
+  // Use optional_time if available, otherwise format from the date
+  const time = backendAppointment.optional_time ||
+               `${appointmentDate.getHours().toString().padStart(2, '0')}:${appointmentDate.getMinutes().toString().padStart(2, '0')}`;
+
+  // Parse notes to extract status and type
+  let status = 'Scheduled';
+  let type = 'Consultation';
+  let reason = '';
+
+  if (backendAppointment.notes) {
+    const notesLines = backendAppointment.notes.split('\n');
+
+    // Try to extract type and reason from notes
+    for (const line of notesLines) {
+      if (line.startsWith('Type:')) {
+        type = line.replace('Type:', '').trim();
+      } else if (line.startsWith('Reason:')) {
+        reason = line.replace('Reason:', '').trim();
+      } else if (line.startsWith('Status:')) {
+        status = line.replace('Status:', '').trim();
+      }
+    }
+  }
+
+  // Get patient name from populated patient_id field
+  let patientName = 'Unknown';
+  let patientId = null;
+
+  if (backendAppointment.patient_id) {
+    if (typeof backendAppointment.patient_id === 'object') {
+      patientName = backendAppointment.patient_id.name || 'Unknown';
+      patientId = backendAppointment.patient_id._id;
+    } else {
+      patientId = backendAppointment.patient_id;
+    }
+  }
+
+  return {
+    _id: backendAppointment._id, // Keep the MongoDB ID
+    id: backendAppointment._id, // Also set as id for compatibility
+    patientId: patientId,
+    patientName: patientName,
+    date: date,
+    time: time,
+    type: type,
+    reason: reason || 'General consultation',
+    status: status,
+    notes: backendAppointment.notes || '',
+    createdBy: backendAppointment.created_by_user_id ? 'staff' : 'visitor',
+    createdAt: backendAppointment.createdAt || new Date().toISOString(),
+    updatedAt: backendAppointment.updatedAt || new Date().toISOString(),
+    patient_id: patientId // Keep the original field for compatibility
+  };
+};
+
+/**
+ * Transform an array of appointments from backend to frontend format
+ * @param {Array} backendAppointments - Array of appointment objects from the backend
+ * @returns {Array} - Array of appointment objects in frontend format
+ */
+export const transformAppointmentsFromBackend = (backendAppointments) => {
+  if (!backendAppointments || !Array.isArray(backendAppointments)) return [];
+  return backendAppointments.map(appointment => transformAppointmentFromBackend(appointment));
+};
+
+/**
+ * Transform an appointment from frontend format to backend format for creating/updating
+ * @param {Object} frontendAppointment - Appointment object in frontend format
+ * @returns {Object} - Appointment object in backend format
+ */
+export const transformAppointmentToBackend = (frontendAppointment) => {
+  // Construct notes with type, reason, and status
+  const notes = `Type: ${frontendAppointment.type || 'Consultation'}\nReason: ${frontendAppointment.reason || 'Not specified'}\nStatus: ${frontendAppointment.status || 'Scheduled'}`;
+
+  return {
+    patient_id: frontendAppointment.patientId || frontendAppointment.patient_id,
+    appointment_date: new Date(frontendAppointment.date),
+    optional_time: frontendAppointment.time || '',
+    notes: frontendAppointment.notes || notes
+  };
+};

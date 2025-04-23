@@ -1,5 +1,6 @@
 // Data service for the UroHealth Central application
 import apiService from '../utils/apiService';
+import { transformAppointmentsFromBackend } from '../utils/dataTransformers';
 
 // Get current date for created/updated timestamps
 const now = new Date().toISOString();
@@ -41,14 +42,13 @@ export const getTodaysAppointments = async () => {
 
     // Filter appointments for today
     const todaysAppointments = currentAppointments.filter(appointment => {
-      // Extract date part from appointment_date (which is in ISO format from the API)
-      const appointmentDate = new Date(appointment.appointment_date).toISOString().split('T')[0];
-      console.log(`Comparing appointment date: ${appointmentDate} with today: ${formattedDate}`);
-      return appointmentDate === formattedDate;
+      // Use the date field which is already in YYYY-MM-DD format in our transformed data
+      console.log(`Comparing appointment date: ${appointment.date} with today: ${formattedDate}`);
+      return appointment.date === formattedDate;
     }).sort((a, b) => {
-      // Sort by optional_time if available
-      if (a.optional_time && b.optional_time) {
-        return a.optional_time.localeCompare(b.optional_time);
+      // Sort by time
+      if (a.time && b.time) {
+        return a.time.localeCompare(b.time);
       }
       return 0;
     });
@@ -135,7 +135,10 @@ export const getAppointments = async () => {
     }
 
     // Fetch from API
-    const appointments = await apiService.getAppointments();
+    const appointmentsResponse = await apiService.getAppointments();
+
+    // Transform appointments to frontend format
+    const appointments = transformAppointmentsFromBackend(appointmentsResponse);
 
     // Update cache
     appointmentsCache = appointments;

@@ -4,7 +4,12 @@ import apiService from './utils/apiService'
 import SimplifiedDoctorDashboard from './components/SimplifiedDoctorDashboard'
 import SimplifiedSecretaryDashboard from './components/SimplifiedSecretaryDashboard'
 import AdminDashboard from './components/AdminDashboard'
-import { transformPatientsFromBackend, transformPatientToBackend } from './utils/dataTransformers'
+import {
+  transformPatientsFromBackend,
+  transformPatientToBackend,
+  transformAppointmentsFromBackend,
+  transformAppointmentToBackend
+} from './utils/dataTransformers'
 
 function Dashboard() {
   const { userInfo, logout } = useContext(AuthContext)
@@ -44,8 +49,12 @@ function Dashboard() {
 
         // Fetch appointments from API
         const appointmentsResponse = await apiService.getAppointments();
-        console.log('Appointments from API:', appointmentsResponse);
-        setAppointmentsData(appointmentsResponse);
+        console.log('Appointments from API (raw):', appointmentsResponse);
+
+        // Transform appointments to frontend format
+        const transformedAppointments = transformAppointmentsFromBackend(appointmentsResponse);
+        console.log('Transformed appointments:', transformedAppointments);
+        setAppointmentsData(transformedAppointments);
 
         // Fetch diagnoses from API
         const diagnosesResponse = await apiService.getDiagnoses();
@@ -203,12 +212,16 @@ function Dashboard() {
           );
         } else {
           // Add new appointment via API
-          const response = await apiService.createAppointment({
-            patient_id: patientId,
-            appointment_date: new Date(appointment.date),
-            optional_time: appointment.time || '',
-            notes: appointment.notes || ''
+          const appointmentData = transformAppointmentToBackend({
+            patientId: patientId,
+            date: appointment.date,
+            time: appointment.time || '',
+            notes: appointment.notes || '',
+            type: appointment.type || 'Consultation',
+            reason: appointment.reason || '',
+            status: appointment.status || 'Scheduled'
           });
+          const response = await apiService.createAppointment(appointmentData);
 
           console.log('Added new appointment to database:', response);
 
@@ -247,12 +260,8 @@ function Dashboard() {
       let appointmentResponse;
       if (isNewAppointment) {
         // Create a new appointment via API
-        appointmentResponse = await apiService.createAppointment({
-          patient_id: appointmentToSave.patientId || appointmentToSave.patient_id,
-          appointment_date: new Date(appointmentToSave.date),
-          optional_time: appointmentToSave.time || '',
-          notes: appointmentToSave.notes || ''
-        });
+        const appointmentData = transformAppointmentToBackend(appointmentToSave);
+        appointmentResponse = await apiService.createAppointment(appointmentData);
 
         console.log('Created new appointment in database:', appointmentResponse);
 
@@ -260,12 +269,8 @@ function Dashboard() {
         setAppointmentsData(prev => [...prev, appointmentResponse]);
       } else {
         // Update existing appointment via API
-        appointmentResponse = await apiService.updateAppointment(appointmentToSave._id, {
-          patient_id: appointmentToSave.patientId || appointmentToSave.patient_id,
-          appointment_date: new Date(appointmentToSave.date),
-          optional_time: appointmentToSave.time || '',
-          notes: appointmentToSave.notes || ''
-        });
+        const appointmentData = transformAppointmentToBackend(appointmentToSave);
+        appointmentResponse = await apiService.updateAppointment(appointmentToSave._id, appointmentData);
 
         console.log('Updated appointment in database:', appointmentResponse);
 
