@@ -34,6 +34,7 @@ function LoginForm() {
       console.log('API URL:', import.meta.env.VITE_API_URL || 'http://localhost:5000/api');
 
       // Call the login API
+      // The backend expects 'username' in the email field
       const data = await apiService.login(username, password);
       console.log('Login response:', data);
 
