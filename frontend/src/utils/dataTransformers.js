@@ -13,6 +13,12 @@ export const transformPatientFromBackend = (backendPatient) => {
   const firstName = nameParts[0] || '';
   const lastName = nameParts.slice(1).join(' ') || '';
 
+  // Create a date of birth string from year_of_birth if available
+  let dateOfBirth = '';
+  if (backendPatient.year_of_birth) {
+    dateOfBirth = `${backendPatient.year_of_birth}-01-01`; // January 1st of the birth year
+  }
+
   return {
     _id: backendPatient._id, // Keep the MongoDB ID
     id: backendPatient._id, // Also set as id for compatibility
@@ -20,7 +26,8 @@ export const transformPatientFromBackend = (backendPatient) => {
     lastName,
     gender: backendPatient.gender || '',
     phone: backendPatient.phone || '',
-    dateOfBirth: '', // Backend doesn't store this yet
+    dateOfBirth: dateOfBirth,
+    yearOfBirth: backendPatient.year_of_birth || '',
     nextOfKinName: backendPatient.next_of_kin_name || '',
     nextOfKinRelationship: backendPatient.next_of_kin_relationship || '',
     nextOfKinPhone: backendPatient.next_of_kin_phone || '',
@@ -52,10 +59,20 @@ export const transformPatientsFromBackend = (backendPatients) => {
  * @returns {Object} - Patient object in backend format
  */
 export const transformPatientToBackend = (frontendPatient) => {
+  // Extract year from dateOfBirth if available
+  let yearOfBirth = frontendPatient.yearOfBirth;
+  if (!yearOfBirth && frontendPatient.dateOfBirth) {
+    const date = new Date(frontendPatient.dateOfBirth);
+    if (!isNaN(date.getFullYear())) {
+      yearOfBirth = date.getFullYear();
+    }
+  }
+
   return {
     name: `${frontendPatient.firstName} ${frontendPatient.lastName}`.trim(),
     gender: frontendPatient.gender || '',
     phone: frontendPatient.phone || '',
+    year_of_birth: yearOfBirth || null,
     next_of_kin_name: frontendPatient.nextOfKinName || 'Not Provided',
     next_of_kin_relationship: frontendPatient.nextOfKinRelationship || 'Not Provided',
     next_of_kin_phone: frontendPatient.nextOfKinPhone || '0000000000',

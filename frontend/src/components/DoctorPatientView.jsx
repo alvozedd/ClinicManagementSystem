@@ -379,40 +379,7 @@ function DoctorPatientView({ patient, appointments, onClose, onUpdatePatient, on
                 </div>
               </div>
 
-              {/* Insurance Information */}
-              <div className="bg-white rounded-lg shadow border border-gray-200 p-6">
-                <h3 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">Insurance Information</h3>
-                <div className="space-y-4">
-                  <div className="flex items-center">
-                    <span className="font-medium w-32 text-gray-700 text-base">Provider:</span>
-                    {editMode ? (
-                      <input
-                        type="text"
-                        name="insuranceProvider"
-                        value={editedPatient.insuranceProvider}
-                        onChange={handleInputChange}
-                        className="border border-gray-300 px-3 py-2 rounded w-full text-base"
-                      />
-                    ) : (
-                      <span className="text-base">{patient.insuranceProvider}</span>
-                    )}
-                  </div>
-                  <div className="flex items-center">
-                    <span className="font-medium w-32 text-gray-700 text-base">Policy Number:</span>
-                    {editMode ? (
-                      <input
-                        type="text"
-                        name="insuranceNumber"
-                        value={editedPatient.insuranceNumber}
-                        onChange={handleInputChange}
-                        className="border border-gray-300 px-3 py-2 rounded w-full text-base"
-                      />
-                    ) : (
-                      <span className="text-base">{patient.insuranceNumber}</span>
-                    )}
-                  </div>
-                </div>
-              </div>
+
 
               {/* Next of Kin */}
               <div className="bg-white rounded-lg shadow border border-gray-200 p-6">

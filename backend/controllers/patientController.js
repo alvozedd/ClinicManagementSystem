@@ -9,6 +9,7 @@ const createPatient = asyncHandler(async (req, res) => {
     name,
     gender,
     phone,
+    year_of_birth,
     next_of_kin_name,
     next_of_kin_relationship,
     next_of_kin_phone,
@@ -21,6 +22,7 @@ const createPatient = asyncHandler(async (req, res) => {
     name,
     gender,
     phone,
+    year_of_birth,
     next_of_kin_name,
     next_of_kin_relationship,
     next_of_kin_phone,
@@ -71,6 +73,12 @@ const updatePatient = asyncHandler(async (req, res) => {
     patient.name = req.body.name || patient.name;
     patient.gender = req.body.gender || patient.gender;
     patient.phone = req.body.phone || patient.phone;
+
+    // Update year of birth if provided
+    if (req.body.year_of_birth !== undefined) {
+      patient.year_of_birth = req.body.year_of_birth;
+    }
+
     patient.next_of_kin_name = req.body.next_of_kin_name || patient.next_of_kin_name;
     patient.next_of_kin_relationship = req.body.next_of_kin_relationship || patient.next_of_kin_relationship;
     patient.next_of_kin_phone = req.body.next_of_kin_phone || patient.next_of_kin_phone;

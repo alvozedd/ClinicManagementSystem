@@ -572,18 +572,7 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
                   <p className="font-medium">{patient.nextOfKinPhone || 'Not provided'}</p>
                 </div>
 
-                <h4 className="font-medium text-gray-700 border-b pb-1 mt-6 mb-3">Insurance Information</h4>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="border-b pb-2">
-                    <p className="text-sm text-gray-500">Insurance Provider</p>
-                    <p className="font-medium">{patient.insuranceProvider || 'Not provided'}</p>
-                  </div>
-                  <div className="border-b pb-2">
-                    <p className="text-sm text-gray-500">Insurance Number</p>
-                    <p className="font-medium">{patient.insuranceNumber || 'Not provided'}</p>
-                  </div>
-                </div>
               </div>
             )}
           </div>

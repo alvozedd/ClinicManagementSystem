@@ -52,20 +52,7 @@ function ViewPatientModal({ patient, onClose }) {
             </div>
           </div>
 
-          {/* Insurance Information */}
-          <div>
-            <h3 className="text-lg font-semibold text-gray-800 border-b pb-2 mb-3">Insurance Information</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <p className="text-sm font-medium text-gray-500">Provider</p>
-                <p>{patient.insuranceProvider}</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-500">Policy Number</p>
-                <p>{patient.insuranceNumber}</p>
-              </div>
-            </div>
-          </div>
+
 
           {/* Next of Kin Information */}
           <div>

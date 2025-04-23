@@ -48,6 +48,9 @@ const patientSchema = mongoose.Schema(
       type: String,
       required: true,
     },
+    year_of_birth: {
+      type: Number,
+    },
     next_of_kin_name: {
       type: String,
       required: true,
