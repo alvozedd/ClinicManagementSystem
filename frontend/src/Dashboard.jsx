@@ -4,6 +4,7 @@ import apiService from './utils/apiService'
 import SimplifiedDoctorDashboard from './components/SimplifiedDoctorDashboard'
 import SimplifiedSecretaryDashboard from './components/SimplifiedSecretaryDashboard'
 import AdminDashboard from './components/AdminDashboard'
+import { transformPatientsFromBackend, transformPatientToBackend } from './utils/dataTransformers'
 
 function Dashboard() {
   const { userInfo, logout } = useContext(AuthContext)
@@ -34,8 +35,12 @@ function Dashboard() {
 
         // Fetch patients from API
         const patientsResponse = await apiService.getPatients();
-        console.log('Patients from API:', patientsResponse);
-        setPatientsData(patientsResponse);
+        console.log('Patients from API (raw):', patientsResponse);
+
+        // Transform patients to frontend format
+        const transformedPatients = transformPatientsFromBackend(patientsResponse);
+        console.log('Transformed patients:', transformedPatients);
+        setPatientsData(transformedPatients);
 
         // Fetch appointments from API
         const appointmentsResponse = await apiService.getAppointments();
@@ -79,35 +84,33 @@ function Dashboard() {
       // Check if this is an existing patient with a MongoDB _id
       if (updatedPatient._id && updatedPatient._id.length === 24) {
         console.log('Updating existing patient with ID:', updatedPatient._id);
-        // Update existing patient
-        response = await apiService.updatePatient(updatedPatient._id, {
-          name: `${updatedPatient.firstName} ${updatedPatient.lastName}`,
-          gender: updatedPatient.gender,
-          phone: updatedPatient.phone,
-          next_of_kin_name: updatedPatient.nextOfKinName || 'Not Provided',
-          next_of_kin_relationship: updatedPatient.nextOfKinRelationship || 'Not Provided',
-          next_of_kin_phone: updatedPatient.nextOfKinPhone || '0000000000'
-        });
+        // Update existing patient - transform to backend format
+        const backendPatientData = transformPatientToBackend(updatedPatient);
+        console.log('Sending to backend:', backendPatientData);
+        response = await apiService.updatePatient(updatedPatient._id, backendPatientData);
+
+        // Transform the response back to frontend format and update local state
+        const transformedResponse = transformPatientsFromBackend([response])[0];
+        console.log('Transformed response:', transformedResponse);
 
         // Update local state
         const updatedPatients = patientsData.map(p =>
-          p._id === updatedPatient._id ? { ...p, ...response } : p
+          p._id === updatedPatient._id ? { ...p, ...transformedResponse } : p
         );
         setPatientsData(updatedPatients);
       } else {
         console.log('Creating new patient');
-        // Add new patient
-        response = await apiService.createPatient({
-          name: `${updatedPatient.firstName} ${updatedPatient.lastName}`,
-          gender: updatedPatient.gender,
-          phone: updatedPatient.phone,
-          next_of_kin_name: updatedPatient.nextOfKinName || 'Not Provided',
-          next_of_kin_relationship: updatedPatient.nextOfKinRelationship || 'Not Provided',
-          next_of_kin_phone: updatedPatient.nextOfKinPhone || '0000000000'
-        });
+        // Add new patient - transform to backend format
+        const backendPatientData = transformPatientToBackend(updatedPatient);
+        console.log('Creating new patient with data:', backendPatientData);
+        response = await apiService.createPatient(backendPatientData);
+
+        // Transform the response back to frontend format
+        const transformedResponse = transformPatientsFromBackend([response])[0];
+        console.log('Transformed new patient response:', transformedResponse);
 
         // Add to local state
-        setPatientsData([...patientsData, response]);
+        setPatientsData([...patientsData, transformedResponse]);
       }
 
       console.log('Patient saved to database:', response);
