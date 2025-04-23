@@ -90,7 +90,7 @@ function LoginForm() {
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
               <label htmlFor="username" className="form-label">
-                Username
+                Email
               </label>
               <div className="mt-1">
                 <input
