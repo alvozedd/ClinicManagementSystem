@@ -13,5 +13,5 @@ services:
       - key: JWT_SECRET
         value: UroHealthSecureJWTSecret2024
       - key: PORT
-        value: 10000
+        value: 5000
     healthCheckPath: /
