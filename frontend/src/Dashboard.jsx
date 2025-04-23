@@ -243,9 +243,13 @@ function Dashboard() {
 
           console.log('Updated appointment in database:', response);
 
+          // Transform the response back to frontend format
+          const transformedResponse = transformAppointmentFromBackend(response);
+          console.log('Transformed updated appointment:', transformedResponse);
+
           // Update in local state
           setAppointmentsData(prev =>
-            prev.map(a => a._id === appointment._id ? response : a)
+            prev.map(a => a._id === appointment._id ? transformedResponse : a)
           );
         } else {
           // Add new appointment via API
@@ -262,8 +266,12 @@ function Dashboard() {
 
           console.log('Added new appointment to database:', response);
 
+          // Transform the response back to frontend format
+          const transformedResponse = transformAppointmentFromBackend(response);
+          console.log('Transformed new appointment:', transformedResponse);
+
           // Add to local state
-          setAppointmentsData(prev => [...prev, response]);
+          setAppointmentsData(prev => [...prev, transformedResponse]);
         }
       }
 
@@ -280,6 +288,7 @@ function Dashboard() {
   const handleSaveDiagnosis = async (updatedAppointment) => {
     try {
       console.log('Dashboard - Handling appointment update:', updatedAppointment);
+      console.log('Status being set:', updatedAppointment.status);
 
       // Check if this is a new appointment (ID starts with 'new-')
       const isNewAppointment = !updatedAppointment._id || updatedAppointment.id?.toString().startsWith('new-');
@@ -291,6 +300,7 @@ function Dashboard() {
           ...updatedAppointment,
           status: 'Completed'
         };
+        console.log('Setting status to Completed for diagnosis');
       }
 
       // Handle the appointment update/creation
@@ -302,8 +312,12 @@ function Dashboard() {
 
         console.log('Created new appointment in database:', appointmentResponse);
 
+        // Transform the response back to frontend format
+        const transformedResponse = transformAppointmentFromBackend(appointmentResponse);
+        console.log('Transformed new appointment:', transformedResponse);
+
         // Add to local state
-        setAppointmentsData(prev => [...prev, appointmentResponse]);
+        setAppointmentsData(prev => [...prev, transformedResponse]);
       } else {
         // Find the existing appointment in our state
         const existingAppointment = appointmentsData.find(a => a._id === appointmentToSave._id);
@@ -315,9 +329,13 @@ function Dashboard() {
 
         console.log('Updated appointment in database:', appointmentResponse);
 
+        // Transform the response back to frontend format
+        const transformedResponse = transformAppointmentFromBackend(appointmentResponse);
+        console.log('Transformed updated appointment:', transformedResponse);
+
         // Update in local state
         setAppointmentsData(prev =>
-          prev.map(a => a._id === appointmentToSave._id ? appointmentResponse : a)
+          prev.map(a => a._id === appointmentToSave._id ? transformedResponse : a)
         );
       }
 
@@ -359,6 +377,31 @@ function Dashboard() {
       alert('Failed to save diagnosis/appointment. Please try again.');
     }
   }
+
+  // Handler for deleting appointments
+  const handleDeleteAppointment = async (appointmentId) => {
+    // Confirm deletion
+    if (!window.confirm('Are you sure you want to delete this appointment?')) {
+      return;
+    }
+
+    try {
+      console.log('Deleting appointment with ID:', appointmentId);
+
+      // Delete appointment via API
+      await apiService.deleteAppointment(appointmentId);
+
+      // Remove the appointment from the local state
+      setAppointmentsData(prev => prev.filter(a => a._id !== appointmentId));
+
+      // Show success message
+      alert('Appointment deleted successfully');
+    } catch (error) {
+      console.error('Error deleting appointment:', error);
+      setError('Failed to delete appointment. Please try again.');
+      alert('Failed to delete appointment. Please try again: ' + error.message);
+    }
+  };
 
   const handleLogout = () => {
     logout()

@@ -46,6 +46,7 @@ function AppointmentManagementModal({ appointment, onClose, onSave, isNew = fals
       // Preserve the original ID and patient information
       // For existing appointments, keep the original ID; for new ones, create a temporary ID
       id: appointment?.id || `new-${Date.now()}`,
+      _id: appointment?._id, // Make sure to include MongoDB _id if it exists
       patientId: appointment?.patientId,
       patientName: appointment?.patientName,
       // Use the form data for appointment details
@@ -53,8 +54,8 @@ function AppointmentManagementModal({ appointment, onClose, onSave, isNew = fals
       time: formData.time,
       type: formData.type,
       reason: formData.reason,
-      status: formData.status,
-      notes: formData.notes,
+      status: formData.status, // This is the status we want to set
+      // Don't include notes here - let the transformer handle it
       // Preserve any diagnosis information if it exists
       diagnosis: appointment?.diagnosis,
       diagnosisDate: appointment?.diagnosisDate,
@@ -66,7 +67,8 @@ function AppointmentManagementModal({ appointment, onClose, onSave, isNew = fals
     };
 
     // Log detailed information about the appointment being saved
-    console.log('Saving appointment:', updatedAppointment);
+    console.log('Saving appointment with status:', updatedAppointment.status);
+    console.log('Full appointment data:', updatedAppointment);
     console.log(`Appointment date: ${updatedAppointment.date}, Today's date: ${new Date().toISOString().split('T')[0]}`);
     console.log(`Is this appointment for today? ${updatedAppointment.date === new Date().toISOString().split('T')[0]}`);
 

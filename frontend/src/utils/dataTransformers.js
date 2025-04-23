@@ -95,6 +95,8 @@ export const transformAppointmentFromBackend = (backendAppointment) => {
         status = line.replace('Status:', '').trim();
       }
     }
+
+    console.log(`Extracted status from appointment ${backendAppointment._id}: ${status}`);
   }
 
   // Get patient name from populated patient_id field
@@ -148,6 +150,9 @@ export const transformAppointmentToBackend = (frontendAppointment, existingAppoi
   // If we have existing notes, try to preserve other information while updating status
   let notes = '';
 
+  // Log the status we're trying to set
+  console.log(`Setting appointment status to: ${frontendAppointment.status}`);
+
   if (existingAppointment && existingAppointment.notes) {
     // Parse existing notes to extract components
     const existingNotes = existingAppointment.notes;
@@ -166,6 +171,7 @@ export const transformAppointmentToBackend = (frontendAppointment, existingAppoi
         return `Reason: ${frontendAppointment.reason || existingAppointment.reason || 'Not specified'}`;
       } else if (line.startsWith('Status:')) {
         statusFound = true;
+        // Ensure we use the new status if provided
         return `Status: ${frontendAppointment.status || existingAppointment.status || 'Scheduled'}`;
       }
       return line;
@@ -188,10 +194,15 @@ export const transformAppointmentToBackend = (frontendAppointment, existingAppoi
     notes = `Type: ${frontendAppointment.type || 'Consultation'}\nReason: ${frontendAppointment.reason || 'Not specified'}\nStatus: ${frontendAppointment.status || 'Scheduled'}`;
   }
 
+  console.log(`Final notes with status: ${notes}`);
+
+  // Always force the notes to be updated, never use frontendAppointment.notes
+  // This ensures our status is always included in the notes
+
   return {
     patient_id: frontendAppointment.patientId || frontendAppointment.patient_id,
     appointment_date: new Date(frontendAppointment.date),
     optional_time: frontendAppointment.time || '',
-    notes: frontendAppointment.notes || notes
+    notes: notes // Always use our constructed notes to ensure status is included
   };
 };
