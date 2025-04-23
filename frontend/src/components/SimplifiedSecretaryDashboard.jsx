@@ -12,6 +12,7 @@ function SimplifiedSecretaryDashboard({
   appointments,
   onUpdatePatient,
   onDiagnoseAppointment,
+  onDeleteAppointment,
   username
 }) {
   const [activeTab, setActiveTab] = useState('patient-management');
@@ -48,17 +49,17 @@ function SimplifiedSecretaryDashboard({
   // Filter upcoming appointments (excluding today's)
   const upcomingAppointments = appointments
     .filter(a => {
-      const appointmentDate = new Date(a.date);
+      // Get today's date in YYYY-MM-DD format
       const today = new Date();
-      today.setHours(0, 0, 0, 0);
+      const todayStr = today.toISOString().split('T')[0];
 
-      // Get date strings for comparison logging
+      // Get appointment date
       const appointmentDateStr = a.date;
-      const todayDateStr = today.toISOString().split('T')[0];
-      console.log(`Secretary - Upcoming filter - Appointment date: ${appointmentDateStr}, Today: ${todayDateStr}`);
 
-      // Only include future dates (not today)
-      return appointmentDate > today;
+      console.log(`Secretary - Upcoming filter - Appointment date: ${appointmentDateStr}, Today: ${todayStr}`);
+
+      // Only include future dates (strictly after today)
+      return appointmentDateStr > todayStr;
     })
     .sort((a, b) => new Date(a.date) - new Date(b.date))
     .slice(0, 5); // Show only next 5 upcoming appointments
@@ -321,15 +322,26 @@ function SimplifiedSecretaryDashboard({
                           >
                             View Patient
                           </button>
-                          <button
-                            className="text-green-600 hover:text-green-800 font-medium"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setEditingAppointment(appointment);
-                            }}
-                          >
-                            Edit
-                          </button>
+                          <div className="flex space-x-2">
+                            <button
+                              className="text-green-600 hover:text-green-800 font-medium"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setEditingAppointment(appointment);
+                              }}
+                            >
+                              Edit
+                            </button>
+                            <button
+                              className="text-red-600 hover:text-red-800 font-medium"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onDeleteAppointment(appointment._id);
+                              }}
+                            >
+                              Delete
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -437,15 +449,26 @@ function SimplifiedSecretaryDashboard({
                           >
                             View Patient
                           </button>
-                          <button
-                            className="text-green-600 hover:text-green-800 font-medium"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setEditingAppointment(appointment);
-                            }}
-                          >
-                            Edit
-                          </button>
+                          <div className="flex space-x-2">
+                            <button
+                              className="text-green-600 hover:text-green-800 font-medium"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setEditingAppointment(appointment);
+                              }}
+                            >
+                              Edit
+                            </button>
+                            <button
+                              className="text-red-600 hover:text-red-800 font-medium"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onDeleteAppointment(appointment._id);
+                              }}
+                            >
+                              Delete
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>

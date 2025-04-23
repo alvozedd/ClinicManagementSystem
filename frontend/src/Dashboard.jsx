@@ -136,6 +136,35 @@ function Dashboard() {
     }
   };
 
+  // Handler for deleting an appointment
+  const handleDeleteAppointment = async (appointmentId) => {
+    // Confirm deletion with the user
+    if (!window.confirm('Are you sure you want to delete this appointment? This action cannot be undone.')) {
+      return; // User cancelled the deletion
+    }
+
+    try {
+      console.log('Deleting appointment with ID:', appointmentId);
+
+      // Delete appointment via API
+      await apiService.deleteAppointment(appointmentId);
+
+      // Remove the appointment from the local state
+      const updatedAppointments = appointmentsData.filter(a => a._id !== appointmentId);
+      setAppointmentsData(updatedAppointments);
+
+      // Show success message
+      alert('Appointment deleted successfully');
+
+      // Refresh data from API to ensure we have the latest data
+      setRefreshTrigger(prev => prev + 1);
+    } catch (error) {
+      console.error('Error deleting appointment:', error);
+      setError('Failed to delete appointment. Please try again.');
+      alert('Failed to delete appointment. Please try again: ' + error.message);
+    }
+  };
+
   // Handler for deleting a patient
   const handleDeletePatient = async (patientId) => {
     // Confirm deletion with the user
@@ -357,6 +386,7 @@ function Dashboard() {
           onUpdatePatient={handleUpdatePatient}
           onDiagnoseAppointment={handleSaveDiagnosis}
           onDeletePatient={handleDeletePatient}
+          onDeleteAppointment={handleDeleteAppointment}
           username={userInfo?.username}
           userRole={userInfo?.role}
         />
@@ -371,6 +401,7 @@ function Dashboard() {
           appointments={appointmentsData}
           onUpdatePatient={handleUpdatePatient}
           onDiagnoseAppointment={handleSaveDiagnosis}
+          onDeleteAppointment={handleDeleteAppointment}
           username={userInfo?.username}
           userRole={userInfo?.role}
         />
