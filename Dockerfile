@@ -17,9 +17,5 @@ ENV MONGODB_URI=mongodb+srv://clinic_admin:adminMuchai123@cluster0.jrm4jes.mongo
 ENV JWT_SECRET=UroHealthSecureJWTSecret2024
 ENV PORT=5000
 
-# Create a startup script
-RUN echo '#!/bin/sh\nnode seedProduction.js\nnode server.js' > /app/backend/start.sh
-RUN chmod +x /app/backend/start.sh
-
 # Start the application
-CMD ["/app/backend/start.sh"]
+CMD ["sh", "-c", "node seedProduction.js && node server.js"]
