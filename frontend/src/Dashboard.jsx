@@ -61,9 +61,7 @@ function Dashboard() {
   const handleUpdatePatient = async (updatedPatient) => {
     try {
       console.log('Updating patient with role:', userInfo?.role);
-
-      // Check if the patient exists in the current patients array
-      const patientExists = patientsData.some(p => p._id === updatedPatient._id);
+      console.log('Updated patient data:', updatedPatient);
 
       // Handle appointments separately if they exist in the update
       if (updatedPatient.appointments) {
@@ -77,8 +75,10 @@ function Dashboard() {
 
       // Use the API to save patient data
       let response;
-      // Update or add the patient via API
-      if (patientExists) {
+
+      // Check if this is an existing patient with a MongoDB _id
+      if (updatedPatient._id && updatedPatient._id.length === 24) {
+        console.log('Updating existing patient with ID:', updatedPatient._id);
         // Update existing patient
         response = await apiService.updatePatient(updatedPatient._id, {
           name: `${updatedPatient.firstName} ${updatedPatient.lastName}`,
@@ -95,6 +95,7 @@ function Dashboard() {
         );
         setPatientsData(updatedPatients);
       } else {
+        console.log('Creating new patient');
         // Add new patient
         response = await apiService.createPatient({
           name: `${updatedPatient.firstName} ${updatedPatient.lastName}`,
@@ -131,15 +132,27 @@ function Dashboard() {
     }
 
     try {
+      console.log('Deleting patient with ID:', patientId);
+
+      // Find the patient in our local state to get the MongoDB _id
+      const patientToDelete = patientsData.find(p => p._id === patientId || p.id === patientId);
+
+      if (!patientToDelete) {
+        throw new Error('Patient not found in local state');
+      }
+
+      const mongoId = patientToDelete._id;
+      console.log('Found patient to delete with MongoDB ID:', mongoId);
+
       // Delete patient via API
-      await apiService.deletePatient(patientId);
+      await apiService.deletePatient(mongoId);
 
       // Remove the patient from the local state
-      const updatedPatients = patientsData.filter(p => p._id !== patientId);
+      const updatedPatients = patientsData.filter(p => p._id !== mongoId);
       setPatientsData(updatedPatients);
 
       // Also remove all appointments associated with this patient from local state
-      const updatedAppointments = appointmentsData.filter(a => a.patient_id !== patientId);
+      const updatedAppointments = appointmentsData.filter(a => a.patient_id !== mongoId);
       setAppointmentsData(updatedAppointments);
 
       // Show success message
@@ -147,7 +160,7 @@ function Dashboard() {
     } catch (error) {
       console.error('Error deleting patient:', error);
       setError('Failed to delete patient. Please try again.');
-      alert('Failed to delete patient. Please try again.');
+      alert('Failed to delete patient. Please try again: ' + error.message);
     }
   };
 

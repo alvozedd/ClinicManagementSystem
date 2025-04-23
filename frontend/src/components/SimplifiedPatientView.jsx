@@ -56,7 +56,10 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
   // Handle deleting the patient
   const handleDeletePatient = () => {
     if (onDeletePatient) {
-      onDeletePatient(patient.id);
+      // Use MongoDB _id if available, otherwise fall back to client-side id
+      const patientId = patient._id || patient.id;
+      console.log('SimplifiedPatientView - Deleting patient with ID:', patientId);
+      onDeletePatient(patientId);
       onClose(); // Close the patient view after deletion
     }
   };
