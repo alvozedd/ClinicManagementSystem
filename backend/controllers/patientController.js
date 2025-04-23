@@ -3,7 +3,7 @@ const Patient = require('../models/patientModel');
 
 // @desc    Create a new patient
 // @route   POST /api/patients
-// @access  Private/Secretary
+// @access  Private/Doctor/Secretary
 const createPatient = asyncHandler(async (req, res) => {
   const {
     name,
@@ -56,7 +56,7 @@ const getPatientById = asyncHandler(async (req, res) => {
 
 // @desc    Update patient
 // @route   PUT /api/patients/:id
-// @access  Private/Secretary
+// @access  Private/Doctor/Secretary
 const updatePatient = asyncHandler(async (req, res) => {
   const patient = await Patient.findById(req.params.id);
 
@@ -78,7 +78,7 @@ const updatePatient = asyncHandler(async (req, res) => {
 
 // @desc    Delete patient
 // @route   DELETE /api/patients/:id
-// @access  Private/Admin
+// @access  Private/Doctor/Secretary
 const deletePatient = asyncHandler(async (req, res) => {
   const patient = await Patient.findById(req.params.id);
 

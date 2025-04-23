@@ -3,7 +3,7 @@ const Appointment = require('../models/appointmentModel');
 
 // @desc    Create a new appointment
 // @route   POST /api/appointments
-// @access  Private/Secretary
+// @access  Private/Doctor/Secretary
 const createAppointment = asyncHandler(async (req, res) => {
   const { patient_id, appointment_date, optional_time, notes } = req.body;
 
@@ -61,7 +61,7 @@ const getAppointmentById = asyncHandler(async (req, res) => {
 
 // @desc    Update appointment
 // @route   PUT /api/appointments/:id
-// @access  Private/Secretary
+// @access  Private/Doctor/Secretary
 const updateAppointment = asyncHandler(async (req, res) => {
   const appointment = await Appointment.findById(req.params.id);
 
@@ -80,7 +80,7 @@ const updateAppointment = asyncHandler(async (req, res) => {
 
 // @desc    Delete appointment
 // @route   DELETE /api/appointments/:id
-// @access  Private/Secretary
+// @access  Private/Doctor/Secretary
 const deleteAppointment = asyncHandler(async (req, res) => {
   const appointment = await Appointment.findById(req.params.id);
 
