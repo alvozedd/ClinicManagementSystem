@@ -98,9 +98,9 @@ function HomePage() {
   return (
     <div className="min-h-screen bg-white text-gray-800" style={{ scrollBehavior: 'smooth' }}>
       {/* Header with blue background */}
-      <div className="bg-blue-800 text-white fixed top-0 left-0 right-0 z-50 shadow-md">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-900 to-blue-700" style={{zIndex: 0}}></div>
-        <div className="absolute inset-0 opacity-40" style={{zIndex: 1}}>
+      <div className="bg-gradient-to-r from-blue-900 via-blue-800 to-blue-700 text-white fixed top-0 left-0 right-0 z-50 shadow-lg">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-900 to-blue-700 opacity-80" style={{zIndex: 0}}></div>
+        <div className="absolute inset-0 opacity-30" style={{zIndex: 1}}>
           <div className="absolute top-0 left-0 w-full h-full" style={{backgroundImage: "url('data:image/svg+xml,%3Csvg width=\"20\" height=\"20\" viewBox=\"0 0 20 20\" xmlns=\"http://www.w3.org/2000/svg\",%3E%3Cg fill=\"none\" fill-rule=\"evenodd\",%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"0.6\",%3E%3Cpath d=\"M0 0h10v10H0V0zm10 10h10v10H10V10z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')", backgroundSize: "20px 20px"}}>
           </div>
         </div>
@@ -110,13 +110,13 @@ function HomePage() {
             <div>
               <Link
                 to="/"
-                className="text-xl md:text-2xl font-bold text-white cursor-pointer hover:text-blue-200 transition-colors flex items-center"
+                className="text-xl md:text-2xl font-bold text-white cursor-pointer hover:text-blue-200 transition-colors flex items-center group"
                 onClick={() => {
                   setShowBookingForm(false);
                   setBookingSuccess(false);
                 }}
               >
-                <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <svg className="w-6 h-6 mr-2 transform group-hover:scale-110 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
                 </svg>
                 UroHealth Central Ltd
@@ -145,7 +145,7 @@ function HomePage() {
                     document.getElementById('services').scrollIntoView({ behavior: 'smooth' });
                   }, 100);
                 }}
-                className="text-white hover:text-blue-200 transition-colors"
+                className="text-white hover:text-blue-200 transition-colors relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 hover:after:w-full after:bg-blue-200 after:transition-all after:duration-300"
               >Services</button>
               <button
                 onClick={() => {
@@ -155,7 +155,7 @@ function HomePage() {
                     document.getElementById('location').scrollIntoView({ behavior: 'smooth' });
                   }, 100);
                 }}
-                className="text-white hover:text-blue-200 transition-colors"
+                className="text-white hover:text-blue-200 transition-colors relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 hover:after:w-full after:bg-blue-200 after:transition-all after:duration-300"
               >Location</button>
               <button
                 onClick={() => {
@@ -165,11 +165,11 @@ function HomePage() {
                     document.getElementById('contact').scrollIntoView({ behavior: 'smooth' });
                   }, 100);
                 }}
-                className="text-white hover:text-blue-200 transition-colors"
+                className="text-white hover:text-blue-200 transition-colors relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 hover:after:w-full after:bg-blue-200 after:transition-all after:duration-300"
               >Contact</button>
               <Link
                 to="/login"
-                className="bg-white text-blue-800 hover:bg-blue-100 p-2 rounded-lg text-sm font-medium transition duration-200 flex items-center justify-center"
+                className="bg-white text-blue-800 hover:bg-blue-100 p-2 rounded-lg text-sm font-medium transition duration-200 flex items-center justify-center shadow-md hover:shadow-lg transform hover:scale-105"
                 aria-label="Staff Login"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -183,7 +183,7 @@ function HomePage() {
           {mobileMenuOpen && (
             <div
               ref={menuRef}
-              className="md:hidden bg-blue-700 rounded-b-lg shadow-lg py-2 absolute left-0 right-0 z-50 transition-all duration-300 ease-in-out"
+              className="md:hidden bg-blue-700 rounded-b-lg shadow-lg py-2 absolute left-0 right-0 z-50 transition-all duration-300 ease-in-out border-t border-blue-600"
               style={{top: '100%'}}
             >
               <div className="flex flex-col space-y-3 px-4 py-2">
@@ -247,7 +247,7 @@ function HomePage() {
                 <div className="absolute top-0 left-0 w-full h-full" style={{backgroundImage: "url('data:image/svg+xml,%3Csvg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\",%3E%3Cg fill=\"none\" fill-rule=\"evenodd\",%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"0.6\",%3E%3Cpath d=\"M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')", backgroundSize: "30px 30px"}}>
                 </div>
               </div>
-              <div className="max-w-2xl mx-auto bg-white rounded-xl shadow-md p-8 text-gray-800 relative z-10">
+              <div className="max-w-2xl mx-auto bg-white rounded-xl shadow-xl p-8 text-gray-800 relative z-10 border border-gray-100 transform transition-all duration-300">
               <div className="text-center px-4 sm:px-0">
                 <Link
                   to="/"
@@ -287,7 +287,7 @@ function HomePage() {
                       appointmentReason: '',
                     });
                   }}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-5 sm:px-6 py-2 rounded-md font-medium text-sm sm:text-base shadow-sm hover:shadow transition-all duration-200 flex items-center justify-center gap-1 w-full md:w-auto"
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-5 sm:px-6 py-2 rounded-md font-medium text-sm sm:text-base shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-1 w-full md:w-auto transform hover:translate-y-[-2px]"
                 >
                   <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h2a1 1 0 001-1v-7m-6 0a1 1 0 00-1 1v3"></path>
@@ -305,7 +305,7 @@ function HomePage() {
                 <div className="absolute top-0 left-0 w-full h-full" style={{backgroundImage: "url('data:image/svg+xml,%3Csvg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\",%3E%3Cg fill=\"none\" fill-rule=\"evenodd\",%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"0.6\",%3E%3Cpath d=\"M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')", backgroundSize: "30px 30px"}}>
                 </div>
               </div>
-              <div className="max-w-2xl mx-auto bg-white rounded-xl shadow-md p-5 sm:p-6 md:p-8 text-gray-800 relative z-10">
+              <div className="max-w-2xl mx-auto bg-white rounded-xl shadow-xl p-5 sm:p-6 md:p-8 text-gray-800 relative z-10 border border-gray-100">
               <div className="flex flex-col items-center mb-4">
                 <Link
                   to="/"
@@ -330,7 +330,7 @@ function HomePage() {
               )}
 
               <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="bg-blue-50 p-3 sm:p-5 rounded-xl mb-5 shadow-sm">
+                <div className="bg-blue-50 p-3 sm:p-5 rounded-xl mb-5 shadow-sm border border-blue-100">
                   <h3 className="font-semibold text-blue-700 mb-3 text-base sm:text-lg border-b border-blue-200 pb-2">Your Information</h3>
 
                   <div className="mb-4">
@@ -343,7 +343,7 @@ function HomePage() {
                       name="firstName"
                       value={formData.firstName}
                       onChange={handleChange}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-800 text-sm md:text-base focus:ring-2 focus:ring-blue-300 focus:border-blue-500 focus:outline-none transition-all duration-200"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-gray-800 text-sm md:text-base focus:ring-2 focus:ring-blue-300 focus:border-blue-500 focus:outline-none transition-all duration-200 shadow-sm"
                       required
                     />
                   </div>
@@ -431,7 +431,7 @@ function HomePage() {
                   </div>
                 </div>
 
-                <div className="bg-blue-50 p-3 sm:p-5 rounded-xl shadow-sm">
+                <div className="bg-blue-50 p-3 sm:p-5 rounded-xl shadow-sm border border-blue-100">
                   <h3 className="font-semibold text-blue-700 mb-3 text-base sm:text-lg border-b border-blue-200 pb-2">Appointment Details</h3>
 
                   <div className="mb-4">
@@ -491,14 +491,14 @@ function HomePage() {
                   <button
                     type="button"
                     onClick={() => setShowBookingForm(false)}
-                    className="text-blue-600 hover:text-blue-800 text-sm sm:text-base font-medium px-4 py-2 border border-blue-200 rounded-md hover:bg-blue-50 transition-all duration-200 order-2 sm:order-1"
+                    className="text-blue-600 hover:text-blue-800 text-sm sm:text-base font-medium px-4 py-2 border border-blue-200 rounded-md hover:bg-blue-50 transition-all duration-200 order-2 sm:order-1 shadow-sm hover:shadow"
                   >
                     Cancel
                   </button>
 
                   <button
                     type="submit"
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-5 sm:px-6 py-2 rounded-md font-medium text-sm sm:text-base order-1 sm:order-2 shadow-sm hover:shadow transition-all duration-200 flex items-center justify-center gap-1"
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-5 sm:px-6 py-2 rounded-md font-medium text-sm sm:text-base order-1 sm:order-2 shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-1 transform hover:translate-y-[-2px]"
                     disabled={loading}
                   >
                     {loading ? (
@@ -525,7 +525,7 @@ function HomePage() {
           ) : (
             <div>
               {/* Home content */}
-              <div className="text-center bg-blue-800 text-white relative overflow-hidden">
+              <div className="text-center bg-gradient-to-r from-blue-900 via-blue-800 to-blue-700 text-white relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-900 to-blue-700"></div>
                 <div className="absolute inset-0 opacity-40">
                   <div className="absolute top-0 left-0 w-full h-full" style={{backgroundImage: "url('data:image/svg+xml,%3Csvg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\",%3E%3Cg fill=\"none\" fill-rule=\"evenodd\",%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"0.6\",%3E%3Cpath d=\"M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')", backgroundSize: "30px 30px"}}>
@@ -545,7 +545,7 @@ function HomePage() {
                         setShowBookingForm(true);
                         window.scrollTo({ top: 0, behavior: 'smooth' });
                       }}
-                      className="bg-blue-500 text-white hover:bg-blue-600 px-5 sm:px-8 py-2 sm:py-3 rounded-md font-medium transition duration-200 shadow-md text-base md:text-lg flex items-center justify-center gap-2 mx-2 sm:mx-0"
+                      className="bg-blue-500 text-white hover:bg-blue-600 px-5 sm:px-8 py-2 sm:py-3 rounded-md font-medium transition duration-200 shadow-md hover:shadow-lg text-base md:text-lg flex items-center justify-center gap-2 mx-2 sm:mx-0 transform hover:translate-y-[-2px]"
                     >
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
@@ -554,7 +554,7 @@ function HomePage() {
                     </button>
                     <button
                       onClick={() => window.location.href = 'tel:+254722396296'}
-                      className="border border-white text-white hover:bg-white hover:text-blue-800 px-5 sm:px-8 py-2 sm:py-3 rounded-md font-medium transition duration-200 text-base md:text-lg flex items-center justify-center gap-2 mx-2 sm:mx-0"
+                      className="border border-white text-white hover:bg-white hover:text-blue-800 px-5 sm:px-8 py-2 sm:py-3 rounded-md font-medium transition duration-200 text-base md:text-lg flex items-center justify-center gap-2 mx-2 sm:mx-0 shadow-md hover:shadow-lg transform hover:translate-y-[-2px]"
                     >
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
@@ -569,7 +569,7 @@ function HomePage() {
               {/* White background sections */}
               <div className="bg-white">
                 {/* Services Section */}
-                <div id="services" className="bg-gradient-to-r from-blue-50 via-white to-blue-50 text-gray-800 py-16 sm:py-20 md:py-24 w-full relative overflow-hidden">
+                <div id="services" className="bg-gradient-to-r from-blue-100 via-white to-blue-100 text-gray-800 py-16 sm:py-20 md:py-24 w-full relative overflow-hidden">
                   <div className="absolute inset-0 opacity-10">
                     <div className="absolute top-0 left-0 w-full h-full" style={{backgroundImage: "radial-gradient(circle, #3b82f6 1px, transparent 1px)", backgroundSize: "30px 30px"}}></div>
                   </div>
@@ -577,7 +577,7 @@ function HomePage() {
                     <h3 className="text-3xl md:text-4xl font-bold text-blue-700 mb-4 text-center">Our Services</h3>
                     <p className="text-lg md:text-xl text-gray-600 mb-8 md:mb-12 max-w-3xl mx-auto">We provide comprehensive urological care with state-of-the-art technology and personalized treatment plans.</p>
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8 px-4 sm:px-0">
-                      <div className="bg-blue-50 rounded-xl p-8 shadow-sm hover:shadow-md transition duration-200 flex flex-col items-center text-center">
+                      <div className="bg-blue-50 rounded-xl p-8 shadow-sm hover:shadow-md transition duration-200 flex flex-col items-center text-center border border-blue-100 hover:border-blue-300 transform hover:translate-y-[-5px]">
                         <div className="bg-blue-100 p-4 rounded-full mb-6">
                           <svg className="w-12 h-12 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
@@ -593,7 +593,7 @@ function HomePage() {
                         </div>
                     </div>
 
-                      <div className="bg-blue-600 rounded-xl p-8 shadow-lg hover:shadow-xl transition duration-200 transform hover:-translate-y-1 text-white flex flex-col items-center text-center">
+                      <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl p-8 shadow-lg hover:shadow-xl transition duration-200 transform hover:-translate-y-2 text-white flex flex-col items-center text-center border border-blue-500">
                         <div className="bg-blue-500 p-4 rounded-full mb-6">
                           <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
@@ -612,7 +612,7 @@ function HomePage() {
                             setShowBookingForm(true);
                             window.scrollTo({ top: 0, behavior: 'smooth' });
                           }}
-                          className="bg-white text-blue-600 hover:bg-blue-50 px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-medium transition duration-200 text-base md:text-lg flex items-center gap-2 w-full justify-center"
+                          className="bg-white text-blue-600 hover:bg-blue-50 px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-medium transition duration-200 text-base md:text-lg flex items-center gap-2 w-full justify-center shadow-md hover:shadow-lg transform hover:translate-y-[-2px]"
                         >
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
@@ -621,7 +621,7 @@ function HomePage() {
                         </button>
                     </div>
 
-                      <div className="bg-blue-50 rounded-xl p-8 shadow-sm hover:shadow-md transition duration-200 flex flex-col items-center text-center">
+                      <div className="bg-blue-50 rounded-xl p-8 shadow-sm hover:shadow-md transition duration-200 flex flex-col items-center text-center border border-blue-100 hover:border-blue-300 transform hover:translate-y-[-5px]">
                         <div className="bg-blue-100 p-4 rounded-full mb-6">
                           <svg className="w-12 h-12 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
@@ -641,7 +641,7 @@ function HomePage() {
                 </div>
 
                 {/* Contact Section */}
-                <div id="contact" className="bg-gradient-to-b from-white to-blue-50 text-gray-800 py-16 sm:py-20 md:py-24 w-full relative">
+                <div id="contact" className="bg-gradient-to-b from-white to-blue-100 text-gray-800 py-16 sm:py-20 md:py-24 w-full relative">
                   <div className="absolute inset-0 opacity-5">
                     <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
                       <defs>
@@ -661,7 +661,7 @@ function HomePage() {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 px-4 sm:px-0">
                       <div>
-                        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 transition-all duration-300 hover:shadow-md hover:border-blue-200">
+                        <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100 transition-all duration-300 hover:shadow-lg hover:border-blue-200 transform hover:translate-y-[-5px]">
                         <div className="flex items-center justify-center w-12 h-12 bg-blue-600 text-white rounded-full mb-4 mx-auto">
                           <span className="text-xl font-bold">UH</span>
                         </div>
@@ -670,7 +670,7 @@ function HomePage() {
                         <p className="text-center font-medium text-sm text-blue-600 mb-6">DR. PAUL MUCHAI MBUGUA - CONSULTANT SURGEON & UROLOGIST</p>
 
                         <div className="space-y-4">
-                          <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-3 p-3 bg-gray-50 rounded-lg">
+                          <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-3 p-3 bg-gray-50 rounded-lg border border-gray-100 hover:border-blue-100 transition-all duration-200">
                             <div className="flex items-center">
                               <svg className="w-5 h-5 text-blue-600 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
@@ -680,24 +680,24 @@ function HomePage() {
                                 <p className="text-sm text-gray-500">Office: 0733 398 296</p>
                               </div>
                             </div>
-                            <a href="tel:+254722396296" className="w-full sm:w-auto sm:ml-auto bg-blue-600 text-white px-3 py-1 rounded text-sm text-center">
+                            <a href="tel:+254722396296" className="w-full sm:w-auto sm:ml-auto bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm text-center shadow-sm hover:shadow transition-all duration-200">
                               Call
                             </a>
                           </div>
 
-                          <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-3 p-3 bg-gray-50 rounded-lg">
+                          <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-3 p-3 bg-gray-50 rounded-lg border border-gray-100 hover:border-blue-100 transition-all duration-200">
                             <div className="flex items-center">
                               <svg className="w-5 h-5 text-blue-600 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                               </svg>
                               <p className="text-sm text-gray-500">info@urohealthcentral.com</p>
                             </div>
-                            <a href="mailto:info@urohealthcentral.com" className="w-full sm:w-auto sm:ml-auto bg-blue-600 text-white px-3 py-1 rounded text-sm text-center">
+                            <a href="mailto:info@urohealthcentral.com" className="w-full sm:w-auto sm:ml-auto bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm text-center shadow-sm hover:shadow transition-all duration-200">
                               Email
                             </a>
                           </div>
 
-                          <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-3 p-3 bg-gray-50 rounded-lg">
+                          <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-3 p-3 bg-gray-50 rounded-lg border border-gray-100 hover:border-blue-100 transition-all duration-200">
                             <div className="flex items-center">
                               <svg className="w-5 h-5 text-blue-600 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
@@ -708,7 +708,7 @@ function HomePage() {
                                 <p className="text-sm text-gray-500">Kimathi Way, Nyeri, Kenya</p>
                               </div>
                             </div>
-                            <a href="https://maps.google.com/?q=Gatemu+House,+Kimathi+Way,+Nyeri,+Kenya" target="_blank" rel="noopener noreferrer" className="w-full sm:w-auto sm:ml-auto bg-blue-600 text-white px-3 py-1 rounded text-sm text-center">
+                            <a href="https://maps.google.com/?q=Gatemu+House,+Kimathi+Way,+Nyeri,+Kenya" target="_blank" rel="noopener noreferrer" className="w-full sm:w-auto sm:ml-auto bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm text-center shadow-sm hover:shadow transition-all duration-200">
                               Directions
                             </a>
                           </div>
@@ -722,13 +722,13 @@ function HomePage() {
               </div>
 
               {/* Map Section */}
-              <div id="location" className="bg-white text-gray-800 py-12 sm:py-16 w-full relative">
+              <div id="location" className="bg-gradient-to-b from-blue-50 to-white text-gray-800 py-12 sm:py-16 w-full relative">
                 <div className="absolute inset-0 bg-blue-50 opacity-30"></div>
                 <div className="max-w-5xl mx-auto px-4">
                   <div className="text-blue-600 text-sm font-semibold mb-3 md:mb-4 uppercase tracking-wider text-center">LOCATION</div>
                   <h2 className="text-2xl md:text-3xl font-bold mb-6 md:mb-8 text-center text-blue-800">Visit Our Clinic</h2>
 
-                  <div className="rounded-lg overflow-hidden shadow-md mb-6 md:mb-8 h-64 sm:h-80 md:h-96">
+                  <div className="rounded-lg overflow-hidden shadow-lg mb-6 md:mb-8 h-64 sm:h-80 md:h-96 border border-gray-200">
                     <iframe
                       src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d7979.417165608913!2d36.9536629!3d-0.4249518!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x18285f7be335efcb%3A0xe3fe6bef56106781!2sDr.%20Muchai%20Mbugua%20Clinic!5e0!3m2!1sen!2ske!4v1745316449986!5m2!1sen!2ske"
                       width="100%"
@@ -742,7 +742,7 @@ function HomePage() {
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 px-4 sm:px-0">
-                    <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 transition-all duration-300 hover:shadow-md hover:-translate-y-1 hover:border-blue-200">
+                    <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100 transition-all duration-300 hover:shadow-lg hover:-translate-y-2 hover:border-blue-200">
                       <div className="flex items-center mb-4">
                         <svg className="w-5 h-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
@@ -755,7 +755,7 @@ function HomePage() {
                       <p className="text-gray-600 text-sm">Nyeri, Kenya</p>
                     </div>
 
-                    <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 transition-all duration-300 hover:shadow-md hover:-translate-y-1 hover:border-blue-200">
+                    <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100 transition-all duration-300 hover:shadow-lg hover:-translate-y-2 hover:border-blue-200">
                       <div className="flex items-center mb-4">
                         <svg className="w-5 h-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -767,7 +767,7 @@ function HomePage() {
                       <p className="text-gray-600 text-sm">Sunday: Closed</p>
                     </div>
 
-                    <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 transition-all duration-300 hover:shadow-md hover:-translate-y-1 hover:border-blue-200">
+                    <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100 transition-all duration-300 hover:shadow-lg hover:-translate-y-2 hover:border-blue-200">
                       <div className="flex items-center mb-4">
                         <svg className="w-5 h-5 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -787,7 +787,7 @@ function HomePage() {
         </main>
 
         {/* Footer */}
-        <footer className="py-12 bg-blue-800 text-white relative overflow-hidden">
+        <footer className="py-12 bg-gradient-to-r from-blue-900 via-blue-800 to-blue-700 text-white relative overflow-hidden">
           <div className="absolute inset-0 opacity-40">
             <div className="absolute top-0 left-0 w-full h-full" style={{backgroundImage: "url('data:image/svg+xml,%3Csvg width=\"20\" height=\"20\" viewBox=\"0 0 20 20\" xmlns=\"http://www.w3.org/2000/svg\",%3E%3Cg fill=\"none\" fill-rule=\"evenodd\",%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"0.6\",%3E%3Cpath d=\"M0 0h10v10H0V0zm10 10h10v10H10V10z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')", backgroundSize: "20px 20px"}}>
             </div>

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import PatientSearch from './PatientSearch';
 import AppointmentManagementModal from './AppointmentManagementModal';
 import AddPatientForm from './AddPatientForm';
+import { FaUserPlus, FaSearch } from 'react-icons/fa';
 
 function PatientSearchAppointmentModal({ patients, onClose, onSave, onAddPatient }) {
   const [selectedPatient, setSelectedPatient] = useState(null);
@@ -47,17 +48,17 @@ function PatientSearchAppointmentModal({ patients, onClose, onSave, onAddPatient
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 backdrop-blur-sm">
+      <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto border border-gray-200">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-bold text-gray-800">
+          <h2 className="text-xl font-bold text-blue-700">
             {showAppointmentForm ? `Create Appointment for ${selectedPatient.firstName} ${selectedPatient.lastName}` :
              showAddPatientForm ? 'Add New Patient' :
              'Select Patient for Appointment'}
           </h2>
           <button
             onClick={handleClose}
-            className="text-gray-500 hover:text-gray-700"
+            className="text-gray-500 hover:text-gray-700 transition-colors p-1 rounded-full hover:bg-gray-100"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
@@ -84,15 +85,16 @@ function PatientSearchAppointmentModal({ patients, onClose, onSave, onAddPatient
           />
         ) : (
           <div>
-            <div className="flex justify-between items-center mb-4">
-              <p className="text-gray-600">Please select a patient to create an appointment for:</p>
+            <div className="flex justify-between items-center mb-6">
+              <p className="text-gray-700 flex items-center">
+                <FaSearch className="text-blue-600 mr-2" />
+                Please select a patient to create an appointment for:
+              </p>
               <button
                 onClick={handleShowAddPatientForm}
-                className="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-md text-sm font-medium flex items-center"
+                className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-md text-sm font-medium flex items-center shadow-sm hover:shadow-md transition-all duration-200 transform hover:translate-y-[-1px]"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
-                </svg>
+                <FaUserPlus className="h-4 w-4 mr-2" />
                 New Patient
               </button>
             </div>

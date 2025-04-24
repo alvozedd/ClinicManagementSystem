@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { FaCalendarAlt, FaClock, FaClipboardList, FaUserInjured, FaRegStickyNote } from 'react-icons/fa';
 
 function AppointmentManagementModal({ appointment, onClose, onSave, isNew = false, isEmbedded = false }) {
   // Initialize with empty values, will be populated in useEffect
@@ -76,15 +77,15 @@ function AppointmentManagementModal({ appointment, onClose, onSave, isNew = fals
   };
 
   return (
-    <div className={isEmbedded ? '' : "fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"}>
-      <div className={isEmbedded ? "w-full" : "bg-white rounded-lg shadow-xl p-6 w-full max-w-md"}>
+    <div className={isEmbedded ? '' : "fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 backdrop-blur-sm"}>
+      <div className={isEmbedded ? "w-full" : "bg-white rounded-xl shadow-xl p-6 w-full max-w-md border border-gray-200"}>
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-bold text-gray-800">
+          <h2 className="text-xl font-bold text-blue-700">
             {isNew ? 'Add New Appointment' : 'Edit Appointment'}
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700"
+            className="text-gray-500 hover:text-gray-700 transition-colors p-1 rounded-full hover:bg-gray-100"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
@@ -93,7 +94,7 @@ function AppointmentManagementModal({ appointment, onClose, onSave, isNew = fals
         </div>
 
         {!isNew && (
-          <div className="mb-4 bg-blue-50 p-3 rounded-lg">
+          <div className="mb-4 bg-blue-50 p-3 rounded-lg border border-blue-100 shadow-sm">
             <p className="text-sm text-blue-800">
               <span className="font-medium">Patient:</span> {appointment.patientName}
             </p>
@@ -104,36 +105,45 @@ function AppointmentManagementModal({ appointment, onClose, onSave, isNew = fals
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                  <FaCalendarAlt className="mr-2 text-blue-600" />
+                  Date
+                </label>
                 <input
                   type="date"
                   name="date"
                   value={formData.date}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-500 shadow-sm transition-all duration-200"
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Time</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                  <FaClock className="mr-2 text-blue-600" />
+                  Time
+                </label>
                 <input
                   type="time"
                   name="time"
                   value={formData.time}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-500 shadow-sm transition-all duration-200"
                   required
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                <FaClipboardList className="mr-2 text-blue-600" />
+                Type
+              </label>
               <select
                 name="type"
                 value={formData.type}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-500 shadow-sm transition-all duration-200"
                 required
               >
                 <option value="Consultation">Consultation</option>
@@ -145,25 +155,33 @@ function AppointmentManagementModal({ appointment, onClose, onSave, isNew = fals
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Reason</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                <FaUserInjured className="mr-2 text-blue-600" />
+                Reason
+              </label>
               <input
                 type="text"
                 name="reason"
                 value={formData.reason}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-500 shadow-sm transition-all duration-200"
                 placeholder="Reason for appointment (optional)"
               />
             </div>
 
             {!isNew && (
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                  <svg className="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                  </svg>
+                  Status
+                </label>
                 <select
                   name="status"
                   value={formData.status}
                   onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-500 shadow-sm transition-all duration-200"
                 >
                   <option value="Pending">Pending</option>
                   <option value="Scheduled">Scheduled</option>
@@ -175,13 +193,16 @@ function AppointmentManagementModal({ appointment, onClose, onSave, isNew = fals
             )}
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                <FaRegStickyNote className="mr-2 text-blue-600" />
+                Notes
+              </label>
               <textarea
                 name="notes"
                 value={formData.notes}
                 onChange={handleChange}
                 rows="3"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-500 shadow-sm transition-all duration-200"
                 placeholder="Additional notes..."
               ></textarea>
             </div>
@@ -190,13 +211,13 @@ function AppointmentManagementModal({ appointment, onClose, onSave, isNew = fals
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+                className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 shadow-sm hover:shadow transition-all duration-200"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 bg-green-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-green-700"
+                className="px-4 py-2 bg-blue-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-blue-700 shadow-sm hover:shadow-md transition-all duration-200 transform hover:translate-y-[-1px]"
               >
                 {isNew ? 'Create Appointment' : 'Save Changes'}
               </button>
