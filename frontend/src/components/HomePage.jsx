@@ -124,7 +124,7 @@ function HomePage() {
 
       <div className="text-gray-800 responsive-bg" style={{
         scrollBehavior: 'smooth',
-        backgroundImage: "url('/src/image/Theone.jpeg')",
+        backgroundImage: "url('/image/Theone.jpeg')",
         backgroundSize: "cover",
         backgroundPosition: "center center", /* Center position for all screen sizes */
         backgroundAttachment: "fixed",
