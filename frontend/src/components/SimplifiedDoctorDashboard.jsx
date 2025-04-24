@@ -351,13 +351,14 @@ function SimplifiedDoctorDashboard({
               </div>
 
               {/* Filter appointments based on selected time period and status */}
-              {
+              {(() => {
                 // First filter by time period, then by status
                 const filteredAppointments = timeFilter === 'all' ?
                   appointments : filterAppointmentsByTimePeriod(appointments, timeFilter);
 
-                filteredAppointments.length > 0 ? (
-                filteredAppointments.filter(appointment => statusFilter === 'all' || appointment.status === statusFilter).length > 0 ? (
+                if (filteredAppointments.length > 0) {
+                  if (filteredAppointments.filter(appointment => statusFilter === 'all' || appointment.status === statusFilter).length > 0) {
+                    return (
                 <div className="space-y-3">
                   {filteredAppointments
                     .filter(appointment => statusFilter === 'all' || appointment.status === statusFilter)
@@ -461,7 +462,9 @@ function SimplifiedDoctorDashboard({
                     </div>
                   ))}
                 </div>
-                ) : (
+                    );
+                  } else {
+                    return (
                   <div className="text-center py-8 bg-gray-50 rounded-lg">
                     <p className="text-gray-500">
                       No {statusFilter.toLowerCase()} appointments found for {timeFilter === 'all' ? 'any time period' :
@@ -472,8 +475,10 @@ function SimplifiedDoctorDashboard({
                         timeFilter === 'thisMonth' ? 'this month' : 'the selected time period'}.
                     </p>
                   </div>
-                )
-              ) : timeFilter === 'all' ? (
+                    );
+                  }
+                } else if (timeFilter === 'all') {
+                  return (
                 <div className="text-center py-8 bg-gray-50 rounded-lg">
                   <p className="text-gray-500">
                     {statusFilter === 'all'
@@ -491,7 +496,10 @@ function SimplifiedDoctorDashboard({
                           timeFilter === 'thisMonth' ? 'this month' : 'the selected time period'}.`}
                   </p>
                 </div>
-              )}
+                  );
+                }
+                return null;
+              })()}
             </div>
 
             {/* Pending Diagnoses Section */}
