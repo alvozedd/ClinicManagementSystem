@@ -705,7 +705,9 @@ function SimplifiedDoctorDashboard({
                   appointments={appointments.filter(a => a.patientId === selectedPatient.id || a.patient_id === selectedPatient._id)}
                   onClose={handleClosePatientView}
                   onUpdatePatient={onUpdatePatient}
-                  onDiagnoseAppointment={onDiagnoseAppointment}
+                  onDiagnoseAppointment={(appointment) => {
+                    setDiagnosingAppointment(appointment);
+                  }}
                   onDeletePatient={(patientId) => {
                     onDeletePatient(patientId);
                     handleClosePatientView(); // Close the patient view after deletion
