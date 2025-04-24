@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { getTodaysAppointments } from '../data/mockData';
 import PatientSearch from './PatientSearch';
 import SecretaryPatientView from './SecretaryPatientView';
@@ -6,6 +7,8 @@ import AddPatientForm from './AddPatientForm';
 import SecretaryCalendarView from './SecretaryCalendarView';
 import AppointmentManagementModal from './AppointmentManagementModal';
 import PatientSearchAppointmentModal from './PatientSearchAppointmentModal';
+import { FaCalendarAlt, FaUserTie, FaClipboardList } from 'react-icons/fa';
+import { getTimeBasedGreeting, getFormattedDate } from '../utils/timeUtils';
 
 function SimplifiedSecretaryDashboard({
   patients,
@@ -105,8 +108,8 @@ function SimplifiedSecretaryDashboard({
         </div>
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center relative z-10">
           <div>
-            <h1 className="text-2xl font-bold mb-2">Welcome, {username}!</h1>
-            <p className="text-blue-100">{new Date().toLocaleDateString()}</p>
+            <h1 className="text-2xl font-bold mb-2">{getTimeBasedGreeting()}, {username}</h1>
+            <p className="text-blue-100">{getFormattedDate()}</p>
           </div>
           <div className="flex flex-wrap gap-4 mt-4 md:mt-0">
             <div className="bg-white bg-opacity-20 rounded-lg p-3 backdrop-blur-sm">
@@ -125,53 +128,50 @@ function SimplifiedSecretaryDashboard({
         </div>
       </div>
 
-      {/* Simple Tab Navigation */}
-      <div className="flex border-b mb-6">
-        <button
-          onClick={() => setActiveTab('patient-management')}
-          className={`py-3 px-6 font-medium text-base border-b-2 -mb-px ${
-            activeTab === 'patient-management'
-              ? 'border-blue-500 text-blue-600'
-              : 'border-transparent text-gray-500 hover:text-gray-700'
-          }`}
-        >
-          <div className="flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-              <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
-            </svg>
-            Patient Management
-          </div>
-        </button>
-        <button
-          onClick={() => setActiveTab('appointments')}
-          className={`py-3 px-6 font-medium text-base border-b-2 -mb-px ${
-            activeTab === 'appointments'
-              ? 'border-blue-500 text-blue-600'
-              : 'border-transparent text-gray-500 hover:text-gray-700'
-          }`}
-        >
-          <div className="flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
-            </svg>
-            Appointments
-          </div>
-        </button>
-        <button
-          onClick={() => setActiveTab('calendar')}
-          className={`py-3 px-6 font-medium text-base border-b-2 -mb-px ${
-            activeTab === 'calendar'
-              ? 'border-blue-500 text-blue-600'
-              : 'border-transparent text-gray-500 hover:text-gray-700'
-          }`}
-        >
-          <div className="flex items-center">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M5 2a1 1 0 011 1v1h8V3a1 1 0 112 0v1h1a2 2 0 012 2v10a2 2 0 01-2 2H3a2 2 0 01-2-2V6a2 2 0 012-2h1V3a1 1 0 011-1zm11 14V6H4v10h12z" clipRule="evenodd" />
-            </svg>
-            Calendar
-          </div>
-        </button>
+      {/* Modern Tab Navigation */}
+      <div className="bg-white rounded-lg shadow-md mb-6 p-1">
+        <div className="flex flex-wrap">
+          <button
+            onClick={() => setActiveTab('patient-management')}
+            className={`flex-1 py-3 px-4 rounded-md font-medium text-base transition-all duration-200 flex justify-center items-center ${
+              activeTab === 'patient-management'
+                ? 'bg-blue-100 text-blue-700'
+                : 'text-gray-600 hover:bg-gray-100'
+            }`}
+          >
+            <div className="flex items-center">
+              <FaUserTie className="h-5 w-5 mr-2" />
+              <span className="hidden sm:inline">Patient Management</span>
+              <span className="sm:hidden">Patients</span>
+            </div>
+          </button>
+          <button
+            onClick={() => setActiveTab('appointments')}
+            className={`flex-1 py-3 px-4 rounded-md font-medium text-base transition-all duration-200 flex justify-center items-center ${
+              activeTab === 'appointments'
+                ? 'bg-blue-100 text-blue-700'
+                : 'text-gray-600 hover:bg-gray-100'
+            }`}
+          >
+            <div className="flex items-center">
+              <FaClipboardList className="h-5 w-5 mr-2" />
+              <span>Appointments</span>
+            </div>
+          </button>
+          <button
+            onClick={() => setActiveTab('calendar')}
+            className={`flex-1 py-3 px-4 rounded-md font-medium text-base transition-all duration-200 flex justify-center items-center ${
+              activeTab === 'calendar'
+                ? 'bg-blue-100 text-blue-700'
+                : 'text-gray-600 hover:bg-gray-100'
+            }`}
+          >
+            <div className="flex items-center">
+              <FaCalendarAlt className="h-5 w-5 mr-2" />
+              <span>Calendar</span>
+            </div>
+          </button>
+        </div>
       </div>
 
       {/* Content Area */}

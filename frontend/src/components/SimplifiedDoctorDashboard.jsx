@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { getTodaysAppointments } from '../data/mockData';
 import PatientSearch from './PatientSearch';
 import SimplifiedPatientView from './SimplifiedPatientView';
@@ -10,6 +11,7 @@ import DoctorPatientSearchAppointmentModal from './DoctorPatientSearchAppointmen
 import AppointmentManagementModal from './AppointmentManagementModal';
 import { FaCalendarAlt, FaUserMd, FaClipboardList, FaSearch, FaUserPlus, FaEye, FaArrowLeft, FaTimes, FaPlus, FaUser } from 'react-icons/fa';
 import { getCreatorLabel } from '../utils/recordCreation';
+import { getTimeBasedGreeting, getFormattedDate } from '../utils/timeUtils';
 
 // Calculate age from date of birth
 const calculateAge = (dateOfBirth) => {
@@ -129,13 +131,9 @@ function SimplifiedDoctorDashboard({
     setActiveTab('patient-management');
   };
 
-  // Get current date in a readable format
-  const currentDate = new Date().toLocaleDateString('en-US', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  });
+  // Get current date and greeting
+  const currentDate = getFormattedDate();
+  const greeting = getTimeBasedGreeting();
 
   // Count pending diagnoses
   const pendingDiagnoses = appointments.filter(a => a.status === 'Completed' && !a.diagnosis).length;
@@ -157,7 +155,7 @@ function SimplifiedDoctorDashboard({
         </div>
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center relative z-10">
           <div>
-            <h1 className="text-2xl font-bold mb-2">Welcome, Dr. {username}!</h1>
+            <h1 className="text-2xl font-bold mb-2">{greeting}, Dr. {username}</h1>
             <p className="text-blue-100">{currentDate}</p>
           </div>
           <div className="flex flex-wrap gap-4 mt-4 md:mt-0">

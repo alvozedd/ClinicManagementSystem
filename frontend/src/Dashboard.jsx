@@ -1,9 +1,11 @@
 import { useContext, useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import AuthContext from './context/AuthContext'
 import apiService from './utils/apiService'
 import SimplifiedDoctorDashboard from './components/SimplifiedDoctorDashboard'
 import SimplifiedSecretaryDashboard from './components/SimplifiedSecretaryDashboard'
 import AdminDashboard from './components/AdminDashboard'
+import { FaSignOutAlt, FaSync, FaUserMd, FaUserTie } from 'react-icons/fa'
 import {
   transformPatientsFromBackend,
   transformPatientToBackend,
@@ -513,32 +515,39 @@ function Dashboard() {
         </div>
         <div className="container mx-auto px-4 py-3 relative z-10">
           <div className="flex justify-between items-center">
-            <div className="text-lg font-bold flex items-center">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
+            <Link to="/" className="text-lg font-bold flex items-center hover:text-blue-100 transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M5.5 4a2.5 2.5 0 014.607-1.346.75.75 0 001.264-.057 4 4 0 117.129 3.571.75.75 0 00-.5 1.057 3.5 3.5 0 01-6.6 3.115.75.75 0 00-1.4.05A2.5 2.5 0 015.5 9.5a.75.75 0 00-.75-.75h-1.5a.75.75 0 000 1.5h1.5a.75.75 0 00.75-.75 1 1 0 011-1 .75.75 0 00.75-.75 1 1 0 011-1 .75.75 0 00.75-.75V4zm3 10a2.5 2.5 0 104.607 1.346.75.75 0 011.264.057 4 4 0 11-7.129-3.571.75.75 0 00.5-1.057 3.5 3.5 0 016.6-3.115.75.75 0 001.4-.05A2.5 2.5 0 0114.5 4.5a.75.75 0 00.75.75h1.5a.75.75 0 010 1.5h-1.5a.75.75 0 00-.75.75 1 1 0 01-1 1 .75.75 0 00-.75.75 1 1 0 01-1 1 .75.75 0 00-.75.75V14z" clipRule="evenodd" />
               </svg>
-              UroHealth Central
-            </div>
+              <span>UroHealth Central Ltd</span>
+            </Link>
             <div className="flex items-center">
-              <span className="mr-4 text-sm">
-                Signed in as <strong>{userInfo?.role}</strong>
-              </span>
+              <div className="mr-4 hidden md:flex items-center">
+                {userInfo?.role === 'doctor' ? (
+                  <FaUserMd className="text-white mr-2" />
+                ) : (
+                  <FaUserTie className="text-white mr-2" />
+                )}
+              </div>
               <button
                 onClick={() => {
                   console.log('Refreshing data from API...');
                   setRefreshTrigger(prev => prev + 1);
                   alert('Data refreshed from database');
                 }}
-                className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm mr-2"
-                title="Refresh data from database"
+                className="bg-green-600 hover:bg-green-700 text-white px-2 md:px-3 py-1 rounded text-sm mr-2 flex items-center"
+                title="Refresh Data"
               >
-                Refresh Data
+                <FaSync className="md:mr-1" />
+                <span className="hidden md:inline">Refresh</span>
               </button>
               <button
                 onClick={handleLogout}
-                className="bg-blue-800 hover:bg-blue-900 text-white px-3 py-1 rounded text-sm"
+                className="bg-blue-800 hover:bg-blue-900 text-white px-2 md:px-3 py-1 rounded text-sm flex items-center"
+                title="Sign out"
               >
-                Sign out
+                <FaSignOutAlt className="md:mr-1" />
+                <span className="hidden md:inline">Sign out</span>
               </button>
             </div>
           </div>
