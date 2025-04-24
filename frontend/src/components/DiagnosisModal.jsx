@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { transformAppointmentFromBackend } from '../utils/dataTransformers';
 
 function DiagnosisModal({ appointment, onClose, onSave }) {
   const [diagnosis, setDiagnosis] = useState('');
@@ -16,16 +17,26 @@ function DiagnosisModal({ appointment, onClose, onSave }) {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    const updatedAppointment = {
-      ...appointment,
-      diagnosis: {
-        notes: diagnosis,
-        treatment: treatment,
-        followUp: followUp,
-        updatedAt: new Date().toISOString()
-      }
+    // Create a structured diagnosis object
+    const diagnosisObj = {
+      notes: diagnosis,
+      treatment: treatment,
+      followUp: followUp,
+      updatedAt: new Date().toISOString()
     };
 
+    // For API compatibility, convert the diagnosis object to a string
+    // The backend expects a diagnosis_text field
+    const updatedAppointment = {
+      ...appointment,
+      diagnosis: diagnosisObj,
+      // Also include a text representation for the API
+      diagnosisText: JSON.stringify(diagnosisObj),
+      // Set status to Completed when adding a diagnosis
+      status: 'Completed'
+    };
+
+    console.log('Saving diagnosis with appointment:', updatedAppointment);
     onSave(updatedAppointment);
   };
 

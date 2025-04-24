@@ -10,7 +10,8 @@ import {
   transformPatientsFromBackend,
   transformPatientToBackend,
   transformAppointmentsFromBackend,
-  transformAppointmentToBackend
+  transformAppointmentToBackend,
+  transformAppointmentFromBackend
 } from './utils/dataTransformers'
 
 function Dashboard() {
@@ -267,6 +268,9 @@ function Dashboard() {
           setAppointmentsData(prev =>
             prev.map(a => a._id === appointment._id ? transformedResponse : a)
           );
+
+          // Log the updated appointments data
+          console.log('Updated appointments data after transform');
         } else {
           // Add new appointment via API
           const appointmentData = transformAppointmentToBackend({
@@ -288,6 +292,9 @@ function Dashboard() {
 
           // Add to local state
           setAppointmentsData(prev => [...prev, transformedResponse]);
+
+          // Log the updated appointments data
+          console.log('Updated appointments data after adding new appointment');
         }
       }
 
@@ -319,6 +326,9 @@ function Dashboard() {
         console.log('Setting status to Completed for diagnosis');
       }
 
+      // Log the appointment we're about to save
+      console.log('Appointment to save:', appointmentToSave);
+
       // Handle the appointment update/creation
       let appointmentResponse;
       if (isNewAppointment) {
@@ -334,6 +344,9 @@ function Dashboard() {
 
         // Add to local state
         setAppointmentsData(prev => [...prev, transformedResponse]);
+
+        // Log the updated appointments data
+        console.log('Updated appointments data after adding new appointment in handleSaveDiagnosis');
       } else {
         // Find the existing appointment in our state
         const existingAppointment = appointmentsData.find(a => a._id === appointmentToSave._id);
@@ -353,6 +366,9 @@ function Dashboard() {
         setAppointmentsData(prev =>
           prev.map(a => a._id === appointmentToSave._id ? transformedResponse : a)
         );
+
+        // Log the updated appointments data
+        console.log('Updated appointments data after updating appointment in handleSaveDiagnosis');
       }
 
       // If there's a diagnosis, save it
@@ -411,6 +427,9 @@ function Dashboard() {
             status: 'Completed'
           } : a)
         );
+
+        // Log the updated appointments data after adding diagnosis
+        console.log('Updated appointments data after adding diagnosis');
       }
 
       // Refresh data from API to ensure we have the latest data

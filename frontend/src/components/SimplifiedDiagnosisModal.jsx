@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { transformAppointmentFromBackend } from '../utils/dataTransformers';
 
 function SimplifiedDiagnosisModal({ appointment, onClose, onSave }) {
   const [diagnosis, setDiagnosis] = useState('');
@@ -73,9 +74,12 @@ function SimplifiedDiagnosisModal({ appointment, onClose, onSave }) {
         ...appointment,
         diagnosis: diagnosisObj,
         // Also include a text representation for the API
-        diagnosisText: JSON.stringify(diagnosisObj)
+        diagnosisText: JSON.stringify(diagnosisObj),
+        // Set status to Completed when adding a diagnosis
+        status: 'Completed'
       };
 
+      console.log('Saving diagnosis with appointment:', updatedAppointment);
       onSave(updatedAppointment);
     } catch (error) {
       console.error('Error saving diagnosis:', error);

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { FaCalendarAlt, FaClock, FaClipboardList, FaUserInjured, FaRegStickyNote } from 'react-icons/fa';
+import { transformAppointmentFromBackend } from '../utils/dataTransformers';
 
 function AppointmentManagementModal({ appointment, onClose, onSave, isNew = false, isEmbedded = false }) {
   // Initialize with empty values, will be populated in useEffect
