@@ -6,6 +6,7 @@ import SimplifiedDiagnosisModal from './SimplifiedDiagnosisModal';
 import MedicalHistoryManager from './MedicalHistoryManager';
 import AllergiesManager from './AllergiesManager';
 import MedicationsManager from './MedicationsManager';
+import PatientDiagnosesTab from './PatientDiagnosesTab';
 import { transformAppointmentFromBackend } from '../utils/dataTransformers';
 import { clearAllCaches } from '../data/mockData';
 
@@ -837,15 +838,8 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
           </div>
         </div>
       ) : activeTab === 'diagnoses' ? (
-        <div className="space-y-6">
-          {/* Diagnoses Section */}
-          <div>
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="font-semibold text-lg">Diagnoses History</h3>
-              <button
-                onClick={() => {
-                  // Create a new appointment for diagnosis if no appointments exist
-                  if (sortedAppointments.length === 0) {
+        <PatientDiagnosesTab patient={patient} appointments={appointments} />
+      ) : activeTab === 'appointments' ? (
                     const newAppointment = {
                       id: 'new-' + Date.now(),
                       patientId: patient.id,

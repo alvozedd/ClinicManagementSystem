@@ -7,9 +7,10 @@ import SimplifiedDiagnosisModal from './SimplifiedDiagnosisModal';
 import AddPatientForm from './AddPatientForm';
 import DoctorCalendarView from './DoctorCalendarView';
 import PatientNavigator from './PatientNavigator';
+import GlobalDiagnosesView from './GlobalDiagnosesView';
 import DoctorPatientSearchAppointmentModal from './DoctorPatientSearchAppointmentModal';
 import AppointmentManagementModal from './AppointmentManagementModal';
-import { FaCalendarAlt, FaUserMd, FaClipboardList, FaSearch, FaUserPlus, FaEye, FaArrowLeft, FaTimes, FaPlus, FaUser } from 'react-icons/fa';
+import { FaCalendarAlt, FaUserMd, FaClipboardList, FaSearch, FaUserPlus, FaEye, FaArrowLeft, FaTimes, FaPlus, FaUser, FaFileMedical } from 'react-icons/fa';
 import { getCreatorLabel } from '../utils/recordCreation';
 import { getTimeBasedGreeting, getFormattedDate, filterAppointmentsByTimePeriod, updateAppointmentStatuses, identifyAppointmentsNeedingDiagnosis } from '../utils/timeUtils';
 import { transformAppointmentFromBackend } from '../utils/dataTransformers';
@@ -240,12 +241,34 @@ function SimplifiedDoctorDashboard({
               <span>Calendar</span>
             </div>
           </button>
+          <button
+            onClick={() => setActiveTab('diagnoses')}
+            className={`flex-1 py-3 px-4 rounded-md font-medium text-base transition-all duration-200 flex justify-center items-center ${
+              activeTab === 'diagnoses'
+                ? 'bg-blue-100 text-blue-700'
+                : 'text-gray-600 hover:bg-gray-100'
+            }`}
+          >
+            <div className="flex items-center">
+              <FaFileMedical className="h-5 w-5 mr-2" />
+              <span>Diagnoses</span>
+            </div>
+          </button>
         </div>
       </div>
 
       {/* Content Area */}
       <div className="bg-white rounded-lg shadow-lg p-6 border border-gray-100">
-        {activeTab === 'calendar' ? (
+        {activeTab === 'diagnoses' ? (
+          <GlobalDiagnosesView
+            onViewPatient={(patientId) => {
+              const patient = patients.find(p => p._id === patientId || p.id === patientId);
+              if (patient) {
+                handleViewPatient(patient);
+              }
+            }}
+          />
+        ) : activeTab === 'calendar' ? (
           <DoctorCalendarView
             appointments={appointments}
             onDiagnoseAppointment={onDiagnoseAppointment}
@@ -439,6 +462,15 @@ function SimplifiedDoctorDashboard({
                           View Patient
                         </button>
                         <div className="flex space-x-2">
+                          <button
+                            className="text-yellow-600 hover:text-yellow-800 font-medium"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setDiagnosingAppointment(appointment);
+                            }}
+                          >
+                            Diagnose
+                          </button>
                           <button
                             className="text-green-600 hover:text-green-800 font-medium"
                             onClick={(e) => {
@@ -660,6 +692,15 @@ function SimplifiedDoctorDashboard({
                         </button>
                         <div className="flex space-x-2">
                           <button
+                            className="text-yellow-600 hover:text-yellow-800 font-medium"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setDiagnosingAppointment(appointment);
+                            }}
+                          >
+                            Diagnose
+                          </button>
+                          <button
                             className="text-green-600 hover:text-green-800 font-medium"
                             onClick={(e) => {
                               e.stopPropagation();
@@ -702,7 +743,12 @@ function SimplifiedDoctorDashboard({
                 />
                 <SimplifiedPatientView
                   patient={selectedPatient}
-                  appointments={appointments.filter(a => a.patientId === selectedPatient.id || a.patient_id === selectedPatient._id)}
+                  appointments={appointments.filter(a =>
+                    (a.patientId === selectedPatient.id) ||
+                    (a.patient_id === selectedPatient._id) ||
+                    (a.patientId === selectedPatient._id) ||
+                    (a.patient_id === selectedPatient.id)
+                  )}
                   onClose={handleClosePatientView}
                   onUpdatePatient={onUpdatePatient}
                   onDiagnoseAppointment={(appointment) => {
