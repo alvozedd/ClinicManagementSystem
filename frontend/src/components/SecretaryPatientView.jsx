@@ -4,7 +4,7 @@ import PatientNavigator from './PatientNavigator';
 import { transformAppointmentFromBackend } from '../utils/dataTransformers';
 import { clearAllCaches } from '../data/mockData';
 
-function SecretaryPatientView({ patient, patients, appointments, onClose, onUpdatePatient, onSelectPatient }) {
+function SecretaryPatientView({ patient, patients, appointments, onClose, onUpdatePatient, onSelectPatient, onDeletePatient }) {
   const [activeTab, setActiveTab] = useState('appointments');
   const [editMode, setEditMode] = useState(false);
   const [editedPatient, setEditedPatient] = useState({...patient});
@@ -306,17 +306,34 @@ function SecretaryPatientView({ patient, patients, appointments, onClose, onUpda
           <div className="border rounded-lg p-4">
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-semibold text-lg">Patient Biodata</h3>
-              {!editMode && canEdit() ? (
+              {!editMode ? (
                 <div className="flex items-center space-x-2">
-                  <button
-                    onClick={() => setEditMode(true)}
-                    className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700"
-                  >
-                    Edit Biodata
-                  </button>
-                  <div className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded border border-green-200">
-                    {getTimeRemaining().minutes} minutes left to edit
-                  </div>
+                  {canEdit() && (
+                    <>
+                      <button
+                        onClick={() => setEditMode(true)}
+                        className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700"
+                      >
+                        Edit Biodata
+                      </button>
+                      <div className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded border border-green-200">
+                        {getTimeRemaining().minutes} minutes left to edit
+                      </div>
+                    </>
+                  )}
+                  {onDeletePatient && (
+                    <button
+                      onClick={() => {
+                        if (window.confirm(`Are you sure you want to delete ${patient.firstName} ${patient.lastName}? This action cannot be undone.`)) {
+                          onDeletePatient(patient._id || patient.id);
+                          onClose(); // Close the patient view after deletion
+                        }
+                      }}
+                      className="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700"
+                    >
+                      Delete Patient
+                    </button>
+                  )}
                 </div>
               ) : !editMode ? (
                 <div className="text-sm text-gray-500 italic">

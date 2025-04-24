@@ -694,11 +694,14 @@ function SimplifiedDoctorDashboard({
                 />
                 <SimplifiedPatientView
                   patient={selectedPatient}
-                  appointments={appointments.filter(a => a.patientId === selectedPatient.id)}
+                  appointments={appointments.filter(a => a.patientId === selectedPatient.id || a.patient_id === selectedPatient._id)}
                   onClose={handleClosePatientView}
                   onUpdatePatient={onUpdatePatient}
                   onDiagnoseAppointment={onDiagnoseAppointment}
-                  onDeletePatient={onDeletePatient}
+                  onDeletePatient={(patientId) => {
+                    onDeletePatient(patientId);
+                    handleClosePatientView(); // Close the patient view after deletion
+                  }}
                 />
 
                 {/* Floating Close Button (visible on mobile) */}

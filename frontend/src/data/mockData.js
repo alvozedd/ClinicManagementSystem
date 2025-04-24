@@ -20,8 +20,17 @@ let lastFetchTime = {
   reports: 0
 };
 
-// Cache expiration time (10 seconds - reduced from 5 minutes to ensure fresher data)
-const CACHE_EXPIRATION = 10 * 1000;
+// Cache expiration times (in milliseconds)
+const CACHE_EXPIRATION = {
+  // Default expiration time (30 seconds)
+  DEFAULT: 30 * 1000,
+
+  // Short expiration for frequently changing data (5 seconds)
+  SHORT: 5 * 1000,
+
+  // Long expiration for rarely changing data (2 minutes)
+  LONG: 2 * 60 * 1000
+};
 
 // Today's appointments (for dashboard)
 export const getTodaysAppointments = async () => {
@@ -108,7 +117,7 @@ export const getPatients = async () => {
   try {
     // Check if cache is valid
     const now = Date.now();
-    if (patientsCache.length > 0 && (now - lastFetchTime.patients) < CACHE_EXPIRATION) {
+    if (patientsCache.length > 0 && (now - lastFetchTime.patients) < CACHE_EXPIRATION.LONG) {
       return patientsCache;
     }
 
@@ -130,7 +139,7 @@ export const getAppointments = async () => {
   try {
     // Check if cache is valid
     const now = Date.now();
-    if (appointmentsCache.length > 0 && (now - lastFetchTime.appointments) < CACHE_EXPIRATION) {
+    if (appointmentsCache.length > 0 && (now - lastFetchTime.appointments) < CACHE_EXPIRATION.SHORT) {
       return appointmentsCache;
     }
 
@@ -155,7 +164,7 @@ export const getReports = async () => {
   try {
     // Check if cache is valid
     const now = Date.now();
-    if (reportsCache.length > 0 && (now - lastFetchTime.reports) < CACHE_EXPIRATION) {
+    if (reportsCache.length > 0 && (now - lastFetchTime.reports) < CACHE_EXPIRATION.DEFAULT) {
       return reportsCache;
     }
 
@@ -182,6 +191,28 @@ export const clearAllCaches = () => {
   lastFetchTime.patients = 0;
   lastFetchTime.appointments = 0;
   lastFetchTime.reports = 0;
+};
+
+// Function to clear specific cache - use this for targeted refreshes
+export const clearCache = (cacheType) => {
+  console.log(`Clearing ${cacheType} cache`);
+  switch (cacheType) {
+    case 'patients':
+      patientsCache = [];
+      lastFetchTime.patients = 0;
+      break;
+    case 'appointments':
+      appointmentsCache = [];
+      lastFetchTime.appointments = 0;
+      break;
+    case 'reports':
+    case 'diagnoses':
+      reportsCache = [];
+      lastFetchTime.reports = 0;
+      break;
+    default:
+      console.warn(`Unknown cache type: ${cacheType}`);
+  }
 };
 
 // Save functions now use API calls

@@ -17,6 +17,7 @@ function SimplifiedSecretaryDashboard({
   onUpdatePatient,
   onDiagnoseAppointment,
   onDeleteAppointment,
+  onDeletePatient,
   username
 }) {
   const [activeTab, setActiveTab] = useState('patient-management');
@@ -510,10 +511,11 @@ function SimplifiedSecretaryDashboard({
               <SecretaryPatientView
                 patient={selectedPatient}
                 patients={patients}
-                appointments={appointments.filter(a => a.patientId === selectedPatient.id)}
+                appointments={appointments.filter(a => a.patientId === selectedPatient.id || a.patient_id === selectedPatient._id)}
                 onClose={handleClosePatientView}
                 onUpdatePatient={onUpdatePatient}
                 onSelectPatient={setSelectedPatient}
+                onDeletePatient={onDeletePatient}
               />
             ) : (
               <div>

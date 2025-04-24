@@ -13,7 +13,7 @@ import {
   transformAppointmentToBackend,
   transformAppointmentFromBackend
 } from './utils/dataTransformers'
-import { clearAllCaches } from './data/mockData'
+import { clearAllCaches, clearCache } from './data/mockData'
 import { updateAppointmentStatuses } from './utils/timeUtils'
 
 function Dashboard() {
@@ -26,6 +26,7 @@ function Dashboard() {
   const [refreshTrigger, setRefreshTrigger] = useState(0) // Used to trigger data refresh
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [selectedPatient, setSelectedPatient] = useState(null) // Track the currently selected patient
 
   // Debug function to check user info and token
   useEffect(() => {
@@ -144,6 +145,7 @@ function Dashboard() {
   // Handler for updating patient information
   const handleUpdatePatient = async (updatedPatient) => {
     try {
+      setIsLoading(true); // Show loading state
       console.log('Updating patient with role:', userInfo?.role);
       console.log('Updated patient data:', updatedPatient);
 
@@ -172,7 +174,7 @@ function Dashboard() {
         const transformedResponse = transformPatientsFromBackend([response])[0];
         console.log('Transformed response:', transformedResponse);
 
-        // Update local state
+        // Update local state immediately (optimistic update)
         const updatedPatients = patientsData.map(p =>
           p._id === updatedPatient._id ? { ...p, ...transformedResponse } : p
         );
@@ -188,17 +190,19 @@ function Dashboard() {
         const transformedResponse = transformPatientsFromBackend([response])[0];
         console.log('Transformed new patient response:', transformedResponse);
 
-        // Add to local state
-        setPatientsData([...patientsData, transformedResponse]);
+        // Add to local state immediately (optimistic update)
+        setPatientsData(prevData => [...prevData, transformedResponse]);
       }
 
       console.log('Patient saved to database:', response);
 
-      // Clear all caches to ensure fresh data
-      clearAllCaches();
+      // Clear only the patients cache to ensure fresh data
+      clearCache('patients');
 
-      // Refresh data from API to ensure we have the latest data
-      setRefreshTrigger(prev => prev + 1);
+      // Refresh only patient data from API
+      const patientsResponse = await apiService.getPatients();
+      const transformedPatients = transformPatientsFromBackend(patientsResponse);
+      setPatientsData(transformedPatients);
 
       return response;
     } catch (error) {
@@ -206,6 +210,8 @@ function Dashboard() {
       setError('Failed to save patient. Please try again.');
       alert('Failed to save patient to database. Please try again.');
       throw error;
+    } finally {
+      setIsLoading(false); // Hide loading state
     }
   };
 
@@ -220,6 +226,7 @@ function Dashboard() {
 
     try {
       console.log('Deleting patient with ID:', patientId);
+      setIsLoading(true); // Show loading state
 
       // Find the patient in our local state to get the MongoDB _id
       const patientToDelete = patientsData.find(p => p._id === patientId || p.id === patientId);
@@ -231,43 +238,38 @@ function Dashboard() {
       const mongoId = patientToDelete._id;
       console.log('Found patient to delete with MongoDB ID:', mongoId);
 
-      try {
-        // Delete patient via API (backend will handle cascade deletion of appointments and diagnoses)
-        const response = await apiService.deletePatient(mongoId);
-        console.log('Delete patient response:', response);
+      // Delete patient via API (backend will handle cascade deletion of appointments and diagnoses)
+      const response = await apiService.deletePatient(mongoId);
+      console.log('Delete patient response:', response);
 
-        // Remove the patient from the local state
-        const updatedPatients = patientsData.filter(p => p._id !== mongoId);
-        setPatientsData(updatedPatients);
+      // Clear all caches to ensure fresh data
+      clearAllCaches();
 
-        // Find all appointments associated with this patient
-        const patientAppointments = appointmentsData.filter(a => a.patient_id === mongoId);
-        const appointmentIds = patientAppointments.map(a => a._id);
-        console.log(`Found ${patientAppointments.length} appointments to remove from local state`);
-
-        // Remove all appointments associated with this patient from local state
-        const updatedAppointments = appointmentsData.filter(a => a.patient_id !== mongoId);
-        setAppointmentsData(updatedAppointments);
-
-        // Remove all diagnoses associated with these appointments from local state
-        const updatedReports = reportsData.filter(d => !appointmentIds.includes(d.appointment_id));
-        setReportsData(updatedReports);
-        console.log(`Removed ${reportsData.length - updatedReports.length} diagnoses from local state`);
-      } catch (deleteError) {
-        // Check if this is a permission error
-        if (deleteError.includes && deleteError.includes('Not authorized as an admin')) {
-          alert('The backend server needs to be restarted to apply permission changes. Please contact the administrator.');
-        } else {
-          throw deleteError;
-        }
-      }
+      // Refresh all data from API to ensure consistency
+      setRefreshTrigger(prev => prev + 1);
 
       // Show success message
-      alert('Patient and all associated data deleted successfully');
+      alert(`Patient ${patientToDelete.name || patientToDelete.firstName + ' ' + patientToDelete.lastName} and all associated data deleted successfully.\n\nDeleted:\n- ${response.deletedAppointments} appointment(s)\n- ${response.deletedDiagnoses} diagnosis/diagnoses`);
+
+      // Return to the main dashboard view if we were viewing the deleted patient
+      if (selectedPatient && (selectedPatient._id === mongoId || selectedPatient.id === patientId)) {
+        // If there's a selected patient and it's the one we just deleted, clear the selection
+        if (typeof onPatientDeleted === 'function') {
+          onPatientDeleted();
+        }
+      }
     } catch (error) {
       console.error('Error deleting patient:', error);
       setError('Failed to delete patient. Please try again.');
-      alert('Failed to delete patient. Please try again: ' + error.message);
+
+      // Check if this is a permission error
+      if (error.includes && error.includes('Not authorized')) {
+        alert('You do not have permission to delete this patient. Please contact an administrator.');
+      } else {
+        alert('Failed to delete patient. Please try again: ' + error.message);
+      }
+    } finally {
+      setIsLoading(false); // Hide loading state
     }
   };
 
@@ -353,6 +355,7 @@ function Dashboard() {
   // Handler for saving diagnosis or updating appointments
   const handleSaveDiagnosis = async (updatedAppointment) => {
     try {
+      setIsLoading(true); // Show loading state
       console.log('Dashboard - Handling appointment update:', updatedAppointment);
       console.log('Status being set:', updatedAppointment.status);
 
@@ -385,7 +388,7 @@ function Dashboard() {
         const transformedResponse = transformAppointmentFromBackend(appointmentResponse);
         console.log('Transformed new appointment:', transformedResponse);
 
-        // Add to local state
+        // Add to local state immediately (optimistic update)
         setAppointmentsData(prev => [...prev, transformedResponse]);
 
         // Log the updated appointments data
@@ -405,7 +408,7 @@ function Dashboard() {
         const transformedResponse = transformAppointmentFromBackend(appointmentResponse);
         console.log('Transformed updated appointment:', transformedResponse);
 
-        // Update in local state
+        // Update in local state immediately (optimistic update)
         setAppointmentsData(prev =>
           prev.map(a => a._id === appointmentToSave._id ? transformedResponse : a)
         );
@@ -459,10 +462,10 @@ function Dashboard() {
 
         console.log('Saved diagnosis to database:', diagnosisResponse);
 
-        // Add to reports data
+        // Add to reports data immediately (optimistic update)
         setReportsData(prev => [...prev, diagnosisResponse]);
 
-        // Update the appointment with the new diagnosis
+        // Update the appointment with the new diagnosis immediately (optimistic update)
         setAppointmentsData(prev =>
           prev.map(a => a._id === appointmentResponse._id ? {
             ...a,
@@ -485,15 +488,27 @@ function Dashboard() {
         alert('Appointment saved successfully!');
       }
 
-      // Clear all caches to ensure fresh data
-      clearAllCaches();
+      // Clear specific caches to ensure fresh data
+      clearCache('appointments');
+      if (appointmentToSave.diagnosis) {
+        clearCache('reports');
+      }
 
-      // Refresh data from API immediately
-      setRefreshTrigger(prev => prev + 1);
+      // Refresh specific data from API
+      const appointmentsResponse = await apiService.getAppointments();
+      const transformedAppointments = transformAppointmentsFromBackend(appointmentsResponse);
+      setAppointmentsData(transformedAppointments);
+
+      if (appointmentToSave.diagnosis) {
+        const diagnosesResponse = await apiService.getDiagnoses();
+        setReportsData(diagnosesResponse);
+      }
     } catch (error) {
       console.error('Error saving diagnosis/appointment:', error);
       setError('Failed to save. Please try again.');
       alert('Failed to save diagnosis/appointment. Please try again.');
+    } finally {
+      setIsLoading(false); // Hide loading state
     }
   }
 
@@ -505,13 +520,22 @@ function Dashboard() {
     }
 
     try {
+      setIsLoading(true); // Show loading state
       console.log('Deleting appointment with ID:', appointmentId);
 
       // Delete appointment via API
       await apiService.deleteAppointment(appointmentId);
 
-      // Remove the appointment from the local state
+      // Remove the appointment from the local state immediately (optimistic update)
       setAppointmentsData(prev => prev.filter(a => a._id !== appointmentId));
+
+      // Clear appointments cache
+      clearCache('appointments');
+
+      // Refresh appointments data from API
+      const appointmentsResponse = await apiService.getAppointments();
+      const transformedAppointments = transformAppointmentsFromBackend(appointmentsResponse);
+      setAppointmentsData(transformedAppointments);
 
       // Show success message
       alert('Appointment deleted successfully');
@@ -519,6 +543,8 @@ function Dashboard() {
       console.error('Error deleting appointment:', error);
       setError('Failed to delete appointment. Please try again.');
       alert('Failed to delete appointment. Please try again: ' + error.message);
+    } finally {
+      setIsLoading(false); // Hide loading state
     }
   };
 
@@ -564,6 +590,7 @@ function Dashboard() {
           onUpdatePatient={handleUpdatePatient}
           onDiagnoseAppointment={handleSaveDiagnosis}
           onDeleteAppointment={handleDeleteAppointment}
+          onDeletePatient={handleDeletePatient}
           username={userInfo?.username}
           userRole={userInfo?.role}
         />
@@ -598,17 +625,43 @@ function Dashboard() {
                 )}
               </div>
               <button
-                onClick={() => {
+                onClick={async () => {
                   console.log('Refreshing data from API...');
-                  // Clear all caches to ensure fresh data
-                  clearAllCaches();
-                  setRefreshTrigger(prev => prev + 1);
-                  alert('Data refreshed from database');
+                  setIsLoading(true); // Show loading state
+                  try {
+                    // Clear all caches to ensure fresh data
+                    clearAllCaches();
+
+                    // Fetch fresh data directly instead of using refreshTrigger
+                    const patientsResponse = await apiService.getPatients();
+                    const transformedPatients = transformPatientsFromBackend(patientsResponse);
+                    setPatientsData(transformedPatients);
+
+                    const appointmentsResponse = await apiService.getAppointments();
+                    const transformedAppointments = transformAppointmentsFromBackend(appointmentsResponse);
+                    setAppointmentsData(transformedAppointments);
+
+                    const diagnosesResponse = await apiService.getDiagnoses();
+                    setReportsData(diagnosesResponse);
+
+                    // Show success message
+                    alert('Data refreshed from database');
+                  } catch (error) {
+                    console.error('Error refreshing data:', error);
+                    alert('Failed to refresh data. Please try again.');
+                  } finally {
+                    setIsLoading(false); // Hide loading state
+                  }
                 }}
                 className="bg-green-600 hover:bg-green-700 text-white px-2 md:px-3 py-1 rounded text-sm mr-2 flex items-center"
                 title="Refresh Data"
+                disabled={isLoading}
               >
-                <FaSync className="md:mr-1" />
+                {isLoading ? (
+                  <span className="animate-spin mr-1">⟳</span>
+                ) : (
+                  <FaSync className="md:mr-1" />
+                )}
                 <span className="hidden md:inline">Refresh</span>
               </button>
               <button
@@ -624,7 +677,15 @@ function Dashboard() {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-8 relative">
+        {isLoading && (
+          <div className="absolute inset-0 bg-white bg-opacity-70 flex items-center justify-center z-50">
+            <div className="bg-white p-4 rounded-lg shadow-lg flex items-center space-x-3">
+              <div className="animate-spin text-blue-600 text-2xl">⟳</div>
+              <div className="text-gray-700 font-medium">Loading...</div>
+            </div>
+          </div>
+        )}
         {renderContent()}
       </main>
     </div>
