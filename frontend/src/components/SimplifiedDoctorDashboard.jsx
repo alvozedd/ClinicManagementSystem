@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getTodaysAppointments } from '../data/mockData';
 import PatientSearch from './PatientSearch';
-import SimplifiedPatientView from './SimplifiedPatientView';
+import SimplifiedPatientView from './BasicPatientView';
 import SimplifiedDiagnosisModal from './SimplifiedDiagnosisModal';
 import AddPatientForm from './AddPatientForm';
 import DoctorCalendarView from './DoctorCalendarView';

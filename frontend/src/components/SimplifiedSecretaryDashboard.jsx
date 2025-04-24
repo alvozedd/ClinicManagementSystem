@@ -2,7 +2,9 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getTodaysAppointments } from '../data/mockData';
 import PatientSearch from './PatientSearch';
-import SecretaryPatientView from './SecretaryPatientView';
+// import SecretaryPatientView from './SecretaryPatientView';
+// Using a simplified version for now
+import SecretaryPatientView from './BasicPatientView';
 import AddPatientForm from './AddPatientForm';
 import SecretaryCalendarView from './SecretaryCalendarView';
 import AppointmentManagementModal from './AppointmentManagementModal';

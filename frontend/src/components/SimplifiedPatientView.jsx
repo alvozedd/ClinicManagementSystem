@@ -1262,7 +1262,7 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
         />
       )}
     </div>
-  );
+  )
 }
 
 export default SimplifiedPatientView;
