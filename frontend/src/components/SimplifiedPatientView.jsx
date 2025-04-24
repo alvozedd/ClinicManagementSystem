@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FaUser } from 'react-icons/fa';
 import { getCreatorLabel } from '../utils/recordCreation';
 import AppointmentManagementModal from './AppointmentManagementModal';
@@ -7,6 +7,7 @@ import MedicalHistoryManager from './MedicalHistoryManager';
 import AllergiesManager from './AllergiesManager';
 import MedicationsManager from './MedicationsManager';
 import { transformAppointmentFromBackend } from '../utils/dataTransformers';
+import { clearAllCaches } from '../data/mockData';
 
 function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient, onDiagnoseAppointment, onDeletePatient }) {
   const [activeTab, setActiveTab] = useState('biodata');
@@ -21,8 +22,28 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
   const [editedAllergies, setEditedAllergies] = useState([...patient.allergies || []]);
   const [editedMedications, setEditedMedications] = useState([...patient.medications || []]);
 
-  // Sort appointments by date (most recent first)
-  const sortedAppointments = [...appointments].sort((a, b) => new Date(b.date) - new Date(a.date));
+  // Update local state when patient prop changes
+  useEffect(() => {
+    setEditedPatient({...patient});
+    setEditedMedicalHistory([...patient.medicalHistory || []]);
+    setEditedAllergies([...patient.allergies || []]);
+    setEditedMedications([...patient.medications || []]);
+  }, [patient]);
+
+  // Get today's date in YYYY-MM-DD format
+  const today = new Date().toISOString().split('T')[0];
+
+  // Separate past and upcoming appointments
+  const pastAppointments = [...appointments]
+    .filter(a => a.date < today || (a.date === today && a.status === 'Completed'))
+    .sort((a, b) => new Date(b.date) - new Date(a.date)); // Most recent first
+
+  const upcomingAppointments = [...appointments]
+    .filter(a => a.date > today || (a.date === today && a.status !== 'Completed'))
+    .sort((a, b) => new Date(a.date) - new Date(b.date)); // Earliest first
+
+  // Combined sorted appointments (for backward compatibility)
+  const sortedAppointments = [...upcomingAppointments, ...pastAppointments];
 
   // Get appointments with diagnoses
   const appointmentsWithDiagnoses = sortedAppointments.filter(a => a.diagnosis || (a.diagnoses && a.diagnoses.length > 0));
@@ -98,6 +119,10 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
       medications: editedMedications
     };
 
+    // Clear caches to ensure fresh data
+    clearAllCaches();
+
+    // Update the patient
     onUpdatePatient(updatedPatient);
     setEditMode(false);
   };
@@ -404,20 +429,21 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
                           const dateStr = `${year}-01-01`;
                           setEditedPatient(prev => ({
                             ...prev,
-                            dateOfBirth: dateStr
+                            dateOfBirth: dateStr,
+                            yearOfBirth: parseInt(year)
                           }));
                         } else {
                           // If input is empty or invalid, clear the date
                           setEditedPatient(prev => ({
                             ...prev,
-                            dateOfBirth: ''
+                            dateOfBirth: '',
+                            yearOfBirth: null
                           }));
                         }
                       }}
                       min="1900"
                       max={new Date().getFullYear()}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                      required
                       placeholder="Enter year of birth"
                     />
                   </div>
@@ -976,7 +1002,7 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
           {/* Appointments List */}
           <div>
             <div className="flex justify-between items-center mb-4">
-              <h3 className="font-semibold text-lg">Appointment History</h3>
+              <h3 className="font-semibold text-lg">Appointments</h3>
               <button
                 onClick={handleAddAppointment}
                 className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-md text-sm font-medium"
@@ -985,9 +1011,67 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
               </button>
             </div>
 
-            {sortedAppointments.length > 0 ? (
+            {/* Upcoming Appointments Section */}
+            {upcomingAppointments.length > 0 && (
+              <div className="mb-6">
+                <h4 className="font-medium text-blue-800 mb-3 border-b pb-1">Upcoming Appointments</h4>
+                <div className="space-y-4">
+                  {upcomingAppointments.map(appointment => (
+                    <div key={appointment.id} className={`border rounded-lg p-4 hover:bg-gray-50 ${appointment.status === 'Scheduled' ? 'bg-green-50' : appointment.status === 'Completed' ? 'bg-blue-50' : appointment.status === 'Cancelled' ? 'bg-red-50' : appointment.status === 'Pending' ? 'bg-yellow-50' : 'bg-white'}`}>
+                      <div className="flex justify-between items-center mb-2">
+                        <div>
+                          <p className="font-medium text-lg">{appointment.date} at {appointment.time}</p>
+                          <p className="text-gray-600">{appointment.type} - {appointment.reason}</p>
+                          {appointment.createdBy && (
+                            <div className="flex items-center mt-1">
+                              <span className="text-gray-500 text-sm mr-1">Booked by:</span>
+                              <span className={`px-2 py-0.5 rounded-md text-xs font-medium ${
+                                appointment.createdBy === 'doctor' ? 'bg-blue-100 text-blue-800' :
+                                appointment.createdBy === 'secretary' ? 'bg-green-100 text-green-800' :
+                                'bg-purple-100 text-purple-800'
+                              }`}>
+                                {getCreatorLabel(appointment.createdBy)}
+                              </span>
+                              {appointment.createdAt && (
+                                <span className="text-xs text-gray-500 ml-1">
+                                  on {new Date(appointment.createdAt).toLocaleDateString()}
+                                </span>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                            appointment.status === 'Scheduled' ? 'bg-green-100 text-green-800' :
+                            appointment.status === 'Completed' ? 'bg-blue-100 text-blue-800' :
+                            appointment.status === 'Cancelled' ? 'bg-red-100 text-red-800' :
+                            appointment.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
+                            'bg-gray-100 text-gray-800'
+                          }`}>
+                            {appointment.status}
+                          </span>
+                          <div className="flex space-x-1">
+                            <button
+                              onClick={() => handleEditAppointment(appointment)}
+                              className="text-blue-600 hover:text-blue-800 text-sm"
+                            >
+                              Edit
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Past Appointments Section */}
+            <div className="mb-4">
+              <h4 className="font-medium text-gray-700 mb-3 border-b pb-1">Previous Appointments</h4>
+              {pastAppointments.length > 0 ? (
               <div className="space-y-4">
-                {sortedAppointments.map(appointment => (
+                {pastAppointments.map(appointment => (
                   <div key={appointment.id} className={`border rounded-lg p-4 hover:bg-gray-50 ${appointment.status === 'Scheduled' ? 'bg-green-50' : appointment.status === 'Completed' ? 'bg-blue-50' : appointment.status === 'Cancelled' ? 'bg-red-50' : appointment.status === 'Pending' ? 'bg-yellow-50' : 'bg-white'}`}>
                     <div className="flex justify-between items-center mb-2">
                       <div>
@@ -1111,7 +1195,13 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
                 ))}
               </div>
             ) : (
-              <div className="text-center py-8 bg-gray-50 rounded-lg">
+              <div className="text-center py-4 bg-gray-50 rounded-lg">
+                <p className="text-gray-500">No previous appointments recorded for this patient.</p>
+              </div>
+            )}
+
+            {upcomingAppointments.length === 0 && pastAppointments.length === 0 && (
+              <div className="text-center py-8 bg-gray-50 rounded-lg mt-4">
                 <p className="text-gray-500">No appointments recorded for this patient.</p>
               </div>
             )}

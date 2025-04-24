@@ -8,7 +8,7 @@ import SecretaryCalendarView from './SecretaryCalendarView';
 import AppointmentManagementModal from './AppointmentManagementModal';
 import PatientSearchAppointmentModal from './PatientSearchAppointmentModal';
 import { FaCalendarAlt, FaUserTie, FaClipboardList } from 'react-icons/fa';
-import { getTimeBasedGreeting, getFormattedDate } from '../utils/timeUtils';
+import { getTimeBasedGreeting, getFormattedDate, identifyAppointmentsNeedingDiagnosis } from '../utils/timeUtils';
 import { transformAppointmentFromBackend } from '../utils/dataTransformers';
 
 function SimplifiedSecretaryDashboard({
@@ -46,9 +46,13 @@ function SimplifiedSecretaryDashboard({
     fetchTodaysAppointments();
   }, [appointments]);
 
+  // Identify appointments that need diagnoses
+  const appointmentsNeedingDiagnosis = identifyAppointmentsNeedingDiagnosis(appointments);
+
   // Calculate analytics
   const totalPatients = patients.length;
   const pendingAppointments = appointments.filter(a => a.status === 'Scheduled').length;
+  const needsDiagnosisCount = appointmentsNeedingDiagnosis.length;
 
   // Filter upcoming appointments (excluding today's)
   const upcomingAppointments = appointments
@@ -120,6 +124,10 @@ function SimplifiedSecretaryDashboard({
             <div className="bg-white bg-opacity-20 rounded-lg p-3 backdrop-blur-sm">
               <div className="font-bold text-2xl">{pendingAppointments}</div>
               <div className="text-sm">Pending Appointments</div>
+            </div>
+            <div className="bg-white bg-opacity-20 rounded-lg p-3 backdrop-blur-sm">
+              <div className="font-bold text-2xl">{needsDiagnosisCount}</div>
+              <div className="text-sm">Needs Diagnosis</div>
             </div>
             <div className="bg-white bg-opacity-20 rounded-lg p-3 backdrop-blur-sm">
               <div className="font-bold text-2xl">{totalPatients}</div>
@@ -251,6 +259,12 @@ function SimplifiedSecretaryDashboard({
                   className={`px-3 py-1 rounded-full text-sm font-medium ${statusFilter === 'Cancelled' ? 'bg-red-600 text-white' : 'bg-red-100 text-red-800 hover:bg-red-200'}`}
                 >
                   Cancelled
+                </button>
+                <button
+                  onClick={() => setStatusFilter('Needs Diagnosis')}
+                  className={`px-3 py-1 rounded-full text-sm font-medium ${statusFilter === 'Needs Diagnosis' ? 'bg-yellow-600 text-white' : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'}`}
+                >
+                  Needs Diagnosis
                 </button>
               </div>
 

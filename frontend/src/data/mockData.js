@@ -20,8 +20,8 @@ let lastFetchTime = {
   reports: 0
 };
 
-// Cache expiration time (5 minutes)
-const CACHE_EXPIRATION = 5 * 60 * 1000;
+// Cache expiration time (10 seconds - reduced from 5 minutes to ensure fresher data)
+const CACHE_EXPIRATION = 10 * 1000;
 
 // Today's appointments (for dashboard)
 export const getTodaysAppointments = async () => {
@@ -171,6 +171,17 @@ export const getReports = async () => {
     console.error('Error fetching reports from API:', error);
     return reportsCache.length > 0 ? reportsCache : initialReports;
   }
+};
+
+// Function to clear all caches - call this after data modifications
+export const clearAllCaches = () => {
+  console.log('Clearing all data caches');
+  patientsCache = [];
+  appointmentsCache = [];
+  reportsCache = [];
+  lastFetchTime.patients = 0;
+  lastFetchTime.appointments = 0;
+  lastFetchTime.reports = 0;
 };
 
 // Save functions now use API calls

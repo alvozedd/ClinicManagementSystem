@@ -1,5 +1,7 @@
 const asyncHandler = require('../middleware/asyncHandler');
 const Patient = require('../models/patientModel');
+const Appointment = require('../models/appointmentModel');
+const Diagnosis = require('../models/diagnosisModel');
 
 // @desc    Create a new patient
 // @route   POST /api/patients
@@ -106,15 +108,46 @@ const updatePatient = asyncHandler(async (req, res) => {
   }
 });
 
-// @desc    Delete patient
+// @desc    Delete patient and all associated data (appointments, diagnoses)
 // @route   DELETE /api/patients/:id
 // @access  Private/Doctor/Secretary
 const deletePatient = asyncHandler(async (req, res) => {
   const patient = await Patient.findById(req.params.id);
 
   if (patient) {
+    // Step 1: Find all appointments for this patient
+    const appointments = await Appointment.find({ patient_id: patient._id });
+    console.log(`Found ${appointments.length} appointments for patient ${patient._id}`);
+
+    // Step 2: For each appointment, delete associated diagnoses
+    for (const appointment of appointments) {
+      const diagnoses = await Diagnosis.find({ appointment_id: appointment._id });
+      console.log(`Found ${diagnoses.length} diagnoses for appointment ${appointment._id}`);
+
+      // Delete all diagnoses for this appointment
+      if (diagnoses.length > 0) {
+        await Diagnosis.deleteMany({ appointment_id: appointment._id });
+        console.log(`Deleted all diagnoses for appointment ${appointment._id}`);
+      }
+    }
+
+    // Step 3: Delete all appointments for this patient
+    if (appointments.length > 0) {
+      await Appointment.deleteMany({ patient_id: patient._id });
+      console.log(`Deleted all appointments for patient ${patient._id}`);
+    }
+
+    // Step 4: Finally delete the patient
     await patient.deleteOne();
-    res.json({ message: 'Patient removed' });
+    console.log(`Deleted patient ${patient._id}`);
+
+    res.json({
+      message: 'Patient and all associated data removed',
+      deletedAppointments: appointments.length,
+      deletedDiagnoses: appointments.reduce((total, appointment) => {
+        return total + (appointment.diagnosesCount || 0);
+      }, 0)
+    });
   } else {
     res.status(404);
     throw new Error('Patient not found');

@@ -61,7 +61,14 @@ export const transformPatientsFromBackend = (backendPatients) => {
 export const transformPatientToBackend = (frontendPatient) => {
   // Extract year from dateOfBirth if available
   let yearOfBirth = frontendPatient.yearOfBirth;
-  if (!yearOfBirth && frontendPatient.dateOfBirth) {
+
+  // Check if yearOfBirth is an empty string and set it to null
+  if (yearOfBirth === '') {
+    yearOfBirth = null;
+  }
+
+  // If no yearOfBirth but dateOfBirth exists, extract year from dateOfBirth
+  if (yearOfBirth === undefined && frontendPatient.dateOfBirth) {
     const date = new Date(frontendPatient.dateOfBirth);
     if (!isNaN(date.getFullYear())) {
       yearOfBirth = date.getFullYear();
@@ -72,7 +79,7 @@ export const transformPatientToBackend = (frontendPatient) => {
     name: `${frontendPatient.firstName} ${frontendPatient.lastName}`.trim(),
     gender: frontendPatient.gender || '',
     phone: frontendPatient.phone || '',
-    year_of_birth: yearOfBirth || null,
+    year_of_birth: yearOfBirth,
     next_of_kin_name: frontendPatient.nextOfKinName || 'Not Provided',
     next_of_kin_relationship: frontendPatient.nextOfKinRelationship || 'Not Provided',
     next_of_kin_phone: frontendPatient.nextOfKinPhone || '0000000000',

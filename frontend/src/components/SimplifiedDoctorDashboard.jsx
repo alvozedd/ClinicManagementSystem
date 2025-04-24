@@ -11,7 +11,7 @@ import DoctorPatientSearchAppointmentModal from './DoctorPatientSearchAppointmen
 import AppointmentManagementModal from './AppointmentManagementModal';
 import { FaCalendarAlt, FaUserMd, FaClipboardList, FaSearch, FaUserPlus, FaEye, FaArrowLeft, FaTimes, FaPlus, FaUser } from 'react-icons/fa';
 import { getCreatorLabel } from '../utils/recordCreation';
-import { getTimeBasedGreeting, getFormattedDate } from '../utils/timeUtils';
+import { getTimeBasedGreeting, getFormattedDate, filterAppointmentsByTimePeriod, updateAppointmentStatuses, identifyAppointmentsNeedingDiagnosis } from '../utils/timeUtils';
 import { transformAppointmentFromBackend } from '../utils/dataTransformers';
 
 // Calculate age from date of birth
@@ -45,6 +45,7 @@ function SimplifiedDoctorDashboard({
   const [showAddAppointmentForm, setShowAddAppointmentForm] = useState(false);
   const [editingAppointment, setEditingAppointment] = useState(null);
   const [statusFilter, setStatusFilter] = useState('all');
+  const [timeFilter, setTimeFilter] = useState('all');
 
   // State for today's appointments
   const [todaysAppointments, setTodaysAppointments] = useState([]);
@@ -154,8 +155,14 @@ function SimplifiedDoctorDashboard({
   const currentDate = getFormattedDate();
   const greeting = getTimeBasedGreeting();
 
+  // Update appointment statuses based on time
+  const updatedAppointments = updateAppointmentStatuses(appointments);
+
+  // Identify appointments that need diagnoses
+  const appointmentsNeedingDiagnosis = identifyAppointmentsNeedingDiagnosis(updatedAppointments);
+
   // Count pending diagnoses
-  const pendingDiagnoses = appointments.filter(a => a.status === 'Completed' && !a.diagnosis).length;
+  const pendingDiagnoses = appointmentsNeedingDiagnosis.length;
 
   // We don't want to auto-select patients anymore
   // This was causing the search to not be visible by default
@@ -269,6 +276,46 @@ function SimplifiedDoctorDashboard({
                 </div>
               </div>
 
+              {/* Time period filter tabs */}
+              <div className="flex space-x-2 mb-4 overflow-x-auto pb-2">
+                <button
+                  onClick={() => setTimeFilter('all')}
+                  className={`px-3 py-1 rounded-full text-sm font-medium ${timeFilter === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}
+                >
+                  All Time
+                </button>
+                <button
+                  onClick={() => setTimeFilter('today')}
+                  className={`px-3 py-1 rounded-full text-sm font-medium ${timeFilter === 'today' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}
+                >
+                  Today
+                </button>
+                <button
+                  onClick={() => setTimeFilter('tomorrow')}
+                  className={`px-3 py-1 rounded-full text-sm font-medium ${timeFilter === 'tomorrow' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}
+                >
+                  Tomorrow
+                </button>
+                <button
+                  onClick={() => setTimeFilter('thisWeek')}
+                  className={`px-3 py-1 rounded-full text-sm font-medium ${timeFilter === 'thisWeek' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}
+                >
+                  This Week
+                </button>
+                <button
+                  onClick={() => setTimeFilter('nextWeek')}
+                  className={`px-3 py-1 rounded-full text-sm font-medium ${timeFilter === 'nextWeek' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}
+                >
+                  Next Week
+                </button>
+                <button
+                  onClick={() => setTimeFilter('thisMonth')}
+                  className={`px-3 py-1 rounded-full text-sm font-medium ${timeFilter === 'thisMonth' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}
+                >
+                  This Month
+                </button>
+              </div>
+
               {/* Status filter tabs */}
               <div className="flex space-x-2 mb-4 overflow-x-auto pb-2">
                 <button
@@ -303,12 +350,24 @@ function SimplifiedDoctorDashboard({
                 </button>
               </div>
 
-              {/* Filter appointments based on selected status */}
-              {todaysAppointments.length > 0 ? (
-                todaysAppointments.filter(appointment => statusFilter === 'all' || appointment.status === statusFilter).length > 0 ? (
+              {/* Filter appointments based on selected time period and status */}
+              {
+                // First filter by time period, then by status
+                const filteredAppointments = timeFilter === 'all' ?
+                  appointments : filterAppointmentsByTimePeriod(appointments, timeFilter);
+
+                filteredAppointments.length > 0 ? (
+                filteredAppointments.filter(appointment => statusFilter === 'all' || appointment.status === statusFilter).length > 0 ? (
                 <div className="space-y-3">
-                  {todaysAppointments
+                  {filteredAppointments
                     .filter(appointment => statusFilter === 'all' || appointment.status === statusFilter)
+                    .sort((a, b) => {
+                      // Sort by date first
+                      const dateCompare = new Date(a.date) - new Date(b.date);
+                      if (dateCompare !== 0) return dateCompare;
+                      // If same date, sort by time
+                      return a.time.localeCompare(b.time);
+                    })
                     .map(appointment => (
                     <div
                       key={appointment.id}
@@ -405,20 +464,116 @@ function SimplifiedDoctorDashboard({
                 ) : (
                   <div className="text-center py-8 bg-gray-50 rounded-lg">
                     <p className="text-gray-500">
-                      No {statusFilter.toLowerCase()} appointments found for today.
+                      No {statusFilter.toLowerCase()} appointments found for {timeFilter === 'all' ? 'any time period' :
+                        timeFilter === 'today' ? 'today' :
+                        timeFilter === 'tomorrow' ? 'tomorrow' :
+                        timeFilter === 'thisWeek' ? 'this week' :
+                        timeFilter === 'nextWeek' ? 'next week' :
+                        timeFilter === 'thisMonth' ? 'this month' : 'the selected time period'}.
                     </p>
                   </div>
                 )
-              ) : (
+              ) : timeFilter === 'all' ? (
                 <div className="text-center py-8 bg-gray-50 rounded-lg">
                   <p className="text-gray-500">
                     {statusFilter === 'all'
-                      ? 'No appointments scheduled for today.'
-                      : `No ${statusFilter.toLowerCase()} appointments for today.`}
+                      ? `No appointments scheduled for ${timeFilter === 'all' ? 'any time period' :
+                          timeFilter === 'today' ? 'today' :
+                          timeFilter === 'tomorrow' ? 'tomorrow' :
+                          timeFilter === 'thisWeek' ? 'this week' :
+                          timeFilter === 'nextWeek' ? 'next week' :
+                          timeFilter === 'thisMonth' ? 'this month' : 'the selected time period'}.`
+                      : `No ${statusFilter.toLowerCase()} appointments for ${timeFilter === 'all' ? 'any time period' :
+                          timeFilter === 'today' ? 'today' :
+                          timeFilter === 'tomorrow' ? 'tomorrow' :
+                          timeFilter === 'thisWeek' ? 'this week' :
+                          timeFilter === 'nextWeek' ? 'next week' :
+                          timeFilter === 'thisMonth' ? 'this month' : 'the selected time period'}.`}
                   </p>
                 </div>
               )}
             </div>
+
+            {/* Pending Diagnoses Section */}
+            {appointmentsNeedingDiagnosis.length > 0 && (
+              <div className="mb-8">
+                <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                  <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-sm font-medium mr-2">
+                    {appointmentsNeedingDiagnosis.length}
+                  </span>
+                  Appointments Needing Diagnosis
+                </h2>
+                <div className="space-y-3">
+                  {appointmentsNeedingDiagnosis
+                    .sort((a, b) => {
+                      // Sort by date first (oldest first)
+                      const dateCompare = new Date(a.date) - new Date(b.date);
+                      if (dateCompare !== 0) return dateCompare;
+                      // If same date, sort by time
+                      return a.time.localeCompare(b.time);
+                    })
+                    .map(appointment => (
+                      <div
+                        key={appointment.id}
+                        className="p-4 rounded-lg border border-yellow-300 bg-yellow-50 flex justify-between items-center cursor-pointer hover:bg-yellow-100 transition-colors"
+                        onClick={() => {
+                          const patient = patients.find(p => p.id === appointment.patientId);
+                          if (patient) {
+                            handleViewPatient(patient);
+                          } else {
+                            // If patient not found, create a basic patient object from appointment data
+                            const newPatient = {
+                              id: appointment.patientId,
+                              firstName: appointment.patientName.split(' ')[0],
+                              lastName: appointment.patientName.split(' ').slice(1).join(' '),
+                              dateOfBirth: '',
+                              gender: '',
+                              phone: '',
+                              lastVisit: new Date().toISOString().split('T')[0],
+                              medicalHistory: [],
+                              medications: [],
+                              allergies: []
+                            };
+                            onUpdatePatient(newPatient); // Add to global state
+                            handleViewPatient(newPatient);
+                          }
+                        }}
+                      >
+                        <div>
+                          <div className="font-medium text-lg">{appointment.date} at {appointment.time} - {appointment.patientName}</div>
+                          <div className="text-gray-600">{appointment.type}: {appointment.reason}</div>
+                          <div className="text-sm text-yellow-700 mt-1">
+                            <span className="font-medium">Status:</span> {appointment.status === 'Needs Diagnosis' ? 'Needs Diagnosis' : 'Completed without diagnosis'}
+                          </div>
+                        </div>
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setDiagnosingAppointment(appointment);
+                            }}
+                            className="px-3 py-1 bg-yellow-500 text-white rounded text-sm font-medium hover:bg-yellow-600"
+                          >
+                            Add Diagnosis
+                          </button>
+                          <button
+                            className="text-blue-600 hover:text-blue-800 font-medium"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const patient = patients.find(p => p.id === appointment.patientId);
+                              if (patient) {
+                                handleViewPatient(patient);
+                              }
+                            }}
+                          >
+                            View Patient
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            )}
 
             {/* Upcoming Appointments Section */}
             <div>

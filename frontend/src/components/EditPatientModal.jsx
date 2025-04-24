@@ -5,6 +5,7 @@ function EditPatientModal({ patient, onClose, onSave }) {
     firstName: '',
     lastName: '',
     dateOfBirth: '',
+    yearOfBirth: '',
     gender: '',
     phone: '',
     email: '',
@@ -112,20 +113,22 @@ function EditPatientModal({ patient, onClose, onSave }) {
                     const dateStr = `${year}-01-01`;
                     setFormData(prev => ({
                       ...prev,
-                      dateOfBirth: dateStr
+                      dateOfBirth: dateStr,
+                      yearOfBirth: parseInt(year)
                     }));
                   } else {
                     // If input is empty or invalid, clear the date
                     setFormData(prev => ({
                       ...prev,
-                      dateOfBirth: ''
+                      dateOfBirth: '',
+                      yearOfBirth: null
                     }));
                   }
                 }}
                 min="1900"
                 max={new Date().getFullYear()}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                required
+
                 placeholder="Enter year of birth"
               />
               <p className="text-xs text-gray-500 mt-1">Only year is required</p>

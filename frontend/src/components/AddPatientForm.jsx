@@ -107,14 +107,14 @@ function AddPatientForm({ onSave, onCancel, createdBy = 'secretary' }) {
                   const dateOfBirth = `${year}-01-01`;
                   setFormData(prev => ({
                     ...prev,
-                    yearOfBirth: year,
+                    yearOfBirth: parseInt(year),
                     dateOfBirth: dateOfBirth
                   }));
                 } else {
                   // If input is empty or invalid, clear the date
                   setFormData(prev => ({
                     ...prev,
-                    yearOfBirth: '',
+                    yearOfBirth: null,
                     dateOfBirth: ''
                   }));
                 }

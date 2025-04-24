@@ -13,6 +13,8 @@ import {
   transformAppointmentToBackend,
   transformAppointmentFromBackend
 } from './utils/dataTransformers'
+import { clearAllCaches } from './data/mockData'
+import { updateAppointmentStatuses } from './utils/timeUtils'
 
 function Dashboard() {
   const { userInfo, logout } = useContext(AuthContext)
@@ -119,7 +121,12 @@ function Dashboard() {
           });
 
           console.log('Appointments with diagnoses:', appointmentsWithDiagnoses);
-          setAppointmentsData(appointmentsWithDiagnoses);
+
+          // Update appointment statuses based on time (for appointments that need diagnoses)
+          const updatedAppointments = updateAppointmentStatuses(appointmentsWithDiagnoses);
+          console.log('Appointments after status updates:', updatedAppointments);
+
+          setAppointmentsData(updatedAppointments);
         } else {
           console.log('No diagnoses found or no appointments to link them to');
         }
@@ -187,6 +194,9 @@ function Dashboard() {
 
       console.log('Patient saved to database:', response);
 
+      // Clear all caches to ensure fresh data
+      clearAllCaches();
+
       // Refresh data from API to ensure we have the latest data
       setRefreshTrigger(prev => prev + 1);
 
@@ -201,10 +211,10 @@ function Dashboard() {
 
   // Handler for deleting an appointment (moved to line 427)
 
-  // Handler for deleting a patient
+  // Handler for deleting a patient and all associated data
   const handleDeletePatient = async (patientId) => {
     // Confirm deletion with the user
-    if (!window.confirm('Are you sure you want to delete this patient? This action cannot be undone.')) {
+    if (!window.confirm('Are you sure you want to delete this patient? This action cannot be undone. All appointments and diagnoses for this patient will also be deleted.')) {
       return; // User cancelled the deletion
     }
 
@@ -222,19 +232,30 @@ function Dashboard() {
       console.log('Found patient to delete with MongoDB ID:', mongoId);
 
       try {
-        // Delete patient via API
-        await apiService.deletePatient(mongoId);
+        // Delete patient via API (backend will handle cascade deletion of appointments and diagnoses)
+        const response = await apiService.deletePatient(mongoId);
+        console.log('Delete patient response:', response);
 
         // Remove the patient from the local state
         const updatedPatients = patientsData.filter(p => p._id !== mongoId);
         setPatientsData(updatedPatients);
 
-        // Also remove all appointments associated with this patient from local state
+        // Find all appointments associated with this patient
+        const patientAppointments = appointmentsData.filter(a => a.patient_id === mongoId);
+        const appointmentIds = patientAppointments.map(a => a._id);
+        console.log(`Found ${patientAppointments.length} appointments to remove from local state`);
+
+        // Remove all appointments associated with this patient from local state
         const updatedAppointments = appointmentsData.filter(a => a.patient_id !== mongoId);
         setAppointmentsData(updatedAppointments);
+
+        // Remove all diagnoses associated with these appointments from local state
+        const updatedReports = reportsData.filter(d => !appointmentIds.includes(d.appointment_id));
+        setReportsData(updatedReports);
+        console.log(`Removed ${reportsData.length - updatedReports.length} diagnoses from local state`);
       } catch (deleteError) {
         // Check if this is a permission error
-        if (deleteError.includes('Not authorized as an admin')) {
+        if (deleteError.includes && deleteError.includes('Not authorized as an admin')) {
           alert('The backend server needs to be restarted to apply permission changes. Please contact the administrator.');
         } else {
           throw deleteError;
@@ -242,7 +263,7 @@ function Dashboard() {
       }
 
       // Show success message
-      alert('Patient deleted successfully');
+      alert('Patient and all associated data deleted successfully');
     } catch (error) {
       console.error('Error deleting patient:', error);
       setError('Failed to delete patient. Please try again.');
@@ -316,6 +337,9 @@ function Dashboard() {
           console.log('Updated appointments data after adding new appointment');
         }
       }
+
+      // Clear all caches to ensure fresh data
+      clearAllCaches();
 
       // Refresh data from API to ensure we have the latest data
       setRefreshTrigger(prev => prev + 1);
@@ -461,10 +485,11 @@ function Dashboard() {
         alert('Appointment saved successfully!');
       }
 
-      // Wait a moment before refreshing data to ensure the database has been updated
-      setTimeout(() => {
-        setRefreshTrigger(prev => prev + 1);
-      }, 1000);
+      // Clear all caches to ensure fresh data
+      clearAllCaches();
+
+      // Refresh data from API immediately
+      setRefreshTrigger(prev => prev + 1);
     } catch (error) {
       console.error('Error saving diagnosis/appointment:', error);
       setError('Failed to save. Please try again.');
@@ -575,6 +600,8 @@ function Dashboard() {
               <button
                 onClick={() => {
                   console.log('Refreshing data from API...');
+                  // Clear all caches to ensure fresh data
+                  clearAllCaches();
                   setRefreshTrigger(prev => prev + 1);
                   alert('Data refreshed from database');
                 }}
