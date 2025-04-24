@@ -68,34 +68,51 @@ function Dashboard() {
         if (diagnosesResponse && diagnosesResponse.length > 0 && transformedAppointments.length > 0) {
           console.log('Linking diagnoses to appointments...');
           const appointmentsWithDiagnoses = transformedAppointments.map(appointment => {
-            // Find a diagnosis for this appointment
-            const diagnosis = diagnosesResponse.find(d => d.appointment_id === appointment._id);
-            if (diagnosis) {
-              console.log(`Found diagnosis for appointment ${appointment._id}:`, diagnosis);
+            // Find all diagnoses for this appointment
+            const appointmentDiagnoses = diagnosesResponse.filter(d => d.appointment_id === appointment._id);
+            if (appointmentDiagnoses && appointmentDiagnoses.length > 0) {
+              console.log(`Found ${appointmentDiagnoses.length} diagnoses for appointment ${appointment._id}:`, appointmentDiagnoses);
 
-              // Try to parse the diagnosis_text as JSON to get structured data
-              let diagnosisObj = {
-                notes: diagnosis.diagnosis_text,
-                treatment: '',
-                followUp: '',
-                files: [],
-                updatedAt: diagnosis.updatedAt || diagnosis.createdAt
-              };
+              // Process all diagnoses for this appointment
+              const diagnosesArray = appointmentDiagnoses.map(diagnosis => {
+                // Try to parse the diagnosis_text as JSON to get structured data
+                let diagnosisObj = {
+                  id: diagnosis._id, // Store the diagnosis ID
+                  notes: diagnosis.diagnosis_text,
+                  treatment: '',
+                  followUp: '',
+                  files: [],
+                  updatedAt: diagnosis.updatedAt || diagnosis.createdAt,
+                  createdAt: diagnosis.createdAt
+                };
 
-              try {
-                // Try to parse the diagnosis_text as JSON
-                const parsedDiagnosis = JSON.parse(diagnosis.diagnosis_text);
-                if (parsedDiagnosis && typeof parsedDiagnosis === 'object') {
-                  diagnosisObj = parsedDiagnosis;
-                  console.log('Successfully parsed diagnosis JSON:', diagnosisObj);
+                try {
+                  // Try to parse the diagnosis_text as JSON
+                  const parsedDiagnosis = JSON.parse(diagnosis.diagnosis_text);
+                  if (parsedDiagnosis && typeof parsedDiagnosis === 'object') {
+                    diagnosisObj = {
+                      ...diagnosisObj,
+                      ...parsedDiagnosis
+                    };
+                    console.log('Successfully parsed diagnosis JSON:', diagnosisObj);
+                  }
+                } catch (e) {
+                  console.log('Diagnosis text is not valid JSON, using as plain text');
                 }
-              } catch (e) {
-                console.log('Diagnosis text is not valid JSON, using as plain text');
-              }
 
+                return diagnosisObj;
+              });
+
+              // Sort diagnoses by creation date (newest first)
+              diagnosesArray.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+              // Ensure the appointment status is set to Completed when it has diagnoses
               return {
                 ...appointment,
-                diagnosis: diagnosisObj
+                diagnoses: diagnosesArray,
+                // Keep the most recent diagnosis as the primary one for backward compatibility
+                diagnosis: diagnosesArray[0],
+                status: 'Completed'
               };
             }
             return appointment;
@@ -103,6 +120,8 @@ function Dashboard() {
 
           console.log('Appointments with diagnoses:', appointmentsWithDiagnoses);
           setAppointmentsData(appointmentsWithDiagnoses);
+        } else {
+          console.log('No diagnoses found or no appointments to link them to');
         }
       } catch (error) {
         console.error('Error fetching data from API:', error);
@@ -419,10 +438,13 @@ function Dashboard() {
         // Add to reports data
         setReportsData(prev => [...prev, diagnosisResponse]);
 
-        // Update the appointment with the diagnosis
+        // Update the appointment with the new diagnosis
         setAppointmentsData(prev =>
           prev.map(a => a._id === appointmentResponse._id ? {
             ...a,
+            // Add the new diagnosis to the diagnoses array
+            diagnoses: a.diagnoses ? [diagnosisObj, ...a.diagnoses] : [diagnosisObj],
+            // Update the primary diagnosis to be the newest one
             diagnosis: diagnosisObj,
             status: 'Completed'
           } : a)
@@ -432,15 +454,17 @@ function Dashboard() {
         console.log('Updated appointments data after adding diagnosis');
       }
 
-      // Refresh data from API to ensure we have the latest data
-      setRefreshTrigger(prev => prev + 1);
-
       // Show success message
       if (updatedAppointment.diagnosis) {
         alert('Consultation information saved successfully!');
       } else {
         alert('Appointment saved successfully!');
       }
+
+      // Wait a moment before refreshing data to ensure the database has been updated
+      setTimeout(() => {
+        setRefreshTrigger(prev => prev + 1);
+      }, 1000);
     } catch (error) {
       console.error('Error saving diagnosis/appointment:', error);
       setError('Failed to save. Please try again.');

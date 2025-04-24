@@ -9,6 +9,7 @@ import AppointmentManagementModal from './AppointmentManagementModal';
 import PatientSearchAppointmentModal from './PatientSearchAppointmentModal';
 import { FaCalendarAlt, FaUserTie, FaClipboardList } from 'react-icons/fa';
 import { getTimeBasedGreeting, getFormattedDate } from '../utils/timeUtils';
+import { transformAppointmentFromBackend } from '../utils/dataTransformers';
 
 function SimplifiedSecretaryDashboard({
   patients,
@@ -180,8 +181,15 @@ function SimplifiedSecretaryDashboard({
           <SecretaryCalendarView
             appointments={appointments}
             onUpdateAppointment={(updatedAppointment) => {
+              console.log('Updating appointment from calendar in SimplifiedSecretaryDashboard:', updatedAppointment);
               // Update the appointment in the global state
               onDiagnoseAppointment(updatedAppointment);
+
+              // Wait a moment before refreshing the UI
+              setTimeout(() => {
+                // Force a re-render by updating the state slightly
+                setActiveTab(prev => prev === 'calendar' ? 'calendar' : prev);
+              }, 500);
             }}
             onViewPatient={(patientId) => {
               const patient = patients.find(p => p.id === patientId);
@@ -546,9 +554,16 @@ function SimplifiedSecretaryDashboard({
           patients={patients}
           onClose={() => setShowAddAppointmentForm(false)}
           onSave={(newAppointment) => {
+            console.log('Adding new appointment in SimplifiedSecretaryDashboard:', newAppointment);
             // Add the new appointment to the global state
             onDiagnoseAppointment(newAppointment);
             setShowAddAppointmentForm(false);
+
+            // Wait a moment before refreshing the UI
+            setTimeout(() => {
+              // Force a re-render by updating the state
+              setShowAddAppointmentForm(false);
+            }, 500);
           }}
           onAddPatient={(newPatient) => {
             // Add the new patient to the global state
@@ -563,9 +578,16 @@ function SimplifiedSecretaryDashboard({
           appointment={editingAppointment}
           onClose={() => setEditingAppointment(null)}
           onSave={(updatedAppointment) => {
+            console.log('Saving appointment in SimplifiedSecretaryDashboard:', updatedAppointment);
             // Update the appointment in the global state
             onDiagnoseAppointment(updatedAppointment);
             setEditingAppointment(null);
+
+            // Wait a moment before refreshing the UI
+            setTimeout(() => {
+              // Force a re-render by updating the state
+              setEditingAppointment(null);
+            }, 500);
           }}
         />
       )}

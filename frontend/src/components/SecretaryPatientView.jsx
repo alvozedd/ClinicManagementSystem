@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import AppointmentManagementModal from './AppointmentManagementModal';
 import PatientNavigator from './PatientNavigator';
+import { transformAppointmentFromBackend } from '../utils/dataTransformers';
 
 function SecretaryPatientView({ patient, patients, appointments, onClose, onUpdatePatient, onSelectPatient }) {
   const [activeTab, setActiveTab] = useState('appointments');

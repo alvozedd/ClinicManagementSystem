@@ -6,6 +6,7 @@ import SimplifiedDiagnosisModal from './SimplifiedDiagnosisModal';
 import MedicalHistoryManager from './MedicalHistoryManager';
 import AllergiesManager from './AllergiesManager';
 import MedicationsManager from './MedicationsManager';
+import { transformAppointmentFromBackend } from '../utils/dataTransformers';
 
 function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient, onDiagnoseAppointment, onDeletePatient }) {
   const [activeTab, setActiveTab] = useState('biodata');
@@ -23,9 +24,46 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
   // Sort appointments by date (most recent first)
   const sortedAppointments = [...appointments].sort((a, b) => new Date(b.date) - new Date(a.date));
 
-  // Get previous diagnoses
-  const previousDiagnoses = sortedAppointments.filter(a => a.diagnosis);
-  console.log('Previous diagnoses:', previousDiagnoses);
+  // Get appointments with diagnoses
+  const appointmentsWithDiagnoses = sortedAppointments.filter(a => a.diagnosis || (a.diagnoses && a.diagnoses.length > 0));
+  console.log('Appointments with diagnoses:', appointmentsWithDiagnoses);
+
+  // Create a flattened array of all diagnoses across all appointments
+  const allDiagnoses = [];
+  appointmentsWithDiagnoses.forEach(appointment => {
+    if (appointment.diagnoses && appointment.diagnoses.length > 0) {
+      // If we have the new diagnoses array structure, use it
+      appointment.diagnoses.forEach(diagnosis => {
+        allDiagnoses.push({
+          ...diagnosis,
+          appointmentId: appointment.id,
+          appointmentDate: appointment.date,
+          appointmentTime: appointment.time,
+          appointmentType: appointment.type,
+          appointmentReason: appointment.reason,
+          appointmentCreatedBy: appointment.createdBy
+        });
+      });
+    } else if (appointment.diagnosis) {
+      // For backward compatibility
+      allDiagnoses.push({
+        ...appointment.diagnosis,
+        appointmentId: appointment.id,
+        appointmentDate: appointment.date,
+        appointmentTime: appointment.time,
+        appointmentType: appointment.type,
+        appointmentReason: appointment.reason,
+        appointmentCreatedBy: appointment.createdBy
+      });
+    }
+  });
+
+  // Sort all diagnoses by date (newest first)
+  allDiagnoses.sort((a, b) => new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt));
+
+  console.log('All diagnoses:', allDiagnoses);
+  console.log('All appointments in SimplifiedPatientView:', appointments);
+  console.log('Sorted appointments in SimplifiedPatientView:', sortedAppointments);
 
   // Calculate age from date of birth
   const calculateAge = (dateOfBirth) => {
@@ -213,9 +251,9 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
                       Last Visit: {patient.lastVisit}
                     </span>
                   )}
-                  {previousDiagnoses.length > 0 && (
+                  {allDiagnoses.length > 0 && (
                     <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm">
-                      {previousDiagnoses.length} Previous Diagnoses
+                      {allDiagnoses.length} Previous Diagnoses
                     </span>
                   )}
                 </div>
@@ -583,11 +621,24 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
           <div className="border rounded-lg p-4">
             <div className="flex justify-between items-center mb-2">
               <h3 className="font-semibold text-lg">Medical History</h3>
-              {editMode && (
-                <div className="text-sm text-blue-600">
-                  Add or remove medical conditions below
-                </div>
-              )}
+              <div className="flex space-x-2">
+                {!editMode && (
+                  <button
+                    onClick={() => setEditMode(true)}
+                    className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 flex items-center"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                      <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                    </svg>
+                    Edit
+                  </button>
+                )}
+                {editMode && (
+                  <div className="text-sm text-blue-600">
+                    Add or remove medical conditions below
+                  </div>
+                )}
+              </div>
             </div>
 
             {editMode ? (
@@ -598,16 +649,39 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
             ) : patient.medicalHistory && patient.medicalHistory.length > 0 ? (
               <div className="space-y-2">
                 {patient.medicalHistory.map((condition, index) => (
-                  <div key={index} className="p-2 bg-gray-50 rounded">
-                    <div className="font-medium">{condition.condition}</div>
-                    <div className="text-sm text-gray-600">
-                      Diagnosed: {condition.diagnosedDate} • {condition.notes}
+                  <div key={index} className="p-2 bg-gray-50 rounded flex justify-between items-center">
+                    <div>
+                      <div className="font-medium">{condition.condition}</div>
+                      <div className="text-sm text-gray-600">
+                        Diagnosed: {condition.diagnosedDate} • {condition.notes}
+                      </div>
+                    </div>
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => {
+                          // Create a temporary edit mode just for this item
+                          setEditMode(true);
+                          // Focus on this item in the medical history manager
+                          // This will be handled by scrolling to the item
+                        }}
+                        className="text-blue-600 hover:text-blue-800"
+                      >
+                        Edit
+                      </button>
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-gray-500 italic">No medical history recorded.</p>
+              <div className="flex flex-col items-center justify-center py-6">
+                <p className="text-gray-500 italic mb-4">No medical history recorded.</p>
+                <button
+                  onClick={() => setEditMode(true)}
+                  className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700"
+                >
+                  Add Medical History
+                </button>
+              </div>
             )}
           </div>
 
@@ -615,11 +689,24 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
           <div className="border rounded-lg p-4">
             <div className="flex justify-between items-center mb-2">
               <h3 className="font-semibold text-lg">Allergies</h3>
-              {editMode && (
-                <div className="text-sm text-blue-600">
-                  Add or remove allergies below
-                </div>
-              )}
+              <div className="flex space-x-2">
+                {!editMode && (
+                  <button
+                    onClick={() => setEditMode(true)}
+                    className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 flex items-center"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                      <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                    </svg>
+                    Edit
+                  </button>
+                )}
+                {editMode && (
+                  <div className="text-sm text-blue-600">
+                    Add or remove allergies below
+                  </div>
+                )}
+              </div>
             </div>
 
             {editMode ? (
@@ -630,13 +717,31 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
             ) : patient.allergies && patient.allergies.length > 0 ? (
               <div className="flex flex-wrap gap-2">
                 {patient.allergies.map((allergy, index) => (
-                  <span key={index} className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm">
-                    {allergy}
-                  </span>
+                  <div key={index} className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm flex items-center">
+                    <span>{allergy}</span>
+                    <button
+                      onClick={() => {
+                        setEditMode(true);
+                      }}
+                      className="ml-2 text-red-600 hover:text-red-800 focus:outline-none"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                      </svg>
+                    </button>
+                  </div>
                 ))}
               </div>
             ) : (
-              <p className="text-gray-500 italic">No allergies recorded.</p>
+              <div className="flex flex-col items-center justify-center py-6">
+                <p className="text-gray-500 italic mb-4">No allergies recorded.</p>
+                <button
+                  onClick={() => setEditMode(true)}
+                  className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700"
+                >
+                  Add Allergies
+                </button>
+              </div>
             )}
           </div>
 
@@ -644,11 +749,24 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
           <div className="border rounded-lg p-4">
             <div className="flex justify-between items-center mb-2">
               <h3 className="font-semibold text-lg">Current Medications</h3>
-              {editMode && (
-                <div className="text-sm text-blue-600">
-                  Add or remove medications below
-                </div>
-              )}
+              <div className="flex space-x-2">
+                {!editMode && (
+                  <button
+                    onClick={() => setEditMode(true)}
+                    className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 flex items-center"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                      <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                    </svg>
+                    Edit
+                  </button>
+                )}
+                {editMode && (
+                  <div className="text-sm text-blue-600">
+                    Add or remove medications below
+                  </div>
+                )}
+              </div>
             </div>
 
             {editMode ? (
@@ -659,16 +777,36 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
             ) : patient.medications && patient.medications.length > 0 ? (
               <div className="space-y-2">
                 {patient.medications.map((medication, index) => (
-                  <div key={index} className="p-2 bg-gray-50 rounded">
-                    <div className="font-medium">{medication.name}</div>
-                    <div className="text-sm text-gray-600">
-                      {medication.dosage} • {medication.frequency} • Started: {medication.startDate}
+                  <div key={index} className="p-2 bg-gray-50 rounded flex justify-between items-center">
+                    <div>
+                      <div className="font-medium">{medication.name}</div>
+                      <div className="text-sm text-gray-600">
+                        {medication.dosage} • {medication.frequency} • Started: {medication.startDate}
+                      </div>
+                    </div>
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => {
+                          setEditMode(true);
+                        }}
+                        className="text-blue-600 hover:text-blue-800"
+                      >
+                        Edit
+                      </button>
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-gray-500 italic">No medications recorded.</p>
+              <div className="flex flex-col items-center justify-center py-6">
+                <p className="text-gray-500 italic mb-4">No medications recorded.</p>
+                <button
+                  onClick={() => setEditMode(true)}
+                  className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700"
+                >
+                  Add Medications
+                </button>
+              </div>
             )}
           </div>
         </div>
@@ -704,62 +842,86 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
               </button>
             </div>
 
-            {previousDiagnoses.length > 0 ? (
+            {allDiagnoses.length > 0 ? (
               <div className="space-y-4">
-                {previousDiagnoses.map(appointment => (
-                  <div key={appointment.id} className="border rounded-lg p-4 bg-blue-50">
+                {allDiagnoses.map((diagnosis, index) => (
+                  <div key={diagnosis.id || index} className="border rounded-lg p-4 bg-blue-50">
                     <div className="flex justify-between items-center mb-2">
                       <div>
-                        <p className="font-medium text-lg">{appointment.date} at {appointment.time}</p>
-                        <p className="text-gray-600">{appointment.type} - {appointment.reason}</p>
-                        {appointment.createdBy && (
+                        <p className="font-medium text-lg">{diagnosis.appointmentDate} at {diagnosis.appointmentTime}</p>
+                        <p className="text-gray-600">{diagnosis.appointmentType} - {diagnosis.appointmentReason}</p>
+                        {diagnosis.appointmentCreatedBy && (
                           <div className="flex items-center mt-1">
                             <span className="text-gray-500 text-sm mr-1">Recorded by:</span>
                             <span className={`px-2 py-0.5 rounded-md text-xs font-medium ${
-                              appointment.createdBy === 'doctor' ? 'bg-blue-100 text-blue-800' :
-                              appointment.createdBy === 'secretary' ? 'bg-green-100 text-green-800' :
+                              diagnosis.appointmentCreatedBy === 'doctor' ? 'bg-blue-100 text-blue-800' :
+                              diagnosis.appointmentCreatedBy === 'secretary' ? 'bg-green-100 text-green-800' :
                               'bg-purple-100 text-purple-800'
                             }`}>
-                              {getCreatorLabel(appointment.createdBy)}
+                              {getCreatorLabel(diagnosis.appointmentCreatedBy)}
                             </span>
+                            {diagnosis.updatedAt && (
+                              <span className="text-xs text-gray-500 ml-2">
+                                {new Date(diagnosis.updatedAt).toLocaleDateString()} {new Date(diagnosis.updatedAt).toLocaleTimeString()}
+                              </span>
+                            )}
                           </div>
                         )}
                       </div>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setDiagnosingAppointment(appointment);
-                        }}
-                        className="px-3 py-1 bg-blue-600 text-white rounded text-sm font-medium hover:bg-blue-700"
-                      >
-                        Edit Diagnosis
-                      </button>
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            // Find the appointment to edit
+                            const appointment = sortedAppointments.find(a => a.id === diagnosis.appointmentId);
+                            if (appointment) {
+                              setDiagnosingAppointment(appointment);
+                            }
+                          }}
+                          className="px-3 py-1 bg-blue-600 text-white rounded text-sm font-medium hover:bg-blue-700"
+                        >
+                          Edit Diagnosis
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            // Find the appointment to add a new diagnosis
+                            const appointment = sortedAppointments.find(a => a.id === diagnosis.appointmentId);
+                            if (appointment) {
+                              setDiagnosingAppointment(appointment);
+                            }
+                          }}
+                          className="px-3 py-1 bg-green-600 text-white rounded text-sm font-medium hover:bg-green-700"
+                        >
+                          Add New Diagnosis
+                        </button>
+                      </div>
                     </div>
 
                     <div className="mt-3 p-3 bg-white rounded-lg border border-blue-200">
                       <p className="font-medium text-blue-800">Diagnosis:</p>
-                      <p className="mt-1">{appointment.diagnosis.notes}</p>
+                      <p className="mt-1">{diagnosis.notes}</p>
 
-                      {appointment.diagnosis.treatment && (
+                      {diagnosis.treatment && (
                         <div className="mt-2">
                           <p className="font-medium text-blue-800">Treatment:</p>
-                          <p className="mt-1">{appointment.diagnosis.treatment}</p>
+                          <p className="mt-1">{diagnosis.treatment}</p>
                         </div>
                       )}
 
-                      {appointment.diagnosis.followUp && (
+                      {diagnosis.followUp && (
                         <div className="mt-2">
                           <p className="font-medium text-blue-800">Follow-up:</p>
-                          <p className="mt-1">{appointment.diagnosis.followUp}</p>
+                          <p className="mt-1">{diagnosis.followUp}</p>
                         </div>
                       )}
 
-                      {appointment.diagnosis.files && appointment.diagnosis.files.length > 0 && (
+                      {diagnosis.files && diagnosis.files.length > 0 && (
                         <div className="mt-4 border-t border-blue-100 pt-3">
                           <p className="font-medium text-blue-800 mb-2">Attached Files:</p>
                           <div className="space-y-2">
-                            {appointment.diagnosis.files.map((file, index) => (
-                              <div key={index} className="flex items-center justify-between bg-blue-50 p-2 rounded">
+                            {diagnosis.files.map((file, fileIndex) => (
+                              <div key={fileIndex} className="flex items-center justify-between bg-blue-50 p-2 rounded">
                                 <div className="flex items-center">
                                   {file.type && file.type.includes('pdf') ? (
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-red-500 mr-2" viewBox="0 0 20 20" fill="currentColor">
@@ -982,12 +1144,30 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
               status: 'Completed'
             };
 
+            console.log('Saving diagnosis in SimplifiedPatientView:', appointmentWithStatus);
+
+            // Check if this is a new diagnosis or an update to an existing one
+            const isNewDiagnosis = !diagnosingAppointment.diagnosis;
+
+            // If this is a new diagnosis for an appointment that already has diagnoses,
+            // we need to preserve the existing diagnoses array
+            if (!isNewDiagnosis && diagnosingAppointment.diagnoses) {
+              // Add the new diagnosis to the existing diagnoses array
+              appointmentWithStatus.diagnoses = [
+                appointmentWithStatus.diagnosis,
+                ...diagnosingAppointment.diagnoses
+              ];
+            }
+
             // Update the appointment with diagnosis
             onDiagnoseAppointment(appointmentWithStatus);
             setDiagnosingAppointment(null);
 
-            // Switch to the diagnoses tab to show the new diagnosis
-            setActiveTab('diagnoses');
+            // Wait a moment before switching tabs to ensure state is updated
+            setTimeout(() => {
+              // Switch to the diagnoses tab to show the new diagnosis
+              setActiveTab('diagnoses');
+            }, 500);
           }}
         />
       )}

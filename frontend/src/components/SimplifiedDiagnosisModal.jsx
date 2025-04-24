@@ -10,11 +10,19 @@ function SimplifiedDiagnosisModal({ appointment, onClose, onSave }) {
   const fileInputRef = useRef(null);
 
   useEffect(() => {
+    // If editing an existing diagnosis, pre-fill the form
     if (appointment && appointment.diagnosis) {
       setDiagnosis(appointment.diagnosis.notes || '');
       setTreatment(appointment.diagnosis.treatment || '');
       setFollowUp(appointment.diagnosis.followUp || '');
       setExistingFiles(appointment.diagnosis.files || []);
+    } else {
+      // If adding a new diagnosis, clear the form
+      setDiagnosis('');
+      setTreatment('');
+      setFollowUp('');
+      setExistingFiles([]);
+      setFiles([]);
     }
   }, [appointment]);
 
@@ -91,7 +99,9 @@ function SimplifiedDiagnosisModal({ appointment, onClose, onSave }) {
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-bold text-gray-800">Patient Diagnosis</h2>
+          <h2 className="text-lg font-bold text-gray-800">
+            {appointment && appointment.diagnosis ? 'Edit Diagnosis' : 'Add New Diagnosis'}
+          </h2>
           <button
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700"
@@ -275,7 +285,7 @@ function SimplifiedDiagnosisModal({ appointment, onClose, onSave }) {
                 type="submit"
                 className="px-4 py-2 bg-green-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-green-700"
               >
-                Save Diagnosis
+                {appointment && appointment.diagnosis ? 'Update Diagnosis' : 'Save Diagnosis'}
               </button>
             </div>
           </div>

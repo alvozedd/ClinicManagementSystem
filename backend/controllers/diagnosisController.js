@@ -7,13 +7,7 @@ const Diagnosis = require('../models/diagnosisModel');
 const createDiagnosis = asyncHandler(async (req, res) => {
   const { appointment_id, diagnosis_text } = req.body;
 
-  // Check if a diagnosis already exists for this appointment
-  const existingDiagnosis = await Diagnosis.findOne({ appointment_id });
-
-  if (existingDiagnosis) {
-    res.status(400);
-    throw new Error('Diagnosis already exists for this appointment');
-  }
+  // No longer check for existing diagnosis - allow multiple diagnoses per appointment
 
   const diagnosis = await Diagnosis.create({
     appointment_id,
@@ -62,13 +56,13 @@ const getDiagnosisByAppointmentId = asyncHandler(async (req, res) => {
     filter.created_by_user_id = req.user._id;
   }
 
-  const diagnosis = await Diagnosis.findOne(filter);
+  // Changed from findOne to find to get all diagnoses for an appointment
+  const diagnoses = await Diagnosis.find(filter).sort({ createdAt: -1 });
 
-  if (diagnosis) {
-    res.json(diagnosis);
+  if (diagnoses && diagnoses.length > 0) {
+    res.json(diagnoses);
   } else {
-    res.status(404);
-    throw new Error('Diagnosis not found');
+    res.json([]);
   }
 });
 

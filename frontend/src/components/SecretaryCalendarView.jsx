@@ -4,6 +4,7 @@ import { format, parse, startOfWeek, getDay } from 'date-fns';
 import { enUS } from 'date-fns/locale';
 import AppointmentManagementModal from './AppointmentManagementModal';
 import CustomCalendar from './CustomCalendar';
+import { transformAppointmentFromBackend } from '../utils/dataTransformers';
 
 // Setup the localizer for the calendar
 const locales = {
@@ -122,6 +123,10 @@ function SecretaryCalendarView({ appointments, onUpdateAppointment, onViewPatien
 
   // Handle saving appointment changes
   const handleSaveAppointment = (updatedAppointment) => {
+    // Make sure we're passing the appointment with the correct format
+    // The Dashboard component expects to receive the appointment and then transform it
+    // No need to transform here as the Dashboard will handle that
+    console.log('SecretaryCalendarView - Saving appointment:', updatedAppointment);
     onUpdateAppointment(updatedAppointment);
     setManagingAppointment(null);
     setIsNewAppointment(false);

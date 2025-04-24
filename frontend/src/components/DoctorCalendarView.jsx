@@ -4,6 +4,7 @@ import { format, parse, startOfWeek, getDay } from 'date-fns';
 import { enUS } from 'date-fns/locale';
 import SimplifiedDiagnosisModal from './SimplifiedDiagnosisModal';
 import CustomCalendar from './CustomCalendar';
+import { transformAppointmentFromBackend } from '../utils/dataTransformers';
 
 // Setup the localizer for the calendar
 const locales = {
@@ -142,8 +143,29 @@ function DoctorCalendarView({ appointments, onDiagnoseAppointment, onViewPatient
       status: 'Completed'
     };
 
+    console.log('Saving diagnosis in DoctorCalendarView:', appointmentWithStatus);
+
+    // Check if this is a new diagnosis or an update to an existing one
+    const isNewDiagnosis = !diagnosingAppointment.diagnosis;
+
+    // If this is a new diagnosis for an appointment that already has diagnoses,
+    // we need to preserve the existing diagnoses array
+    if (!isNewDiagnosis && diagnosingAppointment.diagnoses) {
+      // Add the new diagnosis to the existing diagnoses array
+      appointmentWithStatus.diagnoses = [
+        appointmentWithStatus.diagnosis,
+        ...diagnosingAppointment.diagnoses
+      ];
+    }
+
     onDiagnoseAppointment(appointmentWithStatus);
     setDiagnosingAppointment(null);
+
+    // Force a re-render after a short delay to ensure the diagnosis is saved
+    setTimeout(() => {
+      // This is a no-op state update that will trigger a re-render
+      setDiagnosingAppointment(null);
+    }, 500);
   };
 
   return (

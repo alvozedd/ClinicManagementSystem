@@ -12,6 +12,7 @@ import AppointmentManagementModal from './AppointmentManagementModal';
 import { FaCalendarAlt, FaUserMd, FaClipboardList, FaSearch, FaUserPlus, FaEye, FaArrowLeft, FaTimes, FaPlus, FaUser } from 'react-icons/fa';
 import { getCreatorLabel } from '../utils/recordCreation';
 import { getTimeBasedGreeting, getFormattedDate } from '../utils/timeUtils';
+import { transformAppointmentFromBackend } from '../utils/dataTransformers';
 
 // Calculate age from date of birth
 const calculateAge = (dateOfBirth) => {
@@ -109,16 +110,34 @@ function SimplifiedDoctorDashboard({
       status: 'Completed'
     };
 
+    console.log('Saving diagnosis in SimplifiedDoctorDashboard:', appointmentWithStatus);
+
+    // Check if this is a new diagnosis or an update to an existing one
+    const isNewDiagnosis = !diagnosingAppointment.diagnosis;
+
+    // If this is a new diagnosis for an appointment that already has diagnoses,
+    // we need to preserve the existing diagnoses array
+    if (!isNewDiagnosis && diagnosingAppointment.diagnoses) {
+      // Add the new diagnosis to the existing diagnoses array
+      appointmentWithStatus.diagnoses = [
+        appointmentWithStatus.diagnosis,
+        ...diagnosingAppointment.diagnoses
+      ];
+    }
+
     // Update the appointment in the global state
     onDiagnoseAppointment(appointmentWithStatus);
 
     // Close the diagnosis modal
     setDiagnosingAppointment(null);
 
-    // If we're in the patient management tab, refresh the patient view
+    // If we're in the patient management tab, wait a moment then refresh the patient view
     if (activeTab === 'patient-management' && selectedPatient) {
-      // This will trigger a re-render of the SimplifiedPatientView component
-      setSelectedPatient({...selectedPatient});
+      // Wait a moment to ensure the diagnosis is saved before refreshing
+      setTimeout(() => {
+        // This will trigger a re-render of the SimplifiedPatientView component
+        setSelectedPatient({...selectedPatient});
+      }, 500);
     }
   };
 
