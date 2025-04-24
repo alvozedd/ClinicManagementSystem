@@ -69,8 +69,12 @@ const patientSchema = mongoose.Schema(
     medications: [medicationSchema],
     created_by_user_id: {
       type: mongoose.Schema.Types.ObjectId,
-      required: true,
       ref: 'User',
+    },
+    createdBy: {
+      type: String,
+      enum: ['doctor', 'secretary', 'visitor'],
+      default: 'doctor',
     },
   },
   {

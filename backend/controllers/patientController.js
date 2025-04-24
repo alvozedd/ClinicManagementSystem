@@ -18,6 +18,7 @@ const createPatient = asyncHandler(async (req, res) => {
     medicalHistory,
     allergies,
     medications,
+    createdBy, // Add createdBy field to track who created the patient
   } = req.body;
 
   const patient = await Patient.create({
@@ -31,7 +32,8 @@ const createPatient = asyncHandler(async (req, res) => {
     medicalHistory: medicalHistory || [],
     allergies: allergies || [],
     medications: medications || [],
-    created_by_user_id: req.user._id,
+    created_by_user_id: req.user ? req.user._id : null, // Handle case where user might not be logged in (visitor)
+    createdBy: createdBy || (req.user ? req.user.role : 'visitor'), // Set createdBy based on input or user role
   });
 
   if (patient) {

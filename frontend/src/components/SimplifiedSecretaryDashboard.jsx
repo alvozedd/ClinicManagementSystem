@@ -2,13 +2,13 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getTodaysAppointments } from '../data/mockData';
 import PatientSearch from './PatientSearch';
-// import SecretaryPatientView from './SecretaryPatientView';
 // Using a simplified version for now
 import SecretaryPatientView from './BasicPatientView';
 import AddPatientForm from './AddPatientForm';
 import SecretaryCalendarView from './SecretaryCalendarView';
 import AppointmentManagementModal from './AppointmentManagementModal';
 import PatientSearchAppointmentModal from './PatientSearchAppointmentModal';
+import PatientNavigator from './PatientNavigator';
 import { FaCalendarAlt, FaUserTie, FaClipboardList } from 'react-icons/fa';
 import { getTimeBasedGreeting, getFormattedDate, identifyAppointmentsNeedingDiagnosis } from '../utils/timeUtils';
 import { transformAppointmentFromBackend } from '../utils/dataTransformers';
@@ -510,15 +510,23 @@ function SimplifiedSecretaryDashboard({
           <div>
             {/* Patient Management Tab */}
             {selectedPatient ? (
-              <SecretaryPatientView
-                patient={selectedPatient}
-                patients={patients}
-                appointments={appointments.filter(a => a.patientId === selectedPatient.id || a.patient_id === selectedPatient._id)}
-                onClose={handleClosePatientView}
-                onUpdatePatient={onUpdatePatient}
-                onSelectPatient={setSelectedPatient}
-                onDeletePatient={onDeletePatient}
-              />
+              <>
+                <PatientNavigator
+                  patients={patients}
+                  currentPatient={selectedPatient}
+                  onSelectPatient={setSelectedPatient}
+                  onClose={handleClosePatientView}
+                />
+                <SecretaryPatientView
+                  patient={selectedPatient}
+                  patients={patients}
+                  appointments={appointments.filter(a => a.patientId === selectedPatient.id || a.patient_id === selectedPatient._id)}
+                  onClose={handleClosePatientView}
+                  onUpdatePatient={onUpdatePatient}
+                  onSelectPatient={setSelectedPatient}
+                  onDeletePatient={onDeletePatient}
+                />
+              </>
             ) : (
               <div>
                 <div className="flex justify-between items-center mb-4">
@@ -561,6 +569,7 @@ function SimplifiedSecretaryDashboard({
             <AddPatientForm
               onSave={handleAddPatient}
               onCancel={() => setShowAddPatientForm(false)}
+              createdBy="secretary"
             />
           </div>
         </div>

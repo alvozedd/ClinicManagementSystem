@@ -46,7 +46,8 @@ function WelcomePage() {
         phone: formData.phone,
         next_of_kin_name: 'Not Provided',
         next_of_kin_relationship: 'Not Provided',
-        next_of_kin_phone: '0000000000'
+        next_of_kin_phone: '0000000000',
+        createdBy: 'visitor' // Explicitly set the creator as visitor
       };
 
       console.log('Creating new patient:', patientData);
@@ -58,7 +59,10 @@ function WelcomePage() {
         patient_id: newPatient._id,
         appointment_date: new Date(formData.appointmentDate),
         optional_time: '09:00', // Default time set to 9:00 AM
-        notes: `Type: ${formData.appointmentType}\nReason: ${formData.appointmentReason || 'Not specified'}\nStatus: Scheduled\nBooked online by patient.`
+        notes: `Type: ${formData.appointmentType}\nStatus: Scheduled\nBooked online by patient.`,
+        reason: formData.appointmentReason || 'Not specified', // Explicitly set the reason field
+        type: formData.appointmentType,
+        status: 'Pending' // Set status to Pending for visitor bookings
       };
 
       console.log('Creating new appointment:', appointmentData);
