@@ -1,0 +1,127 @@
+/* Appointment Tabs Styling */
+.appointment-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+
+.appointment-tab {
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+/* Tab colors */
+.appointment-tab.all {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.appointment-tab.all:not(.active) {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.appointment-tab.pending {
+  background-color: #f59e0b;
+  color: white;
+}
+
+.appointment-tab.pending:not(.active) {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.appointment-tab.scheduled {
+  background-color: #10b981;
+  color: white;
+}
+
+.appointment-tab.scheduled:not(.active) {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.appointment-tab.completed {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.appointment-tab.completed:not(.active) {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.appointment-tab.cancelled {
+  background-color: #ef4444;
+  color: white;
+}
+
+.appointment-tab.cancelled:not(.active) {
+  background-color: #fee2e2;
+  color: #b91c1c;
+}
+
+.appointment-tab.diagnosis {
+  background-color: #f59e0b;
+  color: white;
+}
+
+.appointment-tab.diagnosis:not(.active) {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+/* Add appointment button */
+.add-appointment-btn {
+  display: flex;
+  align-items: center;
+  background-color: #10b981;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.add-appointment-btn:hover {
+  background-color: #059669;
+}
+
+.add-appointment-btn svg {
+  margin-right: 0.25rem;
+}
+
+/* Appointment count badge */
+.appointment-count {
+  background-color: #dbeafe;
+  color: #1e40af;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* Section headers */
+.section-header {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 1rem;
+}
+
+/* No appointments message */
+.no-appointments {
+  text-align: center;
+  padding: 2rem 0;
+  background-color: #f9fafb;
+  border-radius: 0.5rem;
+  color: #6b7280;
+}

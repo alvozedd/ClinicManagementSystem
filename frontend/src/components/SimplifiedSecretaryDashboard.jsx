@@ -12,6 +12,7 @@ import PatientNavigator from './PatientNavigator';
 import { FaCalendarAlt, FaUserTie, FaClipboardList } from 'react-icons/fa';
 import { getTimeBasedGreeting, getFormattedDate, identifyAppointmentsNeedingDiagnosis } from '../utils/timeUtils';
 import { transformAppointmentFromBackend } from '../utils/dataTransformers';
+import './AppointmentTabs.css';
 
 function SimplifiedSecretaryDashboard({
   patients,
@@ -214,58 +215,58 @@ function SimplifiedSecretaryDashboard({
             {/* Today's Appointments Section */}
             <div className="mb-8">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-semibold text-gray-800">Today's Appointments</h2>
+                <h2 className="section-header">Today's Appointments</h2>
                 <div className="flex items-center gap-3">
                   <button
                     onClick={() => setShowAddAppointmentForm(true)}
-                    className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-md text-sm font-medium flex items-center"
+                    className="add-appointment-btn"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
                     </svg>
                     Add Appointment
                   </button>
-                  <div className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                  <div className="appointment-count">
                     {todaysAppointments.length} Appointments
                   </div>
                 </div>
               </div>
 
               {/* Status filter tabs */}
-              <div className="flex space-x-2 mb-4 overflow-x-auto pb-2">
+              <div className="appointment-tabs">
                 <button
                   onClick={() => setStatusFilter('all')}
-                  className={`px-3 py-1 rounded-full text-sm font-medium ${statusFilter === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}
+                  className={`appointment-tab all ${statusFilter === 'all' ? 'active' : ''}`}
                 >
                   All
                 </button>
                 <button
                   onClick={() => setStatusFilter('Pending')}
-                  className={`px-3 py-1 rounded-full text-sm font-medium ${statusFilter === 'Pending' ? 'bg-yellow-500 text-white' : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'}`}
+                  className={`appointment-tab pending ${statusFilter === 'Pending' ? 'active' : ''}`}
                 >
                   Pending
                 </button>
                 <button
                   onClick={() => setStatusFilter('Scheduled')}
-                  className={`px-3 py-1 rounded-full text-sm font-medium ${statusFilter === 'Scheduled' ? 'bg-green-600 text-white' : 'bg-green-100 text-green-800 hover:bg-green-200'}`}
+                  className={`appointment-tab scheduled ${statusFilter === 'Scheduled' ? 'active' : ''}`}
                 >
                   Scheduled
                 </button>
                 <button
                   onClick={() => setStatusFilter('Completed')}
-                  className={`px-3 py-1 rounded-full text-sm font-medium ${statusFilter === 'Completed' ? 'bg-blue-600 text-white' : 'bg-blue-100 text-blue-800 hover:bg-blue-200'}`}
+                  className={`appointment-tab completed ${statusFilter === 'Completed' ? 'active' : ''}`}
                 >
                   Completed
                 </button>
                 <button
                   onClick={() => setStatusFilter('Cancelled')}
-                  className={`px-3 py-1 rounded-full text-sm font-medium ${statusFilter === 'Cancelled' ? 'bg-red-600 text-white' : 'bg-red-100 text-red-800 hover:bg-red-200'}`}
+                  className={`appointment-tab cancelled ${statusFilter === 'Cancelled' ? 'active' : ''}`}
                 >
                   Cancelled
                 </button>
                 <button
                   onClick={() => setStatusFilter('Needs Diagnosis')}
-                  className={`px-3 py-1 rounded-full text-sm font-medium ${statusFilter === 'Needs Diagnosis' ? 'bg-yellow-600 text-white' : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'}`}
+                  className={`appointment-tab diagnosis ${statusFilter === 'Needs Diagnosis' ? 'active' : ''}`}
                 >
                   Needs Diagnosis
                 </button>
@@ -373,15 +374,15 @@ function SimplifiedSecretaryDashboard({
                   ))}
                 </div>
                 ) : (
-                  <div className="text-center py-8 bg-gray-50 rounded-lg">
-                    <p className="text-gray-500">
+                  <div className="no-appointments">
+                    <p>
                       No {statusFilter.toLowerCase()} appointments found for today.
                     </p>
                   </div>
                 )
               ) : (
-                <div className="text-center py-8 bg-gray-50 rounded-lg">
-                  <p className="text-gray-500">
+                <div className="no-appointments">
+                  <p>
                     {statusFilter === 'all'
                       ? 'No appointments scheduled for today.'
                       : `No ${statusFilter.toLowerCase()} appointments for today.`}
@@ -500,8 +501,8 @@ function SimplifiedSecretaryDashboard({
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8 bg-gray-50 rounded-lg">
-                  <p className="text-gray-500">No upcoming appointments scheduled.</p>
+                <div className="no-appointments">
+                  <p>No upcoming appointments scheduled.</p>
                 </div>
               )}
             </div>
