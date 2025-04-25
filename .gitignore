@@ -3,12 +3,24 @@ node_modules
 .pnp
 .pnp.js
 
-# Environment variables
+# Environment variables and secrets
 .env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
+.env.production
+backend/.env
+backend/.env.production
+backend/.env.local
+frontend/.env
+frontend/.env.local
+frontend/.env.production
+*.pem
+*.key
+*.crt
+*.p12
+secrets/
 
 # Build files
 /frontend/dist

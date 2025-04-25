@@ -83,27 +83,27 @@ const seedUsers = async () => {
       return;
     }
 
-    // Create default users
+    // Create default users with more secure passwords
     const users = [
       {
         name: 'Admin User',
         username: 'admin',
         email: 'admin@urohealth.com',
-        password: 'admin123',
+        password: process.env.ADMIN_PASSWORD || 'Admin@UroHealth2024!',
         role: 'admin',
       },
       {
         name: 'Dr. Paul Muchai',
         username: 'doctor',
         email: 'doctor@urohealth.com',
-        password: 'doctor123',
+        password: process.env.DOCTOR_PASSWORD || 'Doctor@UroHealth2024!',
         role: 'doctor',
       },
       {
         name: 'Secretary User',
         username: 'secretary',
         email: 'secretary@urohealth.com',
-        password: 'secretary123',
+        password: process.env.SECRETARY_PASSWORD || 'Secretary@UroHealth2024!',
         role: 'secretary',
       },
     ];

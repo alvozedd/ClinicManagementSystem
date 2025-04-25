@@ -48,8 +48,8 @@ const User = mongoose.model('User', userSchema);
 // Connect to MongoDB
 const connectDB = async () => {
   try {
-    const MONGODB_URI = 'mongodb+srv://clinic_admin:adminMuchai123@cluster0.jrm4jes.mongodb.net/clinic_management?retryWrites=true&w=majority';
-    const conn = await mongoose.connect(MONGODB_URI);
+    // Use environment variable for MongoDB URI
+    const conn = await mongoose.connect(process.env.MONGODB_URI);
     console.log(`MongoDB Connected: ${conn.connection.host}`);
     return conn;
   } catch (error) {
@@ -69,10 +69,10 @@ const createDefaultAdmin = async () => {
     if (adminExists) {
       console.log('Admin user already exists');
     } else {
-      // Create admin user
+      // Create admin user with more secure password
       const admin = await User.create({
         email: 'admin@urohealth.com',
-        password: 'admin123',
+        password: process.env.ADMIN_PASSWORD || 'Admin@UroHealth2024!',
         role: 'admin',
       });
 
@@ -85,10 +85,10 @@ const createDefaultAdmin = async () => {
     if (doctorExists) {
       console.log('Doctor user already exists');
     } else {
-      // Create doctor user
+      // Create doctor user with more secure password
       const doctor = await User.create({
         email: 'doctor@urohealth.com',
-        password: 'doctor123',
+        password: process.env.DOCTOR_PASSWORD || 'Doctor@UroHealth2024!',
         role: 'doctor',
       });
 
@@ -101,10 +101,10 @@ const createDefaultAdmin = async () => {
     if (secretaryExists) {
       console.log('Secretary user already exists');
     } else {
-      // Create secretary user
+      // Create secretary user with more secure password
       const secretary = await User.create({
         email: 'secretary@urohealth.com',
-        password: 'secretary123',
+        password: process.env.SECRETARY_PASSWORD || 'Secretary@UroHealth2024!',
         role: 'secretary',
       });
 
