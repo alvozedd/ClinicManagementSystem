@@ -1,6 +1,7 @@
 /**
  * Security middleware for enforcing HTTPS, implementing HSTS, and other security headers
  */
+const crypto = require('crypto');
 
 // Middleware to enforce HTTPS in production
 const enforceHttps = (req, res, next) => {
@@ -21,8 +22,15 @@ const enforceHttps = (req, res, next) => {
   next();
 };
 
+// Generate a nonce for CSP
+const generateNonce = () => {
+  return crypto.randomBytes(16).toString('base64');
+};
+
 // Middleware to add security headers
 const addSecurityHeaders = (req, res, next) => {
+  // Generate a nonce for this request
+  const nonce = generateNonce();
   // HTTP Strict Transport Security
   // Only add in production to avoid issues with local development
   if (process.env.NODE_ENV === 'production') {
@@ -42,13 +50,37 @@ const addSecurityHeaders = (req, res, next) => {
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
 
   // Content Security Policy
-  // This is a basic policy - you may need to customize it based on your application's needs
+  // Comprehensive policy to prevent XSS and other injection attacks
   if (process.env.NODE_ENV === 'production') {
     res.setHeader(
       'Content-Security-Policy',
-      "default-src 'self'; script-src 'self'; connect-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; frame-ancestors 'none';"
+      "default-src 'self'; " +
+      `script-src 'self' 'nonce-${nonce}' https://cdn.jsdelivr.net https://unpkg.com; ` +
+      "connect-src 'self' https://api.urohealth.com; " +
+      "img-src 'self' data: https://cdn.urohealth.com; " +
+      "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; " +
+      "font-src 'self' https://fonts.gstatic.com; " +
+      "frame-ancestors 'none'; " +
+      "form-action 'self'; " +
+      "base-uri 'self'; " +
+      "object-src 'none'; " +
+      "upgrade-insecure-requests;"
+    );
+  } else {
+    // More permissive policy for development
+    res.setHeader(
+      'Content-Security-Policy-Report-Only',
+      "default-src 'self'; " +
+      "script-src 'self' 'unsafe-eval' 'unsafe-inline'; " +
+      "connect-src 'self' *; " +
+      "img-src 'self' data: *; " +
+      "style-src 'self' 'unsafe-inline' *; " +
+      "font-src 'self' *;"
     );
   }
+
+  // Store the nonce in the request object so it can be used in templates
+  req.cspNonce = nonce;
 
   next();
 };
@@ -63,10 +95,10 @@ const secureCoookieSettings = (req, res, next) => {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
     };
-    
+
     return res.cookie(name, value, secureOptions);
   };
-  
+
   next();
 };
 
@@ -74,4 +106,5 @@ module.exports = {
   enforceHttps,
   addSecurityHeaders,
   secureCoookieSettings,
+  generateNonce,
 };

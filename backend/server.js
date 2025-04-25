@@ -6,10 +6,14 @@ const helmet = require('helmet');
 const connectDB = require('./config/db');
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 const { enforceHttps, addSecurityHeaders, secureCoookieSettings } = require('./middleware/securityMiddleware');
+const { handleCsrfError, exemptCsrf, provideCsrfToken } = require('./middleware/csrfMiddleware');
+const { addRequestId } = require('./middleware/requestIdMiddleware');
+const { conditionalRequestLogger } = require('./middleware/requestLoggingMiddleware');
 const userRoutes = require('./routes/userRoutes');
 const patientRoutes = require('./routes/patientRoutes');
 const appointmentRoutes = require('./routes/appointmentRoutes');
 const diagnosisRoutes = require('./routes/diagnosisRoutes');
+const healthRoutes = require('./routes/healthRoutes');
 
 // Load environment variables
 dotenv.config();
@@ -18,6 +22,12 @@ dotenv.config();
 connectDB();
 
 const app = express();
+
+// Add request ID to each request (do this first for complete request tracking)
+app.use(addRequestId);
+
+// Log all requests
+app.use(conditionalRequestLogger);
 
 // Apply security middleware
 app.use(helmet()); // Adds various security headers
@@ -56,7 +66,15 @@ app.use(express.json());
 // Parse cookies
 app.use(cookieParser());
 
-// Routes
+// CSRF protection
+app.use(exemptCsrf);
+app.use(handleCsrfError);
+app.use(provideCsrfToken);
+
+// Health check routes (should be before other routes for quick response)
+app.use('/api/health', healthRoutes);
+
+// API Routes
 app.use('/api/users', userRoutes);
 app.use('/api/patients', patientRoutes);
 app.use('/api/appointments', appointmentRoutes);
