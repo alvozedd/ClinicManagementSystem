@@ -6,6 +6,15 @@ const User = require('../models/userModel');
 const optionalAuth = asyncHandler(async (req, res, next) => {
   let token;
 
+  // Check if this is a visitor booking
+  const isVisitorBooking = req.body && req.body.createdBy === 'visitor';
+
+  if (isVisitorBooking) {
+    console.log('Visitor booking detected, skipping authentication');
+    // For visitor bookings, we don't need authentication
+    return next();
+  }
+
   // Check if token exists in headers
   if (
     req.headers.authorization &&
