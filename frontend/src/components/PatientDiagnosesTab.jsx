@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { FaFileMedical, FaCalendarAlt, FaUser, FaClock, FaClipboardList } from 'react-icons/fa';
+import { FaFileMedical, FaCalendarAlt, FaUser, FaClock, FaClipboardList, FaEdit, FaTrashAlt } from 'react-icons/fa';
 import apiService from '../utils/apiService';
 
-function PatientDiagnosesTab({ patient, appointments }) {
+function PatientDiagnosesTab({ patient, appointments, onEditDiagnosis, onDeleteDiagnosis }) {
   const [allDiagnoses, setAllDiagnoses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -12,22 +12,22 @@ function PatientDiagnosesTab({ patient, appointments }) {
   useEffect(() => {
     const fetchDiagnoses = async () => {
       if (!patient || !patient._id) return;
-      
+
       setLoading(true);
       try {
         // Create a flattened array of all diagnoses across all appointments
         const diagnosesArray = [];
-        
+
         // Get all appointments for this patient
         const patientAppointments = appointments || [];
-        
+
         // For each appointment, fetch diagnoses
         for (const appointment of patientAppointments) {
           if (appointment.status === 'Completed') {
             try {
               const appointmentId = appointment._id || appointment.id;
               const diagnoses = await apiService.getDiagnosisByAppointmentId(appointmentId);
-              
+
               if (diagnoses && diagnoses.length > 0) {
                 diagnoses.forEach(diagnosis => {
                   // Parse the diagnosis_text if it's a JSON string
@@ -37,7 +37,7 @@ function PatientDiagnosesTab({ patient, appointments }) {
                   } catch (e) {
                     // If it's not valid JSON, keep the original text
                   }
-                  
+
                   diagnosesArray.push({
                     id: diagnosis._id,
                     appointmentId: appointmentId,
@@ -47,6 +47,7 @@ function PatientDiagnosesTab({ patient, appointments }) {
                     diagnosisText: parsedDiagnosis.notes || parsedDiagnosis,
                     treatment: parsedDiagnosis.treatment,
                     followUp: parsedDiagnosis.followUp,
+                    files: parsedDiagnosis.files || [],
                     createdAt: new Date(diagnosis.createdAt),
                     createdBy: appointment.created_by_user_id || 'doctor'
                   });
@@ -57,7 +58,7 @@ function PatientDiagnosesTab({ patient, appointments }) {
             }
           }
         }
-        
+
         setAllDiagnoses(diagnosesArray);
       } catch (err) {
         console.error('Error fetching diagnoses:', err);
@@ -136,7 +137,7 @@ function PatientDiagnosesTab({ patient, appointments }) {
             {filteredDiagnoses.length}
           </span>
         </h3>
-        
+
         <div className="flex flex-col sm:flex-row gap-3">
           <select
             value={filterType}
@@ -148,7 +149,7 @@ function PatientDiagnosesTab({ patient, appointments }) {
               <option key={type} value={type}>{type}</option>
             ))}
           </select>
-          
+
           <select
             value={sortOrder}
             onChange={(e) => setSortOrder(e.target.value)}
@@ -162,8 +163,8 @@ function PatientDiagnosesTab({ patient, appointments }) {
 
       <div className="space-y-6">
         {filteredDiagnoses.map((diagnosis, index) => (
-          <div 
-            key={diagnosis.id || index} 
+          <div
+            key={diagnosis.id || index}
             className="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow p-5"
           >
             <div className="flex flex-col sm:flex-row justify-between mb-4 pb-4 border-b border-gray-100">
@@ -174,23 +175,49 @@ function PatientDiagnosesTab({ patient, appointments }) {
                   <p className="text-sm text-gray-600">{diagnosis.appointmentType}</p>
                 </div>
               </div>
-              
-              <div className="flex items-start gap-2">
-                <FaClipboardList className="text-blue-600 mt-1 flex-shrink-0" />
-                <div>
-                  <h4 className="font-semibold text-gray-800">Reason</h4>
-                  <p className="text-sm text-gray-600">{diagnosis.appointmentReason || 'Not specified'}</p>
+
+              <div className="flex items-center gap-4">
+                <div className="flex items-start gap-2">
+                  <FaClipboardList className="text-blue-600 mt-1 flex-shrink-0" />
+                  <div>
+                    <h4 className="font-semibold text-gray-800">Reason</h4>
+                    <p className="text-sm text-gray-600">{diagnosis.appointmentReason || 'Not specified'}</p>
+                  </div>
                 </div>
+
+                {/* Edit and Delete buttons */}
+                {onEditDiagnosis && onDeleteDiagnosis && (
+                  <div className="flex gap-2 ml-2">
+                    <button
+                      onClick={() => onEditDiagnosis(diagnosis)}
+                      className="text-blue-600 hover:text-blue-800 p-1 rounded-full hover:bg-blue-100 transition-colors"
+                      title="Edit Diagnosis"
+                    >
+                      <FaEdit className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (window.confirm('Are you sure you want to delete this diagnosis? This action cannot be undone.')) {
+                          onDeleteDiagnosis(diagnosis.id);
+                        }
+                      }}
+                      className="text-red-600 hover:text-red-800 p-1 rounded-full hover:bg-red-100 transition-colors"
+                      title="Delete Diagnosis"
+                    >
+                      <FaTrashAlt className="h-4 w-4" />
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
-            
+
             <div className="mb-4">
               <h4 className="font-semibold text-blue-800 mb-2">Diagnosis</h4>
               <div className="bg-blue-50 p-4 rounded-lg">
                 <p className="text-gray-800 whitespace-pre-line">{diagnosis.diagnosisText}</p>
               </div>
             </div>
-            
+
             {diagnosis.treatment && (
               <div className="mb-4">
                 <h4 className="font-semibold text-blue-800 mb-2">Treatment Plan</h4>
@@ -199,7 +226,7 @@ function PatientDiagnosesTab({ patient, appointments }) {
                 </div>
               </div>
             )}
-            
+
             {diagnosis.followUp && (
               <div className="mb-4">
                 <h4 className="font-semibold text-blue-800 mb-2">Follow-up Instructions</h4>
@@ -208,7 +235,54 @@ function PatientDiagnosesTab({ patient, appointments }) {
                 </div>
               </div>
             )}
-            
+
+            {diagnosis.files && diagnosis.files.length > 0 && (
+              <div className="mb-4">
+                <h4 className="font-semibold text-blue-800 mb-2">Attached Files</h4>
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <div className="space-y-2">
+                    {diagnosis.files.map((file, fileIndex) => (
+                      <div key={fileIndex} className="flex items-center justify-between bg-white p-2 rounded border border-gray-200">
+                        <div className="flex items-center">
+                          {file.type && file.type.includes('pdf') ? (
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-red-500 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                              <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" />
+                            </svg>
+                          ) : file.type && file.type.includes('image') ? (
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-500 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                              <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
+                            </svg>
+                          ) : (
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-500 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                              <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" />
+                            </svg>
+                          )}
+                          <span className="text-sm">{file.name}</span>
+                        </div>
+                        <div className="flex space-x-2">
+                          <a
+                            href={file.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700"
+                          >
+                            View
+                          </a>
+                          <a
+                            href={file.url}
+                            download={file.name}
+                            className="text-xs bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700"
+                          >
+                            Download
+                          </a>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className="mt-4 text-sm text-gray-500 flex items-center">
               <FaClock className="mr-1" />
               <span>Recorded on {formatDate(diagnosis.createdAt)}</span>

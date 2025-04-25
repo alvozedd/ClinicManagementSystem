@@ -128,40 +128,51 @@ function PatientSearch({ patients, onSelectPatient }) {
   // Get the appropriate sort icon
   const getSortIcon = (field) => {
     if (field !== sortField) {
-      return <FaSort className="text-gray-400" />;
+      return <FaSort className="text-gray-400 ml-1 h-3 w-3 md:h-4 md:w-4" />;
     }
 
     if (field === 'lastName' || field === 'firstName') {
-      return sortDirection === 'asc' ? <FaSortAlphaDown className="text-blue-600" /> : <FaSortAlphaUp className="text-blue-600" />;
+      return sortDirection === 'asc'
+        ? <FaSortAlphaDown className="text-blue-600 ml-1 h-3 w-3 md:h-4 md:w-4" />
+        : <FaSortAlphaUp className="text-blue-600 ml-1 h-3 w-3 md:h-4 md:w-4" />;
     } else {
-      return sortDirection === 'asc' ? <FaSortNumericDown className="text-blue-600" /> : <FaSortNumericUp className="text-blue-600" />;
+      return sortDirection === 'asc'
+        ? <FaSortNumericDown className="text-blue-600 ml-1 h-3 w-3 md:h-4 md:w-4" />
+        : <FaSortNumericUp className="text-blue-600 ml-1 h-3 w-3 md:h-4 md:w-4" />;
     }
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <div className="mb-6">
-        <h2 className="text-xl font-bold mb-2">Patient Search</h2>
-        <p className="text-gray-600 mb-4">Search for a patient to view their complete medical record</p>
+    <div className="bg-white rounded-lg shadow-md p-3 md:p-4">
+      <div className="mb-3 md:mb-4">
+        <div className="flex items-center justify-between mb-2 md:mb-3">
+          <h2 className="text-sm md:text-base font-bold flex items-center">
+            <FaUser className="mr-2 text-blue-600" size={16} />
+            Patient Search
+          </h2>
+          <span className="text-xs md:text-sm text-gray-500">
+            {searchTerm ? `Results: ${searchResults.length}` : `Total: ${searchResults.length}`}
+          </span>
+        </div>
 
-        <div className="relative mb-4">
+        <div className="relative mb-3 md:mb-4">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <svg className="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <svg className="h-4 w-4 md:h-5 md:w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
             </svg>
           </div>
           <input
             type="text"
-            className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-            placeholder="Search by name, ID, or phone number"
+            className="block w-full pl-10 py-2 md:py-3 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm md:text-base"
+            placeholder="Search by name, ID, or phone"
             value={searchTerm}
             onChange={handleSearch}
           />
         </div>
 
-        <div className="flex justify-end mb-4">
-          <div className="flex flex-wrap gap-2 text-sm">
-            <span className="text-gray-600 self-center">Sort by:</span>
+        <div className="mb-3 md:mb-4">
+          <div className="flex flex-wrap gap-2 text-xs md:text-sm">
+            <span className="text-gray-600 self-center whitespace-nowrap">Sort:</span>
             <button
               onClick={() => handleSort('lastName')}
               className={`flex items-center px-2 py-1 rounded ${
@@ -199,48 +210,38 @@ function PatientSearch({ patients, onSelectPatient }) {
       </div>
 
       <div>
-        <h3 className="text-sm font-medium text-gray-500 mb-2">
-          {searchTerm ? `Search Results (${searchResults.length})` : `All Patients (${searchResults.length})`}
-        </h3>
-
         {searchResults.length > 0 ? (
-          <div className="space-y-2">
+          <div className="space-y-2 md:space-y-3 max-h-[400px] md:max-h-[500px] overflow-y-auto">
             {searchResults.map(patient => (
               <div
                 key={patient.id}
-                className="flex justify-between items-center p-3 border rounded-lg hover:bg-blue-50 cursor-pointer transition-colors"
+                className="flex justify-between items-center p-3 md:p-4 border rounded-lg hover:bg-blue-50 cursor-pointer transition-colors"
                 onClick={() => {
-                  // Scroll to top of page when selecting a patient
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                   onSelectPatient(patient);
                 }}
               >
-                <div>
-                  <p className="font-medium">{patient.firstName} {patient.lastName}</p>
-                  <p className="text-sm text-gray-600">
-                    {calculateAge(patient.dateOfBirth)} years • {patient.gender} • {patient.phone}
-                  </p>
-                  {patient.createdBy && (
-                    <p className="text-xs text-gray-500 flex items-center mt-1">
-                      <FaUser className="mr-1" size={10} />
-                      Added by: <span className={`font-medium ml-1 px-2 py-0.5 rounded-full ${patient.createdBy === 'visitor' ? 'bg-purple-100 text-purple-800' : patient.createdBy === 'doctor' ? 'bg-blue-100 text-blue-800' : patient.createdBy === 'secretary' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>
-                        {patient.createdBy === 'visitor' ? 'Patient (Online)' :
-                         patient.createdBy === 'doctor' ? 'Doctor' :
-                         patient.createdBy === 'secretary' ? 'Secretary' :
-                         patient.createdByName || getCreatorLabel(patient.createdBy)}
-                      </span>
-                    </p>
-                  )}
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-sm md:text-base truncate">{patient.firstName} {patient.lastName}</p>
+                  <div className="flex flex-wrap items-center text-xs md:text-sm text-gray-600 mt-1">
+                    <span>{calculateAge(patient.dateOfBirth)} years</span>
+                    <span className="mx-1">•</span>
+                    <span>{patient.gender}</span>
+                    <span className="mx-1">•</span>
+                    <span>{patient.phone}</span>
+                  </div>
                 </div>
-                <button className="text-blue-600 hover:text-blue-800 text-sm">
-                  View Details
+                <button className="text-blue-600 hover:text-blue-800 text-sm md:text-base flex items-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 md:h-5 md:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
                 </button>
               </div>
             ))}
           </div>
         ) : (
-          <div className="text-center py-6 bg-gray-50 rounded-lg">
-            <p className="text-gray-500">No patients found matching your search.</p>
+          <div className="text-center py-4 bg-gray-50 rounded-lg">
+            <p className="text-gray-500 text-sm md:text-base">No patients found</p>
           </div>
         )}
       </div>

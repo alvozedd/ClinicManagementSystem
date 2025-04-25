@@ -84,7 +84,9 @@ function SimplifiedDiagnosisModal({ appointment, onClose, onSave }) {
         // Also include a text representation for the API
         diagnosisText: JSON.stringify(diagnosisObj),
         // Set status to Completed when adding a diagnosis
-        status: 'Completed'
+        status: 'Completed',
+        // If we're editing an existing diagnosis, include its ID
+        diagnosisId: appointment.diagnosis?._id || appointment.diagnosis?.id
       };
 
       console.log('Saving diagnosis with appointment:', updatedAppointment);

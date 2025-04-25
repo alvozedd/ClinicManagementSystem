@@ -47,7 +47,10 @@ function WelcomePage() {
         next_of_kin_name: 'Not Provided',
         next_of_kin_relationship: 'Not Provided',
         next_of_kin_phone: '0000000000',
-        createdBy: 'visitor' // Explicitly set the creator as visitor
+        createdBy: 'visitor', // Explicitly set the creator as visitor
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email || ''
       };
 
       console.log('Creating new patient:', patientData);
@@ -60,9 +63,10 @@ function WelcomePage() {
         appointment_date: new Date(formData.appointmentDate),
         optional_time: '09:00', // Default time set to 9:00 AM
         notes: `Type: ${formData.appointmentType}\nStatus: Scheduled\nBooked online by patient.`,
-        reason: formData.appointmentReason || 'Not specified', // Explicitly set the reason field
+        reason: formData.appointmentReason || 'General consultation', // Use a default reason if not specified
         type: formData.appointmentType,
-        status: 'Pending' // Set status to Pending for visitor bookings
+        status: 'Pending', // Set status to Pending for visitor bookings
+        createdBy: 'visitor' // Explicitly set the creator as visitor
       };
 
       console.log('Creating new appointment:', appointmentData);
@@ -147,9 +151,6 @@ function WelcomePage() {
         {/* Header with clinic name and navigation */}
         <div className="flex justify-between items-center mb-8">
           <div className="flex items-center">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-700 to-blue-500 flex items-center justify-center mr-3">
-              <FaHospital className="text-white text-lg" />
-            </div>
             <div>
               <h1 className="text-2xl font-bold text-blue-800">UroHealth Central Ltd</h1>
               <p className="text-blue-600 text-sm">Consultant Surgeon & Urologist</p>
@@ -264,23 +265,15 @@ function WelcomePage() {
                   </div>
                   <span className="text-sm text-gray-600 ml-6">Working Hours</span>
                 </div>
-              </div>
-            </div>
 
-            {/* Google Maps Embed */}
-            <div className="bg-white rounded-lg shadow-lg overflow-hidden border border-blue-100 w-full">
-              <div className="bg-blue-600 p-4 relative">
-                <div className="absolute inset-0 opacity-40">
-                  <div className="absolute top-0 left-0 w-full h-full" style={{backgroundImage: "url('data:image/svg+xml,%3Csvg width=\"20\" height=\"20\" viewBox=\"0 0 20 20\" xmlns=\"http://www.w3.org/2000/svg\",%3E%3Cg fill=\"none\" fill-rule=\"evenodd\",%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"0.6\",%3E%3Cpath d=\"M0 0h10v10H0V0zm10 10h10v10H10V10z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')", backgroundSize: "20px 20px"}}
+                <div className="w-full block bg-blue-50 py-2 px-4 rounded-md text-blue-700 font-medium">
+                  <div className="flex items-center mb-1">
+                    <FaMapMarkerAlt className="text-blue-600 mr-2" />
+                    <span>Catering Building, 1st Floor<br />P.O. Box 31-10100<br />Nyeri, Kenya</span>
                   </div>
+                  <span className="text-sm text-gray-600 ml-6">Our Location</span>
                 </div>
-                <h2 className="text-xl font-semibold text-white relative z-10">Find Us</h2>
-              </div>
-              <div className="p-4 mb-2">
-                <div className="flex items-center mb-2">
-                  <FaMapMarkerAlt className="text-blue-600 mr-3 flex-shrink-0" />
-                  <span className="text-gray-700">Catering Building, 1st Floor<br />P.O. Box 31-10100<br />Nyeri, Kenya</span>
-                </div>
+
                 <a
                   href="https://maps.google.com/?q=Catering+Building,+Nyeri,+Kenya"
                   target="_blank"
@@ -292,6 +285,17 @@ function WelcomePage() {
                     <span>Open in Google Maps</span>
                   </div>
                 </a>
+              </div>
+            </div>
+
+            {/* Google Maps Embed */}
+            <div className="bg-white rounded-lg shadow-lg overflow-hidden border border-blue-100 w-full">
+              <div className="bg-blue-600 p-4 relative">
+                <div className="absolute inset-0 opacity-40">
+                  <div className="absolute top-0 left-0 w-full h-full" style={{backgroundImage: "url('data:image/svg+xml,%3Csvg width=\"20\" height=\"20\" viewBox=\"0 0 20 20\" xmlns=\"http://www.w3.org/2000/svg\",%3E%3Cg fill=\"none\" fill-rule=\"evenodd\",%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"0.6\",%3E%3Cpath d=\"M0 0h10v10H0V0zm10 10h10v10H10V10z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')", backgroundSize: "20px 20px"}}
+                  </div>
+                </div>
+                <h2 className="text-xl font-semibold text-white relative z-10">Map View</h2>
               </div>
               <div className="p-0">
                 <iframe
@@ -318,7 +322,7 @@ function WelcomePage() {
                   </div>
                 </div>
                 <h1 className="text-2xl font-bold text-white relative z-10">Book Your Appointment</h1>
-                <p className="text-blue-100 mt-2 relative z-10">Complete this form to schedule your visit</p>
+                <p className="text-blue-100 mt-2 relative z-10">Complete this form to schedule your visit with UroHealth Central</p>
               </div>
               <div className="p-6">
                 {error && (

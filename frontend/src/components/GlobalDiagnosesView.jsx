@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { FaFileMedical, FaCalendarAlt, FaUser, FaClock, FaClipboardList, FaSearch } from 'react-icons/fa';
+import { FaFileMedical, FaCalendarAlt, FaUser, FaClock, FaClipboardList, FaSearch, FaEdit, FaTrashAlt } from 'react-icons/fa';
 import apiService from '../utils/apiService';
 
-function GlobalDiagnosesView({ onViewPatient }) {
+function GlobalDiagnosesView({ onViewPatient, onEditDiagnosis, onDeleteDiagnosis }) {
   const [allDiagnoses, setAllDiagnoses] = useState([]);
   const [filteredDiagnoses, setFilteredDiagnoses] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -19,17 +19,17 @@ function GlobalDiagnosesView({ onViewPatient }) {
       try {
         // Fetch all diagnoses
         const diagnoses = await apiService.getDiagnoses();
-        
+
         // Fetch all patients for the filter
         const patientsData = await apiService.getPatients();
         setPatients(patientsData);
-        
+
         // Process diagnoses
         const processedDiagnoses = await Promise.all(diagnoses.map(async (diagnosis) => {
           // Get appointment details
           const appointment = diagnosis.appointment_id;
           const patient = appointment?.patient_id;
-          
+
           // Parse the diagnosis_text if it's a JSON string
           let parsedDiagnosis = diagnosis.diagnosis_text;
           try {
@@ -37,7 +37,7 @@ function GlobalDiagnosesView({ onViewPatient }) {
           } catch (e) {
             // If it's not valid JSON, keep the original text
           }
-          
+
           return {
             id: diagnosis._id,
             appointmentId: appointment?._id,
@@ -49,10 +49,11 @@ function GlobalDiagnosesView({ onViewPatient }) {
             diagnosisText: parsedDiagnosis.notes || parsedDiagnosis,
             treatment: parsedDiagnosis.treatment,
             followUp: parsedDiagnosis.followUp,
+            files: parsedDiagnosis.files || [],
             createdAt: new Date(diagnosis.createdAt)
           };
         }));
-        
+
         setAllDiagnoses(processedDiagnoses);
       } catch (err) {
         console.error('Error fetching diagnoses:', err);
@@ -68,28 +69,28 @@ function GlobalDiagnosesView({ onViewPatient }) {
   // Apply filters and sorting whenever dependencies change
   useEffect(() => {
     let result = [...allDiagnoses];
-    
+
     // Filter by patient if selected
     if (selectedPatient !== 'all') {
       result = result.filter(d => d.patientId === selectedPatient);
     }
-    
+
     // Filter by appointment type
     if (filterType !== 'all') {
       result = result.filter(d => d.appointmentType.toLowerCase() === filterType.toLowerCase());
     }
-    
+
     // Apply search term
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
-      result = result.filter(d => 
+      result = result.filter(d =>
         d.patientName.toLowerCase().includes(term) ||
         d.diagnosisText.toLowerCase().includes(term) ||
         (d.treatment && d.treatment.toLowerCase().includes(term)) ||
         (d.appointmentReason && d.appointmentReason.toLowerCase().includes(term))
       );
     }
-    
+
     // Sort results
     result.sort((a, b) => {
       if (sortOrder === 'newest') {
@@ -98,7 +99,7 @@ function GlobalDiagnosesView({ onViewPatient }) {
         return a.appointmentDate - b.appointmentDate;
       }
     });
-    
+
     setFilteredDiagnoses(result);
   }, [allDiagnoses, selectedPatient, filterType, searchTerm, sortOrder]);
 
@@ -142,7 +143,7 @@ function GlobalDiagnosesView({ onViewPatient }) {
           </span>
         </h2>
       </div>
-      
+
       {/* Search and Filters */}
       <div className="bg-gray-50 p-4 rounded-lg mb-6">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -158,7 +159,7 @@ function GlobalDiagnosesView({ onViewPatient }) {
               placeholder="Search diagnoses..."
             />
           </div>
-          
+
           <select
             value={selectedPatient}
             onChange={(e) => setSelectedPatient(e.target.value)}
@@ -169,7 +170,7 @@ function GlobalDiagnosesView({ onViewPatient }) {
               <option key={patient._id} value={patient._id}>{patient.name}</option>
             ))}
           </select>
-          
+
           <select
             value={filterType}
             onChange={(e) => setFilterType(e.target.value)}
@@ -180,7 +181,7 @@ function GlobalDiagnosesView({ onViewPatient }) {
               <option key={type} value={type}>{type}</option>
             ))}
           </select>
-          
+
           <select
             value={sortOrder}
             onChange={(e) => setSortOrder(e.target.value)}
@@ -203,8 +204,8 @@ function GlobalDiagnosesView({ onViewPatient }) {
       ) : (
         <div className="space-y-6">
           {filteredDiagnoses.map((diagnosis, index) => (
-            <div 
-              key={diagnosis.id || index} 
+            <div
+              key={diagnosis.id || index}
               className="bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-shadow p-5"
             >
               <div className="flex flex-col sm:flex-row justify-between mb-4 pb-4 border-b border-gray-100">
@@ -215,30 +216,56 @@ function GlobalDiagnosesView({ onViewPatient }) {
                     <p className="text-sm text-gray-600">{diagnosis.appointmentType}</p>
                   </div>
                 </div>
-                
-                <div className="flex items-start gap-2">
-                  <FaUser className="text-blue-600 mt-1 flex-shrink-0" />
-                  <div>
-                    <h4 className="font-semibold text-gray-800">
-                      <button 
-                        onClick={() => onViewPatient && onViewPatient(diagnosis.patientId)}
-                        className="text-blue-600 hover:underline"
-                      >
-                        {diagnosis.patientName}
-                      </button>
-                    </h4>
-                    <p className="text-sm text-gray-600">{diagnosis.appointmentReason}</p>
+
+                <div className="flex items-center gap-4">
+                  <div className="flex items-start gap-2">
+                    <FaUser className="text-blue-600 mt-1 flex-shrink-0" />
+                    <div>
+                      <h4 className="font-semibold text-gray-800">
+                        <button
+                          onClick={() => onViewPatient && onViewPatient(diagnosis.patientId)}
+                          className="text-blue-600 hover:underline"
+                        >
+                          {diagnosis.patientName}
+                        </button>
+                      </h4>
+                      <p className="text-sm text-gray-600">{diagnosis.appointmentReason}</p>
+                    </div>
                   </div>
+
+                  {/* Edit and Delete buttons */}
+                  {onEditDiagnosis && onDeleteDiagnosis && (
+                    <div className="flex gap-2 ml-2">
+                      <button
+                        onClick={() => onEditDiagnosis(diagnosis)}
+                        className="text-blue-600 hover:text-blue-800 p-1 rounded-full hover:bg-blue-100 transition-colors"
+                        title="Edit Diagnosis"
+                      >
+                        <FaEdit className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => {
+                          if (window.confirm('Are you sure you want to delete this diagnosis? This action cannot be undone.')) {
+                            onDeleteDiagnosis(diagnosis.id);
+                          }
+                        }}
+                        className="text-red-600 hover:text-red-800 p-1 rounded-full hover:bg-red-100 transition-colors"
+                        title="Delete Diagnosis"
+                      >
+                        <FaTrashAlt className="h-4 w-4" />
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
-              
+
               <div className="mb-4">
                 <h4 className="font-semibold text-blue-800 mb-2">Diagnosis</h4>
                 <div className="bg-blue-50 p-4 rounded-lg">
                   <p className="text-gray-800 whitespace-pre-line">{diagnosis.diagnosisText}</p>
                 </div>
               </div>
-              
+
               {diagnosis.treatment && (
                 <div className="mb-4">
                   <h4 className="font-semibold text-blue-800 mb-2">Treatment Plan</h4>
@@ -247,7 +274,7 @@ function GlobalDiagnosesView({ onViewPatient }) {
                   </div>
                 </div>
               )}
-              
+
               {diagnosis.followUp && (
                 <div className="mb-4">
                   <h4 className="font-semibold text-blue-800 mb-2">Follow-up Instructions</h4>
@@ -256,7 +283,54 @@ function GlobalDiagnosesView({ onViewPatient }) {
                   </div>
                 </div>
               )}
-              
+
+              {diagnosis.files && diagnosis.files.length > 0 && (
+                <div className="mb-4">
+                  <h4 className="font-semibold text-blue-800 mb-2">Attached Files</h4>
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <div className="space-y-2">
+                      {diagnosis.files.map((file, fileIndex) => (
+                        <div key={fileIndex} className="flex items-center justify-between bg-white p-2 rounded border border-gray-200">
+                          <div className="flex items-center">
+                            {file.type && file.type.includes('pdf') ? (
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-red-500 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" />
+                              </svg>
+                            ) : file.type && file.type.includes('image') ? (
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-500 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
+                              </svg>
+                            ) : (
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-500 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" />
+                              </svg>
+                            )}
+                            <span className="text-sm">{file.name}</span>
+                          </div>
+                          <div className="flex space-x-2">
+                            <a
+                              href={file.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700"
+                            >
+                              View
+                            </a>
+                            <a
+                              href={file.url}
+                              download={file.name}
+                              className="text-xs bg-green-600 text-white px-2 py-1 rounded hover:bg-green-700"
+                            >
+                              Download
+                            </a>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div className="mt-4 text-sm text-gray-500 flex items-center">
                 <FaClock className="mr-1" />
                 <span>Recorded on {formatDate(diagnosis.createdAt)}</span>

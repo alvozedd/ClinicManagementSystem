@@ -47,8 +47,8 @@ function PatientNavigator({
   // No sorting functionality in this component anymore
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-4 mb-4">
-      <div className="flex justify-between items-center mb-4">
+    <div className="bg-white rounded-md shadow-sm p-0.5 mb-1">
+      <div className="flex justify-between items-center">
         <div className="flex items-center">
           <button
             onClick={(e) => {
@@ -56,45 +56,43 @@ function PatientNavigator({
               e.stopPropagation();
               onClose();
             }}
-            className="mr-4 bg-blue-100 hover:bg-blue-200 text-blue-700 hover:text-blue-800 font-medium flex items-center px-3 py-2 rounded-md transition-colors duration-200"
+            className="mr-1 bg-blue-100 hover:bg-blue-200 text-blue-700 hover:text-blue-800 text-[10px] font-medium flex items-center px-1 py-0.5 rounded transition-colors duration-200"
           >
-            <FaChevronLeft className="mr-1" />
-            Back to List
+            <FaChevronLeft size={8} />
+            <span className="hidden sm:inline ml-0.5">Back</span>
           </button>
-          <h2 className="text-lg font-semibold">
-            Patient {currentIndex + 1} of {sortedPatients.length}
+          <h2 className="text-xs font-medium">
+            {currentIndex + 1}/{sortedPatients.length}
           </h2>
         </div>
 
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-0.5">
           <button
             onClick={goToPrevious}
             disabled={currentIndex === 0}
-            className={`p-2 rounded-full ${
+            className={`p-0.5 rounded-full ${
               currentIndex === 0
                 ? 'text-gray-400 cursor-not-allowed'
                 : 'text-blue-600 hover:bg-blue-50'
             }`}
             title="Previous patient"
           >
-            <FaChevronLeft />
+            <FaChevronLeft size={10} />
           </button>
           <button
             onClick={goToNext}
             disabled={currentIndex === sortedPatients.length - 1}
-            className={`p-2 rounded-full ${
+            className={`p-0.5 rounded-full ${
               currentIndex === sortedPatients.length - 1
                 ? 'text-gray-400 cursor-not-allowed'
                 : 'text-blue-600 hover:bg-blue-50'
             }`}
             title="Next patient"
           >
-            <FaChevronRight />
+            <FaChevronRight size={10} />
           </button>
         </div>
       </div>
-
-      {/* Sorting removed from this component */}
     </div>
   );
 }

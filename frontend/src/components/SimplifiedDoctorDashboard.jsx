@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import { getTodaysAppointments } from '../data/mockData';
 import PatientSearch from './PatientSearch';
 import SimplifiedPatientView from './BasicPatientView';
@@ -10,10 +9,11 @@ import PatientNavigator from './PatientNavigator';
 import GlobalDiagnosesView from './GlobalDiagnosesView';
 import DoctorPatientSearchAppointmentModal from './DoctorPatientSearchAppointmentModal';
 import AppointmentManagementModal from './AppointmentManagementModal';
-import { FaCalendarAlt, FaUserMd, FaClipboardList, FaSearch, FaUserPlus, FaEye, FaArrowLeft, FaTimes, FaPlus, FaUser, FaFileMedical } from 'react-icons/fa';
+import { FaCalendarAlt, FaUserMd, FaClipboardList, FaSearch, FaUserPlus, FaEye, FaArrowLeft, FaUser, FaFileMedical } from 'react-icons/fa';
 import { getCreatorLabel } from '../utils/recordCreation';
 import { getTimeBasedGreeting, getFormattedDate, filterAppointmentsByTimePeriod, updateAppointmentStatuses, identifyAppointmentsNeedingDiagnosis } from '../utils/timeUtils';
-import { transformAppointmentFromBackend } from '../utils/dataTransformers';
+import apiService from '../utils/apiService';
+import './AppointmentTabs.css';
 
 // Calculate age from date of birth
 const calculateAge = (dateOfBirth) => {
@@ -143,6 +143,54 @@ function SimplifiedDoctorDashboard({
     }
   };
 
+  // Handle editing a diagnosis
+  const handleEditDiagnosis = (diagnosis) => {
+    console.log('Editing diagnosis:', diagnosis);
+
+    // Find the appointment associated with this diagnosis
+    const appointment = appointments.find(a => a._id === diagnosis.appointmentId || a.id === diagnosis.appointmentId);
+
+    if (appointment) {
+      // Set up the appointment with the diagnosis for editing
+      const appointmentWithDiagnosis = {
+        ...appointment,
+        diagnosis: {
+          ...diagnosis,
+          notes: diagnosis.diagnosisText, // Map the diagnosis text to notes for the modal
+        }
+      };
+
+      setDiagnosingAppointment(appointmentWithDiagnosis);
+    } else {
+      console.error('Could not find appointment for diagnosis:', diagnosis);
+      alert('Could not find the appointment associated with this diagnosis.');
+    }
+  };
+
+  // Handle deleting a diagnosis
+  const handleDeleteDiagnosis = async (diagnosisId) => {
+    console.log('Deleting diagnosis with ID:', diagnosisId);
+
+    try {
+      // Confirm deletion with the user
+      if (!window.confirm('Are you sure you want to delete this diagnosis? This action cannot be undone.')) {
+        return;
+      }
+
+      // Call the API to delete the diagnosis
+      await apiService.deleteDiagnosis(diagnosisId);
+
+      // Show success message
+      alert('Diagnosis deleted successfully.');
+
+      // Refresh the page to show updated data
+      window.location.reload();
+    } catch (error) {
+      console.error('Error deleting diagnosis:', error);
+      alert('Failed to delete diagnosis. Please try again.');
+    }
+  };
+
   // Handle adding a new patient
   const handleAddPatient = (newPatient) => {
     onUpdatePatient(newPatient); // This will add the patient to the patients array
@@ -173,92 +221,92 @@ function SimplifiedDoctorDashboard({
   }, [activeTab, selectedPatient, todaysAppointments, patients]);
 
   return (
-    <div className="p-4">
-      {/* Welcome Banner with Quick Stats */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-500 rounded-lg p-6 mb-6 text-white shadow-lg relative">
-        <div className="absolute inset-0 opacity-40 rounded-lg overflow-hidden">
-          <div className="absolute top-0 left-0 w-full h-full" style={{backgroundImage: "url('data:image/svg+xml,%3Csvg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\",%3E%3Cg fill=\"none\" fill-rule=\"evenodd\",%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"0.6\",%3E%3Cpath d=\"M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')", backgroundSize: "30px 30px"}}>
-          </div>
-        </div>
+    <div className="p-2">
+      {/* Welcome Banner with Quick Stats - Same as Secretary Dashboard */}
+      <div className="bg-gradient-to-r from-blue-600 to-blue-500 rounded-md p-3 mb-3 text-white shadow-md relative">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center relative z-10">
           <div>
-            <h1 className="text-2xl font-bold mb-2">{greeting}, Dr. {username}</h1>
-            <p className="text-blue-100">{currentDate}</p>
+            <h1 className="text-lg font-bold mb-0.5 leading-tight">{greeting}, Dr. {username}</h1>
+            <p className="text-blue-100 text-xs">{currentDate}</p>
           </div>
-          <div className="flex flex-wrap gap-4 mt-4 md:mt-0">
-            <div className="bg-white bg-opacity-20 rounded-lg p-3 backdrop-blur-sm">
-              <div className="font-bold text-2xl">{todaysAppointments.length}</div>
-              <div className="text-sm">Today's Appointments</div>
+          <div className="flex flex-wrap gap-2 mt-2 md:mt-0">
+            <div className="bg-white bg-opacity-20 rounded-md p-1.5 backdrop-blur-sm">
+              <div className="font-bold text-base leading-tight">{todaysAppointments.length}</div>
+              <div className="text-xs">Today's Appointments</div>
             </div>
-            <div className="bg-white bg-opacity-20 rounded-lg p-3 backdrop-blur-sm">
-              <div className="font-bold text-2xl">{pendingDiagnoses}</div>
-              <div className="text-sm">Pending Diagnoses</div>
+            <div className="bg-white bg-opacity-20 rounded-md p-1.5 backdrop-blur-sm">
+              <div className="font-bold text-base leading-tight">{pendingDiagnoses}</div>
+              <div className="text-xs">Needs Diagnosis</div>
+            </div>
+            <div className="bg-white bg-opacity-20 rounded-md p-1.5 backdrop-blur-sm">
+              <div className="font-bold text-base leading-tight">{patients.length}</div>
+              <div className="text-xs">Total Patients</div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Modern Tab Navigation */}
-      <div className="bg-white rounded-lg shadow-md mb-6 p-1">
+      {/* Compact Tab Navigation - Same as Secretary Dashboard */}
+      <div className="bg-white rounded-md shadow-sm mb-3 p-0.5">
         <div className="flex flex-wrap">
           <button
             onClick={() => setActiveTab('patient-management')}
-            className={`flex-1 py-3 px-4 rounded-md font-medium text-base transition-all duration-200 flex justify-center items-center ${
+            className={`flex-1 py-1.5 px-2 rounded-md font-medium text-sm transition-all duration-200 flex justify-center items-center ${
               activeTab === 'patient-management'
                 ? 'bg-blue-100 text-blue-700'
                 : 'text-gray-600 hover:bg-gray-100'
             }`}
           >
             <div className="flex items-center">
-              <FaUserMd className="h-5 w-5 mr-2" />
-              <span className="hidden sm:inline">Patient Management</span>
+              <FaUserMd className="h-3.5 w-3.5 mr-1" />
+              <span className="hidden sm:inline">Patients</span>
               <span className="sm:hidden">Patients</span>
             </div>
           </button>
           <button
             onClick={() => setActiveTab('appointments')}
-            className={`flex-1 py-3 px-4 rounded-md font-medium text-base transition-all duration-200 flex justify-center items-center ${
+            className={`flex-1 py-1.5 px-2 rounded-md font-medium text-sm transition-all duration-200 flex justify-center items-center ${
               activeTab === 'appointments'
                 ? 'bg-blue-100 text-blue-700'
                 : 'text-gray-600 hover:bg-gray-100'
             }`}
           >
             <div className="flex items-center">
-              <FaClipboardList className="h-5 w-5 mr-2" />
+              <FaClipboardList className="h-3.5 w-3.5 mr-1" />
               <span>Appointments</span>
             </div>
           </button>
           <button
             onClick={() => setActiveTab('calendar')}
-            className={`flex-1 py-3 px-4 rounded-md font-medium text-base transition-all duration-200 flex justify-center items-center ${
+            className={`flex-1 py-1.5 px-2 rounded-md font-medium text-sm transition-all duration-200 flex justify-center items-center ${
               activeTab === 'calendar'
                 ? 'bg-blue-100 text-blue-700'
                 : 'text-gray-600 hover:bg-gray-100'
             }`}
           >
             <div className="flex items-center">
-              <FaCalendarAlt className="h-5 w-5 mr-2" />
+              <FaCalendarAlt className="h-3.5 w-3.5 mr-1" />
               <span>Calendar</span>
             </div>
           </button>
           <button
             onClick={() => setActiveTab('diagnoses')}
-            className={`flex-1 py-3 px-4 rounded-md font-medium text-base transition-all duration-200 flex justify-center items-center ${
+            className={`flex-1 py-1.5 px-2 rounded-md font-medium text-sm transition-all duration-200 flex justify-center items-center ${
               activeTab === 'diagnoses'
                 ? 'bg-blue-100 text-blue-700'
                 : 'text-gray-600 hover:bg-gray-100'
             }`}
           >
             <div className="flex items-center">
-              <FaFileMedical className="h-5 w-5 mr-2" />
+              <FaFileMedical className="h-3.5 w-3.5 mr-1" />
               <span>Diagnoses</span>
             </div>
           </button>
         </div>
       </div>
 
-      {/* Content Area */}
-      <div className="bg-white rounded-lg shadow-lg p-6 border border-gray-100">
+      {/* Content Area - More Compact - Same as Secretary Dashboard */}
+      <div className="bg-white rounded-md shadow-sm p-2">
         {activeTab === 'diagnoses' ? (
           <GlobalDiagnosesView
             onViewPatient={(patientId) => {
@@ -267,6 +315,8 @@ function SimplifiedDoctorDashboard({
                 handleViewPatient(patient);
               }
             }}
+            onEditDiagnosis={handleEditDiagnosis}
+            onDeleteDiagnosis={handleDeleteDiagnosis}
           />
         ) : activeTab === 'calendar' ? (
           <DoctorCalendarView
@@ -284,16 +334,18 @@ function SimplifiedDoctorDashboard({
             {/* Today's Appointments Section */}
             <div className="mb-8">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-semibold text-gray-800">Today's Appointments</h2>
+                <h2 className="section-header">Today's Appointments</h2>
                 <div className="flex items-center gap-3">
                   <button
                     onClick={() => setShowAddAppointmentForm(true)}
-                    className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-md text-sm font-medium flex items-center"
+                    className="add-appointment-btn"
                   >
-                    <FaPlus className="h-3 w-3 mr-1" />
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
+                    </svg>
                     Add Appointment
                   </button>
-                  <div className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                  <div className="appointment-count">
                     {todaysAppointments.length} Appointments
                   </div>
                 </div>
@@ -371,6 +423,12 @@ function SimplifiedDoctorDashboard({
                 >
                   Cancelled
                 </button>
+                <button
+                  onClick={() => setStatusFilter('Needs Diagnosis')}
+                  className={`px-3 py-1 rounded-full text-sm font-medium ${statusFilter === 'Needs Diagnosis' ? 'bg-purple-600 text-white' : 'bg-purple-100 text-purple-800 hover:bg-purple-200'}`}
+                >
+                  Needs Diagnosis
+                </button>
               </div>
 
               {/* Filter appointments based on selected time period and status */}
@@ -434,7 +492,7 @@ function SimplifiedDoctorDashboard({
                           {appointment.status}
                         </span>
                         <button
-                          className="text-blue-600 hover:text-blue-800 font-medium"
+                          className="text-blue-600 hover:text-blue-800"
                           onClick={(e) => {
                             e.stopPropagation();
                             const patient = patients.find(p => p.id === appointment.patientId);
@@ -458,36 +516,49 @@ function SimplifiedDoctorDashboard({
                               handleViewPatient(newPatient);
                             }
                           }}
+                          title="View Patient"
                         >
-                          View Patient
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          </svg>
                         </button>
                         <div className="flex space-x-2">
                           <button
-                            className="text-yellow-600 hover:text-yellow-800 font-medium"
+                            className="text-yellow-600 hover:text-yellow-800"
                             onClick={(e) => {
                               e.stopPropagation();
                               setDiagnosingAppointment(appointment);
                             }}
+                            title="Diagnose"
                           >
-                            Diagnose
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
                           </button>
                           <button
-                            className="text-green-600 hover:text-green-800 font-medium"
+                            className="text-green-600 hover:text-green-800"
                             onClick={(e) => {
                               e.stopPropagation();
                               setEditingAppointment(appointment);
                             }}
+                            title="Edit"
                           >
-                            Edit
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
                           </button>
                           <button
-                            className="text-red-600 hover:text-red-800 font-medium"
+                            className="text-red-600 hover:text-red-800"
                             onClick={(e) => {
                               e.stopPropagation();
                               onDeleteAppointment(appointment._id);
                             }}
+                            title="Delete"
                           >
-                            Delete
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
                           </button>
                         </div>
                       </div>
@@ -497,8 +568,8 @@ function SimplifiedDoctorDashboard({
                     );
                   } else {
                     return (
-                  <div className="text-center py-8 bg-gray-50 rounded-lg">
-                    <p className="text-gray-500">
+                  <div className="no-appointments">
+                    <p>
                       No {statusFilter.toLowerCase()} appointments found for {timeFilter === 'all' ? 'any time period' :
                         timeFilter === 'today' ? 'today' :
                         timeFilter === 'tomorrow' ? 'tomorrow' :
@@ -511,8 +582,8 @@ function SimplifiedDoctorDashboard({
                   }
                 } else if (timeFilter === 'all') {
                   return (
-                <div className="text-center py-8 bg-gray-50 rounded-lg">
-                  <p className="text-gray-500">
+                <div className="no-appointments">
+                  <p>
                     {statusFilter === 'all'
                       ? `No appointments scheduled for ${timeFilter === 'all' ? 'any time period' :
                           timeFilter === 'today' ? 'today' :
@@ -536,9 +607,9 @@ function SimplifiedDoctorDashboard({
 
             {/* Pending Diagnoses Section */}
             {appointmentsNeedingDiagnosis.length > 0 && (
-              <div className="mb-8">
-                <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                  <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-sm font-medium mr-2">
+              <div className="mb-4">
+                <h2 className="section-header flex items-center">
+                  <span className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm font-medium mr-2">
                     {appointmentsNeedingDiagnosis.length}
                   </span>
                   Appointments Needing Diagnosis
@@ -592,12 +663,15 @@ function SimplifiedDoctorDashboard({
                               e.stopPropagation();
                               setDiagnosingAppointment(appointment);
                             }}
-                            className="px-3 py-1 bg-yellow-500 text-white rounded text-sm font-medium hover:bg-yellow-600"
+                            className="text-yellow-600 hover:text-yellow-800"
+                            title="Add Diagnosis"
                           >
-                            Add Diagnosis
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
                           </button>
                           <button
-                            className="text-blue-600 hover:text-blue-800 font-medium"
+                            className="text-blue-600 hover:text-blue-800"
                             onClick={(e) => {
                               e.stopPropagation();
                               const patient = patients.find(p => p.id === appointment.patientId);
@@ -605,8 +679,12 @@ function SimplifiedDoctorDashboard({
                                 handleViewPatient(patient);
                               }
                             }}
+                            title="View Patient"
                           >
-                            View Patient
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
                           </button>
                         </div>
                       </div>
@@ -617,7 +695,7 @@ function SimplifiedDoctorDashboard({
 
             {/* Upcoming Appointments Section */}
             <div>
-              <h2 className="text-lg font-semibold text-gray-800 mb-4">Upcoming Appointments</h2>
+              <h2 className="section-header">Upcoming Appointments</h2>
 
               {upcomingAppointments.length > 0 ? (
                 <div className="space-y-3">
@@ -649,8 +727,8 @@ function SimplifiedDoctorDashboard({
                       }}
                     >
                       <div>
-                        <div className="font-medium">{appointment.date} at {appointment.time}</div>
-                        <div className="text-sm text-gray-600">{appointment.patientName} - {appointment.reason}</div>
+                        <div className="font-medium text-lg">{appointment.date} at {appointment.time}</div>
+                        <div className="text-gray-600">{appointment.patientName} - {appointment.reason}</div>
                       </div>
                       <div className="flex space-x-2">
                         <span className={`px-3 py-1 rounded-full text-sm font-medium ${
@@ -663,7 +741,7 @@ function SimplifiedDoctorDashboard({
                           {appointment.status}
                         </span>
                         <button
-                          className="text-blue-600 hover:text-blue-800 font-medium"
+                          className="text-blue-600 hover:text-blue-800"
                           onClick={(e) => {
                             e.stopPropagation();
                             const patient = patients.find(p => p.id === appointment.patientId);
@@ -687,36 +765,49 @@ function SimplifiedDoctorDashboard({
                               handleViewPatient(newPatient);
                             }
                           }}
+                          title="View Patient"
                         >
-                          View Patient
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          </svg>
                         </button>
                         <div className="flex space-x-2">
                           <button
-                            className="text-yellow-600 hover:text-yellow-800 font-medium"
+                            className="text-yellow-600 hover:text-yellow-800"
                             onClick={(e) => {
                               e.stopPropagation();
                               setDiagnosingAppointment(appointment);
                             }}
+                            title="Diagnose"
                           >
-                            Diagnose
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
                           </button>
                           <button
-                            className="text-green-600 hover:text-green-800 font-medium"
+                            className="text-green-600 hover:text-green-800"
                             onClick={(e) => {
                               e.stopPropagation();
                               setEditingAppointment(appointment);
                             }}
+                            title="Edit"
                           >
-                            Edit
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
                           </button>
                           <button
-                            className="text-red-600 hover:text-red-800 font-medium"
+                            className="text-red-600 hover:text-red-800"
                             onClick={(e) => {
                               e.stopPropagation();
                               onDeleteAppointment(appointment._id);
                             }}
+                            title="Delete"
                           >
-                            Delete
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
                           </button>
                         </div>
                       </div>
@@ -724,8 +815,8 @@ function SimplifiedDoctorDashboard({
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-8 bg-gray-50 rounded-lg">
-                  <p className="text-gray-500">No upcoming appointments scheduled.</p>
+                <div className="no-appointments">
+                  <p>No upcoming appointments scheduled.</p>
                 </div>
               )}
             </div>
@@ -779,25 +870,25 @@ function SimplifiedDoctorDashboard({
               <div>
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                   <div>
-                    <h2 className="text-2xl font-bold text-gray-800 mb-1">Patient Management</h2>
-                    <p className="text-gray-600">Search for patients or add a new patient record</p>
+                    <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2">Patient Management</h2>
+                    <p className="text-gray-600 text-base md:text-lg">Search for patients or add a new patient record</p>
                   </div>
                   <button
                     onClick={() => setShowAddPatientForm(true)}
-                    className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md font-medium flex items-center shadow-md transition duration-200"
+                    className="bg-green-600 hover:bg-green-700 text-white px-5 py-3 rounded-md font-medium text-base md:text-lg flex items-center shadow-md transition duration-200"
                   >
-                    <FaUserPlus className="h-4 w-4 mr-2" />
+                    <FaUserPlus className="h-5 w-5 mr-2" />
                     Add New Patient
                   </button>
                 </div>
 
-                <div className="bg-gray-50 p-6 rounded-lg border border-gray-200 mb-6">
+                <div className="bg-gray-50 p-4 md:p-6 rounded-lg border border-gray-200 mb-6">
                   <div className="mb-4">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-2 flex items-center">
-                      <FaSearch className="mr-2 text-blue-600" />
+                    <h3 className="text-xl md:text-2xl font-semibold text-gray-800 mb-2 flex items-center">
+                      <FaSearch className="mr-2 text-blue-600" size={24} />
                       Patient Search
                     </h3>
-                    <p className="text-gray-600 text-sm">Search for a patient by name, ID, or phone number</p>
+                    <p className="text-gray-600 text-sm md:text-base">Search for a patient by name, ID, or phone number</p>
                   </div>
                   <PatientSearch
                     patients={patients}
@@ -807,20 +898,20 @@ function SimplifiedDoctorDashboard({
 
                 {/* Recent Patients Quick Access */}
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-800 mb-3">Recent Patients</h3>
+                  <h3 className="text-xl md:text-2xl font-semibold text-gray-800 mb-4">Recent Patients</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {patients.slice(0, 6).map(patient => (
                       <div
                         key={patient.id}
                         onClick={() => setSelectedPatient(patient)}
-                        className="bg-white p-4 rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all duration-200 cursor-pointer"
+                        className="bg-white p-4 md:p-5 rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all duration-200 cursor-pointer"
                       >
-                        <div className="font-medium text-blue-700">{patient.firstName} {patient.lastName}</div>
-                        <div className="text-sm text-gray-600">{calculateAge(patient.dateOfBirth)} years • {patient.gender}</div>
-                        <div className="text-sm text-gray-600 mt-1">Phone: {patient.phone}</div>
+                        <div className="font-medium text-blue-700 text-base md:text-lg">{patient.firstName} {patient.lastName}</div>
+                        <div className="text-sm md:text-base text-gray-600">{calculateAge(patient.dateOfBirth)} years • {patient.gender}</div>
+                        <div className="text-sm md:text-base text-gray-600 mt-2">Phone: {patient.phone}</div>
                         {patient.createdBy && (
-                          <div className="text-xs text-gray-500 flex items-center mt-1">
-                            <FaUser className="mr-1" size={10} />
+                          <div className="text-xs md:text-sm text-gray-500 flex items-center mt-2">
+                            <FaUser className="mr-1" size={12} />
                             Added by: <span className="font-medium ml-1">
                               {patient.createdBy === 'visitor' ? 'Patient (Online)' :
                                patient.createdBy === 'doctor' ? 'Doctor' :
@@ -830,13 +921,13 @@ function SimplifiedDoctorDashboard({
                           </div>
                         )}
                         <button
-                          className="mt-2 text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center"
+                          className="mt-3 text-blue-600 hover:text-blue-800 text-sm md:text-base font-medium flex items-center"
                           onClick={(e) => {
                             e.stopPropagation();
                             setSelectedPatient(patient);
                           }}
                         >
-                          <FaEye className="mr-1" /> View Details
+                          <FaEye className="mr-2" size={16} /> View Details
                         </button>
                       </div>
                     ))}

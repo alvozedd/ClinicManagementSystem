@@ -455,27 +455,99 @@ function Dashboard() {
           };
         }
 
-        const diagnosisResponse = await apiService.createDiagnosis({
-          appointment_id: appointmentResponse._id,
-          diagnosis_text: diagnosisText
-        });
+        let diagnosisResponse;
+
+        // Check if we're updating an existing diagnosis or creating a new one
+        if (appointmentToSave.diagnosisId) {
+          // Update existing diagnosis
+          console.log('Updating existing diagnosis with ID:', appointmentToSave.diagnosisId);
+
+          // Extract diagnosis information from the appointmentToSave object
+          const diagnosisData = appointmentToSave.diagnosis || {};
+
+          // Make sure we're sending the complete diagnosis object as a JSON string
+          const updatedDiagnosisObj = {
+            notes: diagnosisData.notes || '',
+            treatment: diagnosisData.treatment || '',
+            followUp: diagnosisData.followUp || '',
+            files: diagnosisData.files || [],
+            updatedAt: new Date().toISOString()
+          };
+
+          console.log('Updating diagnosis with data:', updatedDiagnosisObj);
+
+          diagnosisResponse = await apiService.updateDiagnosis(appointmentToSave.diagnosisId, {
+            diagnosis_text: JSON.stringify(updatedDiagnosisObj)
+          });
+        } else {
+          // Create new diagnosis
+          console.log('Creating new diagnosis for appointment:', appointmentResponse._id);
+          diagnosisResponse = await apiService.createDiagnosis({
+            appointment_id: appointmentResponse._id,
+            diagnosis_text: diagnosisText
+          });
+        }
 
         console.log('Saved diagnosis to database:', diagnosisResponse);
 
-        // Add to reports data immediately (optimistic update)
-        setReportsData(prev => [...prev, diagnosisResponse]);
+        // Extract diagnosis information from the appointmentToSave object
+        const diagnosisData = appointmentToSave.diagnosis || {};
 
-        // Update the appointment with the new diagnosis immediately (optimistic update)
-        setAppointmentsData(prev =>
-          prev.map(a => a._id === appointmentResponse._id ? {
-            ...a,
-            // Add the new diagnosis to the diagnoses array
-            diagnoses: a.diagnoses ? [diagnosisObj, ...a.diagnoses] : [diagnosisObj],
-            // Update the primary diagnosis to be the newest one
-            diagnosis: diagnosisObj,
-            status: 'Completed'
-          } : a)
-        );
+        // Create a consistent diagnosis object for UI updates
+        const diagnosisObjForUI = {
+          id: appointmentToSave.diagnosisId || diagnosisResponse._id,
+          _id: appointmentToSave.diagnosisId || diagnosisResponse._id,
+          notes: diagnosisData.notes || '',
+          treatment: diagnosisData.treatment || '',
+          followUp: diagnosisData.followUp || '',
+          files: diagnosisData.files || [],
+          updatedAt: new Date().toISOString()
+        };
+
+        console.log('Diagnosis object for UI updates:', diagnosisObjForUI);
+
+        // Handle optimistic updates differently based on whether we're creating or updating
+        if (appointmentToSave.diagnosisId) {
+          // For updates, replace the existing diagnosis in the reports data
+          setReportsData(prev =>
+            prev.map(d => d._id === appointmentToSave.diagnosisId ?
+              { ...d, diagnosis_text: JSON.stringify(diagnosisObjForUI) } : d)
+          );
+
+          // Update the appointment with the updated diagnosis
+          setAppointmentsData(prev =>
+            prev.map(a => a._id === appointmentResponse._id ? {
+              ...a,
+              // Update the diagnosis in the diagnoses array
+              diagnoses: a.diagnoses ?
+                a.diagnoses.map(d => (d._id === appointmentToSave.diagnosisId || d.id === appointmentToSave.diagnosisId) ?
+                  diagnosisObjForUI : d)
+                : [diagnosisObjForUI],
+              // Update the primary diagnosis if it's the one being edited
+              diagnosis: a.diagnosis && (a.diagnosis._id === appointmentToSave.diagnosisId || a.diagnosis.id === appointmentToSave.diagnosisId) ?
+                diagnosisObjForUI : a.diagnosis,
+              status: 'Completed'
+            } : a)
+          );
+        } else {
+          // For new diagnoses, add to reports data
+          setReportsData(prev => [...prev, {
+            ...diagnosisResponse,
+            diagnosis_text: JSON.stringify(diagnosisObjForUI)
+          }]);
+
+          // Update the appointment with the new diagnosis
+          setAppointmentsData(prev =>
+            prev.map(a => a._id === appointmentResponse._id ? {
+              ...a,
+              // Add the new diagnosis to the diagnoses array
+              diagnoses: a.diagnoses ? [diagnosisObjForUI, ...a.diagnoses] : [diagnosisObjForUI],
+              // Update the primary diagnosis to be the newest one
+              diagnosis: diagnosisObjForUI,
+              status: 'Completed'
+            } : a)
+          );
+        }
 
         // Log the updated appointments data after adding diagnosis
         console.log('Updated appointments data after adding diagnosis');
@@ -494,15 +566,23 @@ function Dashboard() {
         clearCache('reports');
       }
 
-      // Refresh specific data from API
+      // Perform a complete refresh of all data to ensure consistency
+      console.log('Performing complete data refresh after diagnosis save/update');
+
+      // Fetch fresh data directly
+      const patientsResponse = await apiService.getPatients();
+      const transformedPatients = transformPatientsFromBackend(patientsResponse);
+      setPatientsData(transformedPatients);
+
       const appointmentsResponse = await apiService.getAppointments();
       const transformedAppointments = transformAppointmentsFromBackend(appointmentsResponse);
       setAppointmentsData(transformedAppointments);
 
-      if (appointmentToSave.diagnosis) {
-        const diagnosesResponse = await apiService.getDiagnoses();
-        setReportsData(diagnosesResponse);
-      }
+      const diagnosesResponse = await apiService.getDiagnoses();
+      setReportsData(diagnosesResponse);
+
+      // Force a refresh of the UI by triggering the refresh trigger
+      setRefreshTrigger(prev => prev + 1);
     } catch (error) {
       console.error('Error saving diagnosis/appointment:', error);
       setError('Failed to save. Please try again.');
@@ -603,17 +683,15 @@ function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-gradient-to-r from-blue-700 to-blue-600 text-white shadow-md relative">
-        <div className="absolute inset-0 opacity-40">
-          <div className="absolute top-0 left-0 w-full h-full" style={{backgroundImage: "url('data:image/svg+xml,%3Csvg width=\"20\" height=\"20\" viewBox=\"0 0 20 20\" xmlns=\"http://www.w3.org/2000/svg\",%3E%3Cg fill=\"none\" fill-rule=\"evenodd\",%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"0.6\",%3E%3Cpath d=\"M0 0h10v10H0V0zm10 10h10v10H10V10z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')", backgroundSize: "20px 20px"}}>
-          </div>
-        </div>
-        <div className="container mx-auto px-4 py-3 relative z-10">
+      <header className="text-white shadow-md sticky top-0 z-50" style={{
+        backgroundImage: "linear-gradient(rgba(30, 64, 175, 0.7), rgba(37, 99, 235, 0.7)), url('./image/Theone.jpeg')",
+        backgroundSize: "cover",
+        backgroundPosition: "center"
+      }}>
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-900 to-blue-700 opacity-50"></div>
+        <div className="container mx-auto px-4 py-4 relative z-10">
           <div className="flex justify-between items-center">
-            <Link to="/" className="text-lg font-bold flex items-center hover:text-blue-100 transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M5.5 4a2.5 2.5 0 014.607-1.346.75.75 0 001.264-.057 4 4 0 117.129 3.571.75.75 0 00-.5 1.057 3.5 3.5 0 01-6.6 3.115.75.75 0 00-1.4.05A2.5 2.5 0 015.5 9.5a.75.75 0 00-.75-.75h-1.5a.75.75 0 000 1.5h1.5a.75.75 0 00.75-.75 1 1 0 011-1 .75.75 0 00.75-.75 1 1 0 011-1 .75.75 0 00.75-.75V4zm3 10a2.5 2.5 0 104.607 1.346.75.75 0 011.264.057 4 4 0 11-7.129-3.571.75.75 0 00.5-1.057 3.5 3.5 0 016.6-3.115.75.75 0 001.4-.05A2.5 2.5 0 0114.5 4.5a.75.75 0 00.75.75h1.5a.75.75 0 010 1.5h-1.5a.75.75 0 00-.75.75 1 1 0 01-1 1 .75.75 0 00-.75.75 1 1 0 01-1 1 .75.75 0 00-.75.75V14z" clipRule="evenodd" />
-              </svg>
+            <Link to="/" className="text-xl md:text-2xl font-bold flex items-center hover:text-blue-100 transition-colors">
               <span>UroHealth Central Ltd</span>
             </Link>
             <div className="flex items-center">
