@@ -11,6 +11,12 @@ const handleResponse = async (response) => {
     const data = await response.json();
 
     if (!response.ok) {
+      // If the response is 401 Unauthorized, it might be due to an expired token
+      if (response.status === 401) {
+        // Let the calling function handle the 401 error
+        return Promise.reject({ status: 401, message: data.message || 'Unauthorized' });
+      }
+
       // If the response contains a message, use it, otherwise use a generic error
       const error = (data && data.message) || response.statusText;
       return Promise.reject(error);
@@ -25,11 +31,123 @@ const handleResponse = async (response) => {
   }
 };
 
+// Secure fetch wrapper that handles token refresh
+const secureFetch = async (url, options = {}) => {
+  // Get the current token
+  const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+  const token = userInfo.token;
+
+  // Check if token exists and is expired
+  if (token && isTokenExpired(token)) {
+    try {
+      // Try to refresh the token
+      await refreshAccessToken();
+
+      // Get the new token
+      const updatedUserInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+      const newToken = updatedUserInfo.token;
+
+      // Update the Authorization header with the new token
+      if (options.headers && options.headers.Authorization) {
+        options.headers.Authorization = `Bearer ${newToken}`;
+      }
+    } catch (error) {
+      console.error('Failed to refresh token:', error);
+      // If refresh fails, redirect to login
+      window.location.href = '/login';
+      return Promise.reject('Session expired. Please log in again.');
+    }
+  }
+
+  try {
+    // Make the request with the current or refreshed token
+    const response = await fetch(url, options);
+    return await handleResponse(response);
+  } catch (error) {
+    // If the error is a 401 Unauthorized, try to refresh the token and retry the request
+    if (error.status === 401) {
+      try {
+        // Try to refresh the token
+        await refreshAccessToken();
+
+        // Get the new token
+        const updatedUserInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+        const newToken = updatedUserInfo.token;
+
+        // Update the Authorization header with the new token
+        if (options.headers && options.headers.Authorization) {
+          options.headers.Authorization = `Bearer ${newToken}`;
+        }
+
+        // Retry the request with the new token
+        const retryResponse = await fetch(url, options);
+        return await handleResponse(retryResponse);
+      } catch (refreshError) {
+        console.error('Failed to refresh token after 401:', refreshError);
+        // If refresh fails, redirect to login
+        window.location.href = '/login';
+        return Promise.reject('Session expired. Please log in again.');
+      }
+    }
+
+    // For other errors, just pass them through
+    return Promise.reject(error);
+  }
+};
+
 // Get auth header with JWT token
 const authHeader = () => {
   const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
   const token = userInfo.token;
   return token ? { 'Authorization': `Bearer ${token}` } : {};
+};
+
+// Check if token is expired
+const isTokenExpired = (token) => {
+  if (!token) return true;
+
+  try {
+    // Get the expiration time from the token (JWT tokens are base64 encoded)
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => {
+      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
+
+    const { exp } = JSON.parse(jsonPayload);
+
+    // Check if the token is expired
+    return Date.now() >= exp * 1000;
+  } catch (error) {
+    console.error('Error checking token expiration:', error);
+    return true;
+  }
+};
+
+// Refresh the access token
+const refreshAccessToken = async () => {
+  try {
+    const response = await fetch(`${API_URL}/users/refresh-token`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include', // Include cookies
+    });
+
+    const data = await handleResponse(response);
+
+    // Update the token in localStorage
+    const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+    userInfo.token = data.token;
+    localStorage.setItem('userInfo', JSON.stringify(userInfo));
+
+    return data.token;
+  } catch (error) {
+    console.error('Error refreshing token:', error);
+    // If refresh fails, log the user out
+    localStorage.removeItem('userInfo');
+    window.location.href = '/login';
+    throw error;
+  }
 };
 
 // API methods
@@ -41,6 +159,7 @@ const apiService = {
       const response = await fetch(`${API_URL}/users/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include', // Include cookies for refresh token
         body: JSON.stringify({ username, password }),
       });
       console.log('Login response status:', response.status, response.statusText);
@@ -51,16 +170,40 @@ const apiService = {
     }
   },
 
+  logout: async () => {
+    try {
+      const response = await fetch(`${API_URL}/users/logout`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include', // Include cookies for refresh token
+      });
+
+      // Clear user info from localStorage
+      localStorage.removeItem('userInfo');
+
+      return handleResponse(response);
+    } catch (error) {
+      console.error('Error during logout:', error);
+      // Even if the server-side logout fails, clear local storage
+      localStorage.removeItem('userInfo');
+      throw error;
+    }
+  },
+
+  refreshToken: async () => {
+    return refreshAccessToken();
+  },
+
   // Patient endpoints
   getPatients: async () => {
-    const response = await fetch(`${API_URL}/patients`, {
+    return secureFetch(`${API_URL}/patients`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
         ...authHeader(),
       },
+      credentials: 'include', // Include cookies for refresh token
     });
-    return handleResponse(response);
   },
 
   getPatientById: async (id) => {
