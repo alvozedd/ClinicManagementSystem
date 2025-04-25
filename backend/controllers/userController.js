@@ -1,6 +1,8 @@
 const asyncHandler = require('../middleware/asyncHandler');
 const User = require('../models/userModel');
-const generateToken = require('../utils/generateToken');
+const RefreshToken = require('../models/refreshTokenModel');
+const tokenService = require('../utils/tokenService');
+const logger = require('../utils/logger');
 
 // @desc    Auth user & get token
 // @route   POST /api/users/login
@@ -8,8 +10,8 @@ const generateToken = require('../utils/generateToken');
 const authUser = asyncHandler(async (req, res) => {
   const { username, password } = req.body;
 
-  console.log('Login attempt with username:', username);
-  console.log('Request body:', req.body);
+  logger.info('Login attempt initiated', { username });
+  logger.debug('Login request received', { body: req.body });
 
   // Find user by username or email
   const user = await User.findOne({
@@ -19,24 +21,39 @@ const authUser = asyncHandler(async (req, res) => {
     ]
   });
 
-  console.log('User found:', user ? 'Yes' : 'No');
+  logger.debug('User lookup result', { found: !!user });
+
   if (user) {
-    console.log('User details:', {
+    // Log user details without sensitive information
+    logger.debug('User found', {
       _id: user._id,
-      name: user.name,
-      username: user.username,
-      email: user.email,
       role: user.role,
     });
   }
 
   if (user) {
     const isMatch = await user.matchPassword(password);
-    console.log('Password match:', isMatch ? 'Yes' : 'No');
+    logger.debug('Password validation result', { success: isMatch });
 
     if (isMatch) {
-      const token = generateToken(user._id);
-      console.log('Token generated successfully');
+      // Get client IP address
+      const ipAddress = req.ip || req.connection.remoteAddress;
+
+      // Generate access token
+      const accessToken = tokenService.generateToken(user._id);
+
+      // Generate refresh token
+      const refreshToken = await tokenService.generateRefreshToken(user, ipAddress);
+
+      logger.info('Authentication successful, tokens generated');
+
+      // Set refresh token as HTTP-only cookie
+      res.cookie('refreshToken', refreshToken.token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      });
 
       res.json({
         _id: user._id,
@@ -44,13 +61,13 @@ const authUser = asyncHandler(async (req, res) => {
         username: user.username,
         email: user.email,
         role: user.role,
-        token: token,
+        token: accessToken,
       });
       return;
     }
   }
 
-  console.log('Authentication failed');
+  logger.info('Authentication failed', { username });
   res.status(401);
   throw new Error('Invalid username or password');
 });
@@ -93,7 +110,7 @@ const registerUser = asyncHandler(async (req, res) => {
       username: user.username,
       email: user.email,
       role: user.role,
-      token: generateToken(user._id),
+      token: tokenService.generateToken(user._id),
     });
   } else {
     res.status(400);
@@ -185,6 +202,88 @@ const deleteUser = asyncHandler(async (req, res) => {
   }
 });
 
+// @desc    Refresh access token using refresh token
+// @route   POST /api/users/refresh-token
+// @access  Public
+const refreshToken = asyncHandler(async (req, res) => {
+  // Get refresh token from cookie or request body
+  const token = req.cookies.refreshToken || req.body.refreshToken;
+
+  if (!token) {
+    res.status(401);
+    throw new Error('Refresh token is required');
+  }
+
+  // Find the refresh token in the database
+  const refreshTokenDoc = await RefreshToken.findOne({ token }).populate('user');
+
+  if (!refreshTokenDoc) {
+    res.status(401);
+    throw new Error('Invalid refresh token');
+  }
+
+  // Check if the token is active (not expired and not revoked)
+  if (!refreshTokenDoc.isActive()) {
+    res.status(401);
+    throw new Error('Refresh token has expired or been revoked');
+  }
+
+  // Get the user from the token
+  const user = refreshTokenDoc.user;
+
+  // Get client IP address
+  const ipAddress = req.ip || req.connection.remoteAddress;
+
+  // Generate new tokens
+  const newAccessToken = tokenService.generateToken(user._id);
+  const newRefreshToken = await tokenService.generateRefreshToken(user, ipAddress);
+
+  // Replace old refresh token with new one
+  await tokenService.replaceToken(token, newRefreshToken.token);
+
+  // Set new refresh token as HTTP-only cookie
+  res.cookie('refreshToken', newRefreshToken.token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+  });
+
+  // Return new access token
+  res.json({
+    token: newAccessToken,
+  });
+});
+
+// @desc    Logout user and revoke refresh token
+// @route   POST /api/users/logout
+// @access  Public
+const logoutUser = asyncHandler(async (req, res) => {
+  // Get refresh token from cookie or request body
+  const token = req.cookies.refreshToken || req.body.refreshToken;
+
+  if (!token) {
+    res.status(400);
+    throw new Error('Refresh token is required');
+  }
+
+  // Get client IP address
+  const ipAddress = req.ip || req.connection.remoteAddress;
+
+  // Revoke the token
+  const revoked = await tokenService.revokeToken(token, ipAddress);
+
+  // Clear the refresh token cookie
+  res.clearCookie('refreshToken');
+
+  if (revoked) {
+    res.json({ message: 'Logout successful' });
+  } else {
+    res.status(400);
+    throw new Error('Invalid refresh token');
+  }
+});
+
 module.exports = {
   authUser,
   registerUser,
@@ -192,4 +291,6 @@ module.exports = {
   getUserById,
   updateUser,
   deleteUser,
+  refreshToken,
+  logoutUser,
 };

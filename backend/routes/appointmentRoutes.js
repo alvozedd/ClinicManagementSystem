@@ -9,6 +9,7 @@ const {
   deleteAppointment,
 } = require('../controllers/appointmentController');
 const { protect, optionalAuth, secretary, doctor } = require('../middleware/authMiddleware');
+const { validateAppointmentCreation } = require('../middleware/validationMiddleware');
 
 // Create a middleware that allows both doctors and secretaries
 const doctorOrSecretary = (req, res, next) => {
@@ -21,12 +22,12 @@ const doctorOrSecretary = (req, res, next) => {
 };
 
 // Use optionalAuth to allow both authenticated and unauthenticated requests
-router.route('/').post(optionalAuth, createAppointment).get(protect, getAppointments);
+router.route('/').post(optionalAuth, validateAppointmentCreation, createAppointment).get(protect, getAppointments);
 router.route('/patient/:id').get(protect, getAppointmentsByPatientId);
 router
   .route('/:id')
   .get(protect, getAppointmentById)
-  .put(protect, doctorOrSecretary, updateAppointment)
+  .put(protect, doctorOrSecretary, validateAppointmentCreation, updateAppointment)
   .delete(protect, doctorOrSecretary, deleteAppointment);
 
 module.exports = router;

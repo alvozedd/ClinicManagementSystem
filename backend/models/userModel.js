@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
+const logger = require('../utils/logger');
 
 const userSchema = mongoose.Schema(
   {
@@ -34,12 +35,15 @@ const userSchema = mongoose.Schema(
 
 // Method to check if entered password matches the hashed password
 userSchema.methods.matchPassword = async function (enteredPassword) {
-  console.log('Comparing passwords:');
-  console.log('Entered password length:', enteredPassword.length);
-  console.log('Stored password (hashed):', this.password);
-  const isMatch = await bcrypt.compare(enteredPassword, this.password);
-  console.log('Password match result:', isMatch);
-  return isMatch;
+  logger.debug('Password validation initiated');
+
+  try {
+    const isMatch = await bcrypt.compare(enteredPassword, this.password);
+    return isMatch;
+  } catch (error) {
+    logger.error('Error comparing passwords', error);
+    return false;
+  }
 };
 
 // Middleware to hash password before saving

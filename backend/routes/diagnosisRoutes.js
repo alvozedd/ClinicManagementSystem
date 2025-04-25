@@ -9,13 +9,14 @@ const {
   deleteDiagnosis,
 } = require('../controllers/diagnosisController');
 const { protect, doctor } = require('../middleware/authMiddleware');
+const { validateDiagnosisCreation } = require('../middleware/validationMiddleware');
 
-router.route('/').post(protect, doctor, createDiagnosis).get(protect, doctor, getDiagnoses);
+router.route('/').post(protect, doctor, validateDiagnosisCreation, createDiagnosis).get(protect, doctor, getDiagnoses);
 router.route('/appointment/:id').get(protect, doctor, getDiagnosisByAppointmentId);
 router
   .route('/:id')
   .get(protect, doctor, getDiagnosisById)
-  .put(protect, doctor, updateDiagnosis)
+  .put(protect, doctor, validateDiagnosisCreation, updateDiagnosis)
   .delete(protect, doctor, deleteDiagnosis);
 
 module.exports = router;
