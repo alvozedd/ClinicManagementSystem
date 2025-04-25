@@ -11,6 +11,7 @@ const {
 const { protect, optionalAuth, secretary, doctor } = require('../middleware/authMiddleware');
 const { validateAppointmentCreation } = require('../middleware/validationMiddleware');
 const { publicEndpointLimiter, apiLimiter } = require('../middleware/rateLimitMiddleware');
+const { logAppointmentAccess, logBulkPhiAccess } = require('../middleware/phiAccessMiddleware');
 
 // Create a middleware that allows both doctors and secretaries
 const doctorOrSecretary = (req, res, next) => {
@@ -33,13 +34,13 @@ router.route('/')
       apiLimiter(req, res, next);
     }
   }, validateAppointmentCreation, createAppointment)
-  .get(protect, apiLimiter, getAppointments);
+  .get(protect, apiLimiter, logBulkPhiAccess, getAppointments);
 
-router.route('/patient/:id').get(protect, apiLimiter, getAppointmentsByPatientId);
+router.route('/patient/:id').get(protect, apiLimiter, logBulkPhiAccess, getAppointmentsByPatientId);
 router
   .route('/:id')
-  .get(protect, getAppointmentById)
-  .put(protect, doctorOrSecretary, validateAppointmentCreation, updateAppointment)
-  .delete(protect, doctorOrSecretary, deleteAppointment);
+  .get(protect, logAppointmentAccess, getAppointmentById)
+  .put(protect, doctorOrSecretary, validateAppointmentCreation, logAppointmentAccess, updateAppointment)
+  .delete(protect, doctorOrSecretary, logAppointmentAccess, deleteAppointment);
 
 module.exports = router;

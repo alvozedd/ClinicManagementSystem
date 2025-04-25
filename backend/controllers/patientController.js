@@ -2,6 +2,8 @@ const asyncHandler = require('../middleware/asyncHandler');
 const Patient = require('../models/patientModel');
 const Appointment = require('../models/appointmentModel');
 const Diagnosis = require('../models/diagnosisModel');
+const auditService = require('../utils/auditService');
+const logger = require('../utils/logger');
 
 // @desc    Create a new patient
 // @route   POST /api/patients
@@ -21,18 +23,15 @@ const createPatient = asyncHandler(async (req, res) => {
     createdBy, // Add createdBy field to track who created the patient
   } = req.body;
 
-  // Log the incoming request data for debugging
-  console.log('Creating patient with data:', {
-    name,
+  // Log the incoming request data for debugging (sanitized)
+  logger.debug('Creating patient', {
     gender,
-    phone,
     createdBy,
     userRole: req.user ? req.user.role : 'none (visitor)'
   });
 
   // Determine the correct createdBy value
   const finalCreatedBy = createdBy || (req.user ? req.user.role : 'visitor');
-  console.log('Final createdBy value:', finalCreatedBy);
 
   const patient = await Patient.create({
     name,
@@ -50,6 +49,19 @@ const createPatient = asyncHandler(async (req, res) => {
   });
 
   if (patient) {
+    // Log the PHI creation in audit log for HIPAA compliance
+    await auditService.logAuditEvent({
+      req,
+      action: 'CREATE',
+      description: 'Created new patient record',
+      resourceType: 'Patient',
+      resourceId: patient._id,
+      status: 'SUCCESS',
+      details: {
+        createdBy: finalCreatedBy,
+      },
+    });
+
     res.status(201).json(patient);
   } else {
     res.status(400);
@@ -62,6 +74,19 @@ const createPatient = asyncHandler(async (req, res) => {
 // @access  Private
 const getPatients = asyncHandler(async (req, res) => {
   const patients = await Patient.find({});
+
+  // Log the PHI access in audit log for HIPAA compliance
+  await auditService.logAuditEvent({
+    req,
+    action: 'READ',
+    description: 'Retrieved all patient records',
+    resourceType: 'Patient',
+    status: 'SUCCESS',
+    details: {
+      count: patients.length,
+    },
+  });
+
   res.json(patients);
 });
 
@@ -72,6 +97,15 @@ const getPatientById = asyncHandler(async (req, res) => {
   const patient = await Patient.findById(req.params.id);
 
   if (patient) {
+    // Log the PHI access in audit log for HIPAA compliance
+    await auditService.logPhiAccess(
+      req,
+      'Patient',
+      patient._id,
+      `Retrieved patient record: ${patient.name}`,
+      'Treatment/Care'
+    );
+
     res.json(patient);
   } else {
     res.status(404);
@@ -116,6 +150,20 @@ const updatePatient = asyncHandler(async (req, res) => {
     }
 
     const updatedPatient = await patient.save();
+
+    // Log the PHI update in audit log for HIPAA compliance
+    await auditService.logAuditEvent({
+      req,
+      action: 'UPDATE',
+      description: `Updated patient record: ${patient.name}`,
+      resourceType: 'Patient',
+      resourceId: patient._id,
+      status: 'SUCCESS',
+      details: {
+        updatedFields: Object.keys(req.body),
+      },
+    });
+
     res.json(updatedPatient);
   } else {
     res.status(404);
@@ -132,29 +180,45 @@ const deletePatient = asyncHandler(async (req, res) => {
   if (patient) {
     // Step 1: Find all appointments for this patient
     const appointments = await Appointment.find({ patient_id: patient._id });
-    console.log(`Found ${appointments.length} appointments for patient ${patient._id}`);
+    logger.debug(`Found ${appointments.length} appointments for patient ${patient._id}`);
 
     // Step 2: For each appointment, delete associated diagnoses
     for (const appointment of appointments) {
       const diagnoses = await Diagnosis.find({ appointment_id: appointment._id });
-      console.log(`Found ${diagnoses.length} diagnoses for appointment ${appointment._id}`);
+      logger.debug(`Found ${diagnoses.length} diagnoses for appointment ${appointment._id}`);
 
       // Delete all diagnoses for this appointment
       if (diagnoses.length > 0) {
         await Diagnosis.deleteMany({ appointment_id: appointment._id });
-        console.log(`Deleted all diagnoses for appointment ${appointment._id}`);
+        logger.debug(`Deleted all diagnoses for appointment ${appointment._id}`);
       }
     }
 
     // Step 3: Delete all appointments for this patient
     if (appointments.length > 0) {
       await Appointment.deleteMany({ patient_id: patient._id });
-      console.log(`Deleted all appointments for patient ${patient._id}`);
+      logger.debug(`Deleted all appointments for patient ${patient._id}`);
     }
 
     // Step 4: Finally delete the patient
     await patient.deleteOne();
-    console.log(`Deleted patient ${patient._id}`);
+    logger.debug(`Deleted patient ${patient._id}`);
+
+    // Log the PHI deletion in audit log for HIPAA compliance
+    await auditService.logAuditEvent({
+      req,
+      action: 'DELETE',
+      description: `Deleted patient record: ${patient.name}`,
+      resourceType: 'Patient',
+      resourceId: patient._id,
+      status: 'SUCCESS',
+      details: {
+        appointmentsDeleted: appointments.length,
+        diagnosesDeleted: appointments.reduce((total, appointment) => {
+          return total + (appointment.diagnosesCount || 0);
+        }, 0)
+      },
+    });
 
     res.json({
       message: 'Patient and all associated data removed',
