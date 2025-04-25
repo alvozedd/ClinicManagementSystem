@@ -31,8 +31,13 @@ const appointmentSchema = mongoose.Schema(
     },
     created_by_user_id: {
       type: mongoose.Schema.Types.ObjectId,
-      required: true,
+      required: false, // Changed to false to allow visitor bookings
       ref: 'User',
+    },
+    createdBy: {
+      type: String,
+      enum: ['doctor', 'secretary', 'visitor', 'admin'],
+      default: 'visitor',
     },
   },
   {

@@ -159,11 +159,11 @@ function SimplifiedSecretaryDashboard({
 
   return (
     <div className="p-2">
-      {/* Welcome Banner with Quick Stats - Reduced Size */}
+      {/* Welcome Banner with Quick Stats and Upcoming Appointments */}
       <div className="bg-gradient-to-r from-blue-600 to-blue-500 rounded-md p-3 mb-3 text-white shadow-md relative">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center relative z-10">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center relative z-10 mb-3">
           <div>
-            <h1 className="text-lg font-bold mb-0.5 leading-tight">{getTimeBasedGreeting()}, {username}</h1>
+            <h1 className="text-lg font-bold mb-0.5 leading-tight">{getTimeBasedGreeting()}</h1>
             <p className="text-blue-100 text-xs">{getFormattedDate()}</p>
           </div>
           <div className="flex flex-wrap gap-2 mt-2 md:mt-0">
@@ -185,6 +185,44 @@ function SimplifiedSecretaryDashboard({
             </div>
           </div>
         </div>
+
+        {/* Upcoming Appointments Section */}
+        {upcomingAppointments.length > 0 && (
+          <div className="mt-2">
+            <h3 className="text-sm font-semibold mb-2">Upcoming Appointments</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+              {upcomingAppointments.slice(0, 3).map((appointment) => (
+                <div
+                  key={appointment.id || appointment._id}
+                  className="bg-white bg-opacity-20 rounded-md p-2 backdrop-blur-sm cursor-pointer hover:bg-opacity-30 transition-all"
+                  onClick={() => {
+                    const patient = patients.find(p => p.id === appointment.patientId || p._id === appointment.patientId);
+                    if (patient) {
+                      handleViewPatient(patient);
+                    }
+                  }}
+                >
+                  <div className="font-semibold text-sm">{appointment.patientName}</div>
+                  <div className="text-xs flex justify-between">
+                    <span>{appointment.date}</span>
+                    <span>{appointment.time}</span>
+                  </div>
+                  <div className="text-xs mt-1">
+                    <span className={`px-1.5 py-0.5 rounded-full text-xs ${
+                      appointment.status === 'Scheduled' ? 'bg-green-100 text-green-800' :
+                      appointment.status === 'Completed' ? 'bg-blue-100 text-blue-800' :
+                      appointment.status === 'Cancelled' ? 'bg-red-100 text-red-800' :
+                      appointment.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
+                      'bg-gray-100 text-gray-800'
+                    }`}>
+                      {appointment.status}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Compact Tab Navigation */}

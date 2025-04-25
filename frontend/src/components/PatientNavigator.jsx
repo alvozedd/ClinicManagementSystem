@@ -56,10 +56,10 @@ function PatientNavigator({
               e.stopPropagation();
               onClose();
             }}
-            className="mr-1 bg-blue-100 hover:bg-blue-200 text-blue-700 hover:text-blue-800 text-[10px] font-medium flex items-center px-1 py-0.5 rounded transition-colors duration-200"
+            className="mr-2 bg-blue-100 hover:bg-blue-200 text-blue-700 hover:text-blue-800 text-xs md:text-sm font-medium flex items-center px-2 md:px-3 py-1 md:py-1.5 rounded transition-colors duration-200"
           >
-            <FaChevronLeft size={8} />
-            <span className="hidden sm:inline ml-0.5">Back</span>
+            <FaChevronLeft className="h-2.5 w-2.5 md:h-3.5 md:w-3.5" />
+            <span className="ml-1 md:ml-1.5">Back to Search</span>
           </button>
           <h2 className="text-xs font-medium">
             {currentIndex + 1}/{sortedPatients.length}

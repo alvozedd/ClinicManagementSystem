@@ -84,7 +84,8 @@ function HomePage() {
         phone: formData.phone,
         next_of_kin_name: 'Not Provided',
         next_of_kin_relationship: 'Not Provided',
-        next_of_kin_phone: '0000000000'
+        next_of_kin_phone: '0000000000',
+        createdBy: 'visitor' // Explicitly set the creator as visitor
       };
 
       console.log('Creating new patient:', patientData);
@@ -99,7 +100,8 @@ function HomePage() {
         notes: `Booked online by patient. Time to be confirmed by secretary.`,
         status: 'Pending',
         type: formData.appointmentType,
-        reason: formData.appointmentReason || 'Not specified'
+        reason: formData.appointmentReason || 'Not specified',
+        createdBy: 'visitor' // Explicitly set the creator as visitor
       };
 
       console.log('Creating new appointment:', appointmentData);

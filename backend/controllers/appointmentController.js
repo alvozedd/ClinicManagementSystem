@@ -5,18 +5,40 @@ const Appointment = require('../models/appointmentModel');
 // @route   POST /api/appointments
 // @access  Private/Doctor/Secretary
 const createAppointment = asyncHandler(async (req, res) => {
-  const { patient_id, appointment_date, optional_time, notes, status, type, reason } = req.body;
+  const { patient_id, appointment_date, optional_time, notes, status, type, reason, createdBy } = req.body;
 
-  const appointment = await Appointment.create({
+  // Log the incoming request data for debugging
+  console.log('Creating appointment with data:', {
+    patient_id,
+    appointment_date,
+    status,
+    type,
+    createdBy,
+    userRole: req.user ? req.user.role : 'none (visitor)'
+  });
+
+  // Create appointment data object
+  const appointmentData = {
     patient_id,
     appointment_date,
     optional_time,
     notes,
     status: status || 'Scheduled',
     type: type || 'Consultation',
-    reason,
-    created_by_user_id: req.user._id,
-  });
+    reason
+  };
+
+  // Add created_by_user_id only if user is authenticated
+  if (req.user) {
+    appointmentData.created_by_user_id = req.user._id;
+  }
+
+  // Add createdBy field to track who created the appointment
+  appointmentData.createdBy = createdBy || (req.user ? req.user.role : 'visitor');
+
+  console.log('Final appointment data:', appointmentData);
+
+  const appointment = await Appointment.create(appointmentData);
 
   if (appointment) {
     res.status(201).json(appointment);

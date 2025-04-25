@@ -21,6 +21,19 @@ const createPatient = asyncHandler(async (req, res) => {
     createdBy, // Add createdBy field to track who created the patient
   } = req.body;
 
+  // Log the incoming request data for debugging
+  console.log('Creating patient with data:', {
+    name,
+    gender,
+    phone,
+    createdBy,
+    userRole: req.user ? req.user.role : 'none (visitor)'
+  });
+
+  // Determine the correct createdBy value
+  const finalCreatedBy = createdBy || (req.user ? req.user.role : 'visitor');
+  console.log('Final createdBy value:', finalCreatedBy);
+
   const patient = await Patient.create({
     name,
     gender,
@@ -33,7 +46,7 @@ const createPatient = asyncHandler(async (req, res) => {
     allergies: allergies || [],
     medications: medications || [],
     created_by_user_id: req.user ? req.user._id : null, // Handle case where user might not be logged in (visitor)
-    createdBy: createdBy || (req.user ? req.user.role : 'visitor'), // Set createdBy based on input or user role
+    createdBy: finalCreatedBy, // Set createdBy based on input or user role
   });
 
   if (patient) {

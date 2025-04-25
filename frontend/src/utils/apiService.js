@@ -75,12 +75,19 @@ const apiService = {
   },
 
   createPatient: async (patientData) => {
+    // Check if this is a visitor booking (no auth token needed)
+    const isVisitorBooking = patientData.createdBy === 'visitor';
+
+    const headers = {
+      'Content-Type': 'application/json',
+      ...(isVisitorBooking ? {} : authHeader()),
+    };
+
+    console.log('Creating patient with headers:', headers, 'isVisitorBooking:', isVisitorBooking);
+
     const response = await fetch(`${API_URL}/patients`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...authHeader(),
-      },
+      headers,
       body: JSON.stringify(patientData),
     });
     return handleResponse(response);
@@ -133,12 +140,19 @@ const apiService = {
   },
 
   createAppointment: async (appointmentData) => {
+    // Check if this is a visitor booking (no auth token needed)
+    const isVisitorBooking = appointmentData.createdBy === 'visitor';
+
+    const headers = {
+      'Content-Type': 'application/json',
+      ...(isVisitorBooking ? {} : authHeader()),
+    };
+
+    console.log('Creating appointment with headers:', headers, 'isVisitorBooking:', isVisitorBooking);
+
     const response = await fetch(`${API_URL}/appointments`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...authHeader(),
-      },
+      headers,
       body: JSON.stringify(appointmentData),
     });
     return handleResponse(response);

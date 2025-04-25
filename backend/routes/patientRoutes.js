@@ -7,7 +7,7 @@ const {
   updatePatient,
   deletePatient,
 } = require('../controllers/patientController');
-const { protect, admin, secretary, doctor } = require('../middleware/authMiddleware');
+const { protect, optionalAuth, admin, secretary, doctor } = require('../middleware/authMiddleware');
 
 // Create a middleware that allows both doctors and secretaries
 const doctorOrSecretary = (req, res, next) => {
@@ -19,7 +19,8 @@ const doctorOrSecretary = (req, res, next) => {
   }
 };
 
-router.route('/').post(protect, doctorOrSecretary, createPatient).get(protect, getPatients);
+// Use optionalAuth to allow both authenticated and unauthenticated requests
+router.route('/').post(optionalAuth, createPatient).get(protect, getPatients);
 router
   .route('/:id')
   .get(protect, getPatientById)
