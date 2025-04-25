@@ -8,6 +8,14 @@
 export const transformPatientFromBackend = (backendPatient) => {
   if (!backendPatient) return null;
 
+  // Log the incoming patient data to debug createdBy issues
+  console.log('transformPatientFromBackend - Raw patient data:', {
+    _id: backendPatient._id,
+    name: backendPatient.name,
+    createdBy: backendPatient.createdBy,
+    created_by_user_id: backendPatient.created_by_user_id
+  });
+
   // Split the name into firstName and lastName
   const nameParts = backendPatient.name ? backendPatient.name.split(' ') : ['', ''];
   const firstName = nameParts[0] || '';
@@ -19,7 +27,11 @@ export const transformPatientFromBackend = (backendPatient) => {
     dateOfBirth = `${backendPatient.year_of_birth}-01-01`; // January 1st of the birth year
   }
 
-  return {
+  // Determine the correct createdBy value
+  const createdByValue = backendPatient.createdBy || (backendPatient.created_by_user_id ? 'doctor' : 'visitor');
+
+  // Create the transformed patient object
+  const transformedPatient = {
     _id: backendPatient._id, // Keep the MongoDB ID
     id: backendPatient._id, // Also set as id for compatibility
     firstName,
@@ -31,7 +43,7 @@ export const transformPatientFromBackend = (backendPatient) => {
     nextOfKinName: backendPatient.next_of_kin_name || '',
     nextOfKinRelationship: backendPatient.next_of_kin_relationship || '',
     nextOfKinPhone: backendPatient.next_of_kin_phone || '',
-    createdBy: backendPatient.created_by_user_id ? 'doctor' : 'visitor', // Default assumption
+    createdBy: createdByValue, // Use the actual createdBy field if available
     createdAt: backendPatient.createdAt || new Date().toISOString(),
     updatedAt: backendPatient.updatedAt || new Date().toISOString(),
     // Additional frontend-only fields
@@ -41,6 +53,15 @@ export const transformPatientFromBackend = (backendPatient) => {
     medications: backendPatient.medications || [],
     allergies: backendPatient.allergies || []
   };
+
+  // Log the transformed patient data to debug createdBy issues
+  console.log('transformPatientFromBackend - Transformed patient data:', {
+    _id: transformedPatient._id,
+    name: `${transformedPatient.firstName} ${transformedPatient.lastName}`,
+    createdBy: transformedPatient.createdBy
+  });
+
+  return transformedPatient;
 };
 
 /**
@@ -86,7 +107,9 @@ export const transformPatientToBackend = (frontendPatient) => {
     // Include medical history, medications, and allergies
     medicalHistory: frontendPatient.medicalHistory || [],
     allergies: frontendPatient.allergies || [],
-    medications: frontendPatient.medications || []
+    medications: frontendPatient.medications || [],
+    // Preserve the createdBy field if it exists
+    createdBy: frontendPatient.createdBy
   };
 };
 
