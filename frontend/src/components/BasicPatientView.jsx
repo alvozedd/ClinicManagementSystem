@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaUser } from 'react-icons/fa';
 import { getCreatorLabel } from '../utils/recordCreation';
 
@@ -6,6 +6,12 @@ function BasicPatientView({ patient, appointments, onClose, onUpdatePatient, onD
   // State for editing mode
   const [editMode, setEditMode] = useState(false);
   const [editedPatient, setEditedPatient] = useState({...patient});
+
+  // Update local state when patient prop changes
+  useEffect(() => {
+    console.log('BasicPatientView - Patient prop updated:', patient);
+    setEditedPatient({...patient});
+  }, [patient]);
 
   // Handle input changes for patient editing
   const handleInputChange = (e) => {
@@ -17,9 +23,16 @@ function BasicPatientView({ patient, appointments, onClose, onUpdatePatient, onD
   };
 
   // Handle saving patient changes
-  const handleSaveChanges = () => {
-    onUpdatePatient(editedPatient);
-    setEditMode(false);
+  const handleSaveChanges = async () => {
+    try {
+      console.log('Saving patient changes:', editedPatient);
+      await onUpdatePatient(editedPatient);
+      console.log('Patient updated successfully');
+      setEditMode(false);
+    } catch (error) {
+      console.error('Error updating patient:', error);
+      alert('Failed to update patient. Please try again.');
+    }
   };
 
   // Handle canceling edits
@@ -29,13 +42,20 @@ function BasicPatientView({ patient, appointments, onClose, onUpdatePatient, onD
   };
 
   // Handle deleting the patient
-  const handleDeletePatient = () => {
+  const handleDeletePatient = async () => {
     if (onDeletePatient) {
-      // Use MongoDB _id if available, otherwise fall back to client-side id
-      const patientId = patient._id || patient.id;
-      if (window.confirm(`Are you sure you want to delete ${patient.firstName} ${patient.lastName}? This action cannot be undone.`)) {
-        onDeletePatient(patientId);
-        onClose(); // Close the patient view after deletion
+      try {
+        // Use MongoDB _id if available, otherwise fall back to client-side id
+        const patientId = patient._id || patient.id;
+        if (window.confirm(`Are you sure you want to delete ${patient.firstName} ${patient.lastName}? This action cannot be undone.`)) {
+          console.log('Deleting patient with ID:', patientId);
+          await onDeletePatient(patientId);
+          console.log('Patient deleted successfully');
+          onClose(); // Close the patient view after deletion
+        }
+      } catch (error) {
+        console.error('Error deleting patient:', error);
+        alert('Failed to delete patient. Please try again.');
       }
     }
   };

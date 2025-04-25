@@ -133,12 +133,17 @@ function SimplifiedDoctorDashboard({
     // Close the diagnosis modal
     setDiagnosingAppointment(null);
 
+    // Trigger a local refresh to ensure UI is updated
+    setLocalRefreshTrigger(prev => prev + 1);
+
     // If we're in the patient management tab, wait a moment then refresh the patient view
     if (activeTab === 'patient-management' && selectedPatient) {
       // Wait a moment to ensure the diagnosis is saved before refreshing
       setTimeout(() => {
         // This will trigger a re-render of the SimplifiedPatientView component
         setSelectedPatient({...selectedPatient});
+        // Trigger another refresh after the timeout
+        setLocalRefreshTrigger(prev => prev + 1);
       }, 500);
     }
   };
@@ -183,8 +188,14 @@ function SimplifiedDoctorDashboard({
       // Show success message
       alert('Diagnosis deleted successfully.');
 
-      // Refresh the page to show updated data
-      window.location.reload();
+      // Trigger a local refresh to update the UI
+      setLocalRefreshTrigger(prev => prev + 1);
+
+      // If we're in the patient management tab and have a selected patient, refresh the patient view
+      if (activeTab === 'patient-management' && selectedPatient) {
+        // This will trigger a re-render of the SimplifiedPatientView component
+        setSelectedPatient({...selectedPatient});
+      }
     } catch (error) {
       console.error('Error deleting diagnosis:', error);
       alert('Failed to delete diagnosis. Please try again.');
@@ -198,6 +209,8 @@ function SimplifiedDoctorDashboard({
     // Select the newly created patient
     setSelectedPatient(newPatient);
     setActiveTab('patient-management');
+    // Trigger a local refresh to update the UI
+    setLocalRefreshTrigger(prev => prev + 1);
   };
 
   // Get current date and greeting
@@ -219,6 +232,28 @@ function SimplifiedDoctorDashboard({
     // Only auto-select if explicitly requested via URL or other means
     // This is intentionally left empty to prevent auto-selection
   }, [activeTab, selectedPatient, todaysAppointments, patients]);
+
+  // Add a local refresh mechanism to ensure changes are immediately visible
+  const [localRefreshTrigger, setLocalRefreshTrigger] = useState(0);
+
+  // This effect will run whenever the patients or appointments props change
+  // or when a local refresh is triggered
+  useEffect(() => {
+    console.log('SimplifiedDoctorDashboard - Detected changes in patients or appointments');
+
+    // If we have a selected patient, make sure it's up to date with the latest data
+    if (selectedPatient) {
+      const updatedPatient = patients.find(p =>
+        p._id === selectedPatient._id ||
+        p.id === selectedPatient.id
+      );
+
+      if (updatedPatient) {
+        console.log('Updating selected patient with latest data');
+        setSelectedPatient(updatedPatient);
+      }
+    }
+  }, [patients, appointments, localRefreshTrigger]);
 
   return (
     <div className="p-2">
