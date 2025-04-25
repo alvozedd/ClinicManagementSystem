@@ -9,6 +9,7 @@ const {
 } = require('../controllers/patientController');
 const { protect, optionalAuth, admin, secretary, doctor } = require('../middleware/authMiddleware');
 const { validatePatientCreation } = require('../middleware/validationMiddleware');
+const { publicEndpointLimiter, apiLimiter } = require('../middleware/rateLimitMiddleware');
 
 // Create a middleware that allows both doctors and secretaries
 const doctorOrSecretary = (req, res, next) => {
@@ -21,7 +22,17 @@ const doctorOrSecretary = (req, res, next) => {
 };
 
 // Use optionalAuth to allow both authenticated and unauthenticated requests
-router.route('/').post(optionalAuth, validatePatientCreation, createPatient).get(protect, getPatients);
+// Apply rate limiting to public endpoints
+router.route('/')
+  .post(optionalAuth, (req, res, next) => {
+    // Apply different rate limiters based on whether it's a visitor booking
+    if (req.body && req.body.createdBy === 'visitor') {
+      publicEndpointLimiter(req, res, next);
+    } else {
+      apiLimiter(req, res, next);
+    }
+  }, validatePatientCreation, createPatient)
+  .get(protect, apiLimiter, getPatients);
 router
   .route('/:id')
   .get(protect, getPatientById)

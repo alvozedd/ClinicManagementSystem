@@ -1,5 +1,6 @@
 import { createContext, useState, useEffect } from 'react';
 import apiService from '../utils/apiService';
+import secureStorage from '../utils/secureStorage';
 
 export const AuthContext = createContext();
 
@@ -9,12 +10,37 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const initAuth = async () => {
-      // Check if user is logged in
-      const storedUserInfo = localStorage.getItem('userInfo');
+      // Check if user is logged in - try secure storage first, then fallback to localStorage
+      const secureUserInfo = secureStorage.getItem('userInfo');
+      const legacyUserInfo = localStorage.getItem('userInfo');
 
-      if (storedUserInfo) {
-        const parsedUserInfo = JSON.parse(storedUserInfo);
+      let parsedUserInfo = null;
 
+      // If we have data in secure storage, use that
+      if (secureUserInfo) {
+        parsedUserInfo = secureUserInfo;
+
+        // If we also have legacy data in localStorage, remove it
+        if (legacyUserInfo) {
+          localStorage.removeItem('userInfo');
+        }
+      }
+      // Otherwise, try to use and migrate legacy data
+      else if (legacyUserInfo) {
+        try {
+          parsedUserInfo = JSON.parse(legacyUserInfo);
+
+          // Migrate to secure storage
+          secureStorage.setItem('userInfo', parsedUserInfo);
+
+          // Remove from localStorage
+          localStorage.removeItem('userInfo');
+        } catch (error) {
+          console.error('Error parsing legacy user info:', error);
+        }
+      }
+
+      if (parsedUserInfo) {
         // Check if token is expired
         const token = parsedUserInfo.token;
         if (token) {
@@ -37,15 +63,15 @@ export const AuthProvider = ({ children }) => {
                 await apiService.refreshToken();
 
                 // Get the updated user info with new token
-                const updatedUserInfo = localStorage.getItem('userInfo');
+                const updatedUserInfo = secureStorage.getItem('userInfo');
                 if (updatedUserInfo) {
-                  setUserInfo(JSON.parse(updatedUserInfo));
+                  setUserInfo(updatedUserInfo);
                 }
               } catch (error) {
                 console.error('Failed to refresh token on startup:', error);
                 // If refresh fails, clear user info
                 setUserInfo(null);
-                localStorage.removeItem('userInfo');
+                secureStorage.removeItem('userInfo');
               }
             } else {
               // Token is still valid
@@ -69,7 +95,8 @@ export const AuthProvider = ({ children }) => {
 
   const login = (data) => {
     setUserInfo(data);
-    localStorage.setItem('userInfo', JSON.stringify(data));
+    // Store in secure storage instead of localStorage
+    secureStorage.setItem('userInfo', data);
   };
 
   const logout = async () => {
@@ -79,10 +106,18 @@ export const AuthProvider = ({ children }) => {
 
       // Update state
       setUserInfo(null);
+
+      // Clear secure storage
+      secureStorage.removeItem('userInfo');
+
+      // Also clear localStorage in case there's any legacy data
+      localStorage.removeItem('userInfo');
     } catch (error) {
       console.error('Error during logout:', error);
       // Even if server-side logout fails, clear local state
       setUserInfo(null);
+      secureStorage.removeItem('userInfo');
+      localStorage.removeItem('userInfo');
     }
   };
 

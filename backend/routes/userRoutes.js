@@ -12,10 +12,11 @@ const {
 } = require('../controllers/userController');
 const { protect, admin } = require('../middleware/authMiddleware');
 const { validateUserRegistration, validateUserLogin } = require('../middleware/validationMiddleware');
+const { authLimiter, registrationLimiter } = require('../middleware/rateLimitMiddleware');
 
-router.route('/').post(protect, admin, validateUserRegistration, registerUser).get(protect, admin, getUsers);
-router.post('/login', validateUserLogin, authUser);
-router.post('/refresh-token', refreshToken);
+router.route('/').post(protect, admin, registrationLimiter, validateUserRegistration, registerUser).get(protect, admin, getUsers);
+router.post('/login', authLimiter, validateUserLogin, authUser);
+router.post('/refresh-token', authLimiter, refreshToken);
 router.post('/logout', logoutUser);
 router
   .route('/:id')

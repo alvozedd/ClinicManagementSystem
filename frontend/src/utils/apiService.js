@@ -1,4 +1,5 @@
 // API Service for making requests to the backend
+import secureStorage from './secureStorage';
 
 // Get the API URL from environment variables or use a default
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
@@ -33,8 +34,8 @@ const handleResponse = async (response) => {
 
 // Secure fetch wrapper that handles token refresh
 const secureFetch = async (url, options = {}) => {
-  // Get the current token
-  const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+  // Get the current token from secure storage
+  const userInfo = secureStorage.getItem('userInfo') || {};
   const token = userInfo.token;
 
   // Check if token exists and is expired
@@ -43,8 +44,8 @@ const secureFetch = async (url, options = {}) => {
       // Try to refresh the token
       await refreshAccessToken();
 
-      // Get the new token
-      const updatedUserInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+      // Get the new token from secure storage
+      const updatedUserInfo = secureStorage.getItem('userInfo') || {};
       const newToken = updatedUserInfo.token;
 
       // Update the Authorization header with the new token
@@ -70,8 +71,8 @@ const secureFetch = async (url, options = {}) => {
         // Try to refresh the token
         await refreshAccessToken();
 
-        // Get the new token
-        const updatedUserInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+        // Get the new token from secure storage
+        const updatedUserInfo = secureStorage.getItem('userInfo') || {};
         const newToken = updatedUserInfo.token;
 
         // Update the Authorization header with the new token
@@ -97,7 +98,30 @@ const secureFetch = async (url, options = {}) => {
 
 // Get auth header with JWT token
 const authHeader = () => {
-  const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+  // Try to get user info from secure storage first
+  let userInfo = secureStorage.getItem('userInfo');
+
+  // If not found in secure storage, try localStorage as fallback (for migration)
+  if (!userInfo) {
+    const legacyUserInfo = localStorage.getItem('userInfo');
+    if (legacyUserInfo) {
+      try {
+        userInfo = JSON.parse(legacyUserInfo);
+
+        // Migrate to secure storage
+        secureStorage.setItem('userInfo', userInfo);
+
+        // Remove from localStorage
+        localStorage.removeItem('userInfo');
+      } catch (error) {
+        console.error('Error parsing legacy user info:', error);
+        userInfo = {};
+      }
+    } else {
+      userInfo = {};
+    }
+  }
+
   const token = userInfo.token;
   return token ? { 'Authorization': `Bearer ${token}` } : {};
 };
@@ -135,16 +159,20 @@ const refreshAccessToken = async () => {
 
     const data = await handleResponse(response);
 
-    // Update the token in localStorage
-    const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
+    // Update the token in secure storage
+    let userInfo = secureStorage.getItem('userInfo') || {};
     userInfo.token = data.token;
-    localStorage.setItem('userInfo', JSON.stringify(userInfo));
+    secureStorage.setItem('userInfo', userInfo);
+
+    // Also remove any legacy data in localStorage
+    localStorage.removeItem('userInfo');
 
     return data.token;
   } catch (error) {
     console.error('Error refreshing token:', error);
     // If refresh fails, log the user out
-    localStorage.removeItem('userInfo');
+    secureStorage.removeItem('userInfo');
+    localStorage.removeItem('userInfo'); // Also clear legacy storage
     window.location.href = '/login';
     throw error;
   }
@@ -178,13 +206,16 @@ const apiService = {
         credentials: 'include', // Include cookies for refresh token
       });
 
-      // Clear user info from localStorage
+      // Clear user info from secure storage
+      secureStorage.removeItem('userInfo');
+      // Also clear legacy storage
       localStorage.removeItem('userInfo');
 
       return handleResponse(response);
     } catch (error) {
       console.error('Error during logout:', error);
-      // Even if the server-side logout fails, clear local storage
+      // Even if the server-side logout fails, clear storage
+      secureStorage.removeItem('userInfo');
       localStorage.removeItem('userInfo');
       throw error;
     }

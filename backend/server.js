@@ -2,8 +2,10 @@ const express = require('express');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
+const helmet = require('helmet');
 const connectDB = require('./config/db');
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
+const { enforceHttps, addSecurityHeaders, secureCoookieSettings } = require('./middleware/securityMiddleware');
 const userRoutes = require('./routes/userRoutes');
 const patientRoutes = require('./routes/patientRoutes');
 const appointmentRoutes = require('./routes/appointmentRoutes');
@@ -16,6 +18,12 @@ dotenv.config();
 connectDB();
 
 const app = express();
+
+// Apply security middleware
+app.use(helmet()); // Adds various security headers
+app.use(enforceHttps); // Redirect HTTP to HTTPS in production
+app.use(addSecurityHeaders); // Add additional security headers
+app.use(secureCoookieSettings); // Ensure cookies are secure
 
 // CORS configuration
 app.use((req, res, next) => {

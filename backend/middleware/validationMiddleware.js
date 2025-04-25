@@ -2,6 +2,7 @@
  * Middleware for validating request data
  * This provides a centralized way to validate inputs before they reach controllers
  */
+const { validatePassword } = require('../utils/passwordPolicy');
 
 // Helper function to validate email format
 const isValidEmail = (email) => {
@@ -54,10 +55,13 @@ const validateUserRegistration = (req, res, next) => {
   // Validate password
   if (!password) {
     errors.push('Password is required');
-  } else if (password.length < 8) {
-    errors.push('Password must be at least 8 characters long');
-  } else if (!/[A-Z]/.test(password) || !/[a-z]/.test(password) || !/[0-9]/.test(password)) {
-    errors.push('Password must contain at least one uppercase letter, one lowercase letter, and one number');
+  } else {
+    // Use the password policy validator
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.isValid) {
+      // Add all password validation errors
+      errors.push(...passwordValidation.errors);
+    }
   }
 
   // Validate role
@@ -117,7 +121,7 @@ const validatePatientCreation = (req, res, next) => {
     next_of_kin_relationship,
     next_of_kin_phone,
   } = req.body;
-  
+
   const errors = [];
 
   // Validate name
