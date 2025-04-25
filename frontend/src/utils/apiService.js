@@ -238,6 +238,70 @@ const apiService = {
     });
     return handleResponse(response);
   },
+
+  // User management endpoints (for admin)
+  getUsers: async () => {
+    const response = await fetch(`${API_URL}/users`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        ...authHeader(),
+      },
+    });
+    return handleResponse(response);
+  },
+
+  getUserById: async (id) => {
+    const response = await fetch(`${API_URL}/users/${id}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        ...authHeader(),
+      },
+    });
+    return handleResponse(response);
+  },
+
+  createUser: async (userData) => {
+    console.log('Creating user with data:', userData);
+    const response = await fetch(`${API_URL}/users`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...authHeader(),
+      },
+      body: JSON.stringify(userData),
+    });
+    const result = await handleResponse(response);
+    console.log('Create user response:', result);
+    return result;
+  },
+
+  updateUser: async (id, userData) => {
+    console.log('Updating user with ID:', id, 'and data:', userData);
+    const response = await fetch(`${API_URL}/users/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        ...authHeader(),
+      },
+      body: JSON.stringify(userData),
+    });
+    const result = await handleResponse(response);
+    console.log('Update user response:', result);
+    return result;
+  },
+
+  deleteUser: async (id) => {
+    const response = await fetch(`${API_URL}/users/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        ...authHeader(),
+      },
+    });
+    return handleResponse(response);
+  },
 };
 
 export default apiService;

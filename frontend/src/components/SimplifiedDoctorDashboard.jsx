@@ -37,8 +37,13 @@ function SimplifiedDoctorDashboard({
   onDiagnoseAppointment,
   onDeletePatient,
   onDeleteAppointment,
-  username
+  username,
+  userRole,
+  userInfo
 }) {
+  // Debug props
+  console.log('Doctor Dashboard - username:', username);
+  console.log('Doctor Dashboard - userInfo:', userInfo);
   const [activeTab, setActiveTab] = useState('patient-management');
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [diagnosingAppointment, setDiagnosingAppointment] = useState(null);
@@ -261,7 +266,7 @@ function SimplifiedDoctorDashboard({
       <div className="bg-gradient-to-r from-blue-600 to-blue-500 rounded-md p-3 mb-3 text-white shadow-md relative">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center relative z-10 mb-3">
           <div>
-            <h1 className="text-lg font-bold mb-0.5 leading-tight">{greeting}, Dr. Paul Muchai</h1>
+            <h1 className="text-lg font-bold mb-0.5 leading-tight">{greeting}, {username}</h1>
             <p className="text-blue-100 text-xs">{currentDate}</p>
           </div>
           <div className="flex flex-wrap gap-2 mt-2 md:mt-0">

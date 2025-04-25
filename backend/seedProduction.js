@@ -8,6 +8,15 @@ dotenv.config();
 // Define the User schema
 const userSchema = mongoose.Schema(
   {
+    name: {
+      type: String,
+      required: true,
+    },
+    username: {
+      type: String,
+      required: true,
+      unique: true,
+    },
     email: {
       type: String,
       required: true,
@@ -56,7 +65,7 @@ const connectDB = async () => {
 const seedUsers = async () => {
   try {
     await connectDB();
-    
+
     // Check if users already exist
     const existingUsers = await User.find({});
     if (existingUsers.length > 0) {
@@ -64,6 +73,8 @@ const seedUsers = async () => {
       existingUsers.forEach(user => {
         console.log({
           _id: user._id,
+          name: user.name,
+          username: user.username,
           email: user.email,
           role: user.role,
         });
@@ -71,26 +82,32 @@ const seedUsers = async () => {
       mongoose.connection.close();
       return;
     }
-    
+
     // Create default users
     const users = [
       {
+        name: 'Admin User',
+        username: 'admin',
         email: 'admin@urohealth.com',
         password: 'admin123',
         role: 'admin',
       },
       {
+        name: 'Dr. Paul Muchai',
+        username: 'doctor',
         email: 'doctor@urohealth.com',
         password: 'doctor123',
         role: 'doctor',
       },
       {
+        name: 'Secretary User',
+        username: 'secretary',
         email: 'secretary@urohealth.com',
         password: 'secretary123',
         role: 'secretary',
       },
     ];
-    
+
     // Hash passwords and create users one by one to trigger the pre-save middleware
     const createdUsers = [];
     for (const userData of users) {
@@ -98,16 +115,18 @@ const seedUsers = async () => {
       await user.save();
       createdUsers.push(user);
     }
-    
+
     console.log('Users created:');
     createdUsers.forEach(user => {
       console.log({
         _id: user._id,
+        name: user.name,
+        username: user.username,
         email: user.email,
         role: user.role,
       });
     });
-    
+
     mongoose.connection.close();
     console.log('Database seeded successfully');
   } catch (error) {

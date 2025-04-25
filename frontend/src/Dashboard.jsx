@@ -636,11 +636,15 @@ function Dashboard() {
 
   // Render different content based on user role
   const renderContent = () => {
+    // Debug userInfo
+    console.log('Dashboard - userInfo:', userInfo);
+
     // For admin, use the admin dashboard focused on user management
     if (userInfo.role === 'admin') {
       return (
         <AdminDashboard
-          username={userInfo?.username}
+          username={userInfo?.name || userInfo?.username || userInfo?.email}
+          userInfo={userInfo}
         />
       );
     }
@@ -655,8 +659,9 @@ function Dashboard() {
           onDiagnoseAppointment={handleSaveDiagnosis}
           onDeletePatient={handleDeletePatient}
           onDeleteAppointment={handleDeleteAppointment}
-          username={userInfo?.username}
+          username={userInfo?.name || userInfo?.username || userInfo?.email}
           userRole={userInfo?.role}
+          userInfo={userInfo}
         />
       );
     }
@@ -671,8 +676,9 @@ function Dashboard() {
           onDiagnoseAppointment={handleSaveDiagnosis}
           onDeleteAppointment={handleDeleteAppointment}
           onDeletePatient={handleDeletePatient}
-          username={userInfo?.username}
+          username={userInfo?.name || userInfo?.username || userInfo?.email}
           userRole={userInfo?.role}
+          userInfo={userInfo}
         />
       );
     }

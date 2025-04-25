@@ -11,13 +11,20 @@ const authUser = asyncHandler(async (req, res) => {
   console.log('Login attempt with username:', username);
   console.log('Request body:', req.body);
 
-  // Find user by username (which is stored in the email field)
-  const user = await User.findOne({ email: username });
+  // Find user by username or email
+  const user = await User.findOne({
+    $or: [
+      { username: username },
+      { email: username }
+    ]
+  });
 
   console.log('User found:', user ? 'Yes' : 'No');
   if (user) {
     console.log('User details:', {
       _id: user._id,
+      name: user.name,
+      username: user.username,
       email: user.email,
       role: user.role,
     });
@@ -33,7 +40,9 @@ const authUser = asyncHandler(async (req, res) => {
 
       res.json({
         _id: user._id,
-        username: user.email, // Return email as username
+        name: user.name,
+        username: user.username,
+        email: user.email,
         role: user.role,
         token: token,
       });
@@ -50,16 +59,28 @@ const authUser = asyncHandler(async (req, res) => {
 // @route   POST /api/users
 // @access  Private/Admin
 const registerUser = asyncHandler(async (req, res) => {
-  const { email, password, role } = req.body;
+  const { name, username, email, password, role } = req.body;
 
-  const userExists = await User.findOne({ email });
+  // Check if user exists with the same email or username
+  const userExists = await User.findOne({
+    $or: [
+      { email },
+      { username }
+    ]
+  });
 
   if (userExists) {
     res.status(400);
-    throw new Error('User already exists');
+    if (userExists.email === email) {
+      throw new Error('User with this email already exists');
+    } else {
+      throw new Error('Username is already taken');
+    }
   }
 
   const user = await User.create({
+    name,
+    username,
     email,
     password,
     role,
@@ -68,6 +89,8 @@ const registerUser = asyncHandler(async (req, res) => {
   if (user) {
     res.status(201).json({
       _id: user._id,
+      name: user.name,
+      username: user.username,
       email: user.email,
       role: user.role,
       token: generateToken(user._id),
@@ -107,6 +130,18 @@ const updateUser = asyncHandler(async (req, res) => {
   const user = await User.findById(req.params.id);
 
   if (user) {
+    // Check if username is being updated and if it's already taken
+    if (req.body.username && req.body.username !== user.username) {
+      const usernameExists = await User.findOne({ username: req.body.username });
+      if (usernameExists) {
+        res.status(400);
+        throw new Error('Username is already taken');
+      }
+    }
+
+    // Update user fields
+    user.name = req.body.name || user.name;
+    user.username = req.body.username || user.username;
     user.email = req.body.email || user.email;
     user.role = req.body.role || user.role;
 
@@ -118,6 +153,8 @@ const updateUser = asyncHandler(async (req, res) => {
 
     res.json({
       _id: updatedUser._id,
+      name: updatedUser.name,
+      username: updatedUser.username,
       email: updatedUser.email,
       role: updatedUser.role,
     });
@@ -131,6 +168,12 @@ const updateUser = asyncHandler(async (req, res) => {
 // @route   DELETE /api/users/:id
 // @access  Private/Admin
 const deleteUser = asyncHandler(async (req, res) => {
+  // Prevent admin from deleting themselves
+  if (req.params.id === req.user._id.toString()) {
+    res.status(400);
+    throw new Error('Admin cannot delete their own account');
+  }
+
   const user = await User.findById(req.params.id);
 
   if (user) {

@@ -21,8 +21,13 @@ function SimplifiedSecretaryDashboard({
   onDiagnoseAppointment,
   onDeleteAppointment,
   onDeletePatient,
-  username
+  username,
+  userRole,
+  userInfo
 }) {
+  // Debug props
+  console.log('Secretary Dashboard - username:', username);
+  console.log('Secretary Dashboard - userInfo:', userInfo);
   const [activeTab, setActiveTab] = useState('patient-management');
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [showAddPatientForm, setShowAddPatientForm] = useState(false);
@@ -163,7 +168,7 @@ function SimplifiedSecretaryDashboard({
       <div className="bg-gradient-to-r from-blue-600 to-blue-500 rounded-md p-3 mb-3 text-white shadow-md relative">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center relative z-10 mb-3">
           <div>
-            <h1 className="text-lg font-bold mb-0.5 leading-tight">{getTimeBasedGreeting()}</h1>
+            <h1 className="text-lg font-bold mb-0.5 leading-tight">{getTimeBasedGreeting()}, {username}</h1>
             <p className="text-blue-100 text-xs">{getFormattedDate()}</p>
           </div>
           <div className="flex flex-wrap gap-2 mt-2 md:mt-0">
