@@ -34,17 +34,17 @@ const decrypt = (encryptedData) => {
   try {
     // Decrypt the data
     const payload = JSON.parse(atob(encryptedData));
-    
+
     // Check if the data is expired (24 hours)
     const timestamp = payload.timestamp;
     const now = new Date().getTime();
     const expirationTime = 24 * 60 * 60 * 1000; // 24 hours
-    
+
     if (now - timestamp > expirationTime) {
       console.warn('Secure storage data has expired');
       return null;
     }
-    
+
     return payload.data;
   } catch (error) {
     console.error('Decryption error:', error);
@@ -61,7 +61,13 @@ const setItem = (key, value) => {
   try {
     const encryptedValue = encrypt(value);
     if (encryptedValue) {
+      // Use sessionStorage for secure data that should not persist across browser sessions
       sessionStorage.setItem(key, encryptedValue);
+
+      // Set a flag in localStorage to indicate active session
+      // This flag will be used to detect if the browser was closed and reopened
+      localStorage.setItem('session_active', 'true');
+      localStorage.setItem('session_timestamp', new Date().getTime().toString());
     }
   } catch (error) {
     console.error('Error storing data securely:', error);
@@ -75,9 +81,22 @@ const setItem = (key, value) => {
  */
 const getItem = (key) => {
   try {
+    // Check if session is still valid
+    const sessionActive = localStorage.getItem('session_active');
+    const sessionTimestamp = localStorage.getItem('session_timestamp');
+    const currentTime = new Date().getTime();
+
+    // If session flag is missing or session is too old (24 hours), consider it invalid
+    if (!sessionActive || !sessionTimestamp ||
+        (currentTime - parseInt(sessionTimestamp)) > 24 * 60 * 60 * 1000) {
+      console.log('Session expired or invalid, clearing data');
+      clear(); // Clear all session data
+      return null;
+    }
+
     const encryptedValue = sessionStorage.getItem(key);
     if (!encryptedValue) return null;
-    
+
     return decrypt(encryptedValue);
   } catch (error) {
     console.error('Error retrieving secure data:', error);
@@ -102,9 +121,37 @@ const removeItem = (key) => {
  */
 const clear = () => {
   try {
+    // Clear session storage
     sessionStorage.clear();
+
+    // Clear session flags from local storage
+    localStorage.removeItem('session_active');
+    localStorage.removeItem('session_timestamp');
   } catch (error) {
     console.error('Error clearing secure storage:', error);
+  }
+};
+
+/**
+ * Check if the current session is valid
+ * @returns {boolean} - True if session is valid, false otherwise
+ */
+const isSessionValid = () => {
+  try {
+    const sessionActive = localStorage.getItem('session_active');
+    const sessionTimestamp = localStorage.getItem('session_timestamp');
+    const currentTime = new Date().getTime();
+
+    // If session flag is missing or session is too old (24 hours), consider it invalid
+    if (!sessionActive || !sessionTimestamp ||
+        (currentTime - parseInt(sessionTimestamp)) > 24 * 60 * 60 * 1000) {
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Error checking session validity:', error);
+    return false;
   }
 };
 
@@ -113,4 +160,5 @@ export default {
   getItem,
   removeItem,
   clear,
+  isSessionValid,
 };

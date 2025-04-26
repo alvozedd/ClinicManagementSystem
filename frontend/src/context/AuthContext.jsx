@@ -10,6 +10,27 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const initAuth = async () => {
+      // Check if user has explicitly logged out
+      const userLoggedOut = localStorage.getItem('user_logged_out') === 'true';
+
+      // If user has logged out, don't try to restore the session
+      if (userLoggedOut) {
+        console.log('User has explicitly logged out, not restoring session');
+        secureStorage.clear();
+        localStorage.removeItem('userInfo');
+        setLoading(false);
+        return;
+      }
+
+      // Check if session is valid
+      if (!secureStorage.isSessionValid()) {
+        console.log('Session is invalid or expired, not restoring session');
+        secureStorage.clear();
+        localStorage.removeItem('userInfo');
+        setLoading(false);
+        return;
+      }
+
       // Check if user is logged in - try secure storage first, then fallback to localStorage
       const secureUserInfo = secureStorage.getItem('userInfo');
       const legacyUserInfo = localStorage.getItem('userInfo');
@@ -71,7 +92,8 @@ export const AuthProvider = ({ children }) => {
                 console.error('Failed to refresh token on startup:', error);
                 // If refresh fails, clear user info
                 setUserInfo(null);
-                secureStorage.removeItem('userInfo');
+                secureStorage.clear();
+                localStorage.removeItem('user_logged_out');
               }
             } else {
               // Token is still valid
@@ -79,11 +101,13 @@ export const AuthProvider = ({ children }) => {
             }
           } catch (error) {
             console.error('Error checking token:', error);
-            setUserInfo(parsedUserInfo);
+            setUserInfo(null);
+            secureStorage.clear();
           }
         } else {
           // No token in user info
-          setUserInfo(parsedUserInfo);
+          setUserInfo(null);
+          secureStorage.clear();
         }
       }
 
@@ -94,6 +118,9 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = (data) => {
+    // Clear any previous logged out flag
+    localStorage.removeItem('user_logged_out');
+
     // Store the session ID separately
     if (data.sessionId) {
       secureStorage.setItem('sessionId', data.sessionId);
@@ -102,6 +129,8 @@ export const AuthProvider = ({ children }) => {
     setUserInfo(data);
     // Store in secure storage instead of localStorage
     secureStorage.setItem('userInfo', data);
+
+    console.log('User logged in successfully');
   };
 
   const logout = async () => {
@@ -115,19 +144,24 @@ export const AuthProvider = ({ children }) => {
       // Update state
       setUserInfo(null);
 
-      // Clear secure storage
-      secureStorage.removeItem('userInfo');
-      secureStorage.removeItem('sessionId');
+      // Clear all secure storage
+      secureStorage.clear();
 
       // Also clear localStorage in case there's any legacy data
       localStorage.removeItem('userInfo');
+
+      // Add a flag to indicate user has explicitly logged out
+      // This will prevent automatic login on page refresh
+      localStorage.setItem('user_logged_out', 'true');
+
+      console.log('User logged out successfully');
     } catch (error) {
       console.error('Error during logout:', error);
       // Even if server-side logout fails, clear local state
       setUserInfo(null);
-      secureStorage.removeItem('userInfo');
-      secureStorage.removeItem('sessionId');
+      secureStorage.clear();
       localStorage.removeItem('userInfo');
+      localStorage.setItem('user_logged_out', 'true');
     }
   };
 
