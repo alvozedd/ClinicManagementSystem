@@ -379,18 +379,21 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
               : 'border-transparent text-gray-500 hover:text-gray-700'
           }`}
         >
-          Appts
+          <span className="hidden md:inline">Appointments</span>
+          <span className="md:hidden">Appts</span>
         </button>
-        <button
-          onClick={() => setActiveTab('diagnoses')}
-          className={`py-2 px-4 font-medium text-sm border-b-2 -mb-px ${
-            activeTab === 'diagnoses'
-              ? 'border-blue-500 text-blue-600'
-              : 'border-transparent text-gray-500 hover:text-gray-700'
-          }`}
-        >
-          Diagnoses
-        </button>
+        {userRole === 'doctor' && (
+          <button
+            onClick={() => setActiveTab('diagnoses')}
+            className={`py-2 px-4 font-medium text-sm border-b-2 -mb-px ${
+              activeTab === 'diagnoses'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            Diagnoses
+          </button>
+        )}
         <button
           onClick={() => setActiveTab('overview')}
           className={`py-2 px-4 font-medium text-sm border-b-2 -mb-px ${
@@ -878,13 +881,14 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
             )}
           </div>
         </div>
-      ) : activeTab === 'diagnoses' ? (
+      ) : activeTab === 'diagnoses' && userRole === 'doctor' ? (
         <div className="p-1">
           <PatientDiagnosesTab
             patient={patient}
             appointments={appointments}
             onEditDiagnosis={handleEditDiagnosis}
             onDeleteDiagnosis={handleDeleteDiagnosis}
+            userRole={userRole}
           />
         </div>
       ) : activeTab === 'appointments' ? (

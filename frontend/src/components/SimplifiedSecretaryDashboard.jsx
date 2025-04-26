@@ -269,7 +269,10 @@ function SimplifiedSecretaryDashboard({
             }`}
           >
             <FaClipboardList className="h-6 w-6 mb-1" />
-            <span className="text-sm font-medium text-center">Appts</span>
+            <span className="text-sm font-medium text-center">
+              <span className="hidden md:inline">Appointments</span>
+              <span className="md:hidden">Appts</span>
+            </span>
           </button>
           <button
             onClick={() => setActiveTab('calendar')}
@@ -645,6 +648,20 @@ function SimplifiedSecretaryDashboard({
                       <div>
                         <div className="font-medium">{appointment.date} at {appointment.time}</div>
                         <div className="text-sm text-gray-600">{appointment.patientName} - {appointment.reason}</div>
+                        {appointment.createdBy && (
+                          <div className="flex items-center mt-1">
+                            <span className="text-gray-500 text-xs mr-1">Added by:</span>
+                            <span className={`px-2 py-0.5 rounded text-xs font-medium ${
+                              appointment.createdBy === 'doctor' ? 'bg-blue-100 text-blue-800' :
+                              appointment.createdBy === 'secretary' ? 'bg-green-100 text-green-800' :
+                              appointment.createdBy === 'admin' ? 'bg-gray-100 text-gray-800' :
+                              'bg-purple-100 text-purple-800'
+                            }`}>
+                              <FaUser className="inline mr-1" size={10} />
+                              {getCreatorLabel(appointment.createdBy)}
+                            </span>
+                          </div>
+                        )}
                       </div>
                       <div className="flex space-x-2">
                         <span className={`px-3 py-1 rounded-full text-sm font-medium ${
