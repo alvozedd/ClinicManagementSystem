@@ -181,6 +181,39 @@ app.post('/users/refresh-token', (req, res) => {
   });
 });
 
+// Patient routes
+app.get('/api/patients', (req, res) => {
+  console.log('GET /api/patients request received');
+  res.status(200).json([]);
+});
+
+app.get('/patients', (req, res) => {
+  console.log('GET /patients request received');
+  res.status(200).json([]);
+});
+
+// Appointment routes
+app.get('/api/appointments', (req, res) => {
+  console.log('GET /api/appointments request received');
+  res.status(200).json([]);
+});
+
+app.get('/appointments', (req, res) => {
+  console.log('GET /appointments request received');
+  res.status(200).json([]);
+});
+
+// Diagnosis routes
+app.get('/api/diagnoses', (req, res) => {
+  console.log('GET /api/diagnoses request received');
+  res.status(200).json([]);
+});
+
+app.get('/diagnoses', (req, res) => {
+  console.log('GET /diagnoses request received');
+  res.status(200).json([]);
+});
+
 // Catch-all route to log unmatched requests
 app.use((req, res, next) => {
   console.log(`Unmatched request: ${req.method} ${req.originalUrl}`);
