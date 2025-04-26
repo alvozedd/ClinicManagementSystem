@@ -67,16 +67,23 @@ const getDiagnosisByAppointmentId = asyncHandler(async (req, res) => {
 });
 
 // @desc    Get diagnoses by patient ID
-// @route   GET /api/diagnoses/patient/:id
+// @route   GET /api/patients/:id/diagnoses
 // @access  Private
 const getDiagnosesByPatientId = asyncHandler(async (req, res) => {
   // First, find all appointments for this patient
   const Appointment = require('../models/appointmentModel');
-  const appointments = await Appointment.find({ patient_id: req.params.id });
+  const patientId = req.params.id;
+
+  console.log(`Fetching diagnoses for patient ID: ${patientId}`);
+
+  const appointments = await Appointment.find({ patient_id: patientId });
 
   if (!appointments || appointments.length === 0) {
+    console.log(`No appointments found for patient ID: ${patientId}`);
     return res.json([]);
   }
+
+  console.log(`Found ${appointments.length} appointments for patient ID: ${patientId}`);
 
   // Get all appointment IDs
   const appointmentIds = appointments.map(app => app._id);
@@ -95,7 +102,8 @@ const getDiagnosesByPatientId = asyncHandler(async (req, res) => {
   const diagnoses = await Diagnosis.find(filter)
     .populate({
       path: 'appointment_id',
-      select: 'appointment_date status type reason',
+      match: { patient_id: patientId }, // Extra check to ensure we only get diagnoses for this patient
+      select: 'appointment_date status type reason patient_id',
       populate: {
         path: 'patient_id',
         select: 'name'
@@ -103,7 +111,12 @@ const getDiagnosesByPatientId = asyncHandler(async (req, res) => {
     })
     .sort({ createdAt: -1 });
 
-  res.json(diagnoses);
+  // Filter out any diagnoses where the appointment_id is null (meaning it didn't match our patient)
+  const filteredDiagnoses = diagnoses.filter(diagnosis => diagnosis.appointment_id !== null);
+
+  console.log(`Found ${filteredDiagnoses.length} diagnoses for patient ID: ${patientId}`);
+
+  res.json(filteredDiagnoses);
 });
 
 // @desc    Get diagnosis by ID

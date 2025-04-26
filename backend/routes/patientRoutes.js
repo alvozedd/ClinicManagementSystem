@@ -7,6 +7,7 @@ const {
   updatePatient,
   deletePatient,
 } = require('../controllers/patientController');
+const { getDiagnosesByPatientId } = require('../controllers/diagnosisController');
 const { protect, optionalAuth, admin, secretary, doctor } = require('../middleware/authMiddleware');
 const { validatePatientCreation } = require('../middleware/validationMiddleware');
 const { publicEndpointLimiter, apiLimiter } = require('../middleware/rateLimitMiddleware');
@@ -38,5 +39,8 @@ router
   .get(protect, getPatientById)
   .put(protect, doctorOrSecretary, validatePatientCreation, updatePatient)
   .delete(protect, doctorOrSecretary, deletePatient);
+
+// Route for getting diagnoses by patient ID
+router.route('/:id/diagnoses').get(protect, getDiagnosesByPatientId);
 
 module.exports = router;
