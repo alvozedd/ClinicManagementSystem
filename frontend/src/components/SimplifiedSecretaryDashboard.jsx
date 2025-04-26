@@ -3,12 +3,13 @@ import { Link } from 'react-router-dom';
 import { getTodaysAppointments } from '../data/mockData';
 import PatientSearch from './PatientSearch';
 // Using a simplified version for now
-import SecretaryPatientView from './BasicPatientView';
+import SecretaryPatientView from './SimplifiedPatientView';
 import AddPatientForm from './AddPatientForm';
 import SecretaryCalendarView from './SecretaryCalendarView';
 import AppointmentManagementModal from './AppointmentManagementModal';
 import PatientSearchAppointmentModal from './PatientSearchAppointmentModal';
 import PatientNavigator from './PatientNavigator';
+import ActionButtons from './ActionButtons';
 import { FaCalendarAlt, FaUserTie, FaClipboardList } from 'react-icons/fa';
 import { getTimeBasedGreeting, getFormattedDate, identifyAppointmentsNeedingDiagnosis } from '../utils/timeUtils';
 import { transformAppointmentFromBackend } from '../utils/dataTransformers';
@@ -28,6 +29,9 @@ function SimplifiedSecretaryDashboard({
   // Debug props
   console.log('Secretary Dashboard - username:', username);
   console.log('Secretary Dashboard - userInfo:', userInfo);
+
+  // Set global user role for patient view component
+  window.userRole = 'secretary';
   const [activeTab, setActiveTab] = useState('patient-management');
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [showAddPatientForm, setShowAddPatientForm] = useState(false);
@@ -168,24 +172,24 @@ function SimplifiedSecretaryDashboard({
       <div className="bg-gradient-to-r from-blue-600 to-blue-500 rounded-md p-3 mb-3 text-white shadow-md relative">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center relative z-10 mb-3">
           <div>
-            <h1 className="text-lg font-bold mb-0.5 leading-tight">{getTimeBasedGreeting()}, {username}</h1>
+            <h1 className="text-base md:text-lg lg:text-xl font-semibold mb-0.5 leading-tight">{getTimeBasedGreeting()}, {username}</h1>
             <p className="text-blue-100 text-xs">{getFormattedDate()}</p>
           </div>
           <div className="flex flex-wrap gap-2 mt-2 md:mt-0">
             <div className="bg-white bg-opacity-20 rounded-md p-1.5 backdrop-blur-sm">
-              <div className="font-bold text-base leading-tight">{todaysAppointments.length}</div>
+              <div className="font-semibold text-sm leading-tight">{todaysAppointments.length}</div>
               <div className="text-xs">Today's Appointments</div>
             </div>
             <div className="bg-white bg-opacity-20 rounded-md p-1.5 backdrop-blur-sm">
-              <div className="font-bold text-base leading-tight">{pendingAppointments}</div>
+              <div className="font-semibold text-sm leading-tight">{pendingAppointments}</div>
               <div className="text-xs">Pending Appointments</div>
             </div>
             <div className="bg-white bg-opacity-20 rounded-md p-1.5 backdrop-blur-sm">
-              <div className="font-bold text-base leading-tight">{needsDiagnosisCount}</div>
+              <div className="font-semibold text-sm leading-tight">{needsDiagnosisCount}</div>
               <div className="text-xs">Needs Diagnosis</div>
             </div>
             <div className="bg-white bg-opacity-20 rounded-md p-1.5 backdrop-blur-sm">
-              <div className="font-bold text-base leading-tight">{totalPatients}</div>
+              <div className="font-semibold text-sm leading-tight">{totalPatients}</div>
               <div className="text-xs">Total Patients</div>
             </div>
           </div>
@@ -194,7 +198,7 @@ function SimplifiedSecretaryDashboard({
         {/* Upcoming Appointments Section */}
         {upcomingAppointments.length > 0 && (
           <div className="mt-2">
-            <h3 className="text-sm font-semibold mb-2">Upcoming Appointments</h3>
+            <h3 className="text-xs font-semibold mb-2">Upcoming Appointments</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
               {upcomingAppointments.slice(0, 3).map((appointment) => (
                 <div
@@ -207,7 +211,7 @@ function SimplifiedSecretaryDashboard({
                     }
                   }}
                 >
-                  <div className="font-semibold text-sm">{appointment.patientName}</div>
+                  <div className="font-medium text-xs">{appointment.patientName}</div>
                   <div className="text-xs flex justify-between">
                     <span>{appointment.date}</span>
                     <span>{appointment.time}</span>
@@ -230,54 +234,47 @@ function SimplifiedSecretaryDashboard({
         )}
       </div>
 
-      {/* Compact Tab Navigation */}
-      <div className="bg-white rounded-md shadow-sm mb-3 p-0.5">
-        <div className="flex flex-wrap">
+      {/* Enhanced Tab Navigation - Mobile Optimized */}
+      <div className="bg-white rounded-md shadow-sm mb-4 p-2">
+        <div className="grid grid-cols-3 gap-1">
           <button
             onClick={() => setActiveTab('patient-management')}
-            className={`flex-1 py-1.5 px-2 rounded-md font-medium text-sm transition-all duration-200 flex justify-center items-center ${
+            className={`py-3 px-2 rounded-md flex flex-col justify-center items-center transition-all ${
               activeTab === 'patient-management'
-                ? 'bg-blue-100 text-blue-700'
+                ? 'bg-blue-100 text-blue-700 shadow-sm'
                 : 'text-gray-600 hover:bg-gray-100'
             }`}
           >
-            <div className="flex items-center">
-              <FaUserTie className="h-3.5 w-3.5 mr-1" />
-              <span className="hidden sm:inline">Patients</span>
-              <span className="sm:hidden">Patients</span>
-            </div>
+            <FaUserTie className="h-6 w-6 mb-1" />
+            <span className="text-sm font-medium text-center">Patients</span>
           </button>
           <button
             onClick={() => setActiveTab('appointments')}
-            className={`flex-1 py-1.5 px-2 rounded-md font-medium text-sm transition-all duration-200 flex justify-center items-center ${
+            className={`py-3 px-2 rounded-md flex flex-col justify-center items-center transition-all ${
               activeTab === 'appointments'
-                ? 'bg-blue-100 text-blue-700'
+                ? 'bg-blue-100 text-blue-700 shadow-sm'
                 : 'text-gray-600 hover:bg-gray-100'
             }`}
           >
-            <div className="flex items-center">
-              <FaClipboardList className="h-3.5 w-3.5 mr-1" />
-              <span>Appointments</span>
-            </div>
+            <FaClipboardList className="h-6 w-6 mb-1" />
+            <span className="text-sm font-medium text-center">Appts</span>
           </button>
           <button
             onClick={() => setActiveTab('calendar')}
-            className={`flex-1 py-1.5 px-2 rounded-md font-medium text-sm transition-all duration-200 flex justify-center items-center ${
+            className={`py-3 px-2 rounded-md flex flex-col justify-center items-center transition-all ${
               activeTab === 'calendar'
-                ? 'bg-blue-100 text-blue-700'
+                ? 'bg-blue-100 text-blue-700 shadow-sm'
                 : 'text-gray-600 hover:bg-gray-100'
             }`}
           >
-            <div className="flex items-center">
-              <FaCalendarAlt className="h-3.5 w-3.5 mr-1" />
-              <span>Calendar</span>
-            </div>
+            <FaCalendarAlt className="h-6 w-6 mb-1" />
+            <span className="text-sm font-medium text-center">Calendar</span>
           </button>
         </div>
       </div>
 
-      {/* Content Area - More Compact */}
-      <div className="bg-white rounded-md shadow-sm p-2">
+      {/* Content Area - Enhanced Styling */}
+      <div className="bg-white rounded-md shadow-sm p-4">
         {activeTab === 'calendar' ? (
           <SecretaryCalendarView
             appointments={appointments}
@@ -309,96 +306,117 @@ function SimplifiedSecretaryDashboard({
                   <button
                     onClick={() => setShowAddAppointmentForm(true)}
                     className="add-appointment-btn"
+                    aria-label="Add Appointment"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 md:mr-1" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
                     </svg>
-                    Add Appointment
+                    <span className="hidden md:inline">Add Appointment</span>
                   </button>
                   <div className="appointment-count">
-                    {todaysAppointments.length} Appointments
+                    <span className="hidden md:inline">{todaysAppointments.length} Appointments</span>
+                    <span className="md:hidden">{todaysAppointments.length}</span>
                   </div>
                 </div>
               </div>
 
-              {/* Time period filter tabs */}
-              <div className="flex space-x-2 mb-4 overflow-x-auto pb-2">
-                <button
-                  onClick={() => setTimeFilter('all')}
-                  className={`px-3 py-1 rounded-full text-sm font-medium ${timeFilter === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}
-                >
-                  All Time
-                </button>
-                <button
-                  onClick={() => setTimeFilter('today')}
-                  className={`px-3 py-1 rounded-full text-sm font-medium ${timeFilter === 'today' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}
-                >
-                  Today
-                </button>
-                <button
-                  onClick={() => setTimeFilter('tomorrow')}
-                  className={`px-3 py-1 rounded-full text-sm font-medium ${timeFilter === 'tomorrow' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}
-                >
-                  Tomorrow
-                </button>
-                <button
-                  onClick={() => setTimeFilter('thisWeek')}
-                  className={`px-3 py-1 rounded-full text-sm font-medium ${timeFilter === 'thisWeek' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}
-                >
-                  This Week
-                </button>
-                <button
-                  onClick={() => setTimeFilter('nextWeek')}
-                  className={`px-3 py-1 rounded-full text-sm font-medium ${timeFilter === 'nextWeek' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}
-                >
-                  Next Week
-                </button>
-                <button
-                  onClick={() => setTimeFilter('thisMonth')}
-                  className={`px-3 py-1 rounded-full text-sm font-medium ${timeFilter === 'thisMonth' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}
-                >
-                  This Month
-                </button>
-              </div>
+              {/* Compact Filter Section */}
+              <div className="mb-4 border rounded-lg p-2 bg-gray-50">
+                <div className="mb-2">
+                  <h3 className="text-sm font-semibold text-gray-700 mb-1">Time Period:</h3>
+                  <div className="flex flex-wrap gap-1">
+                    <button
+                      onClick={() => setTimeFilter('all')}
+                      className={`px-2 py-1 rounded text-xs font-medium transition-all ${timeFilter === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'}`}
+                      aria-label="Show all appointments"
+                    >
+                      All
+                    </button>
+                    <button
+                      onClick={() => setTimeFilter('today')}
+                      className={`px-2 py-1 rounded text-xs font-medium transition-all ${timeFilter === 'today' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'}`}
+                      aria-label="Show today's appointments"
+                    >
+                      Today
+                    </button>
+                    <button
+                      onClick={() => setTimeFilter('tomorrow')}
+                      className={`px-2 py-1 rounded text-xs font-medium transition-all ${timeFilter === 'tomorrow' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'}`}
+                      aria-label="Show tomorrow's appointments"
+                    >
+                      Tmrw
+                    </button>
+                    <button
+                      onClick={() => setTimeFilter('thisWeek')}
+                      className={`px-2 py-1 rounded text-xs font-medium transition-all ${timeFilter === 'thisWeek' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'}`}
+                      aria-label="Show this week's appointments"
+                    >
+                      Week
+                    </button>
+                    <button
+                      onClick={() => setTimeFilter('nextWeek')}
+                      className={`px-2 py-1 rounded text-xs font-medium transition-all ${timeFilter === 'nextWeek' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'}`}
+                      aria-label="Show next week's appointments"
+                    >
+                      Next
+                    </button>
+                    <button
+                      onClick={() => setTimeFilter('thisMonth')}
+                      className={`px-2 py-1 rounded text-xs font-medium transition-all ${timeFilter === 'thisMonth' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'}`}
+                      aria-label="Show this month's appointments"
+                    >
+                      Month
+                    </button>
+                  </div>
+                </div>
 
-              {/* Status filter tabs */}
-              <div className="flex space-x-2 mb-4 overflow-x-auto pb-2">
-                <button
-                  onClick={() => setStatusFilter('all')}
-                  className={`px-3 py-1 rounded-full text-sm font-medium ${statusFilter === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}
-                >
-                  All
-                </button>
-                <button
-                  onClick={() => setStatusFilter('Pending')}
-                  className={`px-3 py-1 rounded-full text-sm font-medium ${statusFilter === 'Pending' ? 'bg-yellow-500 text-white' : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'}`}
-                >
-                  Pending
-                </button>
-                <button
-                  onClick={() => setStatusFilter('Scheduled')}
-                  className={`px-3 py-1 rounded-full text-sm font-medium ${statusFilter === 'Scheduled' ? 'bg-green-600 text-white' : 'bg-green-100 text-green-800 hover:bg-green-200'}`}
-                >
-                  Scheduled
-                </button>
-                <button
-                  onClick={() => setStatusFilter('Completed')}
-                  className={`px-3 py-1 rounded-full text-sm font-medium ${statusFilter === 'Completed' ? 'bg-blue-600 text-white' : 'bg-blue-100 text-blue-800 hover:bg-blue-200'}`}
-                >
-                  Completed
-                </button>
-                <button
-                  onClick={() => setStatusFilter('Cancelled')}
-                  className={`px-3 py-1 rounded-full text-sm font-medium ${statusFilter === 'Cancelled' ? 'bg-red-600 text-white' : 'bg-red-100 text-red-800 hover:bg-red-200'}`}
-                >
-                  Cancelled
-                </button>
-                <button
-                  onClick={() => setStatusFilter('Needs Diagnosis')}
-                  className={`px-3 py-1 rounded-full text-sm font-medium ${statusFilter === 'Needs Diagnosis' ? 'bg-purple-600 text-white' : 'bg-purple-100 text-purple-800 hover:bg-purple-200'}`}
-                >
-                  Needs Diagnosis
-                </button>
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-700 mb-1">Status:</h3>
+                  <div className="flex flex-wrap gap-1">
+                    <button
+                      onClick={() => setStatusFilter('all')}
+                      className={`px-2 py-1 rounded text-xs font-medium transition-all ${statusFilter === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'}`}
+                      aria-label="Show all statuses"
+                    >
+                      All
+                    </button>
+                    <button
+                      onClick={() => setStatusFilter('Pending')}
+                      className={`px-2 py-1 rounded text-xs font-medium transition-all ${statusFilter === 'Pending' ? 'bg-yellow-500 text-white' : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'}`}
+                      aria-label="Show pending appointments"
+                    >
+                      Pending
+                    </button>
+                    <button
+                      onClick={() => setStatusFilter('Scheduled')}
+                      className={`px-2 py-1 rounded text-xs font-medium transition-all ${statusFilter === 'Scheduled' ? 'bg-green-600 text-white' : 'bg-green-100 text-green-800 hover:bg-green-200'}`}
+                      aria-label="Show scheduled appointments"
+                    >
+                      Scheduled
+                    </button>
+                    <button
+                      onClick={() => setStatusFilter('Completed')}
+                      className={`px-2 py-1 rounded text-xs font-medium transition-all ${statusFilter === 'Completed' ? 'bg-blue-600 text-white' : 'bg-blue-100 text-blue-800 hover:bg-blue-200'}`}
+                      aria-label="Show completed appointments"
+                    >
+                      Completed
+                    </button>
+                    <button
+                      onClick={() => setStatusFilter('Cancelled')}
+                      className={`px-2 py-1 rounded text-xs font-medium transition-all ${statusFilter === 'Cancelled' ? 'bg-red-600 text-white' : 'bg-red-100 text-red-800 hover:bg-red-200'}`}
+                      aria-label="Show cancelled appointments"
+                    >
+                      Cancelled
+                    </button>
+                    <button
+                      onClick={() => setStatusFilter('Needs Diagnosis')}
+                      className={`px-2 py-1 rounded text-xs font-medium transition-all ${statusFilter === 'Needs Diagnosis' ? 'bg-purple-600 text-white' : 'bg-purple-100 text-purple-800 hover:bg-purple-200'}`}
+                      aria-label="Show appointments needing diagnosis"
+                    >
+                      Needs Diag
+                    </button>
+                  </div>
+                </div>
               </div>
 
               {/* Filter appointments based on selected time period and status */}
@@ -572,8 +590,14 @@ function SimplifiedSecretaryDashboard({
                 <button
                   onClick={() => setActiveTab('calendar')}
                   className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-md text-sm font-medium"
+                  aria-label="View Calendar"
                 >
-                  View Calendar
+                  <span className="hidden md:inline">View Calendar</span>
+                  <span className="md:hidden">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  </span>
                 </button>
               </div>
 
@@ -719,53 +743,27 @@ function SimplifiedSecretaryDashboard({
               </>
             ) : (
               <div>
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-2 gap-2">
-                  <div>
-                    <h2 className="text-base font-bold text-gray-800 mb-0.5">Patient Management</h2>
-                    <p className="text-gray-600 text-xs">Search for patients or add a new patient record</p>
-                  </div>
-                  <button
-                    onClick={() => setShowAddPatientForm(true)}
-                    className="bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded text-xs font-medium flex items-center shadow-sm transition duration-200"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
-                    </svg>
-                    Add New Patient
-                  </button>
-                </div>
-
-                <div className="bg-gray-50 p-2 rounded border border-gray-200 mb-2">
-                  <div className="mb-1">
-                    <h3 className="text-xs font-semibold text-gray-800 mb-0.5 flex items-center">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1 text-blue-600" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
-                      </svg>
-                      Patient Search
-                    </h3>
-                    <p className="text-gray-600 text-[10px]">Search for a patient by name, ID, or phone number</p>
-                  </div>
-                  <PatientSearch
-                    patients={patients}
-                    onSelectPatient={setSelectedPatient}
-                  />
-                </div>
+                <PatientSearch
+                  patients={patients}
+                  onSelectPatient={setSelectedPatient}
+                  onAddPatient={() => setShowAddPatientForm(true)}
+                />
 
                 {/* Recent Patients Quick Access */}
                 <div>
-                  <h3 className="text-xs font-semibold text-gray-800 mb-1">Recent Patients</h3>
+                  <h3 className="text-sm font-semibold text-gray-800 mb-1">Recent Patients</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1">
                     {patients.slice(0, 6).map(patient => (
                       <div
                         key={patient.id}
                         onClick={() => setSelectedPatient(patient)}
-                        className="bg-white p-1 rounded border border-gray-200 hover:border-blue-300 hover:shadow-sm transition-all duration-200 cursor-pointer"
+                        className="bg-white p-2 rounded border border-gray-200 hover:border-blue-300 hover:shadow-sm transition-all duration-200 cursor-pointer"
                       >
-                        <div className="font-medium text-xs text-blue-700">{patient.firstName} {patient.lastName}</div>
-                        <div className="text-[10px] text-gray-600">{patient.gender} • {patient.phone}</div>
+                        <div className="font-medium text-sm text-blue-700">{patient.firstName} {patient.lastName}</div>
+                        <div className="text-xs text-gray-600">{patient.gender} • {patient.phone}</div>
                         {patient.createdBy && (
-                          <div className="text-[8px] text-gray-500 flex items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-2 w-2 mr-0.5" viewBox="0 0 20 20" fill="currentColor">
+                          <div className="text-xs text-gray-500 flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-0.5" viewBox="0 0 20 20" fill="currentColor">
                               <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
                             </svg>
                             By: <span className="font-medium ml-0.5">
@@ -777,13 +775,13 @@ function SimplifiedSecretaryDashboard({
                           </div>
                         )}
                         <button
-                          className="mt-0.5 text-blue-600 hover:text-blue-800 text-[10px] font-medium flex items-center"
+                          className="mt-1 text-blue-600 hover:text-blue-800 text-xs font-medium flex items-center"
                           onClick={(e) => {
                             e.stopPropagation();
                             setSelectedPatient(patient);
                           }}
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-2 w-2 mr-0.5" viewBox="0 0 20 20" fill="currentColor">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-0.5" viewBox="0 0 20 20" fill="currentColor">
                             <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
                             <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
                           </svg>
