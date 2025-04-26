@@ -23,6 +23,12 @@ const corsMiddleware = (req, res, next) => {
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
     res.header('Access-Control-Allow-Credentials', 'true');
+
+    // Log CORS headers for debugging
+    console.log('CORS headers set:', {
+      origin,
+      allowCredentials: 'true'
+    });
   }
 
   // Handle preflight requests

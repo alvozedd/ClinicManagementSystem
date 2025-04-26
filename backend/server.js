@@ -6,8 +6,8 @@ const helmet = require('helmet');
 const connectDB = require('./config/db');
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 const { enforceHttps, addSecurityHeaders, secureCoookieSettings } = require('./middleware/securityMiddleware');
-// Using simplified CSRF middleware to avoid path-to-regexp errors
-const { handleCsrfError, exemptCsrf, provideCsrfToken } = require('./middleware/simpleCsrfMiddleware');
+// Completely removing CSRF middleware to avoid path-to-regexp errors
+// const { handleCsrfError, exemptCsrf, provideCsrfToken } = require('./middleware/simpleCsrfMiddleware');
 const { addRequestId } = require('./middleware/requestIdMiddleware');
 const { conditionalRequestLogger } = require('./middleware/requestLoggingMiddleware');
 const corsMiddleware = require('./middleware/corsMiddleware');
@@ -70,11 +70,11 @@ app.use(express.json());
 // Parse cookies
 app.use(cookieParser());
 
-// Using simplified CSRF middleware to avoid path-to-regexp errors
-app.use(exemptCsrf);
-app.use(handleCsrfError);
-app.use(provideCsrfToken);
-console.log('Using simplified CSRF middleware');
+// Completely removed CSRF middleware to avoid path-to-regexp errors
+// app.use(exemptCsrf);
+// app.use(handleCsrfError);
+// app.use(provideCsrfToken);
+console.log('CSRF middleware removed to avoid path-to-regexp errors');
 
 // API Routes section
 
