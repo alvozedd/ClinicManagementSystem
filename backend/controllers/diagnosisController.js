@@ -66,6 +66,46 @@ const getDiagnosisByAppointmentId = asyncHandler(async (req, res) => {
   }
 });
 
+// @desc    Get diagnoses by patient ID
+// @route   GET /api/diagnoses/patient/:id
+// @access  Private
+const getDiagnosesByPatientId = asyncHandler(async (req, res) => {
+  // First, find all appointments for this patient
+  const Appointment = require('../models/appointmentModel');
+  const appointments = await Appointment.find({ patient_id: req.params.id });
+
+  if (!appointments || appointments.length === 0) {
+    return res.json([]);
+  }
+
+  // Get all appointment IDs
+  const appointmentIds = appointments.map(app => app._id);
+
+  // Create filter for diagnoses
+  const filter = {
+    appointment_id: { $in: appointmentIds }
+  };
+
+  // If user is a doctor, only return diagnoses created by them
+  if (req.user.role === 'doctor') {
+    filter.created_by_user_id = req.user._id;
+  }
+
+  // Find all diagnoses for these appointments
+  const diagnoses = await Diagnosis.find(filter)
+    .populate({
+      path: 'appointment_id',
+      select: 'appointment_date status type reason',
+      populate: {
+        path: 'patient_id',
+        select: 'name'
+      }
+    })
+    .sort({ createdAt: -1 });
+
+  res.json(diagnoses);
+});
+
 // @desc    Get diagnosis by ID
 // @route   GET /api/diagnoses/:id
 // @access  Private/Doctor
@@ -135,6 +175,7 @@ module.exports = {
   createDiagnosis,
   getDiagnoses,
   getDiagnosisByAppointmentId,
+  getDiagnosesByPatientId,
   getDiagnosisById,
   updateDiagnosis,
   deleteDiagnosis,

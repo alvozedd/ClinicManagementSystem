@@ -84,13 +84,245 @@ app.use('/api/patients', patientRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/diagnoses', diagnosisRoutes);
 
-// Create a special route just for login without the /api prefix
+// Create compatibility routes without the /api prefix
+// Login route
 app.post('/users/login', (req, res) => {
   console.log('Received login request at /users/login, forwarding to controller directly');
   // Import the controller directly
   const { authUser } = require('./controllers/userController');
   // Call the controller function directly
   authUser(req, res);
+});
+
+// Patient routes
+app.get('/patients', (req, res) => {
+  console.log('Received GET request at /patients, forwarding to controller directly');
+  // Import the controller directly
+  const { getPatients } = require('./controllers/patientController');
+  // Add authentication middleware manually
+  const { protect } = require('./middleware/authMiddleware');
+  // Call middleware then controller
+  protect(req, res, () => getPatients(req, res));
+});
+
+app.get('/patients/:id', (req, res) => {
+  console.log('Received GET request at /patients/:id, forwarding to controller directly');
+  // Import the controller directly
+  const { getPatientById } = require('./controllers/patientController');
+  // Add authentication middleware manually
+  const { protect } = require('./middleware/authMiddleware');
+  // Call middleware then controller
+  protect(req, res, () => getPatientById(req, res));
+});
+
+app.post('/patients', (req, res) => {
+  console.log('Received POST request at /patients, forwarding to controller directly');
+  // Import the controller directly
+  const { createPatient } = require('./controllers/patientController');
+  // Add authentication middleware manually
+  const { optionalAuth } = require('./middleware/authMiddleware');
+  // Call middleware then controller
+  optionalAuth(req, res, () => createPatient(req, res));
+});
+
+app.put('/patients/:id', (req, res) => {
+  console.log('Received PUT request at /patients/:id, forwarding to controller directly');
+  // Import the controller directly
+  const { updatePatient } = require('./controllers/patientController');
+  // Add authentication middleware manually
+  const { protect } = require('./middleware/authMiddleware');
+  // Call middleware then controller
+  protect(req, res, () => {
+    // Check if user is doctor or secretary
+    if (req.user && (req.user.role === 'doctor' || req.user.role === 'secretary' || req.user.role === 'admin')) {
+      updatePatient(req, res);
+    } else {
+      res.status(403);
+      throw new Error('Not authorized as a doctor or secretary');
+    }
+  });
+});
+
+app.delete('/patients/:id', (req, res) => {
+  console.log('Received DELETE request at /patients/:id, forwarding to controller directly');
+  // Import the controller directly
+  const { deletePatient } = require('./controllers/patientController');
+  // Add authentication middleware manually
+  const { protect } = require('./middleware/authMiddleware');
+  // Call middleware then controller
+  protect(req, res, () => {
+    // Check if user is doctor or secretary
+    if (req.user && (req.user.role === 'doctor' || req.user.role === 'secretary' || req.user.role === 'admin')) {
+      deletePatient(req, res);
+    } else {
+      res.status(403);
+      throw new Error('Not authorized as a doctor or secretary');
+    }
+  });
+});
+
+// Appointment routes
+app.get('/appointments', (req, res) => {
+  console.log('Received GET request at /appointments, forwarding to controller directly');
+  // Import the controller directly
+  const { getAppointments } = require('./controllers/appointmentController');
+  // Add authentication middleware manually
+  const { protect } = require('./middleware/authMiddleware');
+  // Call middleware then controller
+  protect(req, res, () => getAppointments(req, res));
+});
+
+// Get appointments by patient ID
+app.get('/patients/:id/appointments', (req, res) => {
+  console.log('Received GET request at /patients/:id/appointments, forwarding to controller directly');
+  // Import the controller directly
+  const { getAppointmentsByPatientId } = require('./controllers/appointmentController');
+  // Add authentication middleware manually
+  const { protect } = require('./middleware/authMiddleware');
+  // Call middleware then controller
+  protect(req, res, () => getAppointmentsByPatientId(req, res));
+});
+
+app.post('/appointments', (req, res) => {
+  console.log('Received POST request at /appointments, forwarding to controller directly');
+  // Import the controller directly
+  const { createAppointment } = require('./controllers/appointmentController');
+  // Add authentication middleware manually
+  const { optionalAuth } = require('./middleware/authMiddleware');
+  // Call middleware then controller
+  optionalAuth(req, res, () => createAppointment(req, res));
+});
+
+app.get('/appointments/:id', (req, res) => {
+  console.log('Received GET request at /appointments/:id, forwarding to controller directly');
+  // Import the controller directly
+  const { getAppointmentById } = require('./controllers/appointmentController');
+  // Add authentication middleware manually
+  const { protect } = require('./middleware/authMiddleware');
+  // Call middleware then controller
+  protect(req, res, () => getAppointmentById(req, res));
+});
+
+app.put('/appointments/:id', (req, res) => {
+  console.log('Received PUT request at /appointments/:id, forwarding to controller directly');
+  // Import the controller directly
+  const { updateAppointment } = require('./controllers/appointmentController');
+  // Add authentication middleware manually
+  const { protect } = require('./middleware/authMiddleware');
+  // Call middleware then controller
+  protect(req, res, () => {
+    // Check if user is doctor or secretary
+    if (req.user && (req.user.role === 'doctor' || req.user.role === 'secretary' || req.user.role === 'admin')) {
+      updateAppointment(req, res);
+    } else {
+      res.status(403);
+      throw new Error('Not authorized as a doctor or secretary');
+    }
+  });
+});
+
+app.delete('/appointments/:id', (req, res) => {
+  console.log('Received DELETE request at /appointments/:id, forwarding to controller directly');
+  // Import the controller directly
+  const { deleteAppointment } = require('./controllers/appointmentController');
+  // Add authentication middleware manually
+  const { protect } = require('./middleware/authMiddleware');
+  // Call middleware then controller
+  protect(req, res, () => {
+    // Check if user is doctor or secretary
+    if (req.user && (req.user.role === 'doctor' || req.user.role === 'secretary' || req.user.role === 'admin')) {
+      deleteAppointment(req, res);
+    } else {
+      res.status(403);
+      throw new Error('Not authorized as a doctor or secretary');
+    }
+  });
+});
+
+// Diagnosis routes
+app.get('/diagnoses', (req, res) => {
+  console.log('Received GET request at /diagnoses, forwarding to controller directly');
+  // Import the controller directly
+  const { getDiagnoses } = require('./controllers/diagnosisController');
+  // Add authentication middleware manually
+  const { protect } = require('./middleware/authMiddleware');
+  // Call middleware then controller
+  protect(req, res, () => getDiagnoses(req, res));
+});
+
+// Get diagnoses by patient ID
+app.get('/patients/:id/diagnoses', (req, res) => {
+  console.log('Received GET request at /patients/:id/diagnoses, forwarding to controller directly');
+  // Import the controller directly
+  const { getDiagnosesByPatientId } = require('./controllers/diagnosisController');
+  // Add authentication middleware manually
+  const { protect } = require('./middleware/authMiddleware');
+  // Call middleware then controller
+  protect(req, res, () => getDiagnosesByPatientId(req, res));
+});
+
+app.post('/diagnoses', (req, res) => {
+  console.log('Received POST request at /diagnoses, forwarding to controller directly');
+  // Import the controller directly
+  const { createDiagnosis } = require('./controllers/diagnosisController');
+  // Add authentication middleware manually
+  const { protect } = require('./middleware/authMiddleware');
+  // Call middleware then controller
+  protect(req, res, () => {
+    // Only doctors can create diagnoses
+    if (req.user && (req.user.role === 'doctor' || req.user.role === 'admin')) {
+      createDiagnosis(req, res);
+    } else {
+      res.status(403);
+      throw new Error('Not authorized as a doctor');
+    }
+  });
+});
+
+app.get('/diagnoses/:id', (req, res) => {
+  console.log('Received GET request at /diagnoses/:id, forwarding to controller directly');
+  // Import the controller directly
+  const { getDiagnosisById } = require('./controllers/diagnosisController');
+  // Add authentication middleware manually
+  const { protect } = require('./middleware/authMiddleware');
+  // Call middleware then controller
+  protect(req, res, () => getDiagnosisById(req, res));
+});
+
+app.put('/diagnoses/:id', (req, res) => {
+  console.log('Received PUT request at /diagnoses/:id, forwarding to controller directly');
+  // Import the controller directly
+  const { updateDiagnosis } = require('./controllers/diagnosisController');
+  // Add authentication middleware manually
+  const { protect } = require('./middleware/authMiddleware');
+  // Call middleware then controller
+  protect(req, res, () => {
+    // Only doctors can update diagnoses
+    if (req.user && (req.user.role === 'doctor' || req.user.role === 'admin')) {
+      updateDiagnosis(req, res);
+    } else {
+      res.status(403);
+      throw new Error('Not authorized as a doctor');
+    }
+  });
+});
+
+app.delete('/diagnoses/:id', (req, res) => {
+  console.log('Received DELETE request at /diagnoses/:id, forwarding to controller directly');
+  // Import the controller directly
+  const { deleteDiagnosis } = require('./controllers/diagnosisController');
+  // Add authentication middleware manually
+  const { protect } = require('./middleware/authMiddleware');
+  // Call middleware then controller
+  protect(req, res, () => {
+    // Only doctors can delete diagnoses
+    if (req.user && (req.user.role === 'doctor' || req.user.role === 'admin')) {
+      deleteDiagnosis(req, res);
+    } else {
+      res.status(403);
+      throw new Error('Not authorized as a doctor');
+    }
+  });
 });
 
 // Root route

@@ -4,6 +4,7 @@ const {
   createDiagnosis,
   getDiagnoses,
   getDiagnosisByAppointmentId,
+  getDiagnosesByPatientId,
   getDiagnosisById,
   updateDiagnosis,
   deleteDiagnosis,
@@ -13,6 +14,7 @@ const { validateDiagnosisCreation } = require('../middleware/validationMiddlewar
 
 router.route('/').post(protect, doctor, validateDiagnosisCreation, createDiagnosis).get(protect, doctor, getDiagnoses);
 router.route('/appointment/:id').get(protect, doctor, getDiagnosisByAppointmentId);
+router.route('/patient/:id').get(protect, getDiagnosesByPatientId);
 router
   .route('/:id')
   .get(protect, doctor, getDiagnosisById)
