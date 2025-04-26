@@ -392,6 +392,17 @@ const apiService = {
     return handleResponse(response);
   },
 
+  getDiagnosesByPatientId: async (patientId) => {
+    const response = await fetch(`${API_URL}/patients/${patientId}/diagnoses`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        ...authHeader(),
+      },
+    });
+    return handleResponse(response);
+  },
+
   createDiagnosis: async (diagnosisData) => {
     const response = await fetch(`${API_URL}/diagnoses`, {
       method: 'POST',

@@ -15,7 +15,51 @@ function PatientDiagnosesTab({ patient, appointments, onEditDiagnosis, onDeleteD
 
       setLoading(true);
       try {
-        // Create a flattened array of all diagnoses across all appointments
+        // Try to get diagnoses directly by patient ID first (new method)
+        try {
+          console.log('Fetching diagnoses for patient:', patient._id);
+          const patientId = patient._id || patient.id;
+          const diagnoses = await apiService.getDiagnosesByPatientId(patientId);
+
+          if (diagnoses && diagnoses.length > 0) {
+            console.log('Found diagnoses using patient ID method:', diagnoses.length);
+
+            // Process the diagnoses
+            const diagnosesArray = diagnoses.map(diagnosis => {
+              const appointment = diagnosis.appointment_id;
+
+              // Parse the diagnosis_text if it's a JSON string
+              let parsedDiagnosis = diagnosis.diagnosis_text;
+              try {
+                parsedDiagnosis = JSON.parse(diagnosis.diagnosis_text);
+              } catch (e) {
+                // If it's not valid JSON, keep the original text
+              }
+
+              return {
+                id: diagnosis._id,
+                appointmentId: appointment?._id,
+                appointmentDate: new Date(appointment?.appointment_date),
+                appointmentType: appointment?.type || 'Consultation',
+                appointmentReason: appointment?.reason || 'Not specified',
+                diagnosisText: parsedDiagnosis.notes || parsedDiagnosis,
+                treatment: parsedDiagnosis.treatment,
+                followUp: parsedDiagnosis.followUp,
+                files: parsedDiagnosis.files || [],
+                createdAt: new Date(diagnosis.createdAt),
+                createdBy: diagnosis.created_by_user_id || 'doctor'
+              };
+            });
+
+            setAllDiagnoses(diagnosesArray);
+            setLoading(false);
+            return; // Exit early if we got diagnoses by patient ID
+          }
+        } catch (err) {
+          console.error('Error fetching diagnoses by patient ID, falling back to appointment method:', err);
+        }
+
+        // Fallback: Create a flattened array of all diagnoses across all appointments
         const diagnosesArray = [];
 
         // Get all appointments for this patient
