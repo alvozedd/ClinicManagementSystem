@@ -261,6 +261,25 @@ app.get('/patients/:id/diagnoses', (req, res) => {
   protect(req, res, () => getDiagnosesByPatientId(req, res));
 });
 
+// Get diagnoses by appointment ID
+app.get('/diagnoses/appointment/:id', (req, res) => {
+  console.log('Received GET request at /diagnoses/appointment/:id, forwarding to controller directly');
+  // Import the controller directly
+  const { getDiagnosisByAppointmentId } = require('./controllers/diagnosisController');
+  // Add authentication middleware manually
+  const { protect, doctor } = require('./middleware/authMiddleware');
+  // Call middleware then controller
+  protect(req, res, () => {
+    // Only doctors can view diagnoses by appointment
+    if (req.user && (req.user.role === 'doctor' || req.user.role === 'admin')) {
+      getDiagnosisByAppointmentId(req, res);
+    } else {
+      res.status(403);
+      throw new Error('Not authorized as a doctor');
+    }
+  });
+});
+
 app.post('/diagnoses', (req, res) => {
   console.log('Received POST request at /diagnoses, forwarding to controller directly');
   // Import the controller directly
