@@ -23,13 +23,15 @@ function AdminDashboard({ username, userInfo }) {
     const fetchUsers = async () => {
       try {
         setLoading(true);
+
+        // Set current user ID from props
+        if (userInfo && userInfo._id) {
+          setCurrentUserId(userInfo._id);
+        }
+
         const userData = await apiService.getUsers();
         console.log('Users data from API:', userData);
         setUsers(userData);
-
-        // Get current user ID from localStorage
-        const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}');
-        setCurrentUserId(userInfo._id || '');
       } catch (err) {
         console.error('Error fetching users:', err);
         setError('Failed to load users. Please try again.');
@@ -39,7 +41,7 @@ function AdminDashboard({ username, userInfo }) {
     };
 
     fetchUsers();
-  }, []);
+  }, [userInfo]);
 
   // Filter users based on search term
   const filteredUsers = users.filter(user =>

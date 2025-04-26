@@ -34,12 +34,30 @@ const handleResponse = async (response) => {
 
 // Secure fetch wrapper that handles token refresh
 const secureFetch = async (url, options = {}) => {
+  console.log('Secure fetch called for URL:', url);
+
+  // Check if session is valid
+  if (!secureStorage.isSessionValid()) {
+    console.error('Session is invalid, redirecting to login');
+    window.location.href = '/login';
+    return Promise.reject('Session expired. Please log in again.');
+  }
+
   // Get the current token from secure storage
   const userInfo = secureStorage.getItem('userInfo') || {};
   const token = userInfo.token;
 
+  console.log('Token retrieved from secure storage:', token ? 'Yes (token exists)' : 'No');
+
+  if (!token) {
+    console.error('No token found in secure storage');
+    window.location.href = '/login';
+    return Promise.reject('No authentication token found. Please log in again.');
+  }
+
   // Check if token exists and is expired
-  if (token && isTokenExpired(token)) {
+  if (isTokenExpired(token)) {
+    console.log('Token is expired, attempting to refresh');
     try {
       // Try to refresh the token
       await refreshAccessToken();
@@ -47,6 +65,8 @@ const secureFetch = async (url, options = {}) => {
       // Get the new token from secure storage
       const updatedUserInfo = secureStorage.getItem('userInfo') || {};
       const newToken = updatedUserInfo.token;
+
+      console.log('Token refreshed successfully:', newToken ? 'Yes' : 'No');
 
       // Update the Authorization header with the new token
       if (options.headers && options.headers.Authorization) {
@@ -62,11 +82,18 @@ const secureFetch = async (url, options = {}) => {
 
   try {
     // Make the request with the current or refreshed token
+    console.log('Making fetch request with options:', {
+      method: options.method,
+      headers: options.headers ? 'Headers present' : 'No headers',
+      url
+    });
+
     const response = await fetch(url, options);
     return await handleResponse(response);
   } catch (error) {
     // If the error is a 401 Unauthorized, try to refresh the token and retry the request
     if (error.status === 401) {
+      console.log('Received 401 error, attempting to refresh token');
       try {
         // Try to refresh the token
         await refreshAccessToken();
@@ -81,6 +108,7 @@ const secureFetch = async (url, options = {}) => {
         }
 
         // Retry the request with the new token
+        console.log('Retrying request with new token');
         const retryResponse = await fetch(url, options);
         return await handleResponse(retryResponse);
       } catch (refreshError) {
@@ -92,37 +120,32 @@ const secureFetch = async (url, options = {}) => {
     }
 
     // For other errors, just pass them through
+    console.error('Error in secure fetch:', error);
     return Promise.reject(error);
   }
 };
 
 // Get auth header with JWT token
 const authHeader = () => {
-  // Try to get user info from secure storage first
+  console.log('Getting auth header');
+
+  // Check if session is valid
+  if (!secureStorage.isSessionValid()) {
+    console.log('Session is invalid in authHeader');
+    return {};
+  }
+
+  // Get user info from secure storage
   let userInfo = secureStorage.getItem('userInfo');
 
-  // If not found in secure storage, try localStorage as fallback (for migration)
   if (!userInfo) {
-    const legacyUserInfo = localStorage.getItem('userInfo');
-    if (legacyUserInfo) {
-      try {
-        userInfo = JSON.parse(legacyUserInfo);
-
-        // Migrate to secure storage
-        secureStorage.setItem('userInfo', userInfo);
-
-        // Remove from localStorage
-        localStorage.removeItem('userInfo');
-      } catch (error) {
-        console.error('Error parsing legacy user info:', error);
-        userInfo = {};
-      }
-    } else {
-      userInfo = {};
-    }
+    console.log('No user info found in secure storage');
+    return {};
   }
 
   const token = userInfo.token;
+  console.log('Token found in authHeader:', token ? 'Yes' : 'No');
+
   return token ? { 'Authorization': `Bearer ${token}` } : {};
 };
 
@@ -440,14 +463,15 @@ const apiService = {
 
   // User management endpoints (for admin)
   getUsers: async () => {
-    const response = await fetch(`${API_URL}/users`, {
+    console.log('Calling getUsers API');
+    return secureFetch(`${API_URL}/users`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
         ...authHeader(),
       },
+      credentials: 'include', // Include cookies for refresh token
     });
-    return handleResponse(response);
   },
 
   getUserById: async (id) => {
