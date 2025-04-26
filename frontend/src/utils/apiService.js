@@ -234,6 +234,8 @@ const apiService = {
 
   logout: async (sessionId) => {
     try {
+      console.log('Calling logout API with sessionId:', sessionId ? 'Present' : 'Not present');
+
       const response = await fetch(`${API_URL}/users/logout`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -241,19 +243,24 @@ const apiService = {
         body: sessionId ? JSON.stringify({ sessionId }) : undefined,
       });
 
+      console.log('Logout API response status:', response.status);
+
       // Clear user info from secure storage
-      secureStorage.removeItem('userInfo');
-      secureStorage.removeItem('sessionId');
+      secureStorage.clear(); // Clear all secure storage
+
       // Also clear legacy storage
       localStorage.removeItem('userInfo');
+
+      // Set logout flag
+      localStorage.setItem('user_logged_out', 'true');
 
       return handleResponse(response);
     } catch (error) {
       console.error('Error during logout:', error);
       // Even if the server-side logout fails, clear storage
-      secureStorage.removeItem('userInfo');
-      secureStorage.removeItem('sessionId');
+      secureStorage.clear();
       localStorage.removeItem('userInfo');
+      localStorage.setItem('user_logged_out', 'true');
       throw error;
     }
   },
@@ -475,55 +482,57 @@ const apiService = {
   },
 
   getUserById: async (id) => {
-    const response = await fetch(`${API_URL}/users/${id}`, {
+    console.log('Calling getUserById API for ID:', id);
+    return secureFetch(`${API_URL}/users/${id}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
         ...authHeader(),
       },
+      credentials: 'include', // Include cookies for refresh token
     });
-    return handleResponse(response);
   },
 
   createUser: async (userData) => {
     console.log('Creating user with data:', userData);
-    const response = await fetch(`${API_URL}/users`, {
+    const result = await secureFetch(`${API_URL}/users`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         ...authHeader(),
       },
       body: JSON.stringify(userData),
+      credentials: 'include', // Include cookies for refresh token
     });
-    const result = await handleResponse(response);
     console.log('Create user response:', result);
     return result;
   },
 
   updateUser: async (id, userData) => {
     console.log('Updating user with ID:', id, 'and data:', userData);
-    const response = await fetch(`${API_URL}/users/${id}`, {
+    const result = await secureFetch(`${API_URL}/users/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
         ...authHeader(),
       },
       body: JSON.stringify(userData),
+      credentials: 'include', // Include cookies for refresh token
     });
-    const result = await handleResponse(response);
     console.log('Update user response:', result);
     return result;
   },
 
   deleteUser: async (id) => {
-    const response = await fetch(`${API_URL}/users/${id}`, {
+    console.log('Calling deleteUser API for ID:', id);
+    return secureFetch(`${API_URL}/users/${id}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
         ...authHeader(),
       },
+      credentials: 'include', // Include cookies for refresh token
     });
-    return handleResponse(response);
   },
 };
 

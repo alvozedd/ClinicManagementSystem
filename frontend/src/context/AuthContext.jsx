@@ -135,8 +135,11 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
+      console.log('Logout function called');
+
       // Get session ID to include in logout request
       const sessionId = secureStorage.getItem('sessionId');
+      console.log('Session ID for logout:', sessionId ? 'Found' : 'Not found');
 
       // Call the API to logout (revoke refresh token)
       await apiService.logout(sessionId);
@@ -154,7 +157,12 @@ export const AuthProvider = ({ children }) => {
       // This will prevent automatic login on page refresh
       localStorage.setItem('user_logged_out', 'true');
 
-      console.log('User logged out successfully');
+      console.log('User logged out successfully, redirecting to login page');
+
+      // Redirect to login page after a short delay to ensure state is updated
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 100);
     } catch (error) {
       console.error('Error during logout:', error);
       // Even if server-side logout fails, clear local state
@@ -162,6 +170,11 @@ export const AuthProvider = ({ children }) => {
       secureStorage.clear();
       localStorage.removeItem('userInfo');
       localStorage.setItem('user_logged_out', 'true');
+
+      // Redirect to login page even if there was an error
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 100);
     }
   };
 
