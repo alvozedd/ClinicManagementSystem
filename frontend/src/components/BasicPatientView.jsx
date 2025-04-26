@@ -1,87 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { FaUser, FaFileMedical, FaCalendarAlt } from 'react-icons/fa';
+import { FaUser, FaCalendarAlt } from 'react-icons/fa';
 import { getCreatorLabel } from '../utils/recordCreation';
-import apiService from '../utils/apiService';
 
 function BasicPatientView({ patient, appointments, onClose, onUpdatePatient, onDeletePatient, onDiagnoseAppointment }) {
   // State for editing mode
   const [editMode, setEditMode] = useState(false);
   const [editedPatient, setEditedPatient] = useState({...patient});
 
-  // State for diagnoses
-  const [diagnoses, setDiagnoses] = useState([]);
-  const [loadingDiagnoses, setLoadingDiagnoses] = useState(false);
-  const [diagnosisError, setDiagnosisError] = useState(null);
-
   // Update local state when patient prop changes
   useEffect(() => {
     console.log('BasicPatientView - Patient prop updated:', patient);
     setEditedPatient({...patient});
   }, [patient]);
-
-  // Fetch diagnoses for this patient
-  useEffect(() => {
-    const fetchDiagnoses = async () => {
-      if (!appointments || appointments.length === 0) return;
-
-      setLoadingDiagnoses(true);
-      setDiagnosisError(null);
-
-      try {
-        // Create a flattened array of all diagnoses across all appointments
-        const diagnosesArray = [];
-
-        // For each appointment, fetch diagnoses
-        for (const appointment of appointments) {
-          if (appointment.status === 'Completed') {
-            try {
-              const appointmentId = appointment._id || appointment.id;
-              const appointmentDiagnoses = await apiService.getDiagnosisByAppointmentId(appointmentId);
-
-              if (appointmentDiagnoses && appointmentDiagnoses.length > 0) {
-                appointmentDiagnoses.forEach(diagnosis => {
-                  // Try to parse the diagnosis text as JSON
-                  let parsedDiagnosis;
-                  try {
-                    parsedDiagnosis = JSON.parse(diagnosis.diagnosis_text);
-                  } catch (e) {
-                    // If parsing fails, use the raw text
-                    parsedDiagnosis = diagnosis.diagnosis_text;
-                  }
-
-                  diagnosesArray.push({
-                    id: diagnosis._id,
-                    appointmentId: appointmentId,
-                    appointmentDate: new Date(appointment.appointment_date || appointment.date),
-                    appointmentType: appointment.type,
-                    appointmentReason: appointment.reason,
-                    diagnosisText: parsedDiagnosis.notes || parsedDiagnosis,
-                    treatment: parsedDiagnosis.treatment,
-                    followUp: parsedDiagnosis.followUp,
-                    createdAt: new Date(diagnosis.createdAt),
-                    createdBy: appointment.created_by_user_id || 'doctor'
-                  });
-                });
-              }
-            } catch (err) {
-              console.error(`Error fetching diagnoses for appointment ${appointment._id || appointment.id}:`, err);
-            }
-          }
-        }
-
-        // Sort diagnoses by date (newest first)
-        diagnosesArray.sort((a, b) => b.appointmentDate - a.appointmentDate);
-        setDiagnoses(diagnosesArray);
-      } catch (err) {
-        console.error('Error fetching diagnoses:', err);
-        setDiagnosisError('Failed to load diagnoses. Please try again.');
-      } finally {
-        setLoadingDiagnoses(false);
-      }
-    };
-
-    fetchDiagnoses();
-  }, [appointments]);
 
   // Handle input changes for patient editing
   const handleInputChange = (e) => {
@@ -388,67 +318,7 @@ function BasicPatientView({ patient, appointments, onClose, onUpdatePatient, onD
         )}
       </div>
 
-      {/* Diagnosis History Section */}
-      <div className="mt-6">
-        <h3 className="text-base md:text-lg font-semibold mb-3 flex items-center">
-          <FaFileMedical className="h-5 w-5 md:h-6 md:w-6 mr-2 text-blue-600" />
-          Diagnosis History
-        </h3>
-
-        {loadingDiagnoses ? (
-          <div className="bg-gray-50 rounded-lg p-4 text-center">
-            <p className="text-gray-500 text-sm md:text-base">Loading diagnoses...</p>
-          </div>
-        ) : diagnosisError ? (
-          <div className="bg-red-50 rounded-lg p-4 text-center">
-            <p className="text-red-500 text-sm md:text-base">{diagnosisError}</p>
-          </div>
-        ) : diagnoses.length > 0 ? (
-          <div className="space-y-3">
-            {diagnoses.map((diagnosis) => (
-              <div key={diagnosis.id} className="border rounded-lg p-3 md:p-4 text-sm md:text-base shadow-sm hover:shadow-md transition-shadow">
-                <div className="flex justify-between mb-2">
-                  <div>
-                    <span className="font-semibold">
-                      {diagnosis.appointmentDate.toLocaleDateString()} - {diagnosis.appointmentType}
-                    </span>
-                  </div>
-                  <span className="text-xs text-gray-500">
-                    {new Date(diagnosis.createdAt).toLocaleDateString()}
-                  </span>
-                </div>
-
-                <div className="mb-3">
-                  <h4 className="font-medium text-blue-800 mb-1">Diagnosis:</h4>
-                  <p className="bg-blue-50 p-2 rounded">{diagnosis.diagnosisText}</p>
-                </div>
-
-                {diagnosis.treatment && (
-                  <div className="mb-3">
-                    <h4 className="font-medium text-green-800 mb-1">Treatment:</h4>
-                    <p className="bg-green-50 p-2 rounded">{diagnosis.treatment}</p>
-                  </div>
-                )}
-
-                {diagnosis.followUp && (
-                  <div className="mb-2">
-                    <h4 className="font-medium text-purple-800 mb-1">Follow-up:</h4>
-                    <p className="bg-purple-50 p-2 rounded">{diagnosis.followUp}</p>
-                  </div>
-                )}
-
-                <div className="text-xs text-gray-600 mt-2">
-                  <span className="font-medium">Reason for visit:</span> {diagnosis.appointmentReason || 'Not specified'}
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="bg-gray-50 rounded-lg p-4 text-center">
-            <p className="text-gray-500 text-sm md:text-base">No diagnosis history found</p>
-          </div>
-        )}
-      </div>
+      {/* Note: Diagnosis History Section removed for secretaries */}
     </div>
   )
 }
