@@ -123,10 +123,13 @@ app.get('/api/status', (req, res) => {
   });
 });
 
-// Basic user login route
+// Basic user login routes - adding both paths to match frontend requests
+// Original API path
 app.post('/api/users/login', (req, res) => {
   try {
     const { email, password } = req.body;
+
+    console.log('Login attempt at /api/users/login:', email);
 
     // For now, just return a success response with a dummy token
     // This is just to test CORS, not for actual authentication
@@ -143,9 +146,59 @@ app.post('/api/users/login', (req, res) => {
   }
 });
 
+// Path without /api prefix - matching the frontend request
+app.post('/users/login', (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    console.log('Login attempt at /users/login:', email);
+
+    // For now, just return a success response with a dummy token
+    // This is just to test CORS, not for actual authentication
+    res.status(200).json({
+      _id: '123456789',
+      name: 'Test User',
+      email: email || 'test@example.com',
+      role: 'doctor',
+      token: 'dummy-jwt-token'
+    });
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({ message: 'Server error during login' });
+  }
+});
+
+// Refresh token routes
+app.post('/api/users/refresh-token', (req, res) => {
+  res.status(200).json({
+    token: 'refreshed-dummy-token'
+  });
+});
+
+app.post('/users/refresh-token', (req, res) => {
+  res.status(200).json({
+    token: 'refreshed-dummy-token'
+  });
+});
+
+// Catch-all route to log unmatched requests
+app.use((req, res, next) => {
+  console.log(`Unmatched request: ${req.method} ${req.originalUrl}`);
+  console.log('Headers:', JSON.stringify(req.headers, null, 2));
+
+  // If this is an API request, return a 404 JSON response
+  if (req.originalUrl.includes('/api/') || req.originalUrl.includes('/users/')) {
+    return res.status(404).json({ message: 'Endpoint not found' });
+  }
+
+  // Otherwise, pass to the next middleware
+  next();
+});
+
 // Simple error handler
 app.use((err, req, res, next) => {
-  console.error(err.stack);
+  console.error('Error:', err.message);
+  console.error('Stack:', err.stack);
   res.status(500).json({
     message: 'Internal Server Error',
     error: process.env.NODE_ENV === 'production' ? {} : err.message,
