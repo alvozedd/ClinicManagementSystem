@@ -78,8 +78,11 @@ const addSecurityHeaders = (req, res, next) => {
 
 // Middleware to set secure cookie options
 const secureCoookieSettings = (req, res, next) => {
+  // Store the original cookie function
+  const originalCookie = res.cookie;
+
   // Set secure cookie options
-  res.cookie = (name, value, options = {}) => {
+  res.cookie = function(name, value, options = {}) {
     const secureOptions = {
       ...options,
       httpOnly: true,
@@ -87,7 +90,7 @@ const secureCoookieSettings = (req, res, next) => {
       sameSite: 'strict',
     };
 
-    return res.cookie(name, value, secureOptions);
+    return originalCookie.call(this, name, value, secureOptions);
   };
 
   next();
