@@ -63,8 +63,6 @@ const exemptCsrf = (req, res, next) => {
       '/api/users/refresh-token',
       '/api/patients', // For visitor bookings
       '/api/appointments', // For visitor bookings
-      '/api/health',
-      '/api/health/detailed',
       '/'
     ];
 

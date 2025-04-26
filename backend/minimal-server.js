@@ -32,14 +32,14 @@ const loadEnvFromFile = () => {
     if (process.env.MONGODB_URI) {
       return;
     }
-    
+
     // Try to load from .env.production file
     const envPath = path.resolve(__dirname, '.env.production');
     if (fs.existsSync(envPath)) {
       console.log('Loading environment variables from .env.production file');
       const envFile = fs.readFileSync(envPath, 'utf8');
       const envVars = envFile.split('\n');
-      
+
       envVars.forEach(line => {
         const [key, value] = line.split('=');
         if (key && value) {
@@ -64,7 +64,7 @@ const connectDB = async () => {
     console.error('MongoDB URI is not defined. Please set the MONGODB_URI environment variable.');
     process.exit(1);
   }
-  
+
   try {
     console.log('Connecting to MongoDB...');
     await mongoose.connect(mongoURI);
@@ -83,19 +83,19 @@ app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-  
+
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
-  
+
   next();
 });
 
 // Parse JSON bodies
 app.use(express.json());
 
-// Health check route
-app.get('/api/health', (req, res) => {
+// Status route
+app.get('/api/status', (req, res) => {
   res.status(200).json({
     status: 'ok',
     timestamp: new Date().toISOString(),

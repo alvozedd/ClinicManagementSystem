@@ -16,7 +16,6 @@ const userRoutes = require('./routes/userRoutes');
 const patientRoutes = require('./routes/patientRoutes');
 const appointmentRoutes = require('./routes/appointmentRoutes');
 const diagnosisRoutes = require('./routes/diagnosisRoutes');
-const healthRoutes = require('./routes/healthRoutes');
 
 // Load environment variables
 dotenv.config();
@@ -77,8 +76,7 @@ app.use(handleCsrfError);
 app.use(provideCsrfToken);
 console.log('Using simplified CSRF middleware');
 
-// Health check routes (should be before other routes for quick response)
-app.use('/api/health', healthRoutes);
+// API Routes section
 
 // API Routes
 app.use('/api/users', userRoutes);
