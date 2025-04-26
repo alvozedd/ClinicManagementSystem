@@ -64,7 +64,7 @@ export const createAppointmentRecord = (appointmentData, patient, createdBy) => 
 
 /**
  * Get a human-readable label for the creator
- * @param {string} createdBy - Creator identifier ('doctor', 'secretary', or 'visitor')
+ * @param {string} createdBy - Creator identifier ('doctor', 'secretary', 'visitor', or 'admin')
  * @returns {string} Human-readable label
  */
 export const getCreatorLabel = (createdBy) => {
@@ -75,7 +75,13 @@ export const getCreatorLabel = (createdBy) => {
       return 'Secretary';
     case 'visitor':
       return 'Patient (Online)';
+    case 'admin':
+      return 'Admin';
+    case null:
+    case undefined:
+    case '':
+      return 'Patient (Online)';
     default:
-      return 'Unknown';
+      return 'Patient (Online)';
   }
 };

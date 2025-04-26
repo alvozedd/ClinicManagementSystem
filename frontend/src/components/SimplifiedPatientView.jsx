@@ -640,28 +640,27 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
                   <p className="text-sm font-medium">{patient.id}</p>
                 </div>
 
-                {patient.createdBy && (
-                  <div className="border-b pb-2">
-                    <p className="text-xs text-gray-500">Record Created By</p>
-                    <div className="flex items-center">
-                      <span className={`px-2 py-1 rounded text-sm font-medium ${
-                        patient.createdBy === 'doctor' ? 'bg-blue-100 text-blue-800' :
-                        patient.createdBy === 'secretary' ? 'bg-green-100 text-green-800' :
-                        'bg-purple-100 text-purple-800'
-                      }`}>
-                        <span className="flex items-center">
-                          <FaUser className="mr-1" size={12} />
-                          {getCreatorLabel(patient.createdBy)}
-                        </span>
+                <div className="border-b pb-2">
+                  <p className="text-xs text-gray-500">Record Created By</p>
+                  <div className="flex items-center">
+                    <span className={`px-2 py-1 rounded text-sm font-medium ${
+                      patient.createdBy === 'doctor' ? 'bg-blue-100 text-blue-800' :
+                      patient.createdBy === 'secretary' ? 'bg-green-100 text-green-800' :
+                      patient.createdBy === 'admin' ? 'bg-gray-100 text-gray-800' :
+                      'bg-purple-100 text-purple-800'
+                    }`}>
+                      <span className="flex items-center">
+                        <FaUser className="mr-1" size={12} />
+                        {getCreatorLabel(patient.createdBy)}
                       </span>
-                      {patient.createdAt && (
-                        <span className="text-xs text-gray-500 ml-2">
-                          on {new Date(patient.createdAt).toLocaleDateString()}
-                        </span>
-                      )}
-                    </div>
+                    </span>
+                    {patient.createdAt && (
+                      <span className="text-xs text-gray-500 ml-2">
+                        on {new Date(patient.createdAt).toLocaleDateString()}
+                      </span>
+                    )}
                   </div>
-                )}
+                </div>
 
                 <h4 className="font-medium text-sm text-blue-700 border-b pb-2 mt-3">Next of Kin</h4>
 
@@ -913,18 +912,18 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
                         <div>
                           <p className="font-medium text-base leading-tight">{appointment.date} at {appointment.time}</p>
                           <p className="text-gray-600 text-sm leading-tight mt-1">{appointment.type} - {appointment.reason}</p>
-                          {appointment.createdBy && (
-                            <div className="flex items-center mt-2">
-                              <span className="text-gray-500 text-xs mr-1">Booked by:</span>
-                              <span className={`px-2 py-1 rounded text-xs font-medium ${
-                                appointment.createdBy === 'doctor' ? 'bg-blue-100 text-blue-800' :
-                                appointment.createdBy === 'secretary' ? 'bg-green-100 text-green-800' :
-                                'bg-purple-100 text-purple-800'
-                              }`}>
-                                {getCreatorLabel(appointment.createdBy)}
-                              </span>
-                            </div>
-                          )}
+                          <div className="flex items-center mt-2">
+                            <span className="text-gray-500 text-xs mr-1">Booked by:</span>
+                            <span className={`px-2 py-1 rounded text-xs font-medium ${
+                              appointment.createdBy === 'doctor' ? 'bg-blue-100 text-blue-800' :
+                              appointment.createdBy === 'secretary' ? 'bg-green-100 text-green-800' :
+                              appointment.createdBy === 'admin' ? 'bg-gray-100 text-gray-800' :
+                              'bg-purple-100 text-purple-800'
+                            }`}>
+                              <FaUser className="mr-1" size={10} />
+                              {getCreatorLabel(appointment.createdBy)}
+                            </span>
+                          </div>
                         </div>
                         <div className="flex flex-col items-end space-y-2">
                           <span className={`px-3 py-1 rounded-full text-sm font-medium ${
@@ -961,18 +960,18 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
                         <div>
                           <p className="font-medium text-base leading-tight">{appointment.date} at {appointment.time}</p>
                           <p className="text-gray-600 text-sm leading-tight mt-1">{appointment.type} - {appointment.reason}</p>
-                          {appointment.createdBy && (
-                            <div className="flex items-center mt-2">
-                              <span className="text-gray-500 text-xs mr-1">Booked by:</span>
-                              <span className={`px-2 py-1 rounded text-xs font-medium ${
-                                appointment.createdBy === 'doctor' ? 'bg-blue-100 text-blue-800' :
-                                appointment.createdBy === 'secretary' ? 'bg-green-100 text-green-800' :
-                                'bg-purple-100 text-purple-800'
-                              }`}>
-                                {getCreatorLabel(appointment.createdBy)}
-                              </span>
-                            </div>
-                          )}
+                          <div className="flex items-center mt-2">
+                            <span className="text-gray-500 text-xs mr-1">Booked by:</span>
+                            <span className={`px-2 py-1 rounded text-xs font-medium ${
+                              appointment.createdBy === 'doctor' ? 'bg-blue-100 text-blue-800' :
+                              appointment.createdBy === 'secretary' ? 'bg-green-100 text-green-800' :
+                              appointment.createdBy === 'admin' ? 'bg-gray-100 text-gray-800' :
+                              'bg-purple-100 text-purple-800'
+                            }`}>
+                              <FaUser className="mr-1" size={10} />
+                              {getCreatorLabel(appointment.createdBy)}
+                            </span>
+                          </div>
                         </div>
                         <div className="flex flex-col items-end space-y-2">
                           <span className={`px-3 py-1 rounded-full text-sm font-medium ${
@@ -1110,42 +1109,42 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
           <div className="text-center py-6 bg-gray-50 rounded-lg">
             <p className="text-gray-500 text-base">Please select a tab to view patient information</p>
           </div>
-            <div className="flex justify-between items-center mb-1">
-              <h3 className="font-semibold text-xs">Appointments</h3>
+            <div className="flex justify-between items-center mb-3 mt-4">
+              <h3 className="font-semibold text-lg text-blue-800">Appointments</h3>
               <button
                 onClick={handleAddAppointment}
-                className="bg-green-600 hover:bg-green-700 text-white px-1.5 py-0.5 rounded text-[10px] font-medium"
+                className="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded text-sm font-medium flex items-center"
               >
-                + Add
+                <span className="mr-1">+</span> Add Appointment
               </button>
             </div>
 
-            {/* Ultra-compact Upcoming Appointments Section */}
+            {/* Enhanced Upcoming Appointments Section */}
             {upcomingAppointments.length > 0 && (
-              <div className="mb-2">
-                <h4 className="font-medium text-blue-800 text-[10px] mb-1 border-b pb-0.5">Upcoming</h4>
-                <div className="space-y-1">
+              <div className="mb-4">
+                <h4 className="font-medium text-blue-800 text-base mb-3 border-b pb-2">Upcoming</h4>
+                <div className="space-y-3">
                   {upcomingAppointments.map(appointment => (
-                    <div key={appointment.id} className={`border rounded p-1 hover:bg-gray-50 ${appointment.status === 'Scheduled' ? 'bg-green-50' : appointment.status === 'Completed' ? 'bg-blue-50' : appointment.status === 'Cancelled' ? 'bg-red-50' : appointment.status === 'Pending' ? 'bg-yellow-50' : 'bg-white'}`}>
+                    <div key={appointment.id} className={`border rounded-lg p-3 hover:bg-gray-50 shadow-sm ${appointment.status === 'Scheduled' ? 'bg-green-50' : appointment.status === 'Completed' ? 'bg-blue-50' : appointment.status === 'Cancelled' ? 'bg-red-50' : appointment.status === 'Pending' ? 'bg-yellow-50' : 'bg-white'}`}>
                       <div className="flex justify-between items-center">
                         <div>
-                          <p className="font-medium text-xs leading-tight">{appointment.date} at {appointment.time}</p>
-                          <p className="text-gray-600 text-[10px] leading-tight">{appointment.type} - {appointment.reason}</p>
-                          {appointment.createdBy && (
-                            <div className="flex items-center">
-                              <span className="text-gray-500 text-[8px]">By:</span>
-                              <span className={`px-1 rounded text-[8px] font-medium ml-0.5 ${
-                                appointment.createdBy === 'doctor' ? 'bg-blue-100 text-blue-800' :
-                                appointment.createdBy === 'secretary' ? 'bg-green-100 text-green-800' :
-                                'bg-purple-100 text-purple-800'
-                              }`}>
-                                {getCreatorLabel(appointment.createdBy)}
-                              </span>
-                            </div>
-                          )}
+                          <p className="font-medium text-base leading-tight">{appointment.date} at {appointment.time}</p>
+                          <p className="text-gray-600 text-sm leading-tight mt-1">{appointment.type} - {appointment.reason}</p>
+                          <div className="flex items-center mt-2">
+                            <span className="text-gray-500 text-xs mr-1">Booked by:</span>
+                            <span className={`px-2 py-1 rounded text-xs font-medium ${
+                              appointment.createdBy === 'doctor' ? 'bg-blue-100 text-blue-800' :
+                              appointment.createdBy === 'secretary' ? 'bg-green-100 text-green-800' :
+                              appointment.createdBy === 'admin' ? 'bg-gray-100 text-gray-800' :
+                              'bg-purple-100 text-purple-800'
+                            }`}>
+                              <FaUser className="mr-1" size={10} />
+                              {getCreatorLabel(appointment.createdBy)}
+                            </span>
+                          </div>
                         </div>
-                        <div className="flex flex-col items-end space-y-0.5">
-                          <span className={`px-1 py-0.5 rounded-full text-[8px] font-medium ${
+                        <div className="flex flex-col items-end space-y-2">
+                          <span className={`px-3 py-1 rounded-full text-sm font-medium ${
                             appointment.status === 'Scheduled' ? 'bg-green-100 text-green-800' :
                             appointment.status === 'Completed' ? 'bg-blue-100 text-blue-800' :
                             appointment.status === 'Cancelled' ? 'bg-red-100 text-red-800' :
@@ -1156,7 +1155,7 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
                           </span>
                           <button
                             onClick={() => handleEditAppointment(appointment)}
-                            className="text-blue-600 hover:text-blue-800 text-[8px] bg-blue-50 px-1 py-0.5 rounded"
+                            className="text-blue-600 hover:text-blue-800 text-sm bg-blue-50 px-3 py-1 rounded"
                           >
                             Edit
                           </button>
@@ -1168,36 +1167,36 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
               </div>
             )}
 
-            {/* Ultra-compact Past Appointments Section */}
-            <div className="mb-1">
-              <h4 className="font-medium text-gray-700 text-[10px] mb-1 border-b pb-0.5">Previous</h4>
+            {/* Enhanced Past Appointments Section */}
+            <div className="mb-3">
+              <h4 className="font-medium text-gray-700 text-base mb-3 border-b pb-2">Previous</h4>
               {pastAppointments.length > 0 ? (
-              <div className="space-y-1">
+              <div className="space-y-3">
                 {pastAppointments.map(appointment => (
-                  <div key={appointment.id} className={`border rounded p-1 hover:bg-gray-50 ${appointment.status === 'Scheduled' ? 'bg-green-50' : appointment.status === 'Completed' ? 'bg-blue-50' : appointment.status === 'Cancelled' ? 'bg-red-50' : appointment.status === 'Pending' ? 'bg-yellow-50' : 'bg-white'}`}>
+                  <div key={appointment.id} className={`border rounded-lg p-3 hover:bg-gray-50 shadow-sm ${appointment.status === 'Scheduled' ? 'bg-green-50' : appointment.status === 'Completed' ? 'bg-blue-50' : appointment.status === 'Cancelled' ? 'bg-red-50' : appointment.status === 'Pending' ? 'bg-yellow-50' : 'bg-white'}`}>
                     <div className="flex justify-between items-center">
                       <div>
-                        <p className="font-medium text-xs leading-tight">{appointment.date} at {appointment.time}</p>
-                        <p className="text-gray-600 text-[10px] leading-tight">{appointment.type} - {appointment.reason}</p>
-                        {appointment.createdBy && (
-                          <div className="flex items-center mt-1">
-                            <span className="text-gray-500 text-sm mr-1">Booked by:</span>
-                            <span className={`px-2 py-0.5 rounded-md text-xs font-medium ${
-                              appointment.createdBy === 'doctor' ? 'bg-blue-100 text-blue-800' :
-                              appointment.createdBy === 'secretary' ? 'bg-green-100 text-green-800' :
-                              'bg-purple-100 text-purple-800'
-                            }`}>
-                              {getCreatorLabel(appointment.createdBy)}
+                        <p className="font-medium text-base leading-tight">{appointment.date} at {appointment.time}</p>
+                        <p className="text-gray-600 text-sm leading-tight mt-1">{appointment.type} - {appointment.reason}</p>
+                        <div className="flex items-center mt-2">
+                          <span className="text-gray-500 text-xs mr-1">Booked by:</span>
+                          <span className={`px-2 py-1 rounded text-xs font-medium ${
+                            appointment.createdBy === 'doctor' ? 'bg-blue-100 text-blue-800' :
+                            appointment.createdBy === 'secretary' ? 'bg-green-100 text-green-800' :
+                            appointment.createdBy === 'admin' ? 'bg-gray-100 text-gray-800' :
+                            'bg-purple-100 text-purple-800'
+                          }`}>
+                            <FaUser className="mr-1" size={10} />
+                            {getCreatorLabel(appointment.createdBy)}
+                          </span>
+                          {appointment.createdAt && (
+                            <span className="text-xs text-gray-500 ml-2">
+                              on {new Date(appointment.createdAt).toLocaleDateString()}
                             </span>
-                            {appointment.createdAt && (
-                              <span className="text-xs text-gray-500 ml-1">
-                                on {new Date(appointment.createdAt).toLocaleDateString()}
-                              </span>
-                            )}
-                          </div>
-                        )}
+                          )}
+                        </div>
                       </div>
-                      <div className="flex items-center space-x-2">
+                      <div className="flex flex-col items-end space-y-2">
                         <span className={`px-3 py-1 rounded-full text-sm font-medium ${
                           appointment.status === 'Scheduled' ? 'bg-green-100 text-green-800' :
                           appointment.status === 'Completed' ? 'bg-blue-100 text-blue-800' :
@@ -1207,14 +1206,12 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
                         }`}>
                           {appointment.status}
                         </span>
-                        <div className="flex space-x-1">
-                          <button
-                            onClick={() => handleEditAppointment(appointment)}
-                            className="text-blue-600 hover:text-blue-800 text-sm"
-                          >
-                            Edit
-                          </button>
-                        </div>
+                        <button
+                          onClick={() => handleEditAppointment(appointment)}
+                          className="text-blue-600 hover:text-blue-800 text-sm bg-blue-50 px-3 py-1 rounded"
+                        >
+                          Edit
+                        </button>
                       </div>
                     </div>
 
@@ -1297,14 +1294,14 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
                 ))}
               </div>
             ) : (
-              <div className="text-center py-4 bg-gray-50 rounded-lg">
-                <p className="text-gray-500">No previous appointments recorded for this patient.</p>
+              <div className="text-center py-3 bg-gray-50 rounded-lg">
+                <p className="text-gray-500 text-sm">No previous appointments recorded for this patient</p>
               </div>
             )}
 
             {upcomingAppointments.length === 0 && pastAppointments.length === 0 && (
-              <div className="text-center py-8 bg-gray-50 rounded-lg mt-4">
-                <p className="text-gray-500">No appointments recorded for this patient.</p>
+              <div className="text-center py-6 bg-gray-50 rounded-lg mt-3">
+                <p className="text-gray-500 text-base">No appointments recorded for this patient</p>
               </div>
             )}
           </div>
