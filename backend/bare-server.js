@@ -9,8 +9,21 @@ const mongoose = require('mongoose');
 const fs = require('fs');
 const path = require('path');
 
+console.log('Starting bare minimum server directly...');
+
 // Load environment variables
 dotenv.config();
+
+// Set fallback values for critical environment variables
+if (!process.env.MONGODB_URI) {
+  console.log('Setting fallback MONGODB_URI');
+  process.env.MONGODB_URI = 'mongodb+srv://clinic_admin:adminMuchai123@cluster0.jrm4jes.mongodb.net/clinic_management?retryWrites=true&w=majority';
+}
+
+if (!process.env.JWT_SECRET) {
+  console.log('Setting fallback JWT_SECRET');
+  process.env.JWT_SECRET = 'b8df259dfa44c3db20384347e8968581097e98324d253c1cb6f56cb9985ce1918665ac109f968389ae70c58de4e6e5548bcb9c6b6234c385a35f2ce2ca73c3ea';
+}
 
 // Load environment variables from .env.production if they're not already set
 const loadEnvFromFile = () => {
@@ -19,14 +32,14 @@ const loadEnvFromFile = () => {
     if (process.env.MONGODB_URI) {
       return;
     }
-    
+
     // Try to load from .env.production file
     const envPath = path.resolve(__dirname, '.env.production');
     if (fs.existsSync(envPath)) {
       console.log('Loading environment variables from .env.production file');
       const envFile = fs.readFileSync(envPath, 'utf8');
       const envVars = envFile.split('\n');
-      
+
       envVars.forEach(line => {
         const [key, value] = line.split('=');
         if (key && value) {
@@ -51,7 +64,7 @@ const connectDB = async () => {
     console.error('MongoDB URI is not defined. Please set the MONGODB_URI environment variable.');
     process.exit(1);
   }
-  
+
   try {
     console.log('Connecting to MongoDB...');
     await mongoose.connect(mongoURI);
@@ -70,11 +83,11 @@ app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-  
+
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
-  
+
   next();
 });
 
