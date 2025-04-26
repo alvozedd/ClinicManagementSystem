@@ -80,11 +80,12 @@ app.use('/api/patients', patientRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/diagnoses', diagnosisRoutes);
 
-// Add compatibility routes for frontend that might be using paths without /api prefix
-app.use('/users', userRoutes);
-app.use('/patients', patientRoutes);
-app.use('/appointments', appointmentRoutes);
-app.use('/diagnoses', diagnosisRoutes);
+// Create a special route just for login without the /api prefix
+app.post('/users/login', (req, res, next) => {
+  console.log('Received login request at /users/login, forwarding to /api/users/login');
+  req.url = '/login'; // Change the URL to match what the router expects
+  userRoutes(req, res, next); // Forward to the userRoutes router
+});
 
 // Root route
 app.get('/', (req, res) => {
