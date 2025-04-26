@@ -9,13 +9,11 @@ const { enforceHttps, addSecurityHeaders, secureCoookieSettings } = require('./m
 const { handleCsrfError, exemptCsrf, provideCsrfToken } = require('./middleware/csrfMiddleware');
 const { addRequestId } = require('./middleware/requestIdMiddleware');
 const { conditionalRequestLogger } = require('./middleware/requestLoggingMiddleware');
-const { checkSessionTimeout } = require('./middleware/sessionTimeoutMiddleware');
 const userRoutes = require('./routes/userRoutes');
 const patientRoutes = require('./routes/patientRoutes');
 const appointmentRoutes = require('./routes/appointmentRoutes');
 const diagnosisRoutes = require('./routes/diagnosisRoutes');
 const healthRoutes = require('./routes/healthRoutes');
-const hipaaRoutes = require('./routes/hipaaRoutes');
 
 // Load environment variables
 dotenv.config();
@@ -36,7 +34,6 @@ app.use(helmet()); // Adds various security headers
 app.use(enforceHttps); // Redirect HTTP to HTTPS in production
 app.use(addSecurityHeaders); // Add additional security headers
 app.use(secureCoookieSettings); // Ensure cookies are secure
-app.use(checkSessionTimeout); // HIPAA-compliant session timeout
 
 // CORS configuration
 app.use((req, res, next) => {
@@ -82,7 +79,6 @@ app.use('/api/users', userRoutes);
 app.use('/api/patients', patientRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/diagnoses', diagnosisRoutes);
-app.use('/api/hipaa', hipaaRoutes); // HIPAA compliance routes
 
 // Root route
 app.get('/', (req, res) => {

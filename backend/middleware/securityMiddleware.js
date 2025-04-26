@@ -56,7 +56,7 @@ const addSecurityHeaders = (req, res, next) => {
       'Content-Security-Policy',
       "default-src 'self'; " +
       `script-src 'self' 'nonce-${nonce}' https://cdn.jsdelivr.net https://unpkg.com; ` +
-      "connect-src 'self' https://api.urohealth.com https://urohealthltd.netlify.app; " +
+      "connect-src 'self' https://api.urohealth.com; " +
       "img-src 'self' data: https://cdn.urohealth.com; " +
       "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; " +
       "font-src 'self' https://fonts.gstatic.com; " +
