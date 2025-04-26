@@ -66,30 +66,30 @@ function PatientNavigator({
           </h2>
         </div>
 
-        <div className="flex items-center space-x-0.5">
+        <div className="flex items-center space-x-2">
           <button
             onClick={goToPrevious}
             disabled={currentIndex === 0}
-            className={`p-0.5 rounded-full ${
+            className={`p-1.5 rounded ${
               currentIndex === 0
-                ? 'text-gray-400 cursor-not-allowed'
-                : 'text-blue-600 hover:bg-blue-50'
+                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                : 'bg-blue-100 text-blue-600 hover:bg-blue-200'
             }`}
             title="Previous patient"
           >
-            <FaChevronLeft size={10} />
+            <FaChevronLeft size={14} />
           </button>
           <button
             onClick={goToNext}
             disabled={currentIndex === sortedPatients.length - 1}
-            className={`p-0.5 rounded-full ${
+            className={`p-1.5 rounded ${
               currentIndex === sortedPatients.length - 1
-                ? 'text-gray-400 cursor-not-allowed'
-                : 'text-blue-600 hover:bg-blue-50'
+                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                : 'bg-blue-100 text-blue-600 hover:bg-blue-200'
             }`}
             title="Next patient"
           >
-            <FaChevronRight size={10} />
+            <FaChevronRight size={14} />
           </button>
         </div>
       </div>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FaUser } from 'react-icons/fa';
+import { FaUser, FaTrash } from 'react-icons/fa';
 import { getCreatorLabel } from '../utils/recordCreation';
 import AppointmentManagementModal from './AppointmentManagementModal';
 import SimplifiedDiagnosisModal from './SimplifiedDiagnosisModal';
@@ -414,9 +414,10 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
                 <div className="flex space-x-1">
                   <button
                     onClick={() => setEditMode(true)}
-                    className="bg-blue-600 text-white px-1 py-0.5 rounded text-[10px] hover:bg-blue-700"
+                    className="bg-blue-600 text-white px-1 py-0.5 rounded text-[10px] hover:bg-blue-700 flex items-center"
                   >
-                    Edit
+                    <span className="md:hidden"><FaUser className="h-2.5 w-2.5" /></span>
+                    <span className="hidden md:inline">Edit</span>
                   </button>
                   {onDeletePatient && (
                     <button
@@ -425,9 +426,10 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
                           handleDeletePatient();
                         }
                       }}
-                      className="bg-red-600 text-white px-1 py-0.5 rounded text-[10px] hover:bg-red-700"
+                      className="bg-red-600 text-white px-1 py-0.5 rounded text-[10px] hover:bg-red-700 flex items-center"
                     >
-                      Delete
+                      <span className="md:hidden"><FaTrash className="h-2.5 w-2.5" /></span>
+                      <span className="hidden md:inline">Delete</span>
                     </button>
                   )}
                 </div>
@@ -579,18 +581,18 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
                   />
                 </div>
 
-                <div className="flex justify-end space-x-1 mt-1">
-                  <button
-                    onClick={handleCancelEdit}
-                    className="px-1 py-0.5 bg-gray-500 text-white rounded text-[10px] hover:bg-gray-600"
-                  >
-                    Cancel
-                  </button>
+                <div className="flex justify-center space-x-2 mt-2">
                   <button
                     onClick={handleSaveChanges}
-                    className="px-1 py-0.5 bg-green-600 text-white rounded text-[10px] hover:bg-green-700"
+                    className="px-3 py-1 bg-green-600 text-white rounded text-xs hover:bg-green-700 min-w-[60px]"
                   >
                     Save
+                  </button>
+                  <button
+                    onClick={handleCancelEdit}
+                    className="px-3 py-1 bg-gray-500 text-white rounded text-xs hover:bg-gray-600 min-w-[60px]"
+                  >
+                    Cancel
                   </button>
                 </div>
               </div>
@@ -1279,13 +1281,13 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
                         </div>
                       </div>
                     ) : (
-                      <div className="mt-3 flex justify-end">
+                      <div className="mt-3 flex justify-center">
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             setDiagnosingAppointment(appointment);
                           }}
-                          className="px-3 py-1 bg-yellow-600 text-white rounded text-sm font-medium hover:bg-yellow-700"
+                          className="px-4 py-2 bg-yellow-500 text-white rounded-md text-sm font-medium hover:bg-yellow-600 shadow-md w-full md:w-auto"
                         >
                           Add Diagnosis
                         </button>
