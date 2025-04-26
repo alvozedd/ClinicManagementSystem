@@ -36,29 +36,31 @@ app.use(addSecurityHeaders); // Add additional security headers
 app.use(secureCoookieSettings); // Ensure cookies are secure
 
 // CORS configuration
-app.use((req, res, next) => {
-  // Get the origin from the request
-  const origin = req.headers.origin;
+app.use(cors({
+  origin: function(origin, callback) {
+    // Allow requests with no origin (like mobile apps, curl requests)
+    if (!origin) return callback(null, true);
 
-  // Allow the specific origin that sent the request
-  if (origin) {
-    res.header('Access-Control-Allow-Origin', origin);
-  } else {
-    // Fallback for requests without origin header
-    res.header('Access-Control-Allow-Origin', '*');
-  }
+    // List of allowed origins
+    const allowedOrigins = [
+      'https://urohealthltd.netlify.app',
+      'http://localhost:3000',
+      'http://localhost:5173'
+    ];
 
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-  res.header('Access-Control-Allow-Credentials', 'true');
+    if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization']
+}));
 
-  // Handle OPTIONS method
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-
-  next();
-});
+// Handle preflight OPTIONS requests
+app.options('*', cors());
 
 // Parse JSON bodies
 app.use(express.json());
