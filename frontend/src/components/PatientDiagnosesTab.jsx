@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { FaFileMedical, FaCalendarAlt, FaUser, FaClock, FaClipboardList, FaEdit, FaTrashAlt } from 'react-icons/fa';
+import { useState, useEffect, useRef } from 'react';
+import { FaFileMedical, FaCalendarAlt, FaUser, FaClock, FaClipboardList, FaEdit, FaTrashAlt, FaSync } from 'react-icons/fa';
 import apiService from '../utils/apiService';
 
 function PatientDiagnosesTab({ patient, appointments, onEditDiagnosis, onDeleteDiagnosis }) {
@@ -8,18 +8,52 @@ function PatientDiagnosesTab({ patient, appointments, onEditDiagnosis, onDeleteD
   const [error, setError] = useState(null);
   const [sortOrder, setSortOrder] = useState('newest');
   const [filterType, setFilterType] = useState('all');
+  const [refreshKey, setRefreshKey] = useState(0); // Used to force refresh
+  const currentPatientId = useRef(null);
 
+  // Effect to clear diagnoses when patient changes
+  useEffect(() => {
+    if (!patient) return;
+
+    const patientId = patient._id || patient.id;
+
+    // If patient has changed, clear diagnoses and set loading state
+    if (currentPatientId.current !== patientId) {
+      console.log('Patient changed, clearing diagnoses');
+      setAllDiagnoses([]);
+      setLoading(true);
+      currentPatientId.current = patientId;
+    }
+  }, [patient]);
+
+  // Effect to fetch diagnoses
   useEffect(() => {
     const fetchDiagnoses = async () => {
       if (!patient || !patient._id) return;
 
+      const patientId = patient._id || patient.id;
+
+      // Double-check we're fetching for the current patient
+      if (currentPatientId.current !== patientId) {
+        console.log('Patient ID mismatch, not fetching diagnoses');
+        return;
+      }
+
       setLoading(true);
+      setError(null);
+
       try {
+        console.log(`Fetching diagnoses for patient: ${patientId} (refresh key: ${refreshKey})`);
+
         // Try to get diagnoses directly by patient ID first (new method)
         try {
-          console.log('Fetching diagnoses for patient:', patient._id);
-          const patientId = patient._id || patient.id;
           const diagnoses = await apiService.getDiagnosesByPatientId(patientId);
+
+          // Verify we're still looking at the same patient
+          if (currentPatientId.current !== patientId) {
+            console.log('Patient changed during fetch, aborting');
+            return;
+          }
 
           if (diagnoses && diagnoses.length > 0) {
             console.log('Found diagnoses using patient ID method:', diagnoses.length);
@@ -38,6 +72,7 @@ function PatientDiagnosesTab({ patient, appointments, onEditDiagnosis, onDeleteD
 
               return {
                 id: diagnosis._id,
+                patientId: patientId, // Store patient ID for verification
                 appointmentId: appointment?._id,
                 appointmentDate: new Date(appointment?.appointment_date),
                 appointmentType: appointment?.type || 'Consultation',
@@ -51,12 +86,31 @@ function PatientDiagnosesTab({ patient, appointments, onEditDiagnosis, onDeleteD
               };
             });
 
-            setAllDiagnoses(diagnosesArray);
+            // Final verification that these diagnoses belong to the current patient
+            const verifiedDiagnoses = diagnosesArray.filter(d =>
+              d.patientId === patientId ||
+              !d.patientId // Include if patientId is missing (shouldn't happen but just in case)
+            );
+
+            if (verifiedDiagnoses.length !== diagnosesArray.length) {
+              console.warn(`Filtered out ${diagnosesArray.length - verifiedDiagnoses.length} diagnoses that didn't match patient ID`);
+            }
+
+            setAllDiagnoses(verifiedDiagnoses);
             setLoading(false);
             return; // Exit early if we got diagnoses by patient ID
+          } else {
+            console.log('No diagnoses found for patient:', patientId);
+            setAllDiagnoses([]);
           }
         } catch (err) {
           console.error('Error fetching diagnoses by patient ID, falling back to appointment method:', err);
+        }
+
+        // Verify we're still looking at the same patient
+        if (currentPatientId.current !== patientId) {
+          console.log('Patient changed during fetch, aborting fallback method');
+          return;
         }
 
         // Fallback: Create a flattened array of all diagnoses across all appointments
@@ -67,6 +121,12 @@ function PatientDiagnosesTab({ patient, appointments, onEditDiagnosis, onDeleteD
 
         // For each appointment, fetch diagnoses
         for (const appointment of patientAppointments) {
+          // Verify we're still looking at the same patient before each appointment fetch
+          if (currentPatientId.current !== patientId) {
+            console.log('Patient changed during appointment loop, aborting');
+            return;
+          }
+
           if (appointment.status === 'Completed') {
             try {
               const appointmentId = appointment._id || appointment.id;
@@ -84,6 +144,7 @@ function PatientDiagnosesTab({ patient, appointments, onEditDiagnosis, onDeleteD
 
                   diagnosesArray.push({
                     id: diagnosis._id,
+                    patientId: patientId, // Store patient ID for verification
                     appointmentId: appointmentId,
                     appointmentDate: new Date(appointment.appointment_date || appointment.date),
                     appointmentType: appointment.type,
@@ -103,6 +164,12 @@ function PatientDiagnosesTab({ patient, appointments, onEditDiagnosis, onDeleteD
           }
         }
 
+        // Final verification that we're still on the same patient
+        if (currentPatientId.current !== patientId) {
+          console.log('Patient changed after fetching all appointments, aborting');
+          return;
+        }
+
         setAllDiagnoses(diagnosesArray);
       } catch (err) {
         console.error('Error fetching diagnoses:', err);
@@ -113,7 +180,7 @@ function PatientDiagnosesTab({ patient, appointments, onEditDiagnosis, onDeleteD
     };
 
     fetchDiagnoses();
-  }, [patient, appointments]);
+  }, [patient, appointments, refreshKey]);
 
   // Sort diagnoses based on current sort order
   const sortedDiagnoses = [...allDiagnoses].sort((a, b) => {
@@ -164,9 +231,20 @@ function PatientDiagnosesTab({ patient, appointments, onEditDiagnosis, onDeleteD
       <div className="bg-blue-50 border border-blue-200 text-blue-700 px-6 py-8 rounded-lg text-center">
         <FaFileMedical className="mx-auto text-4xl mb-4 text-blue-400" />
         <h3 className="text-lg font-semibold mb-2">No Diagnoses Found</h3>
-        <p className="text-blue-600">
+        <p className="text-blue-600 mb-4">
           This patient doesn't have any recorded diagnoses yet.
         </p>
+        <button
+          onClick={() => {
+            setLoading(true);
+            setRefreshKey(prev => prev + 1);
+          }}
+          className="inline-flex items-center bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
+          disabled={loading}
+        >
+          <FaSync className={`mr-2 ${loading ? "animate-spin" : ""}`} />
+          {loading ? "Refreshing..." : "Refresh Diagnoses"}
+        </button>
       </div>
     );
   }
@@ -174,13 +252,26 @@ function PatientDiagnosesTab({ patient, appointments, onEditDiagnosis, onDeleteD
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-        <h3 className="text-xl font-bold text-gray-800 flex items-center">
-          <FaFileMedical className="mr-2 text-blue-600" />
-          Patient Diagnoses
-          <span className="ml-2 bg-blue-100 text-blue-800 text-sm font-medium px-2.5 py-0.5 rounded-full">
-            {filteredDiagnoses.length}
-          </span>
-        </h3>
+        <div className="flex items-center">
+          <h3 className="text-xl font-bold text-gray-800 flex items-center">
+            <FaFileMedical className="mr-2 text-blue-600" />
+            Patient Diagnoses
+            <span className="ml-2 bg-blue-100 text-blue-800 text-sm font-medium px-2.5 py-0.5 rounded-full">
+              {filteredDiagnoses.length}
+            </span>
+          </h3>
+          <button
+            onClick={() => {
+              setAllDiagnoses([]);
+              setLoading(true);
+              setRefreshKey(prev => prev + 1);
+            }}
+            className="ml-3 text-blue-600 hover:text-blue-800 p-1 rounded-full hover:bg-blue-100 transition-colors"
+            title="Refresh diagnoses"
+          >
+            <FaSync className={loading ? "animate-spin" : ""} />
+          </button>
+        </div>
 
         <div className="flex flex-col sm:flex-row gap-3">
           <select
