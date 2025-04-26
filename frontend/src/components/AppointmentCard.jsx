@@ -3,22 +3,26 @@ import ActionButtons from './ActionButtons';
 
 /**
  * Reusable appointment card component
- * 
+ *
  * @param {Object} props
  * @param {Object} props.appointment - The appointment object
  * @param {Function} props.onViewPatient - Function to handle viewing a patient
  * @param {Function} props.onEditAppointment - Function to handle editing an appointment
+ * @param {Function} props.onDiagnoseAppointment - Function to handle diagnosing an appointment (optional)
  * @param {Function} props.onDeleteAppointment - Function to handle deleting an appointment
  * @param {Array} props.patients - Array of patients
  * @param {Function} props.onUpdatePatient - Function to update patient data
+ * @param {boolean} props.isDoctor - Whether the current user is a doctor (optional)
  */
-const AppointmentCard = ({ 
-  appointment, 
-  onViewPatient, 
-  onEditAppointment, 
+const AppointmentCard = ({
+  appointment,
+  onViewPatient,
+  onEditAppointment,
+  onDiagnoseAppointment,
   onDeleteAppointment,
   patients,
-  onUpdatePatient
+  onUpdatePatient,
+  isDoctor = false
 }) => {
   const handleCardClick = () => {
     const patient = patients.find(p => p.id === appointment.patientId);
@@ -47,10 +51,10 @@ const AppointmentCard = ({
     <div
       key={appointment.id || appointment._id}
       className={`p-4 rounded-lg border border-gray-200 flex justify-between items-center cursor-pointer hover:bg-blue-50 transition-colors ${
-        appointment.status === 'Scheduled' ? 'bg-green-50' : 
-        appointment.status === 'Completed' ? 'bg-blue-50' : 
-        appointment.status === 'Cancelled' ? 'bg-red-50' : 
-        appointment.status === 'Pending' ? 'bg-yellow-50' : 
+        appointment.status === 'Scheduled' ? 'bg-green-50' :
+        appointment.status === 'Completed' ? 'bg-blue-50' :
+        appointment.status === 'Cancelled' ? 'bg-red-50' :
+        appointment.status === 'Pending' ? 'bg-yellow-50' :
         'bg-white'
       }`}
       onClick={handleCardClick}
@@ -69,13 +73,15 @@ const AppointmentCard = ({
         }`}>
           {appointment.status}
         </span>
-        <ActionButtons 
+        <ActionButtons
           appointment={appointment}
           onViewPatient={onViewPatient}
           onEditAppointment={onEditAppointment}
+          onDiagnoseAppointment={onDiagnoseAppointment}
           onDeleteAppointment={onDeleteAppointment}
           patients={patients}
           onUpdatePatient={onUpdatePatient}
+          isDoctor={isDoctor}
         />
       </div>
     </div>
