@@ -33,6 +33,49 @@ function HomePage() {
   const [error, setError] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const menuRef = useRef(null);
+  const [contentLoading, setContentLoading] = useState(true);
+  const [content, setContent] = useState({
+    header: {},
+    footer: {},
+    homepage: {}
+  });
+
+  // Fetch content from API
+  useEffect(() => {
+    const fetchContent = async () => {
+      try {
+        setContentLoading(true);
+        const contentData = await apiService.getContent();
+
+        // Organize content by section and category
+        const organizedContent = {
+          header: {},
+          footer: {},
+          homepage: {}
+        };
+
+        contentData.forEach(item => {
+          if (!organizedContent[item.section]) {
+            organizedContent[item.section] = {};
+          }
+
+          if (!organizedContent[item.section][item.category]) {
+            organizedContent[item.section][item.category] = [];
+          }
+
+          organizedContent[item.section][item.category].push(item);
+        });
+
+        setContent(organizedContent);
+      } catch (err) {
+        console.error('Error fetching content:', err);
+      } finally {
+        setContentLoading(false);
+      }
+    };
+
+    fetchContent();
+  }, []);
 
   // Close mobile menu when clicking outside
   useEffect(() => {
@@ -272,7 +315,6 @@ function HomePage() {
                 <h2 className="text-2xl sm:text-3xl font-bold text-blue-700 mb-4">Booking Confirmed!</h2>
                 <div className="bg-blue-50 p-3 sm:p-5 rounded-xl mb-5 shadow-sm">
                   <p className="mb-3 text-sm sm:text-base">Thank you for your booking. Your appointment has been scheduled for <strong>{formData.appointmentDate}</strong>.</p>
-                  <p className="mb-3 text-sm sm:text-base">Our staff will contact you to confirm the exact time.</p>
                 </div>
                 <button
                   onClick={() => {
@@ -780,8 +822,12 @@ function HomePage() {
                                   </svg>
                                 </div>
                                 <div>
-                                  <p className="text-sm text-gray-500 font-medium">Mobile: 0722 396 296</p>
-                                  <p className="text-sm text-gray-500">Office: 0733 398 296</p>
+                                  <p className="text-sm text-gray-500 font-medium">
+                                    Mobile: <a href="tel:+254722396296" className="text-blue-600 hover:text-blue-800">0722 396 296</a>
+                                  </p>
+                                  <p className="text-sm text-gray-500">
+                                    Office: <a href="tel:+254733398296" className="text-blue-600 hover:text-blue-800">0733 398 296</a>
+                                  </p>
                                 </div>
                               </div>
                               <a href="tel:+254722396296" className="w-full sm:w-auto sm:ml-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm text-center transition-all duration-300 shadow-sm hover:shadow flex items-center justify-center gap-1">
@@ -829,7 +875,10 @@ function HomePage() {
             <div className="flex flex-col md:flex-row justify-between mb-8">
               <div className="mb-8 md:mb-0">
                 <h3 className="text-xl font-bold mb-4 text-white">UroHealth Central Ltd</h3>
-                <p className="text-blue-100 mb-4 max-w-xs">Providing specialized urological care with a patient-centered approach since 2010.</p>
+                <p className="text-blue-100 mb-4 max-w-xs">
+                  {content.footer?.['UroHealth Central Ltd']?.find(item => item.label === 'About Text')?.value ||
+                   'Providing specialized urological care with a patient-centered approach since 2010.'}
+                </p>
                 <div className="flex space-x-4 mb-4">
                   <a href="#" className="text-white hover:text-blue-300 transition-colors bg-blue-700 p-2 rounded-full">
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -844,71 +893,93 @@ function HomePage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
-                <div>
-                  <h4 className="text-lg font-semibold mb-4 text-white">Services</h4>
-                  <ul className="space-y-2 text-sm text-blue-100">
-                    <li><a href="#" className="hover:text-white transition-colors">Urological Services</a></li>
-                    <li><a href="#" className="hover:text-white transition-colors">General Surgery</a></li>
-                    <li><a href="#" className="hover:text-white transition-colors">Consultations</a></li>
-                    <li><a href="#" className="hover:text-white transition-colors">Diagnostics</a></li>
-                  </ul>
-                </div>
-
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8">
                 <div>
                   <h4 className="text-lg font-semibold mb-4 text-white">Quick Links</h4>
                   <ul className="space-y-2 text-sm text-blue-100">
-                    <li>
-                      <button
-                        onClick={() => {
-                          setShowBookingForm(true);
-                          window.scrollTo({ top: 0, behavior: 'smooth' });
-                        }}
-                        className="hover:text-white transition-colors"
-                      >
-                        Book Appointment
-                      </button>
-                    </li>
-                    <li>
-                      <button
-                        onClick={() => {
-                          setShowBookingForm(false);
-                          setBookingSuccess(false);
-                          setTimeout(() => {
-                            document.getElementById('contact').scrollIntoView({ behavior: 'smooth' });
-                          }, 100);
-                        }}
-                        className="hover:text-white transition-colors"
-                      >
-                        Contact Us
-                      </button>
-                    </li>
-                    <li><Link to="/login" className="hover:text-white transition-colors">Staff Login</Link></li>
+                    {content.footer?.['Quick Links']?.filter(item => item.visible)?.map(link => (
+                      <li key={link.id}>
+                        {link.label === 'Book Appointment' ? (
+                          <button
+                            onClick={() => {
+                              setShowBookingForm(true);
+                              window.scrollTo({ top: 0, behavior: 'smooth' });
+                            }}
+                            className="hover:text-white transition-colors"
+                          >
+                            {link.label}
+                          </button>
+                        ) : link.label === 'Contact Us' ? (
+                          <button
+                            onClick={() => {
+                              setShowBookingForm(false);
+                              setBookingSuccess(false);
+                              setTimeout(() => {
+                                document.getElementById('contact').scrollIntoView({ behavior: 'smooth' });
+                              }, 100);
+                            }}
+                            className="hover:text-white transition-colors"
+                          >
+                            {link.label}
+                          </button>
+                        ) : link.label === 'Staff Login' ? (
+                          <Link to="/login" className="hover:text-white transition-colors">{link.label}</Link>
+                        ) : (
+                          <a href={link.url} className="hover:text-white transition-colors">{link.label}</a>
+                        )}
+                      </li>
+                    ))}
                   </ul>
                 </div>
 
                 <div>
                   <h4 className="text-lg font-semibold mb-4 text-white">Contact</h4>
                   <ul className="space-y-2 text-sm text-blue-100">
-                    <li className="flex items-start">
-                      <svg className="w-4 h-4 mr-2 mt-0.5 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                      </svg>
-                      <span>1st Floor, Gatemu House, Kimathi Way, Nyeri, Kenya</span>
-                    </li>
-                    <li className="flex items-start">
-                      <svg className="w-4 h-4 mr-2 mt-0.5 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
-                      </svg>
-                      <span>+254 722 396 296</span>
-                    </li>
-                    <li className="flex items-start">
-                      <svg className="w-4 h-4 mr-2 mt-0.5 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                      </svg>
-                      <span>drmuchaimbuguaclinic@gmail.com</span>
-                    </li>
+                    {content.footer?.['Contact']?.filter(item => item.visible)?.map(contactItem => (
+                      <li key={contactItem.id} className="flex items-start">
+                        {contactItem.label === 'Address' && (
+                          <>
+                            <svg className="w-4 h-4 mr-2 mt-0.5 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            <span>{contactItem.value}</span>
+                          </>
+                        )}
+                        {contactItem.label === 'Phone' && (
+                          <>
+                            <svg className="w-4 h-4 mr-2 mt-0.5 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                            </svg>
+                            <a href={`tel:${contactItem.value.replace(/\s+/g, '')}`} className="hover:text-white transition-colors">
+                              {contactItem.value}
+                            </a>
+                            <button
+                              className="ml-2 bg-blue-700 hover:bg-blue-600 text-xs px-2 py-1 rounded transition-colors"
+                              onClick={() => window.location.href = `tel:${contactItem.value.replace(/\s+/g, '')}`}
+                            >
+                              Call
+                            </button>
+                          </>
+                        )}
+                        {contactItem.label === 'Email' && (
+                          <>
+                            <svg className="w-4 h-4 mr-2 mt-0.5 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                            </svg>
+                            <a href={`mailto:${contactItem.value}`} className="hover:text-white transition-colors">
+                              {contactItem.value}
+                            </a>
+                            <button
+                              className="ml-2 bg-blue-700 hover:bg-blue-600 text-xs px-2 py-1 rounded transition-colors"
+                              onClick={() => window.location.href = `mailto:${contactItem.value}`}
+                            >
+                              Email
+                            </button>
+                          </>
+                        )}
+                      </li>
+                    ))}
                   </ul>
                 </div>
               </div>
@@ -916,10 +987,16 @@ function HomePage() {
 
             <div className="pt-6 border-t border-blue-700">
               <div className="flex flex-col md:flex-row justify-between items-center">
-                <p className="text-sm text-blue-200 mb-4 md:mb-0">&copy; {new Date().getFullYear()} UroHealth Central Ltd. All rights reserved.</p>
+                <p className="text-sm text-blue-200 mb-4 md:mb-0">
+                  {content.footer?.['Legal']?.find(item => item.label === 'Copyright')?.value ||
+                   `© ${new Date().getFullYear()} UroHealth Central Ltd. All rights reserved.`}
+                </p>
                 <div className="flex space-x-6">
-                  <a href="#" className="text-sm text-blue-200 hover:text-white transition-colors">Privacy Policy</a>
-                  <a href="#" className="text-sm text-blue-200 hover:text-white transition-colors">Terms of Service</a>
+                  {content.footer?.['Legal']?.filter(item => item.type === 'link' && item.visible)?.map(link => (
+                    <a key={link.id} href={link.url} className="text-sm text-blue-200 hover:text-white transition-colors">
+                      {link.label}
+                    </a>
+                  ))}
                 </div>
               </div>
             </div>

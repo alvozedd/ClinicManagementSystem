@@ -6,150 +6,79 @@ function ContentManagement() {
   const [contentItems, setContentItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [activeSection, setActiveSection] = useState('footer');
-  
-  // Mock data for initial development - will be replaced with API calls
+  const [activeSection, setActiveSection] = useState('homepage');
+
+  // Fetch content from API
   useEffect(() => {
-    // Simulate loading content from an API
-    setLoading(true);
-    
-    // Mock data structure for website content
-    const mockContent = {
-      footer: [
-        { 
-          id: 'footer-links-1', 
-          type: 'link', 
-          section: 'footer',
-          category: 'Quick Links',
-          label: 'Privacy Policy', 
-          url: '#', 
-          order: 1,
-          visible: true
-        },
-        { 
-          id: 'footer-links-2', 
-          type: 'link', 
-          section: 'footer',
-          category: 'Quick Links',
-          label: 'Terms of Service', 
-          url: '#', 
-          order: 2,
-          visible: true
-        },
-        { 
-          id: 'footer-contact-1', 
-          type: 'text', 
-          section: 'footer',
-          category: 'Contact',
-          label: 'Address', 
-          value: '1st Floor, Gatemu House, Kimathi Way, Nyeri, Kenya', 
-          order: 1,
-          visible: true
-        },
-        { 
-          id: 'footer-contact-2', 
-          type: 'text', 
-          section: 'footer',
-          category: 'Contact',
-          label: 'Phone', 
-          value: '+254 722 396 296', 
-          order: 2,
-          visible: true
-        },
-        { 
-          id: 'footer-contact-3', 
-          type: 'text', 
-          section: 'footer',
-          category: 'Contact',
-          label: 'Email', 
-          value: 'info@urohealthcentral.com', 
-          order: 3,
-          visible: true
-        },
-        { 
-          id: 'footer-copyright', 
-          type: 'text', 
-          section: 'footer',
-          category: 'Legal',
-          label: 'Copyright', 
-          value: `© ${new Date().getFullYear()} UroHealth Central Ltd. All rights reserved.`, 
-          order: 1,
-          visible: true
-        }
-      ],
-      header: [
-        {
-          id: 'header-title',
-          type: 'text',
-          section: 'header',
-          category: 'Branding',
-          label: 'Site Title',
-          value: 'UroHealth Central Ltd',
-          order: 1,
-          visible: true
-        },
-        {
-          id: 'header-subtitle',
-          type: 'text',
-          section: 'header',
-          category: 'Branding',
-          label: 'Subtitle',
-          value: 'Specialist Urological & Surgical Care',
-          order: 2,
-          visible: true
-        }
-      ],
-      homepage: [
-        {
-          id: 'homepage-hero-title',
-          type: 'text',
-          section: 'homepage',
-          category: 'Hero',
-          label: 'Hero Title',
-          value: 'DR. PAUL MUCHAI MBUGUA - CONSULTANT SURGEON & UROLOGIST',
-          order: 1,
-          visible: true
-        },
-        {
-          id: 'homepage-about-text',
-          type: 'longtext',
-          section: 'homepage',
-          category: 'About',
-          label: 'About Text',
-          value: 'Providing specialized urological care with a patient-centered approach since 2010.',
-          order: 1,
-          visible: true
-        }
-      ]
+    const fetchContent = async () => {
+      try {
+        setLoading(true);
+        // Fetch content for the active section
+        const contentData = await apiService.getContent(activeSection);
+
+        // Filter content by section
+        const sectionContent = contentData.filter(item => item.section === activeSection);
+
+        // Set the content items
+        setContentItems(sectionContent);
+      } catch (err) {
+        console.error('Error fetching content:', err);
+        setError('Failed to load content. Please try again.');
+      } finally {
+        setLoading(false);
+      }
     };
-    
-    // Set the content based on active section
-    setContentItems(mockContent[activeSection] || []);
-    setLoading(false);
+
+    fetchContent();
   }, [activeSection]);
-  
+
   // Function to handle editing content
-  const handleEditContent = (id, updatedData) => {
-    setContentItems(prevItems => 
-      prevItems.map(item => 
-        item.id === id ? { ...item, ...updatedData } : item
-      )
-    );
-    
-    // In a real implementation, we would save to the database here
-    console.log('Updated content:', id, updatedData);
-    // apiService.updateContent(id, updatedData);
+  const handleEditContent = async (id, updatedData) => {
+    try {
+      // Update the content in the database
+      await apiService.updateContent(id, updatedData);
+
+      // Update the local state
+      setContentItems(prevItems =>
+        prevItems.map(item =>
+          item._id === id ? { ...item, ...updatedData } : item
+        )
+      );
+
+      console.log('Content updated successfully');
+    } catch (err) {
+      console.error('Error updating content:', err);
+      setError('Failed to update content. Please try again.');
+    }
   };
-  
+
   // Function to handle toggling visibility
-  const handleToggleVisibility = (id) => {
-    setContentItems(prevItems => 
-      prevItems.map(item => 
-        item.id === id ? { ...item, visible: !item.visible } : item
-      )
-    );
+  const handleToggleVisibility = async (id) => {
+    try {
+      // Find the item to toggle
+      const item = contentItems.find(item => item._id === id);
+      if (!item) return;
+
+      // Toggle visibility
+      const updatedData = { visible: !item.visible };
+
+      // Update the content in the database
+      await apiService.updateContent(id, updatedData);
+
+      // Update the local state
+      setContentItems(prevItems =>
+        prevItems.map(item =>
+          item._id === id ? { ...item, ...updatedData } : item
+        )
+      );
+
+      console.log('Visibility toggled successfully');
+    } catch (err) {
+      console.error('Error toggling visibility:', err);
+      setError('Failed to update content. Please try again.');
+    }
   };
-  
+
   // Group content items by category
   const groupedContent = contentItems.reduce((acc, item) => {
     if (!acc[item.category]) {
@@ -158,7 +87,7 @@ function ContentManagement() {
     acc[item.category].push(item);
     return acc;
   }, {});
-  
+
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
       <div className="flex justify-between items-center mb-6">
@@ -167,20 +96,44 @@ function ContentManagement() {
           <p className="text-sm text-gray-600">Edit website content without changing code</p>
         </div>
       </div>
-      
+
       {/* Section Tabs */}
       <div className="mb-6 border-b border-gray-200">
         <ul className="flex flex-wrap -mb-px">
           <li className="mr-2">
             <button
-              onClick={() => setActiveSection('footer')}
+              onClick={() => setActiveSection('homepage')}
               className={`inline-block py-2 px-4 text-sm font-medium ${
-                activeSection === 'footer'
+                activeSection === 'homepage'
                   ? 'text-blue-600 border-b-2 border-blue-600'
                   : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
             >
-              Footer
+              Homepage
+            </button>
+          </li>
+          <li className="mr-2">
+            <button
+              onClick={() => setActiveSection('services')}
+              className={`inline-block py-2 px-4 text-sm font-medium ${
+                activeSection === 'services'
+                  ? 'text-blue-600 border-b-2 border-blue-600'
+                  : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              Services
+            </button>
+          </li>
+          <li className="mr-2">
+            <button
+              onClick={() => setActiveSection('contact')}
+              className={`inline-block py-2 px-4 text-sm font-medium ${
+                activeSection === 'contact'
+                  ? 'text-blue-600 border-b-2 border-blue-600'
+                  : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              Contact
             </button>
           </li>
           <li className="mr-2">
@@ -197,19 +150,20 @@ function ContentManagement() {
           </li>
           <li className="mr-2">
             <button
-              onClick={() => setActiveSection('homepage')}
+              onClick={() => setActiveSection('footer')}
               className={`inline-block py-2 px-4 text-sm font-medium ${
-                activeSection === 'homepage'
+                activeSection === 'footer'
                   ? 'text-blue-600 border-b-2 border-blue-600'
                   : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
               }`}
             >
-              Homepage
+              Footer
             </button>
           </li>
+          {/* Add more section tabs here if needed */}
         </ul>
       </div>
-      
+
       {/* Content Preview */}
       <div className="mb-6 p-4 border border-gray-200 rounded-lg bg-gray-50">
         <h3 className="text-md font-medium text-gray-700 mb-2">Preview</h3>
@@ -234,7 +188,7 @@ function ContentManagement() {
               ))}
             </div>
           )}
-          
+
           {activeSection === 'header' && (
             <div className="flex flex-col items-center justify-center py-4">
               {groupedContent['Branding']?.filter(item => item.visible).map(item => (
@@ -244,7 +198,7 @@ function ContentManagement() {
               ))}
             </div>
           )}
-          
+
           {activeSection === 'homepage' && (
             <div className="flex flex-col items-center justify-center py-4">
               {groupedContent['Hero']?.filter(item => item.visible).map(item => (
@@ -259,13 +213,85 @@ function ContentManagement() {
               ))}
             </div>
           )}
+
+          {activeSection === 'services' && (
+            <div className="flex flex-col py-4">
+              <h3 className="text-xl font-bold mb-4 text-center">Our Services</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {Object.entries(groupedContent).map(([category, items]) => (
+                  <div key={category} className="bg-blue-700 bg-opacity-50 p-3 rounded-lg">
+                    <h4 className="font-bold text-white mb-2">{category}</h4>
+                    {items.filter(item => item.visible).map(item => (
+                      <div key={item.id} className="text-sm text-blue-100 mb-2">
+                        {item.label === 'Service Title' ? (
+                          <div className="font-medium">{item.value}</div>
+                        ) : item.label === 'Service Description' ? (
+                          <div>{item.value}</div>
+                        ) : (
+                          <div>{item.value}</div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {activeSection === 'contact' && (
+            <div className="flex flex-col py-4">
+              <h3 className="text-xl font-bold mb-4 text-center">Contact Information</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {Object.entries(groupedContent).map(([category, items]) => (
+                  <div key={category} className="bg-blue-700 bg-opacity-50 p-3 rounded-lg">
+                    <h4 className="font-bold text-white mb-2">{category}</h4>
+                    {items.filter(item => item.visible).map(item => (
+                      <div key={item.id} className="text-sm text-blue-100 mb-2">
+                        <div className="font-medium">{item.label}:</div>
+                        <div>{item.value}</div>
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
-      
+
       {/* Content Editor */}
       <div>
         <h3 className="text-md font-medium text-gray-700 mb-4">Edit Content</h3>
-        
+
+        {/* Error Message */}
+        {error && (
+          <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-4">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div className="ml-3">
+                <p className="text-sm text-red-700">{error}</p>
+              </div>
+              <div className="ml-auto pl-3">
+                <div className="-mx-1.5 -my-1.5">
+                  <button
+                    onClick={() => setError('')}
+                    className="inline-flex rounded-md p-1.5 text-red-500 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                  >
+                    <span className="sr-only">Dismiss</span>
+                    <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {loading ? (
           <div className="flex justify-center items-center py-10">
             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
@@ -277,9 +303,9 @@ function ContentManagement() {
                 <h4 className="font-medium text-gray-800 mb-3">{category}</h4>
                 <div className="space-y-4">
                   {items.map(item => (
-                    <ContentItem 
-                      key={item.id} 
-                      item={item} 
+                    <ContentItem
+                      key={item.id}
+                      item={item}
                       onEdit={handleEditContent}
                       onToggleVisibility={handleToggleVisibility}
                     />
@@ -299,30 +325,30 @@ function ContentItem({ item, onEdit, onToggleVisibility }) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedValue, setEditedValue] = useState(item.type === 'link' ? item.label : item.value);
   const [editedUrl, setEditedUrl] = useState(item.url || '');
-  
+
   const handleSave = () => {
-    const updatedData = item.type === 'link' 
+    const updatedData = item.type === 'link'
       ? { label: editedValue, url: editedUrl }
       : { value: editedValue };
-    
-    onEdit(item.id, updatedData);
+
+    onEdit(item._id, updatedData);
     setIsEditing(false);
   };
-  
+
   const handleCancel = () => {
     setEditedValue(item.type === 'link' ? item.label : item.value);
     setEditedUrl(item.url || '');
     setIsEditing(false);
   };
-  
+
   return (
     <div className={`p-3 rounded-lg ${item.visible ? 'bg-white' : 'bg-gray-100'}`}>
       <div className="flex justify-between items-start mb-2">
         <div>
           <span className="text-sm font-medium text-gray-700">{item.label}</span>
           <span className={`ml-2 px-2 py-0.5 rounded-full text-xs ${
-            item.type === 'link' ? 'bg-purple-100 text-purple-800' : 
-            item.type === 'longtext' ? 'bg-green-100 text-green-800' : 
+            item.type === 'link' ? 'bg-purple-100 text-purple-800' :
+            item.type === 'longtext' ? 'bg-green-100 text-green-800' :
             'bg-blue-100 text-blue-800'
           }`}>
             {item.type}
@@ -330,7 +356,7 @@ function ContentItem({ item, onEdit, onToggleVisibility }) {
         </div>
         <div className="flex space-x-2">
           <button
-            onClick={() => onToggleVisibility(item.id)}
+            onClick={() => onToggleVisibility(item._id)}
             className={`p-1 rounded ${
               item.visible ? 'text-gray-500 hover:text-gray-700' : 'text-red-500 hover:text-red-700'
             }`}
@@ -372,7 +398,7 @@ function ContentItem({ item, onEdit, onToggleVisibility }) {
           )}
         </div>
       </div>
-      
+
       {isEditing ? (
         <div className="space-y-2">
           {item.type === 'link' ? (
