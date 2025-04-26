@@ -8,16 +8,24 @@ const logger = require('../utils/logger');
 // @route   POST /api/users/login
 // @access  Public
 const authUser = asyncHandler(async (req, res) => {
-  const { username, password } = req.body;
+  const { username, email, password } = req.body;
 
-  logger.info('Login attempt initiated', { username });
+  // Use either username or email for login
+  const loginIdentifier = username || email;
+
+  if (!loginIdentifier) {
+    res.status(400);
+    throw new Error('Username or email is required');
+  }
+
+  logger.info('Login attempt initiated', { username: loginIdentifier });
   logger.debug('Login request received', { body: req.body });
 
   // Find user by username or email
   const user = await User.findOne({
     $or: [
-      { username: username },
-      { email: username }
+      { username: loginIdentifier },
+      { email: loginIdentifier }
     ]
   });
 

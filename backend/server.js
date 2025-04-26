@@ -37,8 +37,10 @@ connectDB();
 
 const app = express();
 
-// Trust proxy - needed for Railway deployment
-app.set('trust proxy', true);
+// Trust proxy - needed for Railway deployment, but only in production
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', true);
+}
 
 // Add request ID to each request (do this first for complete request tracking)
 app.use(addRequestId);

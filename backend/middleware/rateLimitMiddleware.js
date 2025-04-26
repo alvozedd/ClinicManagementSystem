@@ -9,7 +9,8 @@ const commonConfig = {
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
   // Trust the X-Forwarded-For header from our reverse proxy
-  trustProxy: true
+  // Only enable in production to avoid validation errors in development
+  trustProxy: process.env.NODE_ENV === 'production'
 };
 
 // Create a limiter for general API requests
