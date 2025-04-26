@@ -47,7 +47,9 @@ app.use(addRequestId);
 app.use(conditionalRequestLogger);
 
 // Apply security middleware
-app.use(helmet()); // Adds various security headers
+app.use(helmet({
+  contentSecurityPolicy: false, // Disable CSP from helmet as we have our own
+}));
 app.use(enforceHttps); // Redirect HTTP to HTTPS in production
 app.use(addSecurityHeaders); // Add additional security headers
 app.use(secureCoookieSettings); // Ensure cookies are secure
@@ -62,9 +64,6 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization']
 }));
-
-// Handle preflight OPTIONS requests
-app.options('*', cors());
 
 // Parse JSON bodies
 app.use(express.json());
