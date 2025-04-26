@@ -84,10 +84,12 @@ app.use('/api/appointments', appointmentRoutes);
 app.use('/api/diagnoses', diagnosisRoutes);
 
 // Create a special route just for login without the /api prefix
-app.post('/users/login', (req, res, next) => {
-  console.log('Received login request at /users/login, forwarding to /api/users/login');
-  req.url = '/login'; // Change the URL to match what the router expects
-  userRoutes(req, res, next); // Forward to the userRoutes router
+app.post('/users/login', (req, res) => {
+  console.log('Received login request at /users/login, forwarding to controller directly');
+  // Import the controller directly
+  const { authUser } = require('./controllers/userController');
+  // Call the controller function directly
+  authUser(req, res);
 });
 
 // Root route
