@@ -17,7 +17,7 @@ const corsMiddleware = (req, res, next) => {
   const origin = req.headers.origin;
 
   // Check if the origin is in our allowed list
-  if (allowedOrigins.includes(origin) || !origin) {
+  if (allowedOrigins.includes(origin)) {
     // Set CORS headers - never use wildcard with credentials
     res.header('Access-Control-Allow-Origin', origin);
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
@@ -25,10 +25,22 @@ const corsMiddleware = (req, res, next) => {
     res.header('Access-Control-Allow-Credentials', 'true');
 
     // Log CORS headers for debugging
-    console.log('CORS headers set:', {
+    console.log('CORS headers set for allowed origin:', {
       origin,
       allowCredentials: 'true'
     });
+  } else {
+    // For requests without origin (like curl) or non-allowed origins
+    // We still need to set some CORS headers for OPTIONS requests to work
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+
+    // For API testing tools and server-to-server requests
+    if (!origin) {
+      console.log('No origin in request, setting minimal CORS headers');
+    } else {
+      console.log('Origin not allowed:', origin);
+    }
   }
 
   // Handle preflight requests
