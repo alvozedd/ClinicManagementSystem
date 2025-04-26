@@ -111,10 +111,18 @@ export const identifyAppointmentsNeedingDiagnosis = (appointments) => {
   const today = new Date().toISOString().split('T')[0];
 
   return appointments.filter(appointment => {
+    // Check if the appointment has diagnoses in the diagnoses array
+    const hasDiagnosesArray = appointment.diagnoses && appointment.diagnoses.length > 0;
+
+    // Check if the appointment has a diagnosis object
+    const hasDiagnosisObject = appointment.diagnosis &&
+      (typeof appointment.diagnosis === 'object' || typeof appointment.diagnosis === 'string');
+
     // Past appointments that are completed but have no diagnosis
     const isCompletedWithoutDiagnosis =
       appointment.status === 'Completed' &&
-      !appointment.diagnosis &&
+      !hasDiagnosisObject &&
+      !hasDiagnosesArray &&
       appointment.date <= today;
 
     // Past appointments that are still scheduled (time has passed but status not updated)
@@ -122,7 +130,12 @@ export const identifyAppointmentsNeedingDiagnosis = (appointments) => {
       appointment.status === 'Scheduled' &&
       appointment.date < today;
 
-    return isCompletedWithoutDiagnosis || isPastScheduled;
+    // Appointments explicitly marked as needing diagnosis
+    const isMarkedNeedsDiagnosis =
+      appointment.status === 'Needs Diagnosis' ||
+      appointment.needsDiagnosis === true;
+
+    return isCompletedWithoutDiagnosis || isPastScheduled || isMarkedNeedsDiagnosis;
   });
 };
 
@@ -136,8 +149,22 @@ export const updateAppointmentStatuses = (appointments) => {
   const now = new Date();
 
   return appointments.map(appointment => {
+    // Check if the appointment has diagnoses in the diagnoses array
+    const hasDiagnosesArray = appointment.diagnoses && appointment.diagnoses.length > 0;
+
+    // Check if the appointment has a diagnosis object
+    const hasDiagnosisObject = appointment.diagnosis &&
+      (typeof appointment.diagnosis === 'object' || typeof appointment.diagnosis === 'string');
+
     // Skip appointments that already have diagnoses
-    if (appointment.diagnosis || (appointment.diagnoses && appointment.diagnoses.length > 0)) {
+    if (hasDiagnosisObject || hasDiagnosesArray) {
+      // If it has a diagnosis, make sure it's marked as completed
+      if (appointment.status !== 'Completed') {
+        return {
+          ...appointment,
+          status: 'Completed'
+        };
+      }
       return appointment;
     }
 
