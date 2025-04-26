@@ -6,7 +6,8 @@ const helmet = require('helmet');
 const connectDB = require('./config/db');
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 const { enforceHttps, addSecurityHeaders, secureCoookieSettings } = require('./middleware/securityMiddleware');
-const { handleCsrfError, exemptCsrf, provideCsrfToken } = require('./middleware/csrfMiddleware');
+// Using simplified CSRF middleware to avoid path-to-regexp errors
+const { handleCsrfError, exemptCsrf, provideCsrfToken } = require('./middleware/simpleCsrfMiddleware');
 const { addRequestId } = require('./middleware/requestIdMiddleware');
 const { conditionalRequestLogger } = require('./middleware/requestLoggingMiddleware');
 const corsMiddleware = require('./middleware/corsMiddleware');
@@ -70,10 +71,11 @@ app.use(express.json());
 // Parse cookies
 app.use(cookieParser());
 
-// CSRF protection
+// Using simplified CSRF middleware to avoid path-to-regexp errors
 app.use(exemptCsrf);
 app.use(handleCsrfError);
 app.use(provideCsrfToken);
+console.log('Using simplified CSRF middleware');
 
 // Health check routes (should be before other routes for quick response)
 app.use('/api/health', healthRoutes);
