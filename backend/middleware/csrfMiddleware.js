@@ -36,35 +36,58 @@ const handleCsrfError = (err, req, res, next) => {
 
 // Middleware to provide CSRF token to the frontend
 const provideCsrfToken = (req, res, next) => {
-  // Add CSRF token to response locals for templates
-  res.locals.csrfToken = req.csrfToken();
-  
-  // Also add it as a header for API requests
-  res.setHeader('X-CSRF-Token', req.csrfToken());
-  
+  // Only provide CSRF token if the request has the csrfToken method
+  // (it won't be available for exempt routes)
+  if (req.csrfToken && typeof req.csrfToken === 'function') {
+    try {
+      const token = req.csrfToken();
+      // Add CSRF token to response locals for templates
+      res.locals.csrfToken = token;
+
+      // Also add it as a header for API requests
+      res.setHeader('X-CSRF-Token', token);
+    } catch (error) {
+      console.warn('Error generating CSRF token:', error.message);
+    }
+  }
+
   next();
 };
 
 // Middleware to exempt certain routes from CSRF protection
 const exemptCsrf = (req, res, next) => {
-  // Skip CSRF for these routes
-  const exemptRoutes = [
-    '/api/users/login',
-    '/api/users/refresh-token',
-    '/api/patients', // For visitor bookings
-    '/api/appointments', // For visitor bookings
-  ];
-  
-  // Skip CSRF for GET, HEAD, OPTIONS requests
-  const exemptMethods = ['GET', 'HEAD', 'OPTIONS'];
-  
-  if (
-    exemptRoutes.includes(req.path) ||
-    exemptMethods.includes(req.method)
-  ) {
+  try {
+    // Skip CSRF for these routes
+    const exemptRoutes = [
+      '/api/users/login',
+      '/api/users/refresh-token',
+      '/api/patients', // For visitor bookings
+      '/api/appointments', // For visitor bookings
+      '/api/health',
+      '/api/health/detailed',
+      '/'
+    ];
+
+    // Skip CSRF for GET, HEAD, OPTIONS requests
+    const exemptMethods = ['GET', 'HEAD', 'OPTIONS'];
+
+    // Check if the route is exempt
+    const isExemptRoute = exemptRoutes.some(route =>
+      req.path === route || req.path.startsWith(`${route}/`)
+    );
+
+    if (
+      isExemptRoute ||
+      exemptMethods.includes(req.method)
+    ) {
+      next();
+    } else {
+      csrfProtection(req, res, next);
+    }
+  } catch (error) {
+    console.error('Error in CSRF middleware:', error);
+    // If there's an error, skip CSRF protection as a fallback
     next();
-  } else {
-    csrfProtection(req, res, next);
   }
 };
 
