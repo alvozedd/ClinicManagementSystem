@@ -78,9 +78,24 @@ const connectDB = async () => {
 // Create Express app
 const app = express();
 
-// Basic CORS headers without middleware
+// Improved CORS configuration
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
+  const allowedOrigins = [
+    'https://urohealthltd.netlify.app',
+    'http://localhost:3000',
+    'http://localhost:5173'
+  ];
+
+  const origin = req.headers.origin;
+
+  // Check if the request origin is in our allowed list
+  if (allowedOrigins.includes(origin)) {
+    // Set the specific origin instead of wildcard
+    res.header('Access-Control-Allow-Origin', origin);
+    // Allow credentials
+    res.header('Access-Control-Allow-Credentials', 'true');
+  }
+
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
 
@@ -106,6 +121,26 @@ app.get('/api/status', (req, res) => {
     timestamp: new Date().toISOString(),
     message: 'Bare server is running',
   });
+});
+
+// Basic user login route
+app.post('/api/users/login', (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    // For now, just return a success response with a dummy token
+    // This is just to test CORS, not for actual authentication
+    res.status(200).json({
+      _id: '123456789',
+      name: 'Test User',
+      email: email || 'test@example.com',
+      role: 'doctor',
+      token: 'dummy-jwt-token'
+    });
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({ message: 'Server error during login' });
+  }
 });
 
 // Simple error handler
