@@ -38,7 +38,7 @@ if (!process.env.MONGODB_URI) {
 
 if (!process.env.JWT_SECRET) {
   console.log('Setting fallback JWT_SECRET');
-  process.env.JWT_SECRET = 'UroHealthSecureJWTSecret2024';
+  process.env.JWT_SECRET = 'b8df259dfa44c3db20384347e8968581097e98324d253c1cb6f56cb9985ce1918665ac109f968389ae70c58de4e6e5548bcb9c6b6234c385a35f2ce2ca73c3ea';
 }
 
 // First run the seed script
