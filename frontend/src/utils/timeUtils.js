@@ -47,6 +47,37 @@ export const getDateRanges = () => {
   };
 };
 
+/**
+ * Get a human-readable relative date description
+ * @param {string} dateStr - Date string in YYYY-MM-DD format
+ * @returns {string} Human-readable relative date (Today, Tomorrow, Friday, Next Week, etc.)
+ */
+export const getRelativeDateLabel = (dateStr) => {
+  const today = new Date();
+  const date = new Date(dateStr);
+
+  // Reset time components for accurate day comparison
+  today.setHours(0, 0, 0, 0);
+  date.setHours(0, 0, 0, 0);
+
+  const diffTime = date.getTime() - today.getTime();
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+  if (diffDays === 0) {
+    return 'Today';
+  } else if (diffDays === 1) {
+    return 'Tomorrow';
+  } else if (diffDays > 1 && diffDays < 7) {
+    return date.toLocaleDateString('en-US', { weekday: 'long' });
+  } else if (diffDays >= 7 && diffDays < 14) {
+    return 'Next Week';
+  } else if (diffDays >= 14 && diffDays < 30) {
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  } else {
+    return 'Next Month';
+  }
+};
+
 // Function to filter appointments by time period
 export const filterAppointmentsByTimePeriod = (appointments, period) => {
   if (!appointments || !Array.isArray(appointments) || appointments.length === 0) {

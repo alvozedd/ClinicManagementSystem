@@ -12,7 +12,7 @@ import AppointmentManagementModal from './AppointmentManagementModal';
 import AppointmentCard from './AppointmentCard';
 import { FaCalendarAlt, FaUserMd, FaClipboardList, FaEye, FaArrowLeft, FaUser, FaFileMedical } from 'react-icons/fa';
 import { getCreatorLabel } from '../utils/recordCreation';
-import { getTimeBasedGreeting, getFormattedDate, filterAppointmentsByTimePeriod, updateAppointmentStatuses, identifyAppointmentsNeedingDiagnosis } from '../utils/timeUtils';
+import { getTimeBasedGreeting, getFormattedDate, filterAppointmentsByTimePeriod, updateAppointmentStatuses, identifyAppointmentsNeedingDiagnosis, getRelativeDateLabel } from '../utils/timeUtils';
 import apiService from '../utils/apiService';
 import './AppointmentTabs.css';
 
@@ -293,11 +293,15 @@ function SimplifiedDoctorDashboard({
         {upcomingAppointments.length > 0 && (
           <div className="mt-2">
             <h3 className="text-xs font-semibold mb-2">Upcoming Appointments</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-              {upcomingAppointments.slice(0, 3).map((appointment) => (
+            <div className="flex space-x-2 overflow-x-auto pb-2">
+              {upcomingAppointments.slice(0, 3).map((appointment) => {
+                // Import getRelativeDateLabel from timeUtils
+                const relativeDateLabel = getRelativeDateLabel(appointment.date);
+
+                return (
                 <div
                   key={appointment.id || appointment._id}
-                  className="bg-white bg-opacity-20 rounded-md p-2 backdrop-blur-sm cursor-pointer hover:bg-opacity-30 transition-all"
+                  className="bg-white bg-opacity-20 rounded-md p-2 backdrop-blur-sm cursor-pointer hover:bg-opacity-30 transition-all flex-shrink-0 w-full md:w-1/3"
                   onClick={() => {
                     const patient = patients.find(p => p.id === appointment.patientId || p._id === appointment.patientId);
                     if (patient) {
@@ -307,7 +311,7 @@ function SimplifiedDoctorDashboard({
                 >
                   <div className="font-medium text-xs">{appointment.patientName}</div>
                   <div className="text-xs flex justify-between">
-                    <span>{appointment.date}</span>
+                    <span className="font-semibold">{relativeDateLabel}</span>
                     <span>{appointment.time}</span>
                   </div>
                   <div className="flex justify-between items-center text-xs mt-1">
@@ -333,7 +337,7 @@ function SimplifiedDoctorDashboard({
                     )}
                   </div>
                 </div>
-              ))}
+              )})}
             </div>
           </div>
         )}

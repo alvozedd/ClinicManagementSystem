@@ -80,8 +80,8 @@ export const getCreatorLabel = (createdBy) => {
     case null:
     case undefined:
     case '':
-      return 'Patient (Online)';
+      return 'Unknown';
     default:
-      return 'Patient (Online)';
+      return createdBy || 'Unknown';
   }
 };
