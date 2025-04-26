@@ -78,9 +78,24 @@ const connectDB = async () => {
 // Create Express app
 const app = express();
 
-// Basic CORS middleware
+// Improved CORS middleware
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
+  const allowedOrigins = [
+    'https://urohealthltd.netlify.app',
+    'http://localhost:3000',
+    'http://localhost:5173'
+  ];
+
+  const origin = req.headers.origin;
+
+  // Check if the request origin is in our allowed list
+  if (allowedOrigins.includes(origin)) {
+    // Set the specific origin instead of wildcard
+    res.header('Access-Control-Allow-Origin', origin);
+    // Allow credentials
+    res.header('Access-Control-Allow-Credentials', 'true');
+  }
+
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
 
@@ -106,6 +121,96 @@ app.get('/api/status', (req, res) => {
 // Root route
 app.get('/', (req, res) => {
   res.send('Minimal API is running...');
+});
+
+// Basic user login route
+app.post('/api/users/login', (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    console.log('Login attempt:', email);
+
+    // For now, just return a success response with a dummy token
+    res.status(200).json({
+      _id: '123456789',
+      name: 'Test User',
+      email: email || 'test@example.com',
+      role: 'doctor',
+      token: 'dummy-jwt-token'
+    });
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({ message: 'Server error during login' });
+  }
+});
+
+// Also support the route without /api prefix
+app.post('/users/login', (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    console.log('Login attempt (no /api prefix):', email);
+
+    // For now, just return a success response with a dummy token
+    res.status(200).json({
+      _id: '123456789',
+      name: 'Test User',
+      email: email || 'test@example.com',
+      role: 'doctor',
+      token: 'dummy-jwt-token'
+    });
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({ message: 'Server error during login' });
+  }
+});
+
+// Patient routes
+app.get('/api/patients', (req, res) => {
+  console.log('GET /api/patients request received');
+  res.status(200).json([]);
+});
+
+app.get('/patients', (req, res) => {
+  console.log('GET /patients request received');
+  res.status(200).json([]);
+});
+
+// Appointment routes
+app.get('/api/appointments', (req, res) => {
+  console.log('GET /api/appointments request received');
+  res.status(200).json([]);
+});
+
+app.get('/appointments', (req, res) => {
+  console.log('GET /appointments request received');
+  res.status(200).json([]);
+});
+
+// Diagnosis routes
+app.get('/api/diagnoses', (req, res) => {
+  console.log('GET /api/diagnoses request received');
+  res.status(200).json([]);
+});
+
+app.get('/diagnoses', (req, res) => {
+  console.log('GET /diagnoses request received');
+  res.status(200).json([]);
+});
+
+// Refresh token routes
+app.post('/api/users/refresh-token', (req, res) => {
+  console.log('POST /api/users/refresh-token request received');
+  res.status(200).json({
+    token: 'refreshed-dummy-token'
+  });
+});
+
+app.post('/users/refresh-token', (req, res) => {
+  console.log('POST /users/refresh-token request received');
+  res.status(200).json({
+    token: 'refreshed-dummy-token'
+  });
 });
 
 // Simple error handler
