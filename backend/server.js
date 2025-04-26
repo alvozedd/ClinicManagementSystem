@@ -85,6 +85,97 @@ app.use('/api/appointments', appointmentRoutes);
 app.use('/api/diagnoses', diagnosisRoutes);
 
 // Create compatibility routes without the /api prefix
+// User routes
+app.get('/users', (req, res) => {
+  console.log('Received GET request at /users, forwarding to controller directly');
+  // Import the controller directly
+  const { getUsers } = require('./controllers/userController');
+  // Add authentication middleware manually
+  const { protect, admin } = require('./middleware/authMiddleware');
+  // Call middleware then controller
+  protect(req, res, () => {
+    // Check if user is admin
+    if (req.user && req.user.role === 'admin') {
+      getUsers(req, res);
+    } else {
+      res.status(403);
+      throw new Error('Not authorized as an admin');
+    }
+  });
+});
+
+app.get('/users/:id', (req, res) => {
+  console.log('Received GET request at /users/:id, forwarding to controller directly');
+  // Import the controller directly
+  const { getUserById } = require('./controllers/userController');
+  // Add authentication middleware manually
+  const { protect, admin } = require('./middleware/authMiddleware');
+  // Call middleware then controller
+  protect(req, res, () => {
+    // Check if user is admin
+    if (req.user && req.user.role === 'admin') {
+      getUserById(req, res);
+    } else {
+      res.status(403);
+      throw new Error('Not authorized as an admin');
+    }
+  });
+});
+
+app.post('/users', (req, res) => {
+  console.log('Received POST request at /users, forwarding to controller directly');
+  // Import the controller directly
+  const { registerUser } = require('./controllers/userController');
+  // Add authentication middleware manually
+  const { protect, admin } = require('./middleware/authMiddleware');
+  // Call middleware then controller
+  protect(req, res, () => {
+    // Check if user is admin
+    if (req.user && req.user.role === 'admin') {
+      registerUser(req, res);
+    } else {
+      res.status(403);
+      throw new Error('Not authorized as an admin');
+    }
+  });
+});
+
+app.put('/users/:id', (req, res) => {
+  console.log('Received PUT request at /users/:id, forwarding to controller directly');
+  // Import the controller directly
+  const { updateUser } = require('./controllers/userController');
+  // Add authentication middleware manually
+  const { protect, admin } = require('./middleware/authMiddleware');
+  // Call middleware then controller
+  protect(req, res, () => {
+    // Check if user is admin
+    if (req.user && req.user.role === 'admin') {
+      updateUser(req, res);
+    } else {
+      res.status(403);
+      throw new Error('Not authorized as an admin');
+    }
+  });
+});
+
+app.delete('/users/:id', (req, res) => {
+  console.log('Received DELETE request at /users/:id, forwarding to controller directly');
+  // Import the controller directly
+  const { deleteUser } = require('./controllers/userController');
+  // Add authentication middleware manually
+  const { protect, admin } = require('./middleware/authMiddleware');
+  // Call middleware then controller
+  protect(req, res, () => {
+    // Check if user is admin
+    if (req.user && req.user.role === 'admin') {
+      deleteUser(req, res);
+    } else {
+      res.status(403);
+      throw new Error('Not authorized as an admin');
+    }
+  });
+});
+
 // Login route
 app.post('/users/login', (req, res) => {
   console.log('Received login request at /users/login, forwarding to controller directly');
@@ -92,6 +183,24 @@ app.post('/users/login', (req, res) => {
   const { authUser } = require('./controllers/userController');
   // Call the controller function directly
   authUser(req, res);
+});
+
+// Refresh token route
+app.post('/users/refresh-token', (req, res) => {
+  console.log('Received refresh token request at /users/refresh-token, forwarding to controller directly');
+  // Import the controller directly
+  const { refreshToken } = require('./controllers/userController');
+  // Call the controller function directly
+  refreshToken(req, res);
+});
+
+// Logout route
+app.post('/users/logout', (req, res) => {
+  console.log('Received logout request at /users/logout, forwarding to controller directly');
+  // Import the controller directly
+  const { logoutUser } = require('./controllers/userController');
+  // Call the controller function directly
+  logoutUser(req, res);
 });
 
 // Patient routes
