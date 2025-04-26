@@ -10,6 +10,7 @@ const { handleCsrfError, exemptCsrf, provideCsrfToken } = require('./middleware/
 const { addRequestId } = require('./middleware/requestIdMiddleware');
 const { conditionalRequestLogger } = require('./middleware/requestLoggingMiddleware');
 const corsMiddleware = require('./middleware/corsMiddleware');
+const { checkRequiredEnvVars } = require('./utils/checkEnv');
 const userRoutes = require('./routes/userRoutes');
 const patientRoutes = require('./routes/patientRoutes');
 const appointmentRoutes = require('./routes/appointmentRoutes');
@@ -18,6 +19,19 @@ const healthRoutes = require('./routes/healthRoutes');
 
 // Load environment variables
 dotenv.config();
+
+// Load production environment variables if NODE_ENV is production
+if (process.env.NODE_ENV === 'production') {
+  try {
+    dotenv.config({ path: '.env.production' });
+    console.log('Loaded production environment variables');
+  } catch (error) {
+    console.warn('Error loading production environment variables:', error.message);
+  }
+}
+
+// Check required environment variables
+checkRequiredEnvVars();
 
 // Connect to MongoDB
 connectDB();
