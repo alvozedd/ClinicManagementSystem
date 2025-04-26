@@ -151,10 +151,14 @@ const isTokenExpired = (token) => {
 // Refresh the access token
 const refreshAccessToken = async () => {
   try {
+    // Get the session ID from secure storage
+    const sessionId = secureStorage.getItem('sessionId');
+
     const response = await fetch(`${API_URL}/users/refresh-token`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include', // Include cookies
+      body: sessionId ? JSON.stringify({ sessionId }) : undefined,
     });
 
     const data = await handleResponse(response);
@@ -162,6 +166,12 @@ const refreshAccessToken = async () => {
     // Update the token in secure storage
     let userInfo = secureStorage.getItem('userInfo') || {};
     userInfo.token = data.token;
+
+    // Update session ID if it was returned
+    if (data.sessionId) {
+      secureStorage.setItem('sessionId', data.sessionId);
+    }
+
     secureStorage.setItem('userInfo', userInfo);
 
     // Also remove any legacy data in localStorage
@@ -172,6 +182,7 @@ const refreshAccessToken = async () => {
     console.error('Error refreshing token:', error);
     // If refresh fails, log the user out
     secureStorage.removeItem('userInfo');
+    secureStorage.removeItem('sessionId');
     localStorage.removeItem('userInfo'); // Also clear legacy storage
     window.location.href = '/login';
     throw error;
@@ -198,16 +209,18 @@ const apiService = {
     }
   },
 
-  logout: async () => {
+  logout: async (sessionId) => {
     try {
       const response = await fetch(`${API_URL}/users/logout`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include', // Include cookies for refresh token
+        body: sessionId ? JSON.stringify({ sessionId }) : undefined,
       });
 
       // Clear user info from secure storage
       secureStorage.removeItem('userInfo');
+      secureStorage.removeItem('sessionId');
       // Also clear legacy storage
       localStorage.removeItem('userInfo');
 
@@ -216,6 +229,7 @@ const apiService = {
       console.error('Error during logout:', error);
       // Even if the server-side logout fails, clear storage
       secureStorage.removeItem('userInfo');
+      secureStorage.removeItem('sessionId');
       localStorage.removeItem('userInfo');
       throw error;
     }

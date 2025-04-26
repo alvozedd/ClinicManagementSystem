@@ -26,6 +26,11 @@ const refreshTokenSchema = mongoose.Schema(
     createdByIp: {
       type: String,
     },
+    sessionId: {
+      type: String,
+      required: true,
+      index: true,
+    },
   },
   {
     timestamps: true,
@@ -39,6 +44,21 @@ refreshTokenSchema.index({ token: 1 });
 // Add method to check if token is active
 refreshTokenSchema.methods.isActive = function() {
   return !this.revoked && this.expires > new Date();
+};
+
+// Static method to revoke all other sessions for a user
+refreshTokenSchema.statics.revokeOtherSessions = async function(userId, currentSessionId) {
+  return this.updateMany(
+    {
+      user: userId,
+      sessionId: { $ne: currentSessionId },
+      revoked: false
+    },
+    {
+      revoked: true,
+      revokedReason: 'New session started'
+    }
+  );
 };
 
 const RefreshToken = mongoose.model('RefreshToken', refreshTokenSchema);

@@ -42,14 +42,22 @@ const authUser = asyncHandler(async (req, res) => {
       // Generate access token
       const accessToken = tokenService.generateToken(user._id);
 
-      // Generate refresh token
-      const refreshToken = await tokenService.generateRefreshToken(user, ipAddress);
+      // Generate refresh token with single session enforcement
+      // This will automatically revoke all other sessions for this user
+      const { refreshToken, sessionId } = await tokenService.generateRefreshToken(user, ipAddress, true);
 
-      logger.info('Authentication successful, tokens generated');
+      logger.info('Authentication successful, tokens generated', { sessionId });
 
       // Set refresh token as HTTP-only cookie
       res.cookie('refreshToken', refreshToken.token, {
         httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      });
+
+      // Also set session ID cookie (not HTTP-only so frontend can access it)
+      res.cookie('sessionId', sessionId, {
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
@@ -62,6 +70,7 @@ const authUser = asyncHandler(async (req, res) => {
         email: user.email,
         role: user.role,
         token: accessToken,
+        sessionId: sessionId, // Include session ID in response
       });
       return;
     }
@@ -209,6 +218,9 @@ const refreshToken = asyncHandler(async (req, res) => {
   // Get refresh token from cookie or request body
   const token = req.cookies.refreshToken || req.body.refreshToken;
 
+  // Get session ID from cookie or request body
+  const sessionId = req.cookies.sessionId || req.body.sessionId;
+
   if (!token) {
     res.status(401);
     throw new Error('Refresh token is required');
@@ -231,15 +243,33 @@ const refreshToken = asyncHandler(async (req, res) => {
   // Get the user from the token
   const user = refreshTokenDoc.user;
 
+  // Verify that the session ID matches
+  if (sessionId && refreshTokenDoc.sessionId !== sessionId) {
+    // Session ID mismatch - this could be a token theft attempt
+    // Revoke this token
+    refreshTokenDoc.revoked = true;
+    refreshTokenDoc.revokedReason = 'Session ID mismatch';
+    await refreshTokenDoc.save();
+
+    res.status(401);
+    throw new Error('Session validation failed');
+  }
+
   // Get client IP address
   const ipAddress = req.ip || req.connection.remoteAddress;
 
-  // Generate new tokens
+  // Generate new access token
   const newAccessToken = tokenService.generateToken(user._id);
-  const newRefreshToken = await tokenService.generateRefreshToken(user, ipAddress);
+
+  // Generate new refresh token but maintain the same session ID
+  const { refreshToken: newRefreshToken } = await tokenService.generateRefreshToken(
+    user,
+    ipAddress,
+    false // Don't enforce single session here since we're just refreshing
+  );
 
   // Replace old refresh token with new one
-  await tokenService.replaceToken(token, newRefreshToken.token);
+  await tokenService.replaceToken(token, newRefreshToken.token, refreshTokenDoc.sessionId);
 
   // Set new refresh token as HTTP-only cookie
   res.cookie('refreshToken', newRefreshToken.token, {
@@ -252,6 +282,7 @@ const refreshToken = asyncHandler(async (req, res) => {
   // Return new access token
   res.json({
     token: newAccessToken,
+    sessionId: refreshTokenDoc.sessionId,
   });
 });
 
@@ -275,6 +306,9 @@ const logoutUser = asyncHandler(async (req, res) => {
 
   // Clear the refresh token cookie
   res.clearCookie('refreshToken');
+
+  // Clear the session ID cookie
+  res.clearCookie('sessionId');
 
   if (revoked) {
     res.json({ message: 'Logout successful' });

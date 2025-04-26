@@ -94,6 +94,11 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = (data) => {
+    // Store the session ID separately
+    if (data.sessionId) {
+      secureStorage.setItem('sessionId', data.sessionId);
+    }
+
     setUserInfo(data);
     // Store in secure storage instead of localStorage
     secureStorage.setItem('userInfo', data);
@@ -101,14 +106,18 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
+      // Get session ID to include in logout request
+      const sessionId = secureStorage.getItem('sessionId');
+
       // Call the API to logout (revoke refresh token)
-      await apiService.logout();
+      await apiService.logout(sessionId);
 
       // Update state
       setUserInfo(null);
 
       // Clear secure storage
       secureStorage.removeItem('userInfo');
+      secureStorage.removeItem('sessionId');
 
       // Also clear localStorage in case there's any legacy data
       localStorage.removeItem('userInfo');
@@ -117,6 +126,7 @@ export const AuthProvider = ({ children }) => {
       // Even if server-side logout fails, clear local state
       setUserInfo(null);
       secureStorage.removeItem('userInfo');
+      secureStorage.removeItem('sessionId');
       localStorage.removeItem('userInfo');
     }
   };

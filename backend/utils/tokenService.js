@@ -22,27 +22,45 @@ const generateToken = (id, isRefreshToken = false) => {
 };
 
 /**
+ * Generate a unique session ID
+ * @returns {string} Unique session ID
+ */
+const generateSessionId = () => {
+  return crypto.randomBytes(16).toString('hex');
+};
+
+/**
  * Generate refresh token and save to database
  * @param {Object} user - User object
  * @param {string} ipAddress - IP address of the client
- * @returns {Promise<Object>} Refresh token object
+ * @param {boolean} enforceSingleSession - Whether to enforce single session per user
+ * @returns {Promise<Object>} Refresh token object and session ID
  */
-const generateRefreshToken = async (user, ipAddress) => {
+const generateRefreshToken = async (user, ipAddress, enforceSingleSession = true) => {
   // Create a refresh token that expires in 7 days
   const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-  
+
   // Generate a random token string
   const tokenValue = crypto.randomBytes(40).toString('hex');
-  
+
+  // Generate a unique session ID
+  const sessionId = generateSessionId();
+
   // Create and save refresh token to database
   const refreshToken = await RefreshToken.create({
     user: user._id,
     token: tokenValue,
     expires,
     createdByIp: ipAddress,
+    sessionId,
   });
 
-  return refreshToken;
+  // If single session enforcement is enabled, revoke all other sessions for this user
+  if (enforceSingleSession) {
+    await RefreshToken.revokeOtherSessions(user._id, sessionId);
+  }
+
+  return { refreshToken, sessionId };
 };
 
 /**
@@ -93,7 +111,7 @@ const revokeAllUserTokens = async (userId) => {
     { user: userId, revoked: false },
     { revoked: true }
   );
-  
+
   return result.modifiedCount;
 };
 
@@ -101,9 +119,10 @@ const revokeAllUserTokens = async (userId) => {
  * Replace an old refresh token with a new one
  * @param {string} oldToken - Old refresh token to replace
  * @param {string} newToken - New refresh token
+ * @param {string} sessionId - Session ID to maintain
  * @returns {Promise<boolean>} True if token was replaced, false otherwise
  */
-const replaceToken = async (oldToken, newToken) => {
+const replaceToken = async (oldToken, newToken, sessionId) => {
   const refreshToken = await RefreshToken.findOne({ token: oldToken });
 
   if (!refreshToken || !refreshToken.isActive()) {
@@ -118,11 +137,44 @@ const replaceToken = async (oldToken, newToken) => {
   return true;
 };
 
+/**
+ * Check if a user has an active session
+ * @param {string} userId - User ID to check
+ * @returns {Promise<boolean>} True if user has an active session, false otherwise
+ */
+const hasActiveSession = async (userId) => {
+  const activeToken = await RefreshToken.findOne({
+    user: userId,
+    revoked: false,
+    expires: { $gt: new Date() }
+  });
+
+  return !!activeToken;
+};
+
+/**
+ * Get active session ID for a user
+ * @param {string} userId - User ID to check
+ * @returns {Promise<string|null>} Session ID if found, null otherwise
+ */
+const getActiveSessionId = async (userId) => {
+  const activeToken = await RefreshToken.findOne({
+    user: userId,
+    revoked: false,
+    expires: { $gt: new Date() }
+  });
+
+  return activeToken ? activeToken.sessionId : null;
+};
+
 module.exports = {
   generateToken,
+  generateSessionId,
   generateRefreshToken,
   verifyToken,
   revokeToken,
   revokeAllUserTokens,
   replaceToken,
+  hasActiveSession,
+  getActiveSessionId,
 };
