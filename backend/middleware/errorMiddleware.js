@@ -11,6 +11,21 @@ const notFound = (req, res, next) => {
     query: req.query,
   });
 
+  // Ensure CORS headers are set for 404 responses
+  const origin = req.headers.origin;
+  const allowedOrigins = [
+    'https://urohealthltd.netlify.app',
+    'http://localhost:3000',
+    'http://localhost:5173'
+  ];
+
+  if (allowedOrigins.includes(origin) || !origin) {
+    res.header('Access-Control-Allow-Origin', origin || '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+    res.header('Access-Control-Allow-Credentials', 'true');
+  }
+
   const error = new Error(`Not Found - ${req.originalUrl}`);
   res.status(404);
   next(error);
@@ -72,6 +87,21 @@ const errorHandler = (err, req, res, next) => {
       ip: req.ip,
       statusCode,
     });
+  }
+
+  // Ensure CORS headers are set even in error responses
+  const origin = req.headers.origin;
+  const allowedOrigins = [
+    'https://urohealthltd.netlify.app',
+    'http://localhost:3000',
+    'http://localhost:5173'
+  ];
+
+  if (allowedOrigins.includes(origin) || !origin) {
+    res.header('Access-Control-Allow-Origin', origin || '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+    res.header('Access-Control-Allow-Credentials', 'true');
   }
 
   // Sanitize the error message

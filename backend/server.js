@@ -9,6 +9,7 @@ const { enforceHttps, addSecurityHeaders, secureCoookieSettings } = require('./m
 const { handleCsrfError, exemptCsrf, provideCsrfToken } = require('./middleware/csrfMiddleware');
 const { addRequestId } = require('./middleware/requestIdMiddleware');
 const { conditionalRequestLogger } = require('./middleware/requestLoggingMiddleware');
+const corsMiddleware = require('./middleware/corsMiddleware');
 const userRoutes = require('./routes/userRoutes');
 const patientRoutes = require('./routes/patientRoutes');
 const appointmentRoutes = require('./routes/appointmentRoutes');
@@ -35,25 +36,12 @@ app.use(enforceHttps); // Redirect HTTP to HTTPS in production
 app.use(addSecurityHeaders); // Add additional security headers
 app.use(secureCoookieSettings); // Ensure cookies are secure
 
-// CORS configuration
+// Apply custom CORS middleware (must be before other middleware)
+app.use(corsMiddleware);
+
+// Also apply the cors package for good measure
 app.use(cors({
-  origin: function(origin, callback) {
-    // Allow requests with no origin (like mobile apps, curl requests)
-    if (!origin) return callback(null, true);
-
-    // List of allowed origins
-    const allowedOrigins = [
-      'https://urohealthltd.netlify.app',
-      'http://localhost:3000',
-      'http://localhost:5173'
-    ];
-
-    if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: ['https://urohealthltd.netlify.app', 'http://localhost:3000', 'http://localhost:5173'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization']
