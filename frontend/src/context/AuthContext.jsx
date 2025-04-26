@@ -141,40 +141,40 @@ export const AuthProvider = ({ children }) => {
       const sessionId = secureStorage.getItem('sessionId');
       console.log('Session ID for logout:', sessionId ? 'Found' : 'Not found');
 
-      // Call the API to logout (revoke refresh token)
-      await apiService.logout(sessionId);
-
+      // First, clear all client-side storage to ensure immediate logout effect
       // Update state
       setUserInfo(null);
 
       // Clear all secure storage
       secureStorage.clear();
 
-      // Also clear localStorage in case there's any legacy data
+      // Clear all localStorage items that might contain user data
       localStorage.removeItem('userInfo');
+      localStorage.removeItem('session_active');
+      localStorage.removeItem('session_timestamp');
 
       // Add a flag to indicate user has explicitly logged out
       // This will prevent automatic login on page refresh
       localStorage.setItem('user_logged_out', 'true');
 
+      console.log('Local storage cleared, now calling logout API');
+
+      // Then call the API to logout (revoke refresh token)
+      // Even if this fails, the user is already logged out on the client side
+      await apiService.logout(sessionId);
+
       console.log('User logged out successfully, redirecting to login page');
 
-      // Redirect to login page after a short delay to ensure state is updated
-      setTimeout(() => {
-        window.location.href = '/';
-      }, 100);
+      // Force a full page reload to ensure all React state is reset
+      window.location.href = '/login';
     } catch (error) {
       console.error('Error during logout:', error);
-      // Even if server-side logout fails, clear local state
-      setUserInfo(null);
-      secureStorage.clear();
-      localStorage.removeItem('userInfo');
-      localStorage.setItem('user_logged_out', 'true');
+      // Even if server-side logout fails, we've already cleared local state
+      // No need to clear again, just redirect
+      console.log('Error during logout API call, but user is still logged out locally');
 
-      // Redirect to login page even if there was an error
-      setTimeout(() => {
-        window.location.href = '/';
-      }, 100);
+      // Force a full page reload to ensure all React state is reset
+      window.location.href = '/login';
     }
   };
 

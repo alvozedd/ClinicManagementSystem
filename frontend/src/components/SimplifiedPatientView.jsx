@@ -235,26 +235,26 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
 
   return (
     <div className="bg-white rounded-md">
-      {/* Ultra-compact Patient Header */}
-      <div className="bg-blue-50 p-1 rounded-t-md border border-blue-200 mb-1">
+      {/* Patient Header with larger font */}
+      <div className="bg-blue-50 p-2 rounded-t-md border border-blue-200 mb-2">
         <div className="flex justify-between items-start">
           <div className="flex-grow">
-            <h2 className="text-sm font-bold text-blue-800 leading-tight">
+            <h2 className="text-base md:text-lg font-bold text-blue-800 leading-tight">
               {editMode ? (
-                <div className="flex space-x-1">
+                <div className="flex space-x-2">
                   <input
                     type="text"
                     name="firstName"
                     value={editedPatient.firstName}
                     onChange={handleInputChange}
-                    className="border border-blue-300 rounded px-1 py-0.5 w-24 text-xs bg-blue-50"
+                    className="border border-blue-300 rounded px-2 py-1 w-28 text-sm bg-blue-50"
                   />
                   <input
                     type="text"
                     name="lastName"
                     value={editedPatient.lastName}
                     onChange={handleInputChange}
-                    className="border border-blue-300 rounded px-1 py-0.5 w-24 text-xs bg-blue-50"
+                    className="border border-blue-300 rounded px-2 py-1 w-28 text-sm bg-blue-50"
                   />
                 </div>
               ) : (
@@ -310,20 +310,20 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
                   </div>
                 </div>
               ) : (
-                <div className="flex flex-wrap gap-1">
-                  <span className="bg-blue-100 text-blue-800 px-1 py-0.5 rounded-full text-[10px] leading-none">
+                <div className="flex flex-wrap gap-2 mt-1">
+                  <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm leading-none">
                     {patient.gender} • {calculateAge(patient.dateOfBirth)} yrs
                   </span>
-                  <span className="bg-blue-100 text-blue-800 px-1 py-0.5 rounded-full text-[10px] leading-none">
+                  <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm leading-none">
                     Ph: {patient.phone}
                   </span>
                   {patient.lastVisit && (
-                    <span className="bg-blue-100 text-blue-800 px-1 py-0.5 rounded-full text-[10px] leading-none">
+                    <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm leading-none">
                       Last: {patient.lastVisit}
                     </span>
                   )}
                   {allDiagnoses.length > 0 && (
-                    <span className="bg-blue-100 text-blue-800 px-1 py-0.5 rounded-full text-[10px] leading-none">
+                    <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm leading-none">
                       {allDiagnoses.length} Diagnoses
                     </span>
                   )}
@@ -359,11 +359,11 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
         </div>
       </div>
 
-      {/* Ultra-compact Tab Navigation */}
-      <div className="flex border-b mb-1 relative">
+      {/* Enhanced Tab Navigation */}
+      <div className="flex border-b mb-2 relative">
         <button
           onClick={() => setActiveTab('biodata')}
-          className={`py-0.5 px-2 font-medium text-xs border-b-2 -mb-px ${
+          className={`py-2 px-4 font-medium text-sm border-b-2 -mb-px ${
             activeTab === 'biodata'
               ? 'border-blue-500 text-blue-600'
               : 'border-transparent text-gray-500 hover:text-gray-700'
@@ -373,7 +373,7 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
         </button>
         <button
           onClick={() => setActiveTab('appointments')}
-          className={`py-0.5 px-2 font-medium text-xs border-b-2 -mb-px ${
+          className={`py-2 px-4 font-medium text-sm border-b-2 -mb-px ${
             activeTab === 'appointments'
               ? 'border-blue-500 text-blue-600'
               : 'border-transparent text-gray-500 hover:text-gray-700'
@@ -383,7 +383,7 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
         </button>
         <button
           onClick={() => setActiveTab('diagnoses')}
-          className={`py-0.5 px-2 font-medium text-xs border-b-2 -mb-px ${
+          className={`py-2 px-4 font-medium text-sm border-b-2 -mb-px ${
             activeTab === 'diagnoses'
               ? 'border-blue-500 text-blue-600'
               : 'border-transparent text-gray-500 hover:text-gray-700'
@@ -393,7 +393,7 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
         </button>
         <button
           onClick={() => setActiveTab('overview')}
-          className={`py-0.5 px-2 font-medium text-xs border-b-2 -mb-px ${
+          className={`py-2 px-4 font-medium text-sm border-b-2 -mb-px ${
             activeTab === 'overview'
               ? 'border-blue-500 text-blue-600'
               : 'border-transparent text-gray-500 hover:text-gray-700'
@@ -405,19 +405,19 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
 
       {/* Content Area */}
       {activeTab === 'biodata' ? (
-        <div className="p-1">
-          {/* Ultra-compact Patient Biodata Form */}
-          <div className="border rounded p-1">
-            <div className="flex justify-between items-center mb-1">
-              <h3 className="font-semibold text-xs">Patient Biodata</h3>
+        <div className="p-3">
+          {/* Enhanced Patient Biodata Form */}
+          <div className="border rounded p-3">
+            <div className="flex justify-between items-center mb-3">
+              <h3 className="font-semibold text-base text-blue-800">Patient Biodata</h3>
               {!editMode && (
-                <div className="flex space-x-1">
+                <div className="flex space-x-2">
                   <button
                     onClick={() => setEditMode(true)}
-                    className="bg-blue-600 text-white px-1 py-0.5 rounded text-[10px] hover:bg-blue-700 flex items-center"
+                    className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 flex items-center"
                   >
-                    <span className="md:hidden"><FaUser className="h-2.5 w-2.5" /></span>
-                    <span className="hidden md:inline">Edit</span>
+                    <span className="md:hidden"><FaUser className="h-3 w-3 mr-1" /></span>
+                    <span>Edit</span>
                   </button>
                   {onDeletePatient && (
                     <button
@@ -426,10 +426,10 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
                           handleDeletePatient();
                         }
                       }}
-                      className="bg-red-600 text-white px-1 py-0.5 rounded text-[10px] hover:bg-red-700 flex items-center"
+                      className="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700 flex items-center"
                     >
-                      <span className="md:hidden"><FaTrash className="h-2.5 w-2.5" /></span>
-                      <span className="hidden md:inline">Delete</span>
+                      <span className="md:hidden"><FaTrash className="h-3 w-3 mr-1" /></span>
+                      <span>Delete</span>
                     </button>
                   )}
                 </div>
@@ -437,35 +437,35 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
             </div>
 
             {editMode ? (
-              <div className="space-y-1">
-                <div className="grid grid-cols-2 gap-1">
+              <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-[8px] text-gray-700">First Name</label>
+                    <label className="block text-xs text-gray-700">First Name</label>
                     <input
                       type="text"
                       name="firstName"
                       value={editedPatient.firstName}
                       onChange={handleInputChange}
-                      className="w-full px-1 py-0.5 border border-gray-300 rounded text-xs"
+                      className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-[8px] text-gray-700">Last Name</label>
+                    <label className="block text-xs text-gray-700">Last Name</label>
                     <input
                       type="text"
                       name="lastName"
                       value={editedPatient.lastName}
                       onChange={handleInputChange}
-                      className="w-full px-1 py-0.5 border border-gray-300 rounded text-xs"
+                      className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                       required
                     />
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-1">
+                <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-[8px] text-gray-700">Year of Birth</label>
+                    <label className="block text-xs text-gray-700">Year of Birth</label>
                     <input
                       type="number"
                       name="dateOfBirth"
@@ -491,17 +491,17 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
                       }}
                       min="1900"
                       max={new Date().getFullYear()}
-                      className="w-full px-1 py-0.5 border border-gray-300 rounded text-xs"
+                      className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                       placeholder="Year"
                     />
                   </div>
                   <div>
-                    <label className="block text-[8px] text-gray-700">Gender</label>
+                    <label className="block text-xs text-gray-700">Gender</label>
                     <select
                       name="gender"
                       value={editedPatient.gender}
                       onChange={handleInputChange}
-                      className="w-full px-1 py-0.5 border border-gray-300 rounded text-xs"
+                      className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                       required
                     >
                       <option value="">Select</option>
@@ -513,149 +513,149 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
                 </div>
 
                 <div>
-                  <label className="block text-[8px] text-gray-700">Phone Number</label>
+                  <label className="block text-xs text-gray-700">Phone Number</label>
                   <input
                     type="tel"
                     name="phone"
                     value={editedPatient.phone}
                     onChange={handleInputChange}
-                    className="w-full px-1 py-0.5 border border-gray-300 rounded text-xs"
+                    className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[8px] text-gray-700">Email</label>
+                  <label className="block text-xs text-gray-700">Email</label>
                   <input
                     type="email"
                     name="email"
                     value={editedPatient.email || ''}
                     onChange={handleInputChange}
-                    className="w-full px-1 py-0.5 border border-gray-300 rounded text-xs"
+                    className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-[8px] text-gray-700">Address</label>
+                  <label className="block text-xs text-gray-700">Address</label>
                   <input
                     name="address"
                     value={editedPatient.address || ''}
                     onChange={handleInputChange}
-                    className="w-full px-1 py-0.5 border border-gray-300 rounded text-xs"
+                    className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                   />
                 </div>
 
-                <h4 className="font-medium text-[10px] text-gray-700 border-b pb-0.5 mt-1">Next of Kin</h4>
+                <h4 className="font-medium text-sm text-blue-700 border-b pb-2 mt-3">Next of Kin</h4>
 
-                <div className="grid grid-cols-2 gap-1">
+                <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-[8px] text-gray-700">Name</label>
+                    <label className="block text-xs text-gray-700">Name</label>
                     <input
                       type="text"
                       name="nextOfKinName"
                       value={editedPatient.nextOfKinName || ''}
                       onChange={handleInputChange}
-                      className="w-full px-1 py-0.5 border border-gray-300 rounded text-xs"
+                      className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                     />
                   </div>
                   <div>
-                    <label className="block text-[8px] text-gray-700">Relationship</label>
+                    <label className="block text-xs text-gray-700">Relationship</label>
                     <input
                       type="text"
                       name="nextOfKinRelationship"
                       value={editedPatient.nextOfKinRelationship || ''}
                       onChange={handleInputChange}
-                      className="w-full px-1 py-0.5 border border-gray-300 rounded text-xs"
+                      className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-[8px] text-gray-700">Next of Kin Phone</label>
+                  <label className="block text-xs text-gray-700">Next of Kin Phone</label>
                   <input
                     type="tel"
                     name="nextOfKinPhone"
                     value={editedPatient.nextOfKinPhone || ''}
                     onChange={handleInputChange}
-                    className="w-full px-1 py-0.5 border border-gray-300 rounded text-xs"
+                    className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
                   />
                 </div>
 
-                <div className="flex justify-center space-x-2 mt-2">
+                <div className="flex justify-center space-x-3 mt-4">
                   <button
                     onClick={handleSaveChanges}
-                    className="px-3 py-1 bg-green-600 text-white rounded text-xs hover:bg-green-700 min-w-[60px]"
+                    className="px-4 py-2 bg-green-600 text-white rounded text-sm hover:bg-green-700 min-w-[80px] font-medium"
                   >
                     Save
                   </button>
                   <button
                     onClick={handleCancelEdit}
-                    className="px-3 py-1 bg-gray-500 text-white rounded text-xs hover:bg-gray-600 min-w-[60px]"
+                    className="px-4 py-2 bg-gray-500 text-white rounded text-sm hover:bg-gray-600 min-w-[80px] font-medium"
                   >
                     Cancel
                   </button>
                 </div>
               </div>
             ) : (
-              <div className="space-y-1">
-                <div className="grid grid-cols-2 gap-1">
-                  <div className="border-b pb-0.5">
-                    <p className="text-[8px] text-gray-500">First Name</p>
-                    <p className="text-xs font-medium">{patient.firstName}</p>
+              <div className="space-y-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="border-b pb-2">
+                    <p className="text-xs text-gray-500">First Name</p>
+                    <p className="text-sm font-medium">{patient.firstName}</p>
                   </div>
-                  <div className="border-b pb-0.5">
-                    <p className="text-[8px] text-gray-500">Last Name</p>
-                    <p className="text-xs font-medium">{patient.lastName}</p>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-1">
-                  <div className="border-b pb-0.5">
-                    <p className="text-[8px] text-gray-500">Year of Birth</p>
-                    <p className="text-xs font-medium">{patient.dateOfBirth ? new Date(patient.dateOfBirth).getFullYear() : 'Not provided'} ({calculateAge(patient.dateOfBirth)} yrs)</p>
-                  </div>
-                  <div className="border-b pb-0.5">
-                    <p className="text-[8px] text-gray-500">Gender</p>
-                    <p className="text-xs font-medium">{patient.gender}</p>
+                  <div className="border-b pb-2">
+                    <p className="text-xs text-gray-500">Last Name</p>
+                    <p className="text-sm font-medium">{patient.lastName}</p>
                   </div>
                 </div>
 
-                <div className="border-b pb-0.5">
-                  <p className="text-[8px] text-gray-500">Phone Number</p>
-                  <p className="text-xs font-medium">{patient.phone}</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="border-b pb-2">
+                    <p className="text-xs text-gray-500">Year of Birth</p>
+                    <p className="text-sm font-medium">{patient.dateOfBirth ? new Date(patient.dateOfBirth).getFullYear() : 'Not provided'} ({calculateAge(patient.dateOfBirth)} yrs)</p>
+                  </div>
+                  <div className="border-b pb-2">
+                    <p className="text-xs text-gray-500">Gender</p>
+                    <p className="text-sm font-medium">{patient.gender}</p>
+                  </div>
                 </div>
 
-                <div className="border-b pb-0.5">
-                  <p className="text-[8px] text-gray-500">Email</p>
-                  <p className="text-xs font-medium">{patient.email || 'Not provided'}</p>
+                <div className="border-b pb-2">
+                  <p className="text-xs text-gray-500">Phone Number</p>
+                  <p className="text-sm font-medium">{patient.phone}</p>
                 </div>
 
-                <div className="border-b pb-0.5">
-                  <p className="text-[8px] text-gray-500">Address</p>
-                  <p className="text-xs font-medium">{patient.address || 'Not provided'}</p>
+                <div className="border-b pb-2">
+                  <p className="text-xs text-gray-500">Email</p>
+                  <p className="text-sm font-medium">{patient.email || 'Not provided'}</p>
                 </div>
 
-                <div className="border-b pb-0.5">
-                  <p className="text-[8px] text-gray-500">Patient ID</p>
-                  <p className="text-xs font-medium">{patient.id}</p>
+                <div className="border-b pb-2">
+                  <p className="text-xs text-gray-500">Address</p>
+                  <p className="text-sm font-medium">{patient.address || 'Not provided'}</p>
+                </div>
+
+                <div className="border-b pb-2">
+                  <p className="text-xs text-gray-500">Patient ID</p>
+                  <p className="text-sm font-medium">{patient.id}</p>
                 </div>
 
                 {patient.createdBy && (
-                  <div className="border-b pb-0.5">
-                    <p className="text-[8px] text-gray-500">Record Created By</p>
+                  <div className="border-b pb-2">
+                    <p className="text-xs text-gray-500">Record Created By</p>
                     <div className="flex items-center">
-                      <span className={`px-1 py-0.5 rounded text-[10px] font-medium ${
+                      <span className={`px-2 py-1 rounded text-sm font-medium ${
                         patient.createdBy === 'doctor' ? 'bg-blue-100 text-blue-800' :
                         patient.createdBy === 'secretary' ? 'bg-green-100 text-green-800' :
                         'bg-purple-100 text-purple-800'
                       }`}>
                         <span className="flex items-center">
-                          <FaUser className="mr-0.5" size={8} />
+                          <FaUser className="mr-1" size={12} />
                           {getCreatorLabel(patient.createdBy)}
                         </span>
                       </span>
                       {patient.createdAt && (
-                        <span className="text-[8px] text-gray-500 ml-1">
+                        <span className="text-xs text-gray-500 ml-2">
                           on {new Date(patient.createdAt).toLocaleDateString()}
                         </span>
                       )}
@@ -663,22 +663,22 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
                   </div>
                 )}
 
-                <h4 className="font-medium text-[10px] text-gray-700 border-b pb-0.5 mt-1">Next of Kin</h4>
+                <h4 className="font-medium text-sm text-blue-700 border-b pb-2 mt-3">Next of Kin</h4>
 
-                <div className="grid grid-cols-2 gap-1">
-                  <div className="border-b pb-0.5">
-                    <p className="text-[8px] text-gray-500">Name</p>
-                    <p className="text-xs font-medium">{patient.nextOfKinName || 'Not provided'}</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="border-b pb-2">
+                    <p className="text-xs text-gray-500">Name</p>
+                    <p className="text-sm font-medium">{patient.nextOfKinName || 'Not provided'}</p>
                   </div>
-                  <div className="border-b pb-0.5">
-                    <p className="text-[8px] text-gray-500">Relationship</p>
-                    <p className="text-xs font-medium">{patient.nextOfKinRelationship || 'Not provided'}</p>
+                  <div className="border-b pb-2">
+                    <p className="text-xs text-gray-500">Relationship</p>
+                    <p className="text-sm font-medium">{patient.nextOfKinRelationship || 'Not provided'}</p>
                   </div>
                 </div>
 
-                <div className="border-b pb-0.5">
-                  <p className="text-[8px] text-gray-500">Phone</p>
-                  <p className="text-xs font-medium">{patient.nextOfKinPhone || 'Not provided'}</p>
+                <div className="border-b pb-2">
+                  <p className="text-xs text-gray-500">Phone</p>
+                  <p className="text-sm font-medium">{patient.nextOfKinPhone || 'Not provided'}</p>
                 </div>
               </div>
             )}
@@ -889,34 +889,34 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
           />
         </div>
       ) : activeTab === 'appointments' ? (
-        <div className="p-1">
+        <div className="p-3">
           {/* Appointments List */}
           <div>
-            <div className="flex justify-between items-center mb-1">
-              <h3 className="font-semibold text-xs">Appointments</h3>
+            <div className="flex justify-between items-center mb-3">
+              <h3 className="font-semibold text-lg text-blue-800">Appointments</h3>
               <button
                 onClick={handleAddAppointment}
-                className="bg-green-600 hover:bg-green-700 text-white px-1.5 py-0.5 rounded text-[10px] font-medium"
+                className="bg-green-600 hover:bg-green-700 text-white px-3 py-1.5 rounded text-sm font-medium flex items-center"
               >
-                + Add
+                <span className="mr-1">+</span> Add Appointment
               </button>
             </div>
 
-            {/* Ultra-compact Upcoming Appointments Section */}
+            {/* Enhanced Upcoming Appointments Section */}
             {upcomingAppointments.length > 0 && (
-              <div className="mb-2">
-                <h4 className="font-medium text-blue-800 text-[10px] mb-1 border-b pb-0.5">Upcoming</h4>
-                <div className="space-y-1">
+              <div className="mb-4">
+                <h4 className="font-medium text-blue-800 text-base mb-3 border-b pb-2">Upcoming</h4>
+                <div className="space-y-3">
                   {upcomingAppointments.map(appointment => (
-                    <div key={appointment.id} className={`border rounded p-1 hover:bg-gray-50 ${appointment.status === 'Scheduled' ? 'bg-green-50' : appointment.status === 'Completed' ? 'bg-blue-50' : appointment.status === 'Cancelled' ? 'bg-red-50' : appointment.status === 'Pending' ? 'bg-yellow-50' : 'bg-white'}`}>
+                    <div key={appointment.id} className={`border rounded-lg p-3 hover:bg-gray-50 shadow-sm ${appointment.status === 'Scheduled' ? 'bg-green-50' : appointment.status === 'Completed' ? 'bg-blue-50' : appointment.status === 'Cancelled' ? 'bg-red-50' : appointment.status === 'Pending' ? 'bg-yellow-50' : 'bg-white'}`}>
                       <div className="flex justify-between items-center">
                         <div>
-                          <p className="font-medium text-xs leading-tight">{appointment.date} at {appointment.time}</p>
-                          <p className="text-gray-600 text-[10px] leading-tight">{appointment.type} - {appointment.reason}</p>
+                          <p className="font-medium text-base leading-tight">{appointment.date} at {appointment.time}</p>
+                          <p className="text-gray-600 text-sm leading-tight mt-1">{appointment.type} - {appointment.reason}</p>
                           {appointment.createdBy && (
-                            <div className="flex items-center">
-                              <span className="text-gray-500 text-[8px]">By:</span>
-                              <span className={`px-1 rounded text-[8px] font-medium ml-0.5 ${
+                            <div className="flex items-center mt-2">
+                              <span className="text-gray-500 text-xs mr-1">Booked by:</span>
+                              <span className={`px-2 py-1 rounded text-xs font-medium ${
                                 appointment.createdBy === 'doctor' ? 'bg-blue-100 text-blue-800' :
                                 appointment.createdBy === 'secretary' ? 'bg-green-100 text-green-800' :
                                 'bg-purple-100 text-purple-800'
@@ -926,8 +926,8 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
                             </div>
                           )}
                         </div>
-                        <div className="flex flex-col items-end space-y-0.5">
-                          <span className={`px-1 py-0.5 rounded-full text-[8px] font-medium ${
+                        <div className="flex flex-col items-end space-y-2">
+                          <span className={`px-3 py-1 rounded-full text-sm font-medium ${
                             appointment.status === 'Scheduled' ? 'bg-green-100 text-green-800' :
                             appointment.status === 'Completed' ? 'bg-blue-100 text-blue-800' :
                             appointment.status === 'Cancelled' ? 'bg-red-100 text-red-800' :
@@ -938,7 +938,7 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
                           </span>
                           <button
                             onClick={() => handleEditAppointment(appointment)}
-                            className="text-blue-600 hover:text-blue-800 text-[8px] bg-blue-50 px-1 py-0.5 rounded"
+                            className="text-blue-600 hover:text-blue-800 text-sm bg-blue-50 px-3 py-1 rounded"
                           >
                             Edit
                           </button>
@@ -950,21 +950,21 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
               </div>
             )}
 
-            {/* Ultra-compact Past Appointments Section */}
-            <div className="mb-1">
-              <h4 className="font-medium text-gray-700 text-[10px] mb-1 border-b pb-0.5">Previous</h4>
+            {/* Enhanced Past Appointments Section */}
+            <div className="mb-3">
+              <h4 className="font-medium text-gray-700 text-base mb-3 border-b pb-2">Previous</h4>
               {pastAppointments.length > 0 ? (
-                <div className="space-y-1">
+                <div className="space-y-3">
                   {pastAppointments.map(appointment => (
-                    <div key={appointment.id} className={`border rounded p-1 hover:bg-gray-50 ${appointment.status === 'Scheduled' ? 'bg-green-50' : appointment.status === 'Completed' ? 'bg-blue-50' : appointment.status === 'Cancelled' ? 'bg-red-50' : appointment.status === 'Pending' ? 'bg-yellow-50' : 'bg-white'}`}>
+                    <div key={appointment.id} className={`border rounded-lg p-3 hover:bg-gray-50 shadow-sm ${appointment.status === 'Scheduled' ? 'bg-green-50' : appointment.status === 'Completed' ? 'bg-blue-50' : appointment.status === 'Cancelled' ? 'bg-red-50' : appointment.status === 'Pending' ? 'bg-yellow-50' : 'bg-white'}`}>
                       <div className="flex justify-between items-center">
                         <div>
-                          <p className="font-medium text-xs leading-tight">{appointment.date} at {appointment.time}</p>
-                          <p className="text-gray-600 text-[10px] leading-tight">{appointment.type} - {appointment.reason}</p>
+                          <p className="font-medium text-base leading-tight">{appointment.date} at {appointment.time}</p>
+                          <p className="text-gray-600 text-sm leading-tight mt-1">{appointment.type} - {appointment.reason}</p>
                           {appointment.createdBy && (
-                            <div className="flex items-center">
-                              <span className="text-gray-500 text-[8px]">By:</span>
-                              <span className={`px-1 rounded text-[8px] font-medium ml-0.5 ${
+                            <div className="flex items-center mt-2">
+                              <span className="text-gray-500 text-xs mr-1">Booked by:</span>
+                              <span className={`px-2 py-1 rounded text-xs font-medium ${
                                 appointment.createdBy === 'doctor' ? 'bg-blue-100 text-blue-800' :
                                 appointment.createdBy === 'secretary' ? 'bg-green-100 text-green-800' :
                                 'bg-purple-100 text-purple-800'
@@ -974,8 +974,8 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
                             </div>
                           )}
                         </div>
-                        <div className="flex flex-col items-end space-y-0.5">
-                          <span className={`px-1 py-0.5 rounded-full text-[8px] font-medium ${
+                        <div className="flex flex-col items-end space-y-2">
+                          <span className={`px-3 py-1 rounded-full text-sm font-medium ${
                             appointment.status === 'Scheduled' ? 'bg-green-100 text-green-800' :
                             appointment.status === 'Completed' ? 'bg-blue-100 text-blue-800' :
                             appointment.status === 'Cancelled' ? 'bg-red-100 text-red-800' :
@@ -986,7 +986,7 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
                           </span>
                           <button
                             onClick={() => handleEditAppointment(appointment)}
-                            className="text-blue-600 hover:text-blue-800 text-[8px] bg-blue-50 px-1 py-0.5 rounded"
+                            className="text-blue-600 hover:text-blue-800 text-sm bg-blue-50 px-3 py-1 rounded"
                           >
                             Edit
                           </button>
@@ -996,119 +996,119 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-1 bg-gray-50 rounded">
-                  <p className="text-gray-500 text-[10px]">No previous appointments</p>
+                <div className="text-center py-3 bg-gray-50 rounded-lg">
+                  <p className="text-gray-500 text-sm">No previous appointments</p>
                 </div>
               )}
             </div>
 
             {upcomingAppointments.length === 0 && pastAppointments.length === 0 && (
-              <div className="text-center py-2 bg-gray-50 rounded mt-1">
-                <p className="text-gray-500 text-xs">No appointments recorded</p>
+              <div className="text-center py-6 bg-gray-50 rounded-lg mt-3">
+                <p className="text-gray-500 text-base">No appointments recorded for this patient</p>
               </div>
             )}
           </div>
         </div>
       ) : activeTab === 'overview' ? (
-        <div className="p-1">
+        <div className="p-3">
           {/* Patient Info */}
-          <div className="space-y-2">
-            <h3 className="font-semibold text-xs">Patient Information</h3>
+          <div className="space-y-4">
+            <h3 className="font-semibold text-lg text-blue-800">Patient Information</h3>
 
-            <div className="border rounded p-1 bg-gray-50">
-              <div className="grid grid-cols-2 gap-1">
-                <div className="border-b pb-1">
-                  <p className="text-[10px] text-gray-500">First Name</p>
-                  <p className="text-xs font-medium">{patient.firstName}</p>
+            <div className="border rounded-lg p-3 bg-gray-50 shadow-sm">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="border-b pb-2">
+                  <p className="text-xs text-gray-500">First Name</p>
+                  <p className="text-sm font-medium">{patient.firstName}</p>
                 </div>
-                <div className="border-b pb-1">
-                  <p className="text-[10px] text-gray-500">Last Name</p>
-                  <p className="text-xs font-medium">{patient.lastName}</p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-1 mt-1">
-                <div className="border-b pb-1">
-                  <p className="text-[10px] text-gray-500">Year of Birth</p>
-                  <p className="text-xs font-medium">{patient.dateOfBirth ? new Date(patient.dateOfBirth).getFullYear() : 'Not provided'} ({calculateAge(patient.dateOfBirth)} yrs)</p>
-                </div>
-                <div className="border-b pb-1">
-                  <p className="text-[10px] text-gray-500">Gender</p>
-                  <p className="text-xs font-medium">{patient.gender}</p>
+                <div className="border-b pb-2">
+                  <p className="text-xs text-gray-500">Last Name</p>
+                  <p className="text-sm font-medium">{patient.lastName}</p>
                 </div>
               </div>
 
-              <div className="border-b pb-1 mt-1">
-                <p className="text-[10px] text-gray-500">Phone Number</p>
-                <p className="text-xs font-medium">{patient.phone}</p>
+              <div className="grid grid-cols-2 gap-4 mt-3">
+                <div className="border-b pb-2">
+                  <p className="text-xs text-gray-500">Year of Birth</p>
+                  <p className="text-sm font-medium">{patient.dateOfBirth ? new Date(patient.dateOfBirth).getFullYear() : 'Not provided'} ({calculateAge(patient.dateOfBirth)} yrs)</p>
+                </div>
+                <div className="border-b pb-2">
+                  <p className="text-xs text-gray-500">Gender</p>
+                  <p className="text-sm font-medium">{patient.gender}</p>
+                </div>
               </div>
 
-              <div className="border-b pb-1 mt-1">
-                <p className="text-[10px] text-gray-500">Email</p>
-                <p className="text-xs font-medium">{patient.email || 'Not provided'}</p>
+              <div className="border-b pb-2 mt-3">
+                <p className="text-xs text-gray-500">Phone Number</p>
+                <p className="text-sm font-medium">{patient.phone}</p>
+              </div>
+
+              <div className="border-b pb-2 mt-3">
+                <p className="text-xs text-gray-500">Email</p>
+                <p className="text-sm font-medium">{patient.email || 'Not provided'}</p>
               </div>
             </div>
 
             {/* Medical History */}
-            <h3 className="font-semibold text-xs mt-2">Medical History</h3>
+            <h3 className="font-semibold text-lg text-blue-800 mt-4">Medical History</h3>
             {patient.medicalHistory && patient.medicalHistory.length > 0 ? (
-              <div className="space-y-1">
+              <div className="space-y-3">
                 {patient.medicalHistory.map((condition, index) => (
-                  <div key={index} className="p-1 bg-gray-50 rounded border">
-                    <div className="font-medium text-xs">{condition.condition}</div>
-                    <div className="text-[10px] text-gray-600">
+                  <div key={index} className="p-3 bg-gray-50 rounded-lg border shadow-sm">
+                    <div className="font-medium text-base">{condition.condition}</div>
+                    <div className="text-sm text-gray-600 mt-1">
                       Diagnosed: {condition.diagnosedDate} • {condition.notes}
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="text-center py-1 bg-gray-50 rounded">
-                <p className="text-gray-500 text-[10px]">No medical history recorded</p>
+              <div className="text-center py-3 bg-gray-50 rounded-lg">
+                <p className="text-gray-500 text-sm">No medical history recorded</p>
               </div>
             )}
 
             {/* Allergies */}
-            <h3 className="font-semibold text-xs mt-2">Allergies</h3>
+            <h3 className="font-semibold text-lg text-blue-800 mt-4">Allergies</h3>
             {patient.allergies && patient.allergies.length > 0 ? (
-              <div className="flex flex-wrap gap-1">
+              <div className="flex flex-wrap gap-2 p-3 bg-gray-50 rounded-lg border shadow-sm">
                 {patient.allergies.map((allergy, index) => (
-                  <div key={index} className="bg-red-100 text-red-800 px-1 py-0.5 rounded-full text-[10px]">
+                  <div key={index} className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-medium">
                     {allergy}
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="text-center py-1 bg-gray-50 rounded">
-                <p className="text-gray-500 text-[10px]">No allergies recorded</p>
+              <div className="text-center py-3 bg-gray-50 rounded-lg">
+                <p className="text-gray-500 text-sm">No allergies recorded</p>
               </div>
             )}
 
             {/* Medications */}
-            <h3 className="font-semibold text-xs mt-2">Current Medications</h3>
+            <h3 className="font-semibold text-lg text-blue-800 mt-4">Current Medications</h3>
             {patient.medications && patient.medications.length > 0 ? (
-              <div className="space-y-1">
+              <div className="space-y-3">
                 {patient.medications.map((medication, index) => (
-                  <div key={index} className="p-1 bg-gray-50 rounded border">
-                    <div className="font-medium text-xs">{medication.name}</div>
-                    <div className="text-[10px] text-gray-600">
+                  <div key={index} className="p-3 bg-gray-50 rounded-lg border shadow-sm">
+                    <div className="font-medium text-base">{medication.name}</div>
+                    <div className="text-sm text-gray-600 mt-1">
                       {medication.dosage} • {medication.frequency} • Started: {medication.startDate}
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="text-center py-1 bg-gray-50 rounded">
-                <p className="text-gray-500 text-[10px]">No medications recorded</p>
+              <div className="text-center py-3 bg-gray-50 rounded-lg">
+                <p className="text-gray-500 text-sm">No medications recorded</p>
               </div>
             )}
           </div>
         </div>
       ) : (
-        <div className="p-1">
+        <div className="p-3">
           {/* Default Tab */}
-          <div className="text-center py-1 bg-gray-50 rounded">
-            <p className="text-gray-500 text-xs">Please select a tab</p>
+          <div className="text-center py-6 bg-gray-50 rounded-lg">
+            <p className="text-gray-500 text-base">Please select a tab to view patient information</p>
           </div>
             <div className="flex justify-between items-center mb-1">
               <h3 className="font-semibold text-xs">Appointments</h3>

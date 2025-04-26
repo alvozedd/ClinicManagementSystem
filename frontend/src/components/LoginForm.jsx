@@ -29,6 +29,9 @@ function LoginForm() {
     try {
       console.log('Attempting login with:', { username });
 
+      // Clear any previous logged out flag
+      localStorage.removeItem('user_logged_out');
+
       // Import the API service
       const apiService = (await import('../utils/apiService')).default;
       console.log('API URL:', import.meta.env.VITE_API_URL || 'http://localhost:5000/api');
@@ -40,6 +43,9 @@ function LoginForm() {
 
       // Use the login function from AuthContext
       login(data);
+
+      // Redirect to dashboard after successful login
+      window.location.href = '/dashboard';
     } catch (err) {
       console.error('Login error details:', err);
       setError(`Login failed: ${err.toString()}`);

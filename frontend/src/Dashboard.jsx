@@ -628,10 +628,18 @@ function Dashboard() {
     }
   };
 
-  const handleLogout = () => {
-    logout()
-    // Use window.location to ensure full page reload
-    window.location.href = '/'
+  const handleLogout = async () => {
+    console.log('Dashboard: handleLogout called');
+    try {
+      // Call the logout function from AuthContext
+      await logout();
+      // The redirect is handled in the AuthContext logout function
+      // No need to redirect here as it would race with the redirect in AuthContext
+    } catch (error) {
+      console.error('Error during logout from Dashboard:', error);
+      // If there's an error, force a redirect to login page
+      window.location.href = '/login';
+    }
   }
 
   // Render different content based on user role

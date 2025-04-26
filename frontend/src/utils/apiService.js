@@ -236,6 +236,21 @@ const apiService = {
     try {
       console.log('Calling logout API with sessionId:', sessionId ? 'Present' : 'Not present');
 
+      // First, clear all client-side storage to ensure immediate logout effect
+      // Clear all secure storage
+      secureStorage.clear();
+
+      // Clear all localStorage items that might contain user data
+      localStorage.removeItem('userInfo');
+      localStorage.removeItem('session_active');
+      localStorage.removeItem('session_timestamp');
+
+      // Set logout flag
+      localStorage.setItem('user_logged_out', 'true');
+
+      console.log('Local storage cleared, now calling logout API');
+
+      // Then call the API to logout (revoke refresh token)
       const response = await fetch(`${API_URL}/users/logout`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -245,22 +260,17 @@ const apiService = {
 
       console.log('Logout API response status:', response.status);
 
-      // Clear user info from secure storage
-      secureStorage.clear(); // Clear all secure storage
-
-      // Also clear legacy storage
-      localStorage.removeItem('userInfo');
-
-      // Set logout flag
-      localStorage.setItem('user_logged_out', 'true');
+      // Double-check that everything is cleared
+      if (secureStorage.getItem('userInfo')) {
+        console.warn('userInfo still exists in secureStorage after logout, clearing again');
+        secureStorage.clear();
+      }
 
       return handleResponse(response);
     } catch (error) {
-      console.error('Error during logout:', error);
-      // Even if the server-side logout fails, clear storage
-      secureStorage.clear();
-      localStorage.removeItem('userInfo');
-      localStorage.setItem('user_logged_out', 'true');
+      console.error('Error during logout API call:', error);
+      // Even if the server-side logout fails, we've already cleared local storage
+      // No need to clear again
       throw error;
     }
   },
