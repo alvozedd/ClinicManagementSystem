@@ -1,5 +1,7 @@
 import React from 'react';
 import ActionButtons from './ActionButtons';
+import { FaUser } from 'react-icons/fa';
+import { getCreatorLabel } from '../utils/recordCreation';
 
 /**
  * Reusable appointment card component
@@ -62,6 +64,20 @@ const AppointmentCard = ({
       <div>
         <div className="font-medium text-lg">{appointment.time} - {appointment.patientName}</div>
         <div className="text-gray-600">{appointment.type || ''}: {appointment.reason}</div>
+        {appointment.createdBy && (
+          <div className="flex items-center mt-1">
+            <span className="text-gray-500 text-xs mr-1">Added by:</span>
+            <span className={`px-2 py-0.5 rounded text-xs font-medium ${
+              appointment.createdBy === 'doctor' ? 'bg-blue-100 text-blue-800' :
+              appointment.createdBy === 'secretary' ? 'bg-green-100 text-green-800' :
+              appointment.createdBy === 'admin' ? 'bg-gray-100 text-gray-800' :
+              'bg-purple-100 text-purple-800'
+            }`}>
+              <FaUser className="inline mr-1" size={10} />
+              {getCreatorLabel(appointment.createdBy)}
+            </span>
+          </div>
+        )}
       </div>
       <div className="flex space-x-2">
         <span className={`px-3 py-1 rounded-full text-sm font-medium ${

@@ -10,8 +10,9 @@ import AppointmentManagementModal from './AppointmentManagementModal';
 import PatientSearchAppointmentModal from './PatientSearchAppointmentModal';
 import PatientNavigator from './PatientNavigator';
 import ActionButtons from './ActionButtons';
-import { FaCalendarAlt, FaUserTie, FaClipboardList } from 'react-icons/fa';
+import { FaCalendarAlt, FaUserTie, FaClipboardList, FaUser } from 'react-icons/fa';
 import { getTimeBasedGreeting, getFormattedDate, identifyAppointmentsNeedingDiagnosis } from '../utils/timeUtils';
+import { getCreatorLabel } from '../utils/recordCreation';
 import { transformAppointmentFromBackend } from '../utils/dataTransformers';
 import './AppointmentTabs.css';
 
@@ -216,7 +217,7 @@ function SimplifiedSecretaryDashboard({
                     <span>{appointment.date}</span>
                     <span>{appointment.time}</span>
                   </div>
-                  <div className="text-xs mt-1">
+                  <div className="flex justify-between items-center text-xs mt-1">
                     <span className={`px-1.5 py-0.5 rounded-full text-xs ${
                       appointment.status === 'Scheduled' ? 'bg-green-100 text-green-800' :
                       appointment.status === 'Completed' ? 'bg-blue-100 text-blue-800' :
@@ -226,6 +227,17 @@ function SimplifiedSecretaryDashboard({
                     }`}>
                       {appointment.status}
                     </span>
+                    {appointment.createdBy && (
+                      <span className={`px-1.5 py-0.5 rounded-full text-xs ${
+                        appointment.createdBy === 'doctor' ? 'bg-blue-100 text-blue-800' :
+                        appointment.createdBy === 'secretary' ? 'bg-green-100 text-green-800' :
+                        appointment.createdBy === 'admin' ? 'bg-gray-100 text-gray-800' :
+                        'bg-purple-100 text-purple-800'
+                      }`}>
+                        <FaUser className="inline mr-1" size={8} />
+                        {getCreatorLabel(appointment.createdBy)}
+                      </span>
+                    )}
                   </div>
                 </div>
               ))}

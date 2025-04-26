@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
 import apiService from '../utils/apiService';
+import ContentManagement from './ContentManagement';
+import { FaUsers, FaEdit } from 'react-icons/fa';
 
 function AdminDashboard({ username, userInfo }) {
+  const [activeTab, setActiveTab] = useState('users'); // 'users' or 'content'
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editingUser, setEditingUser] = useState(null);
@@ -224,11 +227,47 @@ function AdminDashboard({ username, userInfo }) {
       {/* Welcome Banner */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
         <h1 className="text-xl font-bold text-blue-800">Welcome, {username}!</h1>
-        <p className="text-sm text-blue-600">User Management Dashboard</p>
+        <p className="text-sm text-blue-600">Admin Dashboard</p>
       </div>
 
-      {/* User Management Section */}
-      <div className="bg-white rounded-lg shadow-md p-6">
+      {/* Tabs */}
+      <div className="mb-6 border-b border-gray-200">
+        <ul className="flex flex-wrap -mb-px">
+          <li className="mr-2">
+            <button
+              onClick={() => setActiveTab('users')}
+              className={`inline-block py-3 px-4 text-sm font-medium flex items-center ${
+                activeTab === 'users'
+                  ? 'text-blue-600 border-b-2 border-blue-600'
+                  : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <FaUsers className="mr-2" />
+              User Management
+            </button>
+          </li>
+          <li className="mr-2">
+            <button
+              onClick={() => setActiveTab('content')}
+              className={`inline-block py-3 px-4 text-sm font-medium flex items-center ${
+                activeTab === 'content'
+                  ? 'text-blue-600 border-b-2 border-blue-600'
+                  : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+            >
+              <FaEdit className="mr-2" />
+              Content Management
+            </button>
+          </li>
+        </ul>
+      </div>
+
+      {/* Content based on active tab */}
+      {activeTab === 'content' ? (
+        <ContentManagement />
+      ) : (
+        /* User Management Section */
+        <div className="bg-white rounded-lg shadow-md p-6">
         <div className="flex justify-between items-center mb-6">
           <div>
             <h2 className="text-lg font-semibold text-gray-800">User Management</h2>
