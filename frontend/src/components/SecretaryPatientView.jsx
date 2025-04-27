@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import AppointmentManagementModal from './AppointmentManagementModal';
 import PatientNavigator from './PatientNavigator';
+import PatientEditForm from './PatientEditForm';
 import { transformAppointmentFromBackend } from '../utils/dataTransformers';
 import { clearAllCaches } from '../data/mockData';
-import { FaUser } from 'react-icons/fa';
+import { FaUser, FaEdit, FaCalendarAlt, FaIdCard, FaPhone, FaEnvelope } from 'react-icons/fa';
 import { getCreatorLabel } from '../utils/recordCreation';
 
 function SecretaryPatientView({ patient, patients, appointments, onClose, onUpdatePatient, onSelectPatient, onDeletePatient }) {
@@ -11,6 +12,8 @@ function SecretaryPatientView({ patient, patients, appointments, onClose, onUpda
   const [editedPatient, setEditedPatient] = useState({...patient});
   const [managingAppointment, setManagingAppointment] = useState(null);
   const [isNewAppointment, setIsNewAppointment] = useState(false);
+  const [activeTab, setActiveTab] = useState('appointments');
+  const [showEditForm, setShowEditForm] = useState(false);
 
   // Update local state when patient prop changes
   useEffect(() => {
@@ -165,8 +168,17 @@ function SecretaryPatientView({ patient, patients, appointments, onClose, onUpda
                 <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm">
                   {patient.gender} • {calculateAge(patient.dateOfBirth)} years
                 </span>
-                <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm">
+                <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm flex items-center">
                   Phone: {patient.phone}
+                  {patient.phone && (
+                    <a
+                      href={`tel:${patient.phone}`}
+                      className="bg-green-500 hover:bg-green-600 text-white p-1 rounded-full ml-2"
+                      title="Call patient"
+                    >
+                      <FaPhone size={10} />
+                    </a>
+                  )}
                 </span>
                 {sortedAppointments.length > 0 && (
                   <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm">
@@ -177,6 +189,12 @@ function SecretaryPatientView({ patient, patients, appointments, onClose, onUpda
             </div>
           </div>
           <div className="flex flex-col space-y-2">
+            <button
+              onClick={() => setShowEditForm(true)}
+              className="text-blue-600 hover:text-blue-800 bg-blue-50 px-3 py-1 rounded text-sm flex items-center"
+            >
+              <FaEdit className="mr-1" /> Edit Patient
+            </button>
             <button
               onClick={onClose}
               className="text-gray-500 hover:text-gray-700"
@@ -189,9 +207,113 @@ function SecretaryPatientView({ patient, patients, appointments, onClose, onUpda
         </div>
       </div>
 
-      {/* Appointments Section */}
+      {/* Tabs */}
+      <div className="flex border-b mb-4">
+        <button
+          className={`px-4 py-2 font-medium text-sm ${activeTab === 'biodata' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+          onClick={() => setActiveTab('biodata')}
+        >
+          <FaIdCard className="inline mr-1" /> Patient Info
+        </button>
+        <button
+          className={`px-4 py-2 font-medium text-sm ${activeTab === 'appointments' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+          onClick={() => setActiveTab('appointments')}
+        >
+          <FaCalendarAlt className="inline mr-1" /> Appointments
+        </button>
+      </div>
+
+      {/* Content Section */}
       <div className="p-4">
-        <div>
+        {activeTab === 'biodata' ? (
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="border-b pb-2">
+                <p className="text-sm text-gray-500">First Name</p>
+                <p className="font-medium">{patient.firstName}</p>
+              </div>
+              <div className="border-b pb-2">
+                <p className="text-sm text-gray-500">Last Name</p>
+                <p className="font-medium">{patient.lastName}</p>
+              </div>
+              <div className="border-b pb-2">
+                <p className="text-sm text-gray-500">Gender</p>
+                <p className="font-medium">{patient.gender}</p>
+              </div>
+              <div className="border-b pb-2">
+                <p className="text-sm text-gray-500">Date of Birth</p>
+                <p className="font-medium">{patient.dateOfBirth}</p>
+              </div>
+              <div className="border-b pb-2">
+                <p className="text-sm text-gray-500">Phone</p>
+                <div className="flex items-center">
+                  <p className="font-medium mr-2">{patient.phone}</p>
+                  {patient.phone && (
+                    <a
+                      href={`tel:${patient.phone}`}
+                      className="bg-green-500 hover:bg-green-600 text-white p-1.5 rounded-full"
+                      title="Call patient"
+                    >
+                      <FaPhone size={12} />
+                    </a>
+                  )}
+                </div>
+              </div>
+              <div className="border-b pb-2">
+                <p className="text-sm text-gray-500">Email</p>
+                <div className="flex items-center">
+                  <p className="font-medium mr-2">{patient.email || 'Not provided'}</p>
+                  {patient.email && (
+                    <a
+                      href={`mailto:${patient.email}`}
+                      className="bg-blue-500 hover:bg-blue-600 text-white p-1.5 rounded-full"
+                      title="Email patient"
+                    >
+                      <FaEnvelope size={12} />
+                    </a>
+                  )}
+                </div>
+              </div>
+              <div className="border-b pb-2">
+                <p className="text-sm text-gray-500">Address</p>
+                <p className="font-medium">{patient.address || 'Not provided'}</p>
+              </div>
+            </div>
+
+            {/* Next of Kin Information */}
+            {(patient.nextOfKinName || patient.nextOfKinRelationship || patient.nextOfKinPhone) && (
+              <div className="mt-6">
+                <h3 className="text-md font-semibold mb-3">Next of Kin Information</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="border-b pb-2">
+                    <p className="text-sm text-gray-500">Name</p>
+                    <p className="font-medium">{patient.nextOfKinName || 'Not provided'}</p>
+                  </div>
+                  <div className="border-b pb-2">
+                    <p className="text-sm text-gray-500">Relationship</p>
+                    <p className="font-medium">{patient.nextOfKinRelationship || 'Not provided'}</p>
+                  </div>
+                  <div className="border-b pb-2">
+                    <p className="text-sm text-gray-500">Phone</p>
+                    <div className="flex items-center">
+                      <p className="font-medium mr-2">{patient.nextOfKinPhone || 'Not provided'}</p>
+                      {patient.nextOfKinPhone && (
+                        <a
+                          href={`tel:${patient.nextOfKinPhone}`}
+                          className="bg-green-500 hover:bg-green-600 text-white p-1.5 rounded-full"
+                          title="Call next of kin"
+                        >
+                          <FaPhone size={12} />
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div>
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-semibold">Appointments</h3>
             <button
@@ -323,7 +445,8 @@ function SecretaryPatientView({ patient, patients, appointments, onClose, onUpda
           {sortedAppointments.length === 0 && (
             <p className="text-gray-500 text-center py-4">No appointments found for this patient.</p>
           )}
-        </div>
+          </div>
+        )}
       </div>
 
       {/* Appointment Management Modal */}
@@ -337,6 +460,33 @@ function SecretaryPatientView({ patient, patients, appointments, onClose, onUpda
           }}
           isNew={isNewAppointment}
         />
+      )}
+
+      {/* Patient Edit Modal */}
+      {showEditForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-bold text-gray-800">Edit Patient</h2>
+              <button
+                onClick={() => setShowEditForm(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </button>
+            </div>
+            <PatientEditForm
+              patient={patient}
+              onSave={(updatedPatient) => {
+                onUpdatePatient(updatedPatient);
+                setShowEditForm(false);
+              }}
+              onCancel={() => setShowEditForm(false)}
+            />
+          </div>
+        </div>
       )}
     </div>
   );

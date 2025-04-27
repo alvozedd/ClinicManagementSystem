@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { FaPhone, FaEnvelope } from 'react-icons/fa';
 import { patients as allPatients } from '../data/mockData';
 
 function DoctorPatientView({ patient, appointments, onClose, onUpdatePatient, onDiagnoseAppointment }) {
@@ -341,7 +342,18 @@ function DoctorPatientView({ patient, appointments, onClose, onUpdatePatient, on
                         className="border border-gray-300 px-3 py-2 rounded w-full text-base"
                       />
                     ) : (
-                      <span className="text-base">{patient.phone}</span>
+                      <div className="flex items-center">
+                        <span className="text-base mr-2">{patient.phone}</span>
+                        {patient.phone && (
+                          <a
+                            href={`tel:${patient.phone}`}
+                            className="bg-green-500 hover:bg-green-600 text-white p-1.5 rounded-full"
+                            title="Call patient"
+                          >
+                            <FaPhone size={14} />
+                          </a>
+                        )}
+                      </div>
                     )}
                   </div>
                   <div className="flex items-center">
@@ -355,7 +367,18 @@ function DoctorPatientView({ patient, appointments, onClose, onUpdatePatient, on
                         className="border border-gray-300 px-3 py-2 rounded w-full text-base"
                       />
                     ) : (
-                      <span className="text-base">{patient.email}</span>
+                      <div className="flex items-center">
+                        <span className="text-base mr-2">{patient.email || 'Not provided'}</span>
+                        {patient.email && (
+                          <a
+                            href={`mailto:${patient.email}`}
+                            className="bg-blue-500 hover:bg-blue-600 text-white p-1.5 rounded-full"
+                            title="Email patient"
+                          >
+                            <FaEnvelope size={14} />
+                          </a>
+                        )}
+                      </div>
                     )}
                   </div>
                   <div className="flex items-center">
@@ -424,7 +447,18 @@ function DoctorPatientView({ patient, appointments, onClose, onUpdatePatient, on
                         className="border border-gray-300 px-3 py-2 rounded w-full text-base"
                       />
                     ) : (
-                      <span className="text-base">{patient.nextOfKinPhone || 'Not provided'}</span>
+                      <div className="flex items-center">
+                        <span className="text-base mr-2">{patient.nextOfKinPhone || 'Not provided'}</span>
+                        {patient.nextOfKinPhone && (
+                          <a
+                            href={`tel:${patient.nextOfKinPhone}`}
+                            className="bg-green-500 hover:bg-green-600 text-white p-1.5 rounded-full"
+                            title="Call next of kin"
+                          >
+                            <FaPhone size={14} />
+                          </a>
+                        )}
+                      </div>
                     )}
                   </div>
                 </div>
