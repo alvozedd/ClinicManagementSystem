@@ -208,8 +208,8 @@ function SecretaryPatientView({ patient, patients, appointments, onClose, onUpda
               <h4 className="text-md font-medium text-gray-700 mb-2">Upcoming Appointments</h4>
               <div className="space-y-3">
                 {upcomingAppointments.map(appointment => (
-                  <div 
-                    key={appointment.id} 
+                  <div
+                    key={appointment.id}
                     className={`border rounded-lg p-4 ${
                       appointment.status === 'Scheduled' ? 'bg-green-50 border-green-200' :
                       appointment.status === 'Completed' ? 'bg-blue-50 border-blue-200' :
@@ -269,8 +269,8 @@ function SecretaryPatientView({ patient, patients, appointments, onClose, onUpda
               <h4 className="text-md font-medium text-gray-700 mb-2">Past Appointments</h4>
               <div className="space-y-3">
                 {pastAppointments.map(appointment => (
-                  <div 
-                    key={appointment.id} 
+                  <div
+                    key={appointment.id}
                     className={`border rounded-lg p-4 ${
                       appointment.status === 'Completed' ? 'bg-blue-50 border-blue-200' :
                       appointment.status === 'Cancelled' ? 'bg-red-50 border-red-200' :
@@ -331,7 +331,7 @@ function SecretaryPatientView({ patient, patients, appointments, onClose, onUpda
         <AppointmentManagementModal
           appointment={managingAppointment}
           onSave={handleSaveAppointment}
-          onCancel={() => {
+          onClose={() => {
             setManagingAppointment(null);
             setIsNewAppointment(false);
           }}

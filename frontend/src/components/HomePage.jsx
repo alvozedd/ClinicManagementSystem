@@ -4,8 +4,6 @@ import apiService from '../utils/apiService';
 import { loadContent, getContentValue, getCategoryItems } from '../utils/contentUtils';
 import { FaBars, FaTimes } from 'react-icons/fa';
 import './GlassEffects.css';
-import './ScrollAnimations.css';
-import ScrollAnimations from './ScrollAnimations';
 
 // Add custom CSS for responsive background image
 const responsiveBackgroundStyles = `
@@ -151,9 +149,6 @@ function HomePage() {
     <>
       {/* Add style tag for responsive background */}
       <style dangerouslySetInnerHTML={{ __html: responsiveBackgroundStyles }} />
-
-      {/* Scroll Animations Component */}
-      <ScrollAnimations />
 
       <div className="text-gray-800 responsive-bg" style={{
         scrollBehavior: 'smooth',
@@ -552,10 +547,6 @@ function HomePage() {
             <div>
               {/* Home content */}
               <div className="text-center text-white relative overflow-hidden" style={{ height: "100vh" }}>
-                {/* Fluid elements for parallax effect */}
-                <div className="fluid-element fluid-element-1 parallax-element"></div>
-                <div className="fluid-element fluid-element-2 parallax-element"></div>
-                <div className="fluid-element fluid-element-3 parallax-element"></div>
 
                 {/* Very subtle background overlay */}
                 <div className="absolute inset-0 bg-gradient-to-b from-blue-900/5 to-transparent"></div>
@@ -563,13 +554,13 @@ function HomePage() {
                 {/* Hero Section - Blue Background */}
                 <div className="max-w-4xl mx-auto text-center relative px-4 sm:px-6 h-screen flex flex-col justify-center items-center z-10">
                   <div className="transform translate-y-[-10vh]">
-                    <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4 text-white fade-in-element">
+                    <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4 text-white">
                       {getContentValue(content, 'homepage', 'Hero', 'Hero Title', 'UroHealth Central Ltd')}
                     </h1>
-                    <p className="text-xl sm:text-2xl md:text-3xl mb-2 text-white font-light fade-in-element">
+                    <p className="text-xl sm:text-2xl md:text-3xl mb-2 text-white font-light">
                       {getContentValue(content, 'homepage', 'Hero', 'Hero Subtitle', 'Specialist Urological Care')}
                     </p>
-                    <p className="text-sm sm:text-base md:text-lg mb-6 sm:mb-8 leading-relaxed text-white max-w-xl mx-auto fade-in-element">
+                    <p className="text-sm sm:text-base md:text-lg mb-6 sm:mb-8 leading-relaxed text-white max-w-xl mx-auto">
                       {getContentValue(content, 'homepage', 'Hero', 'Hero Description', '20+ years of specialized medical excellence')}
                     </p>
                     <div className="flex flex-row justify-center gap-5 sm:gap-8 mt-6 sm:mt-8">
@@ -604,19 +595,19 @@ function HomePage() {
               {/* White background sections */}
               <div className="bg-white">
                 {/* Services Section */}
-                <div id="services" className="gradient-section bg-white text-gray-800 py-16 sm:py-20 md:py-24 w-full relative overflow-hidden" data-color-from="rgba(255, 255, 255, 1)" data-color-to="rgba(219, 234, 254, 0.3)">
+                <div id="services" className="bg-white text-gray-800 py-16 sm:py-20 md:py-24 w-full relative overflow-hidden">
                   <div className="max-w-5xl mx-auto px-4">
                     <div className="text-center mb-12 relative">
                       <div className="bg-gradient-to-r from-blue-50 via-blue-100 to-blue-50 h-1 w-24 mx-auto mb-4"></div>
-                      <h3 className="text-3xl md:text-4xl font-bold text-blue-700 mb-4 text-center relative inline-block fade-in-element">
+                      <h3 className="text-3xl md:text-4xl font-bold text-blue-700 mb-4 text-center relative inline-block">
                         Our Services
                         <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-blue-400 to-blue-600 transform scale-x-0 transition-transform duration-300 group-hover:scale-x-100"></div>
                       </h3>
-                      <p className="text-lg md:text-xl text-gray-600 mb-2 max-w-3xl mx-auto fade-in-element">{getContentValue(content, 'homepage', 'About', 'About Text', 'We provide comprehensive urological care with state-of-the-art technology and personalized treatment plans.')}</p>
+                      <p className="text-lg md:text-xl text-gray-600 mb-2 max-w-3xl mx-auto">{getContentValue(content, 'homepage', 'About', 'About Text', 'We provide comprehensive urological care with state-of-the-art technology and personalized treatment plans.')}</p>
                       <div className="h-1 w-16 bg-gradient-to-r from-blue-400 to-blue-600 mx-auto mt-4"></div>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8 px-4 sm:px-0">
-                      <div className="bg-blue-50 rounded-xl p-8 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col items-center text-center border border-blue-100 hover:border-blue-300 transform hover:translate-y-[-8px] h-full group fade-in-element">
+                      <div className="bg-blue-50 rounded-xl p-8 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col items-center text-center border border-blue-100 hover:border-blue-300 transform hover:translate-y-[-8px] h-full group">
                         <div className="bg-blue-100 p-5 rounded-full mb-6 group-hover:bg-blue-200 transition-all duration-300 transform group-hover:scale-110">
                           <svg className="w-14 h-14 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
@@ -635,7 +626,7 @@ function HomePage() {
                         </div>
                       </div>
 
-                      <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:translate-y-[-8px] text-white flex flex-col items-center text-center border border-blue-500 h-full group relative overflow-hidden fade-in-element">
+                      <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:translate-y-[-8px] text-white flex flex-col items-center text-center border border-blue-500 h-full group relative overflow-hidden">
                         <div className="absolute top-0 right-0 w-24 h-24 bg-blue-400 opacity-10 rounded-full -mr-8 -mt-8"></div>
                         <div className="absolute bottom-0 left-0 w-24 h-24 bg-blue-800 opacity-10 rounded-full -ml-8 -mb-8"></div>
                         <div className="bg-blue-500 p-5 rounded-full mb-6 group-hover:bg-blue-400 transition-all duration-300 transform group-hover:scale-110 relative z-10">
@@ -656,7 +647,7 @@ function HomePage() {
                         </div>
                       </div>
 
-                      <div className="bg-blue-50 rounded-xl p-8 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col items-center text-center border border-blue-100 hover:border-blue-300 transform hover:translate-y-[-8px] h-full group fade-in-element">
+                      <div className="bg-blue-50 rounded-xl p-8 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col items-center text-center border border-blue-100 hover:border-blue-300 transform hover:translate-y-[-8px] h-full group">
                         <div className="bg-blue-100 p-5 rounded-full mb-6 group-hover:bg-blue-200 transition-all duration-300 transform group-hover:scale-110">
                           <svg className="w-14 h-14 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
@@ -679,16 +670,16 @@ function HomePage() {
                 </div>
 
                 {/* Contact Section */}
-                <div id="contact" className="gradient-section bg-white text-gray-800 py-16 sm:py-20 md:py-24 w-full relative" data-color-from="rgba(219, 234, 254, 0.3)" data-color-to="rgba(191, 219, 254, 0.5)">
+                <div id="contact" className="bg-white text-gray-800 py-16 sm:py-20 md:py-24 w-full relative">
                   <div className="max-w-5xl mx-auto px-4">
                     <div className="text-center mb-12 relative">
                       <div className="bg-gradient-to-r from-blue-50 via-blue-100 to-blue-50 h-1 w-24 mx-auto mb-4"></div>
-                      <div className="text-blue-600 text-sm font-semibold mb-3 uppercase tracking-wider text-center fade-in-element">{getContentValue(content, 'contact', 'Main', 'Title', 'CONTACT US')}</div>
-                      <h2 className="text-2xl md:text-3xl font-bold mb-4 text-center text-blue-800 relative inline-block fade-in-element">
+                      <div className="text-blue-600 text-sm font-semibold mb-3 uppercase tracking-wider text-center">{getContentValue(content, 'contact', 'Main', 'Title', 'CONTACT US')}</div>
+                      <h2 className="text-2xl md:text-3xl font-bold mb-4 text-center text-blue-800 relative inline-block">
                         {getContentValue(content, 'contact', 'Main', 'Subtitle', 'Get in touch')}
                         <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-blue-400 to-blue-600 transform scale-x-0 transition-transform duration-300 group-hover:scale-x-100"></div>
                       </h2>
-                      <p className="text-center text-gray-600 mb-4 max-w-2xl mx-auto fade-in-element">
+                      <p className="text-center text-gray-600 mb-4 max-w-2xl mx-auto">
                         {getContentValue(content, 'contact', 'Main', 'Description', 'Have questions about our services or need more information? Our team will get back to you as soon as possible.')}
                       </p>
                       <div className="h-1 w-16 bg-gradient-to-r from-blue-400 to-blue-600 mx-auto mt-4"></div>
@@ -697,7 +688,7 @@ function HomePage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 px-4 sm:px-0">
                       {/* Location Map on the left */}
                       <div className="order-2 md:order-1">
-                        <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100 transition-all duration-300 hover:shadow-xl hover:border-blue-200 h-full group relative fade-in-element">
+                        <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100 transition-all duration-300 hover:shadow-xl hover:border-blue-200 h-full group relative">
                           <div className="flex items-center mb-4">
                             <svg className="w-7 h-7 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
@@ -756,7 +747,7 @@ function HomePage() {
 
                       {/* Contact Information on the right */}
                       <div className="order-1 md:order-2">
-                        <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100 transition-all duration-500 hover:shadow-xl hover:border-blue-200 transform hover:translate-y-[-8px] relative overflow-hidden fade-in-element">
+                        <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100 transition-all duration-500 hover:shadow-xl hover:border-blue-200 transform hover:translate-y-[-8px] relative overflow-hidden">
                           {/* Background pattern */}
                           <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-full -mr-16 -mt-16 opacity-50"></div>
                           <div className="absolute bottom-0 left-0 w-32 h-32 bg-blue-50 rounded-full -ml-16 -mb-16 opacity-50"></div>
@@ -830,7 +821,7 @@ function HomePage() {
         </main>
 
         {/* Footer */}
-        <footer className="py-12 enhanced-footer-pattern text-white relative overflow-hidden gradient-section" data-color-from="rgba(191, 219, 254, 0.5)" data-color-to="rgba(37, 99, 235, 1)">
+        <footer className="py-12 enhanced-footer-pattern text-white relative overflow-hidden">
           <div className="max-w-5xl mx-auto px-4">
             <div className="flex flex-col md:flex-row justify-between mb-8">
               <div className="mb-8 md:mb-0">
