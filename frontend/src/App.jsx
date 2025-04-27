@@ -4,6 +4,7 @@ import AuthContext from './context/AuthContext'
 import Dashboard from './Dashboard'
 import HomePage from './components/HomePage'
 import LoginForm from './components/LoginForm'
+import './components/GlassEffects.css'
 
 function App() {
   const { userInfo, loading } = useContext(AuthContext)

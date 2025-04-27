@@ -4,7 +4,6 @@ import apiService from '../utils/apiService';
 import { loadContent, getContentValue, getCategoryItems } from '../utils/contentUtils';
 import { FaBars, FaTimes } from 'react-icons/fa';
 import './GlassEffects.css';
-import ScrollAnimationsInit from './ScrollAnimationsInit';
 
 // Add custom CSS for responsive background image
 const responsiveBackgroundStyles = `
@@ -151,9 +150,6 @@ function HomePage() {
 
   return (
     <>
-      {/* Initialize scroll animations */}
-      <ScrollAnimationsInit />
-
       {/* Add style tag for responsive background */}
       <style dangerouslySetInnerHTML={{ __html: responsiveBackgroundStyles }} />
 
