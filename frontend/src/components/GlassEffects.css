@@ -1,0 +1,47 @@
+/* Frosted Glass Effects */
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+}
+
+.glass-card-blue {
+  background: rgba(59, 130, 246, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(96, 165, 250, 0.18);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
+}
+
+.glass-card-green {
+  background: rgba(16, 185, 129, 0.15);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(16, 185, 129, 0.18);
+  box-shadow: 0 8px 32px 0 rgba(16, 185, 129, 0.15);
+}
+
+.glass-card-yellow {
+  background: rgba(245, 158, 11, 0.15);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(245, 158, 11, 0.18);
+  box-shadow: 0 8px 32px 0 rgba(245, 158, 11, 0.15);
+}
+
+.glass-card-red {
+  background: rgba(239, 68, 68, 0.15);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(239, 68, 68, 0.18);
+  box-shadow: 0 8px 32px 0 rgba(239, 68, 68, 0.15);
+}
+
+/* Enhanced Footer Pattern */
+.enhanced-footer-pattern {
+  background-color: #2563eb;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.15'%3E%3Cpath d='M0 38.59l2.83-2.83 1.41 1.41L1.41 40H0v-1.41zM0 20.83l2.83-2.83 1.41 1.41L1.41 22.24H0v-1.41zM0 3.07l2.83-2.83 1.41 1.41L1.41 4.48H0V3.07zm20.76-1.41l2.83-2.83 1.41 1.41L22.17 3.07h-1.41V1.66zm20.76 35.93l2.83-2.83 1.41 1.41L42.17 40h-1.41v-1.41zM20.76 18.17l2.83-2.83 1.41 1.41-2.83 2.83h-1.41v-1.41zm20.76 0l2.83-2.83 1.41 1.41-2.83 2.83h-1.41v-1.41zM3.07 17.41l2.83-2.83 1.41 1.41-2.83 2.83H3.07v-1.41zm20.76 0l2.83-2.83 1.41 1.41-2.83 2.83h-1.41v-1.41zM3.07 34.93l2.83-2.83 1.41 1.41-2.83 2.83H3.07v-1.41zm20.76 0l2.83-2.83 1.41 1.41-2.83 2.83h-1.41v-1.41zM3.07 0L0 3.07v1.41h1.41L4.48 1.41 3.07 0zm39.32 0l-2.83 2.83 1.41 1.41L43.9 1.41 42.49 0h-1.41zm-16.49 0l-2.83 2.83 1.41 1.41L27.31 1.41 25.9 0h-1.41zm-20.76 0L0 3.07v1.41h1.41l3.07-3.07L3.07 0zm23.17 0L20.76 3.07v1.41h1.41l3.07-3.07L25.9 0zm15.66 0l-2.83 2.83 1.41 1.41 2.83-2.83-1.41-1.41h-1.41zM38.17 0l-2.83 2.83 1.41 1.41 2.83-2.83L38.17 0zm-16.49 0l-2.83 2.83 1.41 1.41 2.83-2.83L21.68 0zm-20.76 0L0 3.07v1.41h1.41l3.07-3.07L3.07 0zm36.25 0l-2.83 2.83 1.41 1.41L40.83 1.41 39.42 0zm-16.49 0l-2.83 2.83 1.41 1.41 2.83-2.83L22.93 0zm-16.49 0L3.07 3.07v1.41h1.41l3.07-3.07L6.14 0zm36.25 0l-2.83 2.83 1.41 1.41L43.9 1.41 42.49 0h-1.41zm-16.49 0l-2.83 2.83 1.41 1.41L27.31 1.41 25.9 0h-1.41zm-20.76 0L0 3.07v1.41h1.41l3.07-3.07L3.07 0z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}

@@ -2,6 +2,7 @@ import React from 'react';
 import ActionButtons from './ActionButtons';
 import { FaUser } from 'react-icons/fa';
 import { getCreatorLabel } from '../utils/recordCreation';
+import './GlassEffects.css';
 
 /**
  * Reusable appointment card component
@@ -52,12 +53,12 @@ const AppointmentCard = ({
   return (
     <div
       key={appointment.id || appointment._id}
-      className={`p-4 rounded-lg border border-gray-200 flex justify-between items-center cursor-pointer hover:bg-blue-50 transition-colors ${
-        appointment.status === 'Scheduled' ? 'bg-green-50' :
-        appointment.status === 'Completed' ? 'bg-blue-50' :
-        appointment.status === 'Cancelled' ? 'bg-red-50' :
-        appointment.status === 'Pending' ? 'bg-yellow-50' :
-        'bg-white'
+      className={`p-4 rounded-lg border border-gray-200 flex justify-between items-center cursor-pointer hover:shadow-lg transition-all duration-300 ${
+        appointment.status === 'Scheduled' ? 'glass-card-green' :
+        appointment.status === 'Completed' ? 'glass-card-blue' :
+        appointment.status === 'Cancelled' ? 'glass-card-red' :
+        appointment.status === 'Pending' ? 'glass-card-yellow' :
+        'glass-card'
       }`}
       onClick={handleCardClick}
     >

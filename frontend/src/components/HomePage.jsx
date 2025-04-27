@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import apiService from '../utils/apiService';
 import { loadContent, getContentValue, getCategoryItems } from '../utils/contentUtils';
 import { FaBars, FaTimes } from 'react-icons/fa';
+import './GlassEffects.css';
 
 // Add custom CSS for responsive background image
 const responsiveBackgroundStyles = `
@@ -620,18 +621,7 @@ function HomePage() {
                             </svg>
                             <span className="text-lg">{getContentValue(content, 'services', 'Consultations', 'Feature', '30-60 minutes')}</span>
                           </div>
-                          <button
-                            onClick={() => {
-                              setShowBookingForm(true);
-                              window.scrollTo({ top: 0, behavior: 'smooth' });
-                            }}
-                            className="bg-blue-600 text-white hover:bg-blue-700 px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-medium transition-all duration-300 text-base flex items-center gap-2 w-full justify-center shadow-sm hover:shadow group-hover:scale-105"
-                          >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                            </svg>
-                            Book Now
-                          </button>
+
                         </div>
                       </div>
 
@@ -652,18 +642,7 @@ function HomePage() {
                             </svg>
                             <span className="text-lg">{getContentValue(content, 'services', 'Diagnostics', 'Feature', 'Accurate Results')}</span>
                           </div>
-                          <button
-                            onClick={() => {
-                              setShowBookingForm(true);
-                              window.scrollTo({ top: 0, behavior: 'smooth' });
-                            }}
-                            className="bg-white text-blue-600 hover:bg-blue-50 px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-medium transition-all duration-300 text-base flex items-center gap-2 w-full justify-center shadow-md hover:shadow-lg group-hover:scale-105"
-                          >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                            </svg>
-                            Book Now
-                          </button>
+
                         </div>
                       </div>
 
@@ -682,18 +661,7 @@ function HomePage() {
                             </svg>
                             <span className="text-lg">{getContentValue(content, 'services', 'Treatments', 'Feature', 'Personalized Care')}</span>
                           </div>
-                          <button
-                            onClick={() => {
-                              setShowBookingForm(true);
-                              window.scrollTo({ top: 0, behavior: 'smooth' });
-                            }}
-                            className="bg-blue-600 text-white hover:bg-blue-700 px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-medium transition-all duration-300 text-base flex items-center gap-2 w-full justify-center shadow-sm hover:shadow group-hover:scale-105"
-                          >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                            </svg>
-                            Book Now
-                          </button>
+
                         </div>
                       </div>
                     </div>
@@ -852,7 +820,7 @@ function HomePage() {
         </main>
 
         {/* Footer */}
-        <footer className="py-12 bg-blue-800 text-white relative overflow-hidden">
+        <footer className="py-12 enhanced-footer-pattern text-white relative overflow-hidden">
           <div className="max-w-5xl mx-auto px-4">
             <div className="flex flex-col md:flex-row justify-between mb-8">
               <div className="mb-8 md:mb-0">
