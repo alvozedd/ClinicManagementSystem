@@ -89,12 +89,15 @@ export const transformPatientToBackend = (frontendPatient) => {
   }
 
   // If no yearOfBirth but dateOfBirth exists, extract year from dateOfBirth
-  if (yearOfBirth === undefined && frontendPatient.dateOfBirth) {
+  if ((yearOfBirth === undefined || yearOfBirth === null) && frontendPatient.dateOfBirth) {
     const date = new Date(frontendPatient.dateOfBirth);
     if (!isNaN(date.getFullYear())) {
       yearOfBirth = date.getFullYear();
     }
   }
+
+  // Log the year of birth for debugging
+  console.log('Transforming patient to backend with year of birth:', yearOfBirth);
 
   return {
     name: `${frontendPatient.firstName} ${frontendPatient.lastName}`.trim(),

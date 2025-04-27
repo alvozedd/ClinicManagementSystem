@@ -48,8 +48,15 @@ function AddPatientForm({ onSave, onCancel, createdBy = 'secretary' }) {
       return;
     }
 
+    // Make sure yearOfBirth is properly set
+    const patientData = {
+      ...formData,
+      yearOfBirth: formData.yearOfBirth ? parseInt(formData.yearOfBirth) : null
+    };
+
     // Create a new patient record with the specified creator
-    const newPatient = createPatientRecord(formData, createdBy);
+    const newPatient = createPatientRecord(patientData, createdBy);
+    console.log('Creating patient with year of birth:', patientData.yearOfBirth);
 
     onSave(newPatient);
   };

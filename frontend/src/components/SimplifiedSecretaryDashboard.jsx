@@ -200,7 +200,7 @@ function SimplifiedSecretaryDashboard({
         {upcomingAppointments.length > 0 && (
           <div className="mt-2">
             <h3 className="text-xs font-semibold mb-2">Upcoming Appointments</h3>
-            <div className="flex space-x-2 overflow-x-auto pb-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
               {upcomingAppointments.slice(0, 3).map((appointment) => {
                 // Get relative date label
                 const relativeDateLabel = getRelativeDateLabel(appointment.date);
@@ -208,7 +208,7 @@ function SimplifiedSecretaryDashboard({
                 return (
                 <div
                   key={appointment.id || appointment._id}
-                  className="bg-white bg-opacity-20 rounded-md p-2 backdrop-blur-sm cursor-pointer hover:bg-opacity-30 transition-all flex-shrink-0 w-full md:w-1/3"
+                  className="bg-white bg-opacity-20 rounded-md p-2 backdrop-blur-sm cursor-pointer hover:bg-opacity-30 transition-all"
                   onClick={() => {
                     const patient = patients.find(p => p.id === appointment.patientId || p._id === appointment.patientId);
                     if (patient) {

@@ -293,7 +293,7 @@ function SimplifiedDoctorDashboard({
         {upcomingAppointments.length > 0 && (
           <div className="mt-2">
             <h3 className="text-xs font-semibold mb-2">Upcoming Appointments</h3>
-            <div className="flex space-x-2 overflow-x-auto pb-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
               {upcomingAppointments.slice(0, 3).map((appointment) => {
                 // Import getRelativeDateLabel from timeUtils
                 const relativeDateLabel = getRelativeDateLabel(appointment.date);
@@ -301,7 +301,7 @@ function SimplifiedDoctorDashboard({
                 return (
                 <div
                   key={appointment.id || appointment._id}
-                  className="bg-white bg-opacity-20 rounded-md p-2 backdrop-blur-sm cursor-pointer hover:bg-opacity-30 transition-all flex-shrink-0 w-full md:w-1/3"
+                  className="bg-white bg-opacity-20 rounded-md p-2 backdrop-blur-sm cursor-pointer hover:bg-opacity-30 transition-all"
                   onClick={() => {
                     const patient = patients.find(p => p.id === appointment.patientId || p._id === appointment.patientId);
                     if (patient) {
@@ -345,7 +345,7 @@ function SimplifiedDoctorDashboard({
 
       {/* Enhanced Tab Navigation - Mobile Optimized */}
       <div className="bg-white rounded-md shadow-sm mb-4 p-2">
-        <div className="grid grid-cols-4 gap-1">
+        <div className="grid grid-cols-5 gap-1">
           <button
             onClick={() => setActiveTab('patient-management')}
             className={`py-3 px-2 rounded-md flex flex-col justify-center items-center transition-all ${
@@ -371,6 +371,18 @@ function SimplifiedDoctorDashboard({
               <span className="md:hidden">Appts</span>
             </span>
           </button>
+          <button
+            onClick={() => setActiveTab('diagnoses')}
+            className={`py-3 px-2 rounded-md flex flex-col justify-center items-center transition-all ${
+              activeTab === 'diagnoses'
+                ? 'bg-blue-100 text-blue-700 shadow-sm'
+                : 'text-gray-600 hover:bg-gray-100'
+            }`}
+          >
+            <FaFileMedical className="h-6 w-6 mb-1" />
+            <span className="text-sm font-medium text-center">Diagnoses</span>
+          </button>
+
           <button
             onClick={() => setActiveTab('calendar')}
             className={`py-3 px-2 rounded-md flex flex-col justify-center items-center transition-all ${
