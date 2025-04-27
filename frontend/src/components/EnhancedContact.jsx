@@ -218,7 +218,7 @@ const EnhancedContact = ({ content, getContentValue }) => {
                 <FaDirections className="mr-2 text-lg" /> Get Directions
               </a>
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
 
