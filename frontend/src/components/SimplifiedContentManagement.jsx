@@ -20,23 +20,23 @@ function SimplifiedContentManagement() {
         // Use the loadContent utility which handles fallbacks
         const organizedContent = await loadContent();
         setContent(organizedContent);
-        
+
         // Create a flat structure for the form data
         const flatData = {};
-        
+
         // Process each section
         Object.keys(organizedContent).forEach(section => {
           Object.keys(organizedContent[section] || {}).forEach(category => {
             (organizedContent[section][category] || []).forEach(item => {
               const key = `${section}_${category}_${item.label}`;
               flatData[key] = item.type === 'link' ? item.url : item.value;
-              
+
               // Store the item ID for later use when saving
               flatData[`${key}_id`] = item._id || item.id;
             });
           });
         });
-        
+
         setFormData(flatData);
         setOriginalData(flatData);
       } catch (err) {
@@ -73,50 +73,50 @@ function SimplifiedContentManagement() {
     try {
       // Create an array of update promises
       const updatePromises = [];
-      
+
       // For each changed field, create an update promise
       Object.keys(formData).forEach(key => {
         // Skip ID fields
         if (key.endsWith('_id')) return;
-        
+
         // Check if the value has changed
         if (formData[key] !== originalData[key]) {
           const id = formData[`${key}_id`];
           if (!id) return;
-          
+
           // Parse the key to get section, category, and label
           const [section, category, ...labelParts] = key.split('_');
           const label = labelParts.join('_');
-          
+
           // Find the original item to determine its type
           let itemType = 'text';
           let updateData = {};
-          
+
           // Look through the content to find the matching item
           if (content[section] && content[section][category]) {
             const item = content[section][category].find(i => i.label === label);
             if (item) {
               itemType = item.type;
-              
+
               // Prepare update data based on item type
               if (itemType === 'link') {
                 updateData = { url: formData[key] };
               } else {
                 updateData = { value: formData[key] };
               }
-              
+
               // Add the update promise
               updatePromises.push(apiService.updateContent(id, updateData));
             }
           }
         }
       });
-      
+
       // Execute all updates in parallel
       if (updatePromises.length > 0) {
         await Promise.all(updatePromises);
         setSuccess('Content updated successfully!');
-        
+
         // Update the original data to reflect the new values
         setOriginalData(formData);
       } else {
@@ -431,25 +431,7 @@ function SimplifiedContentManagement() {
           </div>
         </div>
 
-        {/* Doctor Information */}
-        <div className="border rounded-lg overflow-hidden">
-          <div className="bg-gray-50 p-8">
-            <h3 className="text-lg font-semibold mb-4 text-center">Doctor Information</h3>
-            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 text-center">
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-1">Doctor Name & Title</label>
-                <input
-                  type="text"
-                  name="homepage_Doctor_Doctor Name"
-                  value={formData['homepage_Doctor_Doctor Name'] || ''}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-center font-semibold"
-                  placeholder="DR. PAUL MUCHAI MBUGUA - CONSULTANT SURGEON & UROLOGIST"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
+
 
         {/* Contact Information */}
         <div className="border rounded-lg overflow-hidden">

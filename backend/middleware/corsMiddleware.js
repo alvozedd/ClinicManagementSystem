@@ -5,9 +5,13 @@
 // List of allowed origins
 const allowedOrigins = [
   'https://urohealthltd.netlify.app',
+  'https://www.urohealthltd.netlify.app',
   'http://localhost:3000',
   'http://localhost:5173'
 ];
+
+// For development, you can enable this to allow all origins
+const ALLOW_ALL_ORIGINS = process.env.NODE_ENV === 'development';
 
 /**
  * Custom CORS middleware that ensures headers are set for all responses
@@ -16,8 +20,17 @@ const allowedOrigins = [
 const corsMiddleware = (req, res, next) => {
   const origin = req.headers.origin;
 
+  // In development, allow all origins if the flag is set
+  if (ALLOW_ALL_ORIGINS) {
+    res.header('Access-Control-Allow-Origin', origin || '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+    res.header('Access-Control-Allow-Credentials', 'true');
+
+    console.log('CORS: Development mode - allowing all origins');
+  }
   // Check if the origin is in our allowed list
-  if (allowedOrigins.includes(origin)) {
+  else if (allowedOrigins.includes(origin)) {
     // Set CORS headers - never use wildcard with credentials
     res.header('Access-Control-Allow-Origin', origin);
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');

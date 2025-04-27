@@ -62,11 +62,18 @@ app.use(corsMiddleware);
 
 // Also apply the cors package for good measure
 app.use(cors({
-  origin: ['https://urohealthltd.netlify.app', 'http://localhost:3000', 'http://localhost:5173'],
+  origin: ['https://urohealthltd.netlify.app', 'https://www.urohealthltd.netlify.app', 'http://localhost:3000', 'http://localhost:5173'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization']
+  allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization'],
+  optionsSuccessStatus: 200 // Some legacy browsers (IE11) choke on 204
 }));
+
+// Handle preflight requests at the application level
+app.options('*', (req, res) => {
+  res.status(200).end();
+  console.log('Responded to OPTIONS request');
+});
 
 // Parse JSON bodies
 app.use(express.json());
@@ -461,6 +468,12 @@ app.use('/api/content', require('./routes/contentRoutes'));
 // Fallback content route for direct API access without /api prefix
 app.get('/content', (req, res) => {
   console.log('Received GET request at /content, redirecting to /api/content');
+  // Set CORS headers explicitly for this route
+  const origin = req.headers.origin;
+  if (origin) {
+    res.header('Access-Control-Allow-Origin', origin);
+    res.header('Access-Control-Allow-Credentials', 'true');
+  }
   // Import the controller directly
   const { getContent } = require('./controllers/contentController');
   // Call the controller function directly (public endpoint)
@@ -469,6 +482,12 @@ app.get('/content', (req, res) => {
 
 app.get('/content/:id', (req, res) => {
   console.log('Received GET request at /content/:id, redirecting to /api/content/:id');
+  // Set CORS headers explicitly for this route
+  const origin = req.headers.origin;
+  if (origin) {
+    res.header('Access-Control-Allow-Origin', origin);
+    res.header('Access-Control-Allow-Credentials', 'true');
+  }
   // Import the controller directly
   const { getContentById } = require('./controllers/contentController');
   // Call the controller function directly (public endpoint)
