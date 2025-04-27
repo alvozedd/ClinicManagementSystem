@@ -1,12 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import apiService from '../utils/apiService';
-import { loadContent, getContentValue, getCategoryItems } from '../utils/contentUtils';
+import { loadContent, getContentValue } from '../utils/contentUtils';
 import { FaBars, FaTimes } from 'react-icons/fa';
 import EnhancedContact from './EnhancedContact';
 import './GlassEffects.css';
 import '../styles/animations.css';
-import { setupScrollAnimations, setupStaggeredAnimations, textRevealAnimation, imageRevealAnimation, setupServiceCardAnimations } from '../utils/animationUtils';
 
 // Add custom CSS for responsive background image
 const responsiveBackgroundStyles = `
@@ -63,54 +62,23 @@ function HomePage() {
     fetchContent();
   }, []);
 
-  // Setup animations when component mounts
+  // Setup basic animations when component mounts
   useEffect(() => {
-    // Wait for content to load before setting up animations
+    // Only run animations if content is loaded
     if (!contentLoading) {
       try {
-        // Setup scroll animations
-        const cleanupScrollAnimations = setupScrollAnimations();
+        // Add fade-in class to elements that should animate
+        document.querySelectorAll('.service-card').forEach((card, index) => {
+          card.classList.add('fade-in');
+          card.style.animationDelay = `${index * 100}ms`;
+        });
 
-        // Setup service card animations
-        const cleanupServiceAnimations = setupServiceCardAnimations();
-
-        // Apply text animations to hero section with safe checks
-        const heroTitle = document.querySelector('.hero-title');
-        const heroSubtitle = document.querySelector('.hero-subtitle');
-        const heroDescription = document.querySelector('.hero-description');
-
-        // Apply animations with delays
-        setTimeout(() => {
-          if (heroTitle) textRevealAnimation(heroTitle, 30);
-        }, 100);
-
-        setTimeout(() => {
-          if (heroSubtitle) heroSubtitle.classList.add('fade-in');
-        }, 300);
-
-        setTimeout(() => {
-          if (heroDescription) heroDescription.classList.add('fade-in');
-        }, 600);
-
-        // Setup staggered animations for service cards
-        setTimeout(() => {
-          const servicesGrid = document.querySelector('.services-grid');
-          if (servicesGrid) {
-            setupStaggeredAnimations('.services-grid', 150);
-          }
-        }, 800);
-
-        // Apply image animation to background
-        setTimeout(() => {
-          const bgImage = document.querySelector('.responsive-bg');
-          if (bgImage) imageRevealAnimation(bgImage);
-        }, 200);
-
-        // Return cleanup function
-        return () => {
-          if (cleanupScrollAnimations) cleanupScrollAnimations();
-          if (cleanupServiceAnimations) cleanupServiceAnimations();
-        };
+        // Add fade-in to hero elements
+        const heroElements = document.querySelectorAll('.hero-title, .hero-subtitle, .hero-description');
+        heroElements.forEach((el, index) => {
+          el.classList.add('fade-in');
+          el.style.animationDelay = `${index * 200}ms`;
+        });
       } catch (error) {
         console.error('Animation setup error:', error);
         // Continue rendering the page even if animations fail

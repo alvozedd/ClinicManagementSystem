@@ -1,6 +1,6 @@
 /**
- * Animation utilities for the UroHealth Central website
- * These functions provide simple animations without external dependencies
+ * Simplified Animation utilities for the UroHealth Central website
+ * These functions provide basic CSS class-based animations without DOM manipulation
  */
 
 // Helper to check if an element is in viewport
@@ -17,124 +17,93 @@ export const isInViewport = (element, offset = 0) => {
 
 // Apply fade-in animation to elements when they enter viewport
 export const setupScrollAnimations = () => {
-  // Elements to animate
-  const animatedElements = document.querySelectorAll('.animate-on-scroll');
+  try {
+    // Elements to animate
+    const animatedElements = document.querySelectorAll('.animate-on-scroll');
+    if (!animatedElements || animatedElements.length === 0) return () => {};
 
-  const handleScroll = () => {
-    animatedElements.forEach(element => {
-      if (isInViewport(element, 50)) {
-        element.classList.add('animated');
-      }
-    });
-  };
+    const handleScroll = () => {
+      animatedElements.forEach(element => {
+        if (isInViewport(element, 50)) {
+          element.classList.add('animated');
+        }
+      });
+    };
 
-  // Initial check
-  handleScroll();
+    // Initial check
+    handleScroll();
 
-  // Add scroll listener
-  window.addEventListener('scroll', handleScroll);
+    // Add scroll listener
+    window.addEventListener('scroll', handleScroll);
 
-  // Return cleanup function
-  return () => {
-    window.removeEventListener('scroll', handleScroll);
-  };
+    // Return cleanup function
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  } catch (error) {
+    console.error('Error in setupScrollAnimations:', error);
+    return () => {};
+  }
 };
 
 // Apply staggered animations to children of a container
 export const setupStaggeredAnimations = (containerSelector, delay = 100) => {
-  const container = document.querySelector(containerSelector);
-  if (!container) return () => {};
+  try {
+    const container = document.querySelector(containerSelector);
+    if (!container) return () => {};
 
-  const children = container.children;
+    const children = container.children;
+    if (!children || children.length === 0) return () => {};
 
-  // Add animation classes instead of direct style manipulation
-  Array.from(children).forEach((child, index) => {
-    // Add base class
-    child.classList.add('stagger-animation');
+    // Add animation classes
+    Array.from(children).forEach((child, index) => {
+      child.classList.add('fade-in');
+      child.style.animationDelay = `${index * 100}ms`;
+    });
 
-    // Set the delay as a data attribute
-    child.dataset.animationDelay = index * delay;
-
-    // Trigger animation after a small delay
-    setTimeout(() => {
-      child.classList.add('animated');
-    }, 100 + (index * delay)); // Staggered delay
-  });
-
-  return () => {
-    // Cleanup if needed
-  };
+    return () => {};
+  } catch (error) {
+    console.error('Error in setupStaggeredAnimations:', error);
+    return () => {};
+  }
 };
 
-// Apply text reveal animation (simpler fade-in approach)
+// Apply text reveal animation (simple class-based approach)
 export const textRevealAnimation = (element, delay = 30) => {
-  if (!element) return;
-
-  // Instead of manipulating the text content, just add a class
-  element.classList.add('text-reveal-animation');
-
-  // Set initial state
-  element.style.opacity = '0';
-  element.style.transform = 'translateY(10px)';
-  element.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-
-  // Trigger animation after a small delay
-  setTimeout(() => {
-    element.style.opacity = '1';
-    element.style.transform = 'translateY(0)';
-  }, delay);
+  try {
+    if (!element) return;
+    element.classList.add('fade-in');
+  } catch (error) {
+    console.error('Error in textRevealAnimation:', error);
+  }
 };
 
 // Apply image fade-in animation
 export const imageRevealAnimation = (imgElement) => {
-  if (!imgElement) return;
-
-  // Set initial state
-  imgElement.style.opacity = '0';
-  imgElement.style.transform = 'scale(0.95)';
-  imgElement.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
-
-  // Function to handle image load
-  const handleImageLoad = () => {
-    imgElement.style.opacity = '1';
-    imgElement.style.transform = 'scale(1)';
-  };
-
-  // Check if image is already loaded
-  if (imgElement.complete) {
-    handleImageLoad();
-  } else {
-    imgElement.addEventListener('load', handleImageLoad);
+  try {
+    if (!imgElement) return;
+    imgElement.classList.add('fade-in');
+    return () => {};
+  } catch (error) {
+    console.error('Error in imageRevealAnimation:', error);
+    return () => {};
   }
-
-  // Return cleanup function
-  return () => {
-    imgElement.removeEventListener('load', handleImageLoad);
-  };
 };
 
 // Apply service card animations
 export const setupServiceCardAnimations = () => {
-  const cards = document.querySelectorAll('.service-card');
+  try {
+    const cards = document.querySelectorAll('.service-card');
+    if (!cards || cards.length === 0) return () => {};
 
-  const handleScroll = () => {
     cards.forEach((card, index) => {
-      if (isInViewport(card, 100)) {
-        setTimeout(() => {
-          card.classList.add('animated');
-        }, index * 150); // Staggered delay
-      }
+      card.classList.add('fade-in');
+      card.style.animationDelay = `${index * 100}ms`;
     });
-  };
 
-  // Initial check
-  handleScroll();
-
-  // Add scroll listener
-  window.addEventListener('scroll', handleScroll);
-
-  // Return cleanup function
-  return () => {
-    window.removeEventListener('scroll', handleScroll);
-  };
+    return () => {};
+  } catch (error) {
+    console.error('Error in setupServiceCardAnimations:', error);
+    return () => {};
+  }
 };

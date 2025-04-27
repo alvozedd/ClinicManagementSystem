@@ -1,4 +1,4 @@
-/* Animation styles for UroHealth Central website */
+/* Simplified Animation styles for UroHealth Central website */
 
 /* Base animation classes */
 .animate-on-scroll {
@@ -12,121 +12,14 @@
   transform: translateY(0);
 }
 
-/* Fade in animation */
+/* Simple fade in animation */
 .fade-in {
-  opacity: 0;
-  animation: fadeIn 0.8s ease forwards;
+  animation: simpleFadeIn 0.8s ease forwards;
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-/* Fade in with slight rise */
-.fade-in-up {
-  opacity: 0;
-  transform: translateY(20px);
-  animation: fadeInUp 0.8s ease forwards;
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Staggered animations for children */
-.stagger-animation {
-  opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.5s ease, transform 0.5s ease;
-}
-
-.stagger-animation.animated {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* Text reveal animation */
-.text-reveal-animation {
-  opacity: 0;
-  transform: translateY(10px);
-  transition: opacity 0.5s ease, transform 0.5s ease;
-}
-
-/* Service card animations */
-.service-card {
-  opacity: 0;
-  transform: translateY(30px);
-  transition: opacity 0.6s ease, transform 0.6s ease, box-shadow 0.3s ease, border-color 0.3s ease;
-}
-
-.service-card.animated {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* Image reveal animation */
-.image-reveal {
-  opacity: 0;
-  transform: scale(0.95);
-  transition: opacity 0.8s ease, transform 0.8s ease;
-}
-
-.image-reveal.loaded {
-  opacity: 1;
-  transform: scale(1);
-}
-
-/* Text reveal animation for headings */
-.text-reveal {
-  overflow: hidden;
-}
-
-.text-reveal-inner {
-  display: inline-block;
-  transform: translateY(100%);
-  animation: revealText 0.8s ease forwards;
-}
-
-@keyframes revealText {
-  from {
-    transform: translateY(100%);
-  }
-  to {
-    transform: translateY(0);
-  }
-}
-
-/* Delayed animations */
-.delay-100 {
-  animation-delay: 100ms;
-}
-
-.delay-200 {
-  animation-delay: 200ms;
-}
-
-.delay-300 {
-  animation-delay: 300ms;
-}
-
-.delay-400 {
-  animation-delay: 400ms;
-}
-
-.delay-500 {
-  animation-delay: 500ms;
+@keyframes simpleFadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
 }
 
 /* Footer spacing fix */
@@ -144,6 +37,7 @@
 
 .footer-contact-item span {
   flex-grow: 1;
+  word-break: break-word;
 }
 
 .footer-contact-item button {
@@ -151,35 +45,22 @@
   flex-shrink: 0;
 }
 
-/* Background image loading animation */
-.bg-image-container {
-  position: relative;
-  overflow: hidden;
-}
-
-.bg-image-placeholder {
+/* Appointment count badge styling */
+.appointment-count-badge {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(59, 130, 246, 0.1);
-  z-index: 1;
-  opacity: 1;
-  transition: opacity 0.5s ease;
-}
-
-.bg-image-placeholder.hidden {
-  opacity: 0;
-}
-
-.bg-image {
-  position: relative;
-  z-index: 2;
-  opacity: 0;
-  transition: opacity 0.8s ease;
-}
-
-.bg-image.loaded {
-  opacity: 1;
+  top: 2px;
+  left: 2px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  padding: 0 4px;
+  z-index: 10 !important;
+  pointer-events: none;
 }

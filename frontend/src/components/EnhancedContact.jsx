@@ -1,28 +1,9 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { FaPhone, FaEnvelope, FaMapMarkerAlt, FaClock, FaDirections } from 'react-icons/fa';
 import './EnhancedContactStyles.css';
 import '../styles/animations.css';
-import { setupScrollAnimations } from '../utils/animationUtils';
 
 const EnhancedContact = ({ content, getContentValue }) => {
-  // Setup animations when component mounts
-  useEffect(() => {
-    // Setup scroll animations for contact section
-    const cleanupScrollAnimations = setupScrollAnimations();
-
-    // Apply animations to map container
-    const mapContainer = document.querySelector('.map-container');
-    if (mapContainer) {
-      mapContainer.classList.add('animate-on-scroll');
-      // Force a check for elements in viewport
-      const event = new Event('scroll');
-      window.dispatchEvent(event);
-    }
-
-    return () => {
-      cleanupScrollAnimations();
-    };
-  }, []);
 
   return (
     <div id="contact" className="bg-white text-gray-800 py-16 sm:py-20 md:py-24 w-full relative">
@@ -48,7 +29,7 @@ const EnhancedContact = ({ content, getContentValue }) => {
           {/* Left Column - Contact Information */}
           <div className="space-y-6">
             {/* Contact Card */}
-            <div className="contact-card rounded-xl p-6 animate-on-scroll">
+            <div className="contact-card rounded-xl p-6 fade-in">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-xl font-bold text-blue-800">Contact Information</h3>
                 <div className="h-10 w-10 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center text-white">
@@ -163,7 +144,7 @@ const EnhancedContact = ({ content, getContentValue }) => {
           </div>
 
           {/* Right Column - Map */}
-          <div className="animate-on-scroll">
+          <div className="fade-in">
             <div className="contact-card contact-card-elevated rounded-xl p-6">
               <h3 className="text-xl font-bold text-blue-800 mb-4">Our Location</h3>
 
@@ -179,7 +160,7 @@ const EnhancedContact = ({ content, getContentValue }) => {
               </div>
 
               {/* Map with border and enhanced styling */}
-              <div className="map-container mt-4 mb-4 animate-on-scroll">
+              <div className="map-container mt-4 mb-4 fade-in">
                 <iframe
                   src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3989.7575147797847!2d36.95!3d-0.42!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMMKwMjUnMTIuMCJTIDM2wrA1NycwMC4wIkU!5e0!3m2!1sen!2sus!4v1620000000000!5m2!1sen!2sus"
                   width="100%"
