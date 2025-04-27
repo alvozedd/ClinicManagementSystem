@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FaUser, FaTrash } from 'react-icons/fa';
+import { FaUser, FaTrash, FaPhone, FaEnvelope, FaPhoneAlt } from 'react-icons/fa';
 import { getCreatorLabel } from '../utils/recordCreation';
 import AppointmentManagementModal from './AppointmentManagementModal';
 import SimplifiedDiagnosisModal from './SimplifiedDiagnosisModal';
@@ -314,9 +314,27 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
                   <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm leading-none">
                     {patient.gender} • {calculateAge(patient.dateOfBirth)} yrs
                   </span>
-                  <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm leading-none">
+                  <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm leading-none flex items-center">
                     Ph: {patient.phone}
+                    {patient.phone && (
+                      <a
+                        href={`tel:${patient.phone}`}
+                        className="bg-green-500 hover:bg-green-600 text-white p-1 rounded-full ml-2"
+                        title="Call patient"
+                      >
+                        <FaPhone size={10} />
+                      </a>
+                    )}
                   </span>
+                  {patient.phone && (
+                    <a
+                      href={`tel:${patient.phone}`}
+                      className="bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded-full text-sm leading-none flex items-center"
+                      title="Call patient"
+                    >
+                      <FaPhoneAlt className="mr-1" size={10} /> Call
+                    </a>
+                  )}
                   {patient.lastVisit && (
                     <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm leading-none">
                       Last: {patient.lastVisit}
@@ -625,12 +643,34 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
 
                 <div className="border-b pb-2">
                   <p className="text-xs text-gray-500">Phone Number</p>
-                  <p className="text-sm font-medium">{patient.phone}</p>
+                  <div className="flex items-center">
+                    <p className="text-sm font-medium mr-2">{patient.phone}</p>
+                    {patient.phone && (
+                      <a
+                        href={`tel:${patient.phone}`}
+                        className="bg-green-500 hover:bg-green-600 text-white p-1.5 rounded-full"
+                        title="Call patient"
+                      >
+                        <FaPhone size={12} />
+                      </a>
+                    )}
+                  </div>
                 </div>
 
                 <div className="border-b pb-2">
                   <p className="text-xs text-gray-500">Email</p>
-                  <p className="text-sm font-medium">{patient.email || 'Not provided'}</p>
+                  <div className="flex items-center">
+                    <p className="text-sm font-medium mr-2">{patient.email || 'Not provided'}</p>
+                    {patient.email && (
+                      <a
+                        href={`mailto:${patient.email}`}
+                        className="bg-blue-500 hover:bg-blue-600 text-white p-1.5 rounded-full"
+                        title="Email patient"
+                      >
+                        <FaEnvelope size={12} />
+                      </a>
+                    )}
+                  </div>
                 </div>
 
                 <div className="border-b pb-2">
@@ -680,7 +720,18 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
 
                 <div className="border-b pb-2">
                   <p className="text-xs text-gray-500">Phone</p>
-                  <p className="text-sm font-medium">{patient.nextOfKinPhone || 'Not provided'}</p>
+                  <div className="flex items-center">
+                    <p className="text-sm font-medium mr-2">{patient.nextOfKinPhone || 'Not provided'}</p>
+                    {patient.nextOfKinPhone && (
+                      <a
+                        href={`tel:${patient.nextOfKinPhone}`}
+                        className="bg-green-500 hover:bg-green-600 text-white p-1.5 rounded-full"
+                        title="Call next of kin"
+                      >
+                        <FaPhone size={12} />
+                      </a>
+                    )}
+                  </div>
                 </div>
               </div>
             )}
