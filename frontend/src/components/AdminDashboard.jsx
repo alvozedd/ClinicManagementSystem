@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import apiService from '../utils/apiService';
-import ContentManagement from './ContentManagement';
+import SimplifiedContentManagement from './SimplifiedContentManagement';
 import { FaUsers, FaEdit } from 'react-icons/fa';
 
 function AdminDashboard({ username, userInfo }) {
@@ -264,7 +264,7 @@ function AdminDashboard({ username, userInfo }) {
 
       {/* Content based on active tab */}
       {activeTab === 'content' ? (
-        <ContentManagement />
+        <SimplifiedContentManagement />
       ) : (
         /* User Management Section */
         <div className="bg-white rounded-lg shadow-md p-6">
