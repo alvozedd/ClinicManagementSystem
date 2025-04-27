@@ -1,24 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FaChevronDown } from 'react-icons/fa';
 import '../styles/fallbackAnimations.css';
-
-// Try to import Framer Motion, but provide fallback if it fails
-let motion, AnimatePresence;
-try {
-  const framerMotion = require('framer-motion');
-  motion = framerMotion.motion;
-  AnimatePresence = framerMotion.AnimatePresence;
-} catch (error) {
-  // Create fallback components if Framer Motion is not available
-  motion = {
-    div: (props) => {
-      const { className, children, initial, animate, exit, whileHover, ...rest } = props;
-      const combinedClassName = `${className || ''} ${initial?.opacity === 0 ? 'fade-in' : ''}`;
-      return <div className={combinedClassName} {...rest}>{children}</div>;
-    }
-  };
-  AnimatePresence = ({ children }) => <>{children}</>;
-}
+import { motion, AnimatePresence } from 'framer-motion';
 
 const PageLoader = ({ children, backgroundImage }) => {
   const [loading, setLoading] = useState(true);

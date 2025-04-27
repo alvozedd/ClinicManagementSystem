@@ -3,22 +3,7 @@ import { FaPhone, FaEnvelope, FaMapMarkerAlt, FaClock, FaDirections } from 'reac
 import './EnhancedContactStyles.css';
 import '../styles/animations.css';
 import '../styles/fallbackAnimations.css';
-
-// Try to import Framer Motion, but provide fallback if it fails
-let motion;
-try {
-  const framerMotion = require('framer-motion');
-  motion = framerMotion.motion;
-} catch (error) {
-  // Create fallback components if Framer Motion is not available
-  motion = {
-    div: (props) => {
-      const { className, children, initial, animate, whileInView, viewport, transition, ...rest } = props;
-      const combinedClassName = `${className || ''} ${initial?.opacity === 0 ? 'fade-in' : ''}`;
-      return <div className={combinedClassName} {...rest}>{children}</div>;
-    }
-  };
-}
+import { motion } from 'framer-motion';
 
 const EnhancedContact = ({ content, getContentValue }) => {
 

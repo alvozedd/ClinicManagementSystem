@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import apiService from '../utils/apiService';
 import { loadContent, getContentValue } from '../utils/contentUtils';
 import { FaBars, FaTimes } from 'react-icons/fa';
@@ -8,35 +8,7 @@ import './GlassEffects.css';
 import '../styles/animations.css';
 import '../styles/fallbackAnimations.css';
 import PageLoader from './PageLoader';
-
-// Try to import Framer Motion, but provide fallback if it fails
-let motion;
-try {
-  const framerMotion = require('framer-motion');
-  motion = framerMotion.motion;
-} catch (error) {
-  // Create fallback components if Framer Motion is not available
-  motion = {
-    div: (props) => {
-      const { className, children, initial, animate, whileInView, viewport, transition, ...rest } = props;
-      const combinedClassName = `${className || ''} ${initial?.opacity === 0 ? 'fade-in' : ''}`;
-      return <div className={combinedClassName} {...rest}>{children}</div>;
-    },
-    h3: (props) => {
-      const { className, children, ...rest } = props;
-      return <h3 className={`${className || ''} fade-in`} {...rest}>{children}</h3>;
-    },
-    p: (props) => {
-      const { className, children, ...rest } = props;
-      return <p className={`${className || ''} fade-in`} {...rest}>{children}</p>;
-    },
-    button: (props) => {
-      const { className, children, animate, ...rest } = props;
-      const combinedClassName = `${className || ''} ${animate ? 'pulse-animation' : ''}`;
-      return <button className={combinedClassName} {...rest}>{children}</button>;
-    }
-  };
-}
+import { motion } from 'framer-motion';
 
 // Add custom CSS for responsive background image
 const responsiveBackgroundStyles = `
@@ -61,7 +33,6 @@ const responsiveBackgroundStyles = `
 `;
 
 function HomePage() {
-  const navigate = useNavigate();
   const [showBookingForm, setShowBookingForm] = useState(false);
   const [bookingSuccess, setBookingSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
