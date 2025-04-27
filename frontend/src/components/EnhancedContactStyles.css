@@ -181,3 +181,26 @@
 .office-hours-time {
   color: #4b5563;
 }
+
+/* Footer spacing fix */
+.footer-contact-item {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 0.5rem;
+}
+
+.footer-contact-item svg {
+  margin-right: 0.5rem;
+  margin-top: 0.125rem;
+  flex-shrink: 0;
+}
+
+.footer-contact-item span {
+  flex-grow: 1;
+  word-break: break-word;
+}
+
+.footer-contact-item button {
+  margin-left: 0.5rem;
+  flex-shrink: 0;
+}
