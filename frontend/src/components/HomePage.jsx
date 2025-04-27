@@ -6,6 +6,8 @@ import { FaBars, FaTimes } from 'react-icons/fa';
 import EnhancedContact from './EnhancedContact';
 import './GlassEffects.css';
 import '../styles/animations.css';
+import { motion } from 'framer-motion';
+import PageLoader from './PageLoader';
 
 // Add custom CSS for responsive background image
 const responsiveBackgroundStyles = `
@@ -179,16 +181,17 @@ function HomePage() {
       {/* Add style tag for responsive background */}
       <style dangerouslySetInnerHTML={{ __html: responsiveBackgroundStyles }} />
 
-      <div className="text-gray-800 responsive-bg bg-image" style={{
-        scrollBehavior: 'smooth',
-        backgroundImage: "url('/image/Theone.jpeg')",
-        backgroundSize: "cover",
-        backgroundPosition: "center center", /* Center position for all screen sizes */
-        backgroundAttachment: "fixed",
-        minHeight: "100vh",
-        overflowX: "hidden", /* Prevent horizontal scrolling on mobile */
-        position: "relative" /* For overlay positioning */
-      }}>
+      <PageLoader backgroundImage="/image/Theone.jpeg">
+        <div className="text-gray-800 responsive-bg bg-image" style={{
+          scrollBehavior: 'smooth',
+          backgroundImage: "url('/image/Theone.jpeg')",
+          backgroundSize: "cover",
+          backgroundPosition: "center center", /* Center position for all screen sizes */
+          backgroundAttachment: "fixed",
+          minHeight: "100vh",
+          overflowX: "hidden", /* Prevent horizontal scrolling on mobile */
+          position: "relative" /* For overlay positioning */
+        }}>
       {/* Header with background image */}
       <div className="text-white fixed top-0 left-0 right-0 z-50 backdrop-blur-[1px]">
         <div className="max-w-6xl mx-auto px-4">
@@ -582,17 +585,42 @@ function HomePage() {
 
                 {/* Hero Section - Blue Background */}
                 <div className="max-w-4xl mx-auto text-center relative px-4 sm:px-6 h-screen flex flex-col justify-center items-center z-10">
-                  <div className="transform translate-y-[-10vh]">
-                    <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4 text-white hero-title">
+                  <motion.div
+                    className="transform translate-y-[-10vh]"
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8, delay: 0.2 }}
+                  >
+                    <motion.h1
+                      className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4 text-white hero-title"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.5, delay: 0.3 }}
+                    >
                       {getContentValue(content, 'homepage', 'Hero', 'Hero Title', 'UroHealth Central Ltd')}
-                    </h1>
-                    <p className="text-xl sm:text-2xl md:text-3xl mb-2 text-white font-light hero-subtitle">
+                    </motion.h1>
+                    <motion.p
+                      className="text-xl sm:text-2xl md:text-3xl mb-2 text-white font-light hero-subtitle"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.5, delay: 0.5 }}
+                    >
                       {getContentValue(content, 'homepage', 'Hero', 'Hero Subtitle', 'Specialist Urological Care')}
-                    </p>
-                    <p className="text-sm sm:text-base md:text-lg mb-6 sm:mb-8 leading-relaxed text-white max-w-xl mx-auto hero-description">
+                    </motion.p>
+                    <motion.p
+                      className="text-sm sm:text-base md:text-lg mb-6 sm:mb-8 leading-relaxed text-white max-w-xl mx-auto hero-description"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.5, delay: 0.7 }}
+                    >
                       {getContentValue(content, 'homepage', 'Hero', 'Hero Description', '20+ years of specialized medical excellence')}
-                    </p>
-                    <div className="flex flex-row justify-center gap-5 sm:gap-8 mt-6 sm:mt-8">
+                    </motion.p>
+                    <motion.div
+                      className="flex flex-row justify-center gap-5 sm:gap-8 mt-6 sm:mt-8"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5, delay: 0.9 }}
+                    >
                       <button
                         onClick={() => {
                           setShowBookingForm(true);
@@ -614,8 +642,8 @@ function HomePage() {
                         </svg>
                         Call Us
                       </button>
-                    </div>
-                  </div>
+                    </motion.div>
+                  </motion.div>
                 </div>
 
               </div>
@@ -636,7 +664,13 @@ function HomePage() {
                       <div className="h-1 w-16 bg-gradient-to-r from-blue-200 to-white mx-auto mt-4"></div>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8 px-4 sm:px-0 relative z-10 services-grid">
-                      <div className="true-glass-card p-8 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col items-center text-center border border-white/10 hover:border-white/30 transform hover:translate-y-[-8px] h-full group service-card">
+                      <motion.div
+                        className="true-glass-card p-8 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col items-center text-center border border-white/10 hover:border-white/30 transform hover:translate-y-[-8px] h-full group service-card"
+                        initial={{ opacity: 0, y: 50 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true, margin: "-100px" }}
+                        transition={{ duration: 0.5, delay: 0.1 }}
+                      >
                         <div className="bg-white/20 p-5 rounded-full mb-6 group-hover:bg-white/30 transition-all duration-300 transform group-hover:scale-110">
                           <svg className="w-14 h-14 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
@@ -653,9 +687,15 @@ function HomePage() {
                           </div>
 
                         </div>
-                      </div>
+                      </motion.div>
 
-                      <div className="true-glass-card p-8 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col items-center text-center border border-white/20 hover:border-white/40 transform hover:translate-y-[-8px] h-full group relative overflow-hidden service-card">
+                      <motion.div
+                        className="true-glass-card p-8 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col items-center text-center border border-white/20 hover:border-white/40 transform hover:translate-y-[-8px] h-full group relative overflow-hidden service-card"
+                        initial={{ opacity: 0, y: 50 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true, margin: "-100px" }}
+                        transition={{ duration: 0.5, delay: 0.3 }}
+                      >
                         <div className="absolute top-0 right-0 w-24 h-24 bg-white opacity-5 rounded-full -mr-8 -mt-8"></div>
                         <div className="absolute bottom-0 left-0 w-24 h-24 bg-white opacity-5 rounded-full -ml-8 -mb-8"></div>
                         <div className="bg-white/30 p-5 rounded-full mb-6 group-hover:bg-white/40 transition-all duration-300 transform group-hover:scale-110 relative z-10">
@@ -674,9 +714,15 @@ function HomePage() {
                           </div>
 
                         </div>
-                      </div>
+                      </motion.div>
 
-                      <div className="true-glass-card p-8 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col items-center text-center border border-white/10 hover:border-white/30 transform hover:translate-y-[-8px] h-full group service-card">
+                      <motion.div
+                        className="true-glass-card p-8 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col items-center text-center border border-white/10 hover:border-white/30 transform hover:translate-y-[-8px] h-full group service-card"
+                        initial={{ opacity: 0, y: 50 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true, margin: "-100px" }}
+                        transition={{ duration: 0.5, delay: 0.5 }}
+                      >
                         <div className="bg-white/20 p-5 rounded-full mb-6 group-hover:bg-white/30 transition-all duration-300 transform group-hover:scale-110">
                           <svg className="w-14 h-14 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
@@ -693,7 +739,7 @@ function HomePage() {
                           </div>
 
                         </div>
-                      </div>
+                      </motion.div>
                     </div>
                   </div>
                 </div>
@@ -831,6 +877,7 @@ function HomePage() {
         </footer>
       </div>
     </div>
+      </PageLoader>
     </>
   );
 }
