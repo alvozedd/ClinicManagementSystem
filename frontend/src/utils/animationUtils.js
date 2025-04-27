@@ -19,7 +19,7 @@ export const isInViewport = (element, offset = 0) => {
 export const setupScrollAnimations = () => {
   // Elements to animate
   const animatedElements = document.querySelectorAll('.animate-on-scroll');
-  
+
   const handleScroll = () => {
     animatedElements.forEach(element => {
       if (isInViewport(element, 50)) {
@@ -30,10 +30,10 @@ export const setupScrollAnimations = () => {
 
   // Initial check
   handleScroll();
-  
+
   // Add scroll listener
   window.addEventListener('scroll', handleScroll);
-  
+
   // Return cleanup function
   return () => {
     window.removeEventListener('scroll', handleScroll);
@@ -44,76 +44,69 @@ export const setupScrollAnimations = () => {
 export const setupStaggeredAnimations = (containerSelector, delay = 100) => {
   const container = document.querySelector(containerSelector);
   if (!container) return () => {};
-  
+
   const children = container.children;
-  
-  // Apply staggered animation to each child
+
+  // Add animation classes instead of direct style manipulation
   Array.from(children).forEach((child, index) => {
-    child.style.opacity = '0';
-    child.style.transform = 'translateY(20px)';
-    child.style.transition = `opacity 0.5s ease, transform 0.5s ease`;
-    child.style.transitionDelay = `${index * delay}ms`;
-    
+    // Add base class
+    child.classList.add('stagger-animation');
+
+    // Set the delay as a data attribute
+    child.dataset.animationDelay = index * delay;
+
+    // Trigger animation after a small delay
     setTimeout(() => {
-      child.style.opacity = '1';
-      child.style.transform = 'translateY(0)';
-    }, 100); // Small initial delay before starting animations
+      child.classList.add('animated');
+    }, 100 + (index * delay)); // Staggered delay
   });
-  
+
   return () => {
     // Cleanup if needed
   };
 };
 
-// Apply text reveal animation (letter by letter)
+// Apply text reveal animation (simpler fade-in approach)
 export const textRevealAnimation = (element, delay = 30) => {
   if (!element) return;
-  
-  const text = element.textContent;
-  element.textContent = '';
-  element.style.opacity = '1';
-  
-  // Create spans for each letter
-  for (let i = 0; i < text.length; i++) {
-    const span = document.createElement('span');
-    span.textContent = text[i];
-    span.style.opacity = '0';
-    span.style.display = 'inline-block';
-    span.style.transform = 'translateY(10px)';
-    span.style.transition = `opacity 0.2s ease, transform 0.2s ease`;
-    span.style.transitionDelay = `${i * delay}ms`;
-    element.appendChild(span);
-    
-    // Trigger animation after a small delay
-    setTimeout(() => {
-      span.style.opacity = '1';
-      span.style.transform = 'translateY(0)';
-    }, 10);
-  }
+
+  // Instead of manipulating the text content, just add a class
+  element.classList.add('text-reveal-animation');
+
+  // Set initial state
+  element.style.opacity = '0';
+  element.style.transform = 'translateY(10px)';
+  element.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+
+  // Trigger animation after a small delay
+  setTimeout(() => {
+    element.style.opacity = '1';
+    element.style.transform = 'translateY(0)';
+  }, delay);
 };
 
 // Apply image fade-in animation
 export const imageRevealAnimation = (imgElement) => {
   if (!imgElement) return;
-  
+
   // Set initial state
   imgElement.style.opacity = '0';
   imgElement.style.transform = 'scale(0.95)';
   imgElement.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
-  
+
   // Function to handle image load
   const handleImageLoad = () => {
     imgElement.style.opacity = '1';
     imgElement.style.transform = 'scale(1)';
   };
-  
+
   // Check if image is already loaded
   if (imgElement.complete) {
     handleImageLoad();
   } else {
     imgElement.addEventListener('load', handleImageLoad);
   }
-  
+
   // Return cleanup function
   return () => {
     imgElement.removeEventListener('load', handleImageLoad);
@@ -123,7 +116,7 @@ export const imageRevealAnimation = (imgElement) => {
 // Apply service card animations
 export const setupServiceCardAnimations = () => {
   const cards = document.querySelectorAll('.service-card');
-  
+
   const handleScroll = () => {
     cards.forEach((card, index) => {
       if (isInViewport(card, 100)) {
@@ -133,13 +126,13 @@ export const setupServiceCardAnimations = () => {
       }
     });
   };
-  
+
   // Initial check
   handleScroll();
-  
+
   // Add scroll listener
   window.addEventListener('scroll', handleScroll);
-  
+
   // Return cleanup function
   return () => {
     window.removeEventListener('scroll', handleScroll);

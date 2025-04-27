@@ -67,42 +67,54 @@ function HomePage() {
   useEffect(() => {
     // Wait for content to load before setting up animations
     if (!contentLoading) {
-      // Setup scroll animations
-      const cleanupScrollAnimations = setupScrollAnimations();
+      try {
+        // Setup scroll animations
+        const cleanupScrollAnimations = setupScrollAnimations();
 
-      // Setup service card animations
-      const cleanupServiceAnimations = setupServiceCardAnimations();
+        // Setup service card animations
+        const cleanupServiceAnimations = setupServiceCardAnimations();
 
-      // Apply text animations to hero section
-      const heroTitle = document.querySelector('.hero-title');
-      const heroSubtitle = document.querySelector('.hero-subtitle');
-      const heroDescription = document.querySelector('.hero-description');
+        // Apply text animations to hero section with safe checks
+        const heroTitle = document.querySelector('.hero-title');
+        const heroSubtitle = document.querySelector('.hero-subtitle');
+        const heroDescription = document.querySelector('.hero-description');
 
-      if (heroTitle) textRevealAnimation(heroTitle, 30);
+        // Apply animations with delays
+        setTimeout(() => {
+          if (heroTitle) textRevealAnimation(heroTitle, 30);
+        }, 100);
 
-      // Staggered animations for hero elements with delays
-      setTimeout(() => {
-        if (heroSubtitle) heroSubtitle.classList.add('fade-in');
-      }, 300);
+        setTimeout(() => {
+          if (heroSubtitle) heroSubtitle.classList.add('fade-in');
+        }, 300);
 
-      setTimeout(() => {
-        if (heroDescription) heroDescription.classList.add('fade-in');
-      }, 600);
+        setTimeout(() => {
+          if (heroDescription) heroDescription.classList.add('fade-in');
+        }, 600);
 
-      // Setup staggered animations for service cards
-      setTimeout(() => {
-        setupStaggeredAnimations('.services-grid', 150);
-      }, 300);
+        // Setup staggered animations for service cards
+        setTimeout(() => {
+          const servicesGrid = document.querySelector('.services-grid');
+          if (servicesGrid) {
+            setupStaggeredAnimations('.services-grid', 150);
+          }
+        }, 800);
 
-      // Apply image animation to background
-      const bgImage = document.querySelector('.responsive-bg');
-      if (bgImage) imageRevealAnimation(bgImage);
+        // Apply image animation to background
+        setTimeout(() => {
+          const bgImage = document.querySelector('.responsive-bg');
+          if (bgImage) imageRevealAnimation(bgImage);
+        }, 200);
 
-      // Return cleanup function
-      return () => {
-        cleanupScrollAnimations();
-        cleanupServiceAnimations();
-      };
+        // Return cleanup function
+        return () => {
+          if (cleanupScrollAnimations) cleanupScrollAnimations();
+          if (cleanupServiceAnimations) cleanupServiceAnimations();
+        };
+      } catch (error) {
+        console.error('Animation setup error:', error);
+        // Continue rendering the page even if animations fail
+      }
     }
   }, [contentLoading]);
 
