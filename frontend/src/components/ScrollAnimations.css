@@ -1,8 +1,22 @@
 /* Scroll Animations Styles */
 
-/* Fade-in elements - initially hidden */
+/* Fade-in elements - initially hidden but with fallback */
 .fade-in-element {
   opacity: 0;
+}
+
+/* Fallback for when JavaScript is disabled or GSAP fails to load */
+@media (prefers-reduced-motion: reduce) {
+  .fade-in-element {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* Make elements visible if JavaScript is disabled */
+.no-js .fade-in-element {
+  opacity: 1;
+  transform: none;
 }
 
 /* Parallax elements */
