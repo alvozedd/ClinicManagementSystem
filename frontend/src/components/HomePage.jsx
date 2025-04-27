@@ -553,13 +553,13 @@ function HomePage() {
                 <div className="max-w-4xl mx-auto text-center relative px-4 sm:px-6 h-screen flex flex-col justify-center items-center z-10">
                   <div className="transform translate-y-[-10vh]">
                     <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4 text-white">
-                      UroHealth Central Ltd
+                      {getContentValue(content, 'homepage', 'Hero', 'Hero Title', 'UroHealth Central Ltd')}
                     </h1>
                     <p className="text-xl sm:text-2xl md:text-3xl mb-2 text-white font-light">
-                      Specialist Urological Care
+                      {getContentValue(content, 'homepage', 'Hero', 'Hero Subtitle', 'Specialist Urological Care')}
                     </p>
                     <p className="text-sm sm:text-base md:text-lg mb-6 sm:mb-8 leading-relaxed text-white max-w-xl mx-auto">
-                      20+ years of specialized medical excellence
+                      {getContentValue(content, 'homepage', 'Hero', 'Hero Description', '20+ years of specialized medical excellence')}
                     </p>
                     <div className="flex flex-row justify-center gap-5 sm:gap-8 mt-6 sm:mt-8">
                       <button
@@ -601,7 +601,7 @@ function HomePage() {
                         Our Services
                         <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-blue-400 to-blue-600 transform scale-x-0 transition-transform duration-300 group-hover:scale-x-100"></div>
                       </h3>
-                      <p className="text-lg md:text-xl text-gray-600 mb-2 max-w-3xl mx-auto">We provide comprehensive urological care with state-of-the-art technology and personalized treatment plans.</p>
+                      <p className="text-lg md:text-xl text-gray-600 mb-2 max-w-3xl mx-auto">{getContentValue(content, 'homepage', 'About', 'About Text', 'We provide comprehensive urological care with state-of-the-art technology and personalized treatment plans.')}</p>
                       <div className="h-1 w-16 bg-gradient-to-r from-blue-400 to-blue-600 mx-auto mt-4"></div>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8 px-4 sm:px-0">
@@ -611,14 +611,14 @@ function HomePage() {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                           </svg>
                         </div>
-                        <h4 className="text-2xl font-semibold mb-4 text-blue-800">Consultations</h4>
-                        <p className="text-gray-600 text-lg leading-relaxed mb-6">Comprehensive evaluation and diagnosis of urological conditions by our expert consultants.</p>
+                        <h4 className="text-2xl font-semibold mb-4 text-blue-800">{getContentValue(content, 'services', 'Consultations', 'Title', 'Consultations')}</h4>
+                        <p className="text-gray-600 text-lg leading-relaxed mb-6">{getContentValue(content, 'services', 'Consultations', 'Description', 'Comprehensive evaluation and diagnosis of urological conditions by our expert consultants.')}</p>
                         <div className="mt-auto">
                           <div className="mb-6 flex items-center justify-center text-blue-600">
                             <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                             </svg>
-                            <span className="text-lg">30-60 minutes</span>
+                            <span className="text-lg">{getContentValue(content, 'services', 'Consultations', 'Feature', '30-60 minutes')}</span>
                           </div>
                           <button
                             onClick={() => {
@@ -643,14 +643,14 @@ function HomePage() {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                           </svg>
                         </div>
-                        <h4 className="text-2xl font-semibold mb-4 text-white relative z-10">Diagnostics</h4>
-                        <p className="text-blue-100 mb-6 text-lg leading-relaxed relative z-10">Advanced diagnostic procedures including ultrasound, cystoscopy, and urodynamic studies.</p>
+                        <h4 className="text-2xl font-semibold mb-4 text-white relative z-10">{getContentValue(content, 'services', 'Diagnostics', 'Title', 'Diagnostics')}</h4>
+                        <p className="text-blue-100 mb-6 text-lg leading-relaxed relative z-10">{getContentValue(content, 'services', 'Diagnostics', 'Description', 'Advanced diagnostic procedures including ultrasound, cystoscopy, and urodynamic studies.')}</p>
                         <div className="mt-auto relative z-10">
                           <div className="mb-6 flex items-center justify-center text-blue-100">
                             <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
                             </svg>
-                            <span className="text-lg">Accurate Results</span>
+                            <span className="text-lg">{getContentValue(content, 'services', 'Diagnostics', 'Feature', 'Accurate Results')}</span>
                           </div>
                           <button
                             onClick={() => {
@@ -673,14 +673,14 @@ function HomePage() {
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
                           </svg>
                         </div>
-                        <h4 className="text-2xl font-semibold mb-4 text-blue-800">Treatments</h4>
-                        <p className="text-gray-600 text-lg leading-relaxed mb-6">Comprehensive treatment options for various urological conditions, from medication to surgical interventions.</p>
+                        <h4 className="text-2xl font-semibold mb-4 text-blue-800">{getContentValue(content, 'services', 'Treatments', 'Title', 'Treatments')}</h4>
+                        <p className="text-gray-600 text-lg leading-relaxed mb-6">{getContentValue(content, 'services', 'Treatments', 'Description', 'Comprehensive treatment options for various urological conditions, from medication to surgical interventions.')}</p>
                         <div className="mt-auto">
                           <div className="mb-6 flex items-center justify-center text-blue-600">
                             <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
                             </svg>
-                            <span className="text-lg">Personalized Care</span>
+                            <span className="text-lg">{getContentValue(content, 'services', 'Treatments', 'Feature', 'Personalized Care')}</span>
                           </div>
                           <button
                             onClick={() => {
@@ -705,13 +705,13 @@ function HomePage() {
                   <div className="max-w-5xl mx-auto px-4">
                     <div className="text-center mb-12 relative">
                       <div className="bg-gradient-to-r from-blue-50 via-blue-100 to-blue-50 h-1 w-24 mx-auto mb-4"></div>
-                      <div className="text-blue-600 text-sm font-semibold mb-3 uppercase tracking-wider text-center">CONTACT US</div>
+                      <div className="text-blue-600 text-sm font-semibold mb-3 uppercase tracking-wider text-center">{getContentValue(content, 'contact', 'Main', 'Title', 'CONTACT US')}</div>
                       <h2 className="text-2xl md:text-3xl font-bold mb-4 text-center text-blue-800 relative inline-block">
-                        Get in touch
+                        {getContentValue(content, 'contact', 'Main', 'Subtitle', 'Get in touch')}
                         <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-blue-400 to-blue-600 transform scale-x-0 transition-transform duration-300 group-hover:scale-x-100"></div>
                       </h2>
                       <p className="text-center text-gray-600 mb-4 max-w-2xl mx-auto">
-                        Have questions about our services or need more information? Our team will get back to you as soon as possible.
+                        {getContentValue(content, 'contact', 'Main', 'Description', 'Have questions about our services or need more information? Our team will get back to you as soon as possible.')}
                       </p>
                       <div className="h-1 w-16 bg-gradient-to-r from-blue-400 to-blue-600 mx-auto mt-4"></div>
                     </div>
@@ -743,9 +743,9 @@ function HomePage() {
                             {/* Clinic hours overlay on hover */}
                             <div className="absolute inset-0 bg-blue-900/70 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-center items-center text-white p-4">
                               <h4 className="font-semibold text-lg mb-2">Clinic Hours</h4>
-                              <p className="text-sm mb-1">Monday - Friday: 8:00 AM - 5:00 PM</p>
-                              <p className="text-sm mb-1">Saturday: By appointment</p>
-                              <p className="text-sm">Sunday: Closed</p>
+                              <p className="text-sm mb-1">{getContentValue(content, 'contact', 'Office Hours', 'Weekday Hours', 'Monday - Friday: 8:00 AM - 5:00 PM')}</p>
+                              <p className="text-sm mb-1">{getContentValue(content, 'contact', 'Office Hours', 'Saturday Hours', 'Saturday: By appointment')}</p>
+                              <p className="text-sm">{getContentValue(content, 'contact', 'Office Hours', 'Sunday Hours', 'Sunday: Closed')}</p>
                             </div>
                           </div>
 
@@ -756,9 +756,9 @@ function HomePage() {
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                               </svg>
                               <div>
-                                <p className="text-gray-600 text-sm mb-1">1st Floor, Gatemu House,</p>
-                                <p className="text-gray-600 text-sm mb-1">Kimathi Way,</p>
-                                <p className="text-gray-600 text-sm">Nyeri, Kenya</p>
+                                <p className="text-gray-600 text-sm mb-1">{getContentValue(content, 'contact', 'Location', 'Address Line 1', '1st Floor, Gatemu House,')}</p>
+                                <p className="text-gray-600 text-sm mb-1">{getContentValue(content, 'contact', 'Location', 'Address Line 2', 'Kimathi Way,')}</p>
+                                <p className="text-gray-600 text-sm">{getContentValue(content, 'contact', 'Location', 'Address Line 3', 'Nyeri, Kenya')}</p>
                               </div>
                             </div>
                             <a
@@ -793,7 +793,7 @@ function HomePage() {
 
                           <h3 className="text-xl font-bold text-center mb-2 text-blue-800 relative z-10">UROHEALTH CENTRAL LTD</h3>
                           <p className="text-sm text-center text-gray-500 mb-4 relative z-10">Specialist Urological & Surgical Care</p>
-                          <p className="text-center font-medium text-sm text-blue-600 mb-6 relative z-10">DR. PAUL MUCHAI MBUGUA - CONSULTANT SURGEON & UROLOGIST</p>
+                          <p className="text-center font-medium text-sm text-blue-600 mb-6 relative z-10">{getContentValue(content, 'homepage', 'Doctor', 'Doctor Name', 'DR. PAUL MUCHAI MBUGUA - CONSULTANT SURGEON & UROLOGIST')}</p>
 
                           <div className="space-y-4 relative z-10">
                             <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-3 p-4 bg-gray-50 rounded-lg border border-gray-100 hover:border-blue-200 transition-all duration-300 hover:shadow-md group animate-slideUp">
@@ -805,14 +805,14 @@ function HomePage() {
                                 </div>
                                 <div>
                                   <p className="text-sm text-gray-500 font-medium">
-                                    Mobile: <a href="tel:+254722396296" className="text-blue-600 hover:text-blue-800">0722 396 296</a>
+                                    Mobile: <a href="tel:+254722396296" className="text-blue-600 hover:text-blue-800">{getContentValue(content, 'footer', 'Contact', 'Mobile', '0722 396 296')}</a>
                                   </p>
                                   <p className="text-sm text-gray-500">
-                                    Office: <a href="tel:+254733398296" className="text-blue-600 hover:text-blue-800">0733 398 296</a>
+                                    Office: <a href="tel:+254733398296" className="text-blue-600 hover:text-blue-800">{getContentValue(content, 'footer', 'Contact', 'Office', '0733 398 296')}</a>
                                   </p>
                                 </div>
                               </div>
-                              <a href="tel:+254722396296" className="w-full sm:w-auto sm:ml-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm text-center transition-all duration-300 shadow-sm hover:shadow flex items-center justify-center gap-1">
+                              <a href={`tel:+${getContentValue(content, 'footer', 'Contact', 'Mobile', '0722 396 296').replace(/\s+/g, '')}`} className="w-full sm:w-auto sm:ml-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm text-center transition-all duration-300 shadow-sm hover:shadow flex items-center justify-center gap-1">
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
                                 </svg>
@@ -827,9 +827,9 @@ function HomePage() {
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                                   </svg>
                                 </div>
-                                <p className="text-sm text-gray-500 font-medium">info@urohealthcentral.com</p>
+                                <p className="text-sm text-gray-500 font-medium">{getContentValue(content, 'footer', 'Contact', 'Email', 'info@urohealthcentral.com')}</p>
                               </div>
-                              <a href="mailto:info@urohealthcentral.com" className="w-full sm:w-auto sm:ml-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm text-center transition-all duration-300 shadow-sm hover:shadow flex items-center justify-center gap-1">
+                              <a href={`mailto:${getContentValue(content, 'footer', 'Contact', 'Email', 'info@urohealthcentral.com')}`} className="w-full sm:w-auto sm:ml-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm text-center transition-all duration-300 shadow-sm hover:shadow flex items-center justify-center gap-1">
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                                 </svg>
