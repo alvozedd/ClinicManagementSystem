@@ -81,17 +81,20 @@ function DoctorCalendarView({ appointments, onDiagnoseAppointment, onViewPatient
     switch(appointment.status) {
       case 'Completed':
         statusStyles = hasDiagnosis
-          ? { container: 'bg-green-100 border-l-4 border-green-500', badge: 'bg-green-200 text-green-800' }
-          : { container: 'bg-blue-100 border-l-4 border-blue-500', badge: 'bg-blue-200 text-blue-800' };
+          ? { container: 'bg-green-50 border-l-4 border-green-400', badge: 'bg-green-100 text-green-800' }
+          : { container: 'bg-blue-50 border-l-4 border-blue-400', badge: 'bg-blue-100 text-blue-800' };
         break;
       case 'Scheduled':
-        statusStyles = { container: 'bg-yellow-100 border-l-4 border-yellow-500', badge: 'bg-yellow-200 text-yellow-800' };
+        statusStyles = { container: 'bg-emerald-50 border-l-4 border-emerald-400', badge: 'bg-emerald-100 text-emerald-800' };
         break;
       case 'Cancelled':
-        statusStyles = { container: 'bg-red-100 border-l-4 border-red-500', badge: 'bg-red-200 text-red-800' };
+        statusStyles = { container: 'bg-red-50 border-l-4 border-red-400', badge: 'bg-red-100 text-red-800' };
         break;
       case 'Rescheduled':
-        statusStyles = { container: 'bg-purple-100 border-l-4 border-purple-500', badge: 'bg-purple-200 text-purple-800' };
+        statusStyles = { container: 'bg-purple-50 border-l-4 border-purple-400', badge: 'bg-purple-100 text-purple-800' };
+        break;
+      case 'Pending':
+        statusStyles = { container: 'bg-amber-50 border-l-4 border-amber-400', badge: 'bg-amber-100 text-amber-800' };
         break;
       default:
         statusStyles = { container: 'bg-gray-100 border-l-4 border-gray-500', badge: 'bg-gray-200 text-gray-800' };
@@ -175,7 +178,7 @@ function DoctorCalendarView({ appointments, onDiagnoseAppointment, onViewPatient
         <p className="text-sm text-gray-600">Click on an appointment to view patient details</p>
       </div>
 
-      <div className="h-[600px]">
+      <div className="h-[650px]">
         <CustomCalendar
           localizer={localizer}
           events={events}
@@ -186,11 +189,13 @@ function DoctorCalendarView({ appointments, onDiagnoseAppointment, onViewPatient
           eventPropGetter={(event) => ({
             className: 'calendar-event',
             style: {
-              backgroundColor: event.resource?.status === 'Completed' ? '#3B82F6' :
-                             event.resource?.status === 'Scheduled' ? '#10B981' :
-                             event.resource?.status === 'Cancelled' ? '#EF4444' :
-                             event.resource?.status === 'Pending' ? '#F59E0B' :
-                             event.resource?.status === 'Rescheduled' ? '#8B5CF6' : '#9CA3AF'
+              backgroundColor: event.resource?.status === 'Completed' ? '#DBEAFE' : // lighter blue
+                             event.resource?.status === 'Scheduled' ? '#D1FAE5' : // lighter green
+                             event.resource?.status === 'Cancelled' ? '#FEE2E2' : // lighter red
+                             event.resource?.status === 'Pending' ? '#FEF3C7' : // lighter amber
+                             event.resource?.status === 'Rescheduled' ? '#EDE9FE' : // lighter purple
+                             '#F3F4F6', // lighter gray
+              color: '#000000' // ensure text is black for contrast
             }
           })}
         />

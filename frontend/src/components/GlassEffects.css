@@ -1,43 +1,73 @@
 /* Frosted Glass Effects */
 
 .glass-card {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
   border: 1px solid rgba(255, 255, 255, 0.18);
   box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
 }
 
 .glass-card-blue {
-  background: rgba(59, 130, 246, 0.7);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: rgba(59, 130, 246, 0.25);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
   border: 1px solid rgba(96, 165, 250, 0.18);
   box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
 }
 
 .glass-card-green {
-  background: rgba(16, 185, 129, 0.15);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: rgba(16, 185, 129, 0.25);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
   border: 1px solid rgba(16, 185, 129, 0.18);
   box-shadow: 0 8px 32px 0 rgba(16, 185, 129, 0.15);
 }
 
 .glass-card-yellow {
-  background: rgba(245, 158, 11, 0.15);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: rgba(245, 158, 11, 0.25);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
   border: 1px solid rgba(245, 158, 11, 0.18);
   box-shadow: 0 8px 32px 0 rgba(245, 158, 11, 0.15);
 }
 
 .glass-card-red {
-  background: rgba(239, 68, 68, 0.15);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  background: rgba(239, 68, 68, 0.25);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
   border: 1px solid rgba(239, 68, 68, 0.18);
   box-shadow: 0 8px 32px 0 rgba(239, 68, 68, 0.15);
+}
+
+/* True Glass Morphism Effect */
+.true-glass-card {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+  border-radius: 12px;
+}
+
+/* Services Section Background */
+.services-bg {
+  background: linear-gradient(135deg, #3b82f6, #1e40af);
+  position: relative;
+  overflow: hidden;
+}
+
+.services-bg::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="0.1"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');
+  background-size: 30px 30px;
+  opacity: 0.5;
+  z-index: 0;
 }
 
 /* Enhanced Footer Pattern */

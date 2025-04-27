@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Calendar, Views } from 'react-big-calendar';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import './CalendarStyles.css';
@@ -119,13 +119,52 @@ const CustomCalendar = ({
     );
   };
 
+  // Custom date cell component to show appointment counts
+  const DateCellWrapper = useCallback(
+    ({ children, value }) => {
+      // Count events for this date
+      const eventCount = events.filter(event => {
+        const eventDate = new Date(event.start);
+        return (
+          eventDate.getDate() === value.getDate() &&
+          eventDate.getMonth() === value.getMonth() &&
+          eventDate.getFullYear() === value.getFullYear()
+        );
+      }).length;
+
+      // Determine badge class based on count
+      let badgeClass = '';
+      if (eventCount > 0) {
+        if (eventCount >= 5) {
+          badgeClass = 'appointment-count-high'; // Many appointments
+        } else if (eventCount >= 3) {
+          badgeClass = 'appointment-count-medium'; // Several appointments
+        } else {
+          badgeClass = 'appointment-count-low'; // Few appointments
+        }
+      }
+
+      return (
+        <div className="relative">
+          {children}
+          {eventCount > 0 && (
+            <div className={`appointment-count-badge ${badgeClass}`}>
+              {eventCount}
+            </div>
+          )}
+        </div>
+      );
+    },
+    [events]
+  );
+
   return (
     <Calendar
       localizer={localizer}
       events={events}
       startAccessor="start"
       endAccessor="end"
-      style={{ height: '600px' }} // Increased height to show more content
+      style={{ height: '650px' }} // Increased height to show more content
       view={view}
       date={date}
       onView={setView}
@@ -139,7 +178,8 @@ const CustomCalendar = ({
       timeslots={1} // 1 slot per step (30 minutes)
       components={{
         ...components,
-        toolbar: CustomToolbar
+        toolbar: CustomToolbar,
+        dateCellWrapper: DateCellWrapper
       }}
       eventPropGetter={eventPropGetter}
       popup={true}

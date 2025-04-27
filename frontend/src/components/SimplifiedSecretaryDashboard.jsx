@@ -553,12 +553,6 @@ function SimplifiedSecretaryDashboard({
             {/* Patient Management Tab */}
             {selectedPatient ? (
               <>
-                <PatientNavigator
-                  patients={patients}
-                  currentPatient={selectedPatient}
-                  onSelectPatient={setSelectedPatient}
-                  onClose={handleClosePatientView}
-                />
                 <SecretaryPatientView
                   patient={selectedPatient}
                   patients={patients}

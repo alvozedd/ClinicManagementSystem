@@ -17,7 +17,7 @@ const calculateAge = (dateOfBirth) => {
   return age;
 };
 
-function PatientSearch({ patients, onSelectPatient }) {
+function PatientSearch({ patients, onSelectPatient, onAddPatient }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [recentPatients, setRecentPatients] = useState([]);
@@ -145,11 +145,22 @@ function PatientSearch({ patients, onSelectPatient }) {
   return (
     <div className="bg-white rounded-lg shadow-md p-3 md:p-4">
       <div className="mb-3 md:mb-4">
-        <div className="flex items-center justify-between mb-2 md:mb-3">
+        <div className="flex items-center justify-between mb-2 md:mb-3 gap-2">
           <h2 className="text-sm md:text-base font-bold flex items-center">
             <FaUser className="mr-2 text-blue-600" size={16} />
             Patient Search
           </h2>
+          {onAddPatient && (
+            <button
+              onClick={onAddPatient}
+              className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-md text-sm font-medium flex items-center"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
+              </svg>
+              Add Patient
+            </button>
+          )}
           <span className="text-xs md:text-sm text-gray-500">
             {searchTerm ? `Results: ${searchResults.length}` : `Total: ${searchResults.length}`}
           </span>
@@ -231,11 +242,25 @@ function PatientSearch({ patients, onSelectPatient }) {
                     <span>{patient.phone}</span>
                   </div>
                 </div>
-                <button className="text-blue-600 hover:text-blue-800 text-sm md:text-base flex items-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 md:h-5 md:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </button>
+                <div className="flex items-center space-x-2">
+                  <button
+                    className="text-blue-600 hover:text-blue-800 bg-blue-50 p-1.5 rounded-md"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onSelectPatient(patient);
+                    }}
+                    title="Edit Patient"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 md:h-5 md:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                  </button>
+                  <button className="text-blue-600 hover:text-blue-800 bg-blue-50 p-1.5 rounded-md">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 md:h-5 md:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+                </div>
               </div>
             ))}
           </div>

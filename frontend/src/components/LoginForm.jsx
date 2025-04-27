@@ -1,6 +1,7 @@
 import { useState, useContext } from 'react';
 import { Navigate, Link } from 'react-router-dom';
 import AuthContext from '../context/AuthContext';
+import './GlassEffects.css';
 
 function LoginForm() {
   const [username, setUsername] = useState('');
@@ -62,7 +63,7 @@ function LoginForm() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-8 sm:px-6 lg:px-8 fade-in">
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex flex-col justify-center py-8 sm:px-6 lg:px-8 fade-in">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
           <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-700 to-blue-500 flex items-center justify-center">
@@ -78,7 +79,7 @@ function LoginForm() {
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+        <div className="glass-card py-8 px-4 shadow-lg sm:rounded-lg sm:px-10 fade-in-element">
           {error && (
             <div className="bg-red-50 border-l-2 border-red-400 p-2 mb-4">
               <div className="flex">

@@ -4,7 +4,6 @@ import apiService from '../utils/apiService';
 import { loadContent, getContentValue, getCategoryItems } from '../utils/contentUtils';
 import { FaBars, FaTimes } from 'react-icons/fa';
 import './GlassEffects.css';
-import './MedicalPatterns.css';
 
 // Add custom CSS for responsive background image
 const responsiveBackgroundStyles = `
@@ -282,7 +281,7 @@ function HomePage() {
             <div className="py-12 text-white relative overflow-hidden">
 
 
-              <div className="max-w-2xl mx-auto glass-card pattern-dna rounded-xl shadow-xl p-8 text-gray-800 relative z-10 border border-gray-100 transform transition-all duration-300 fade-in-element">
+              <div className="max-w-2xl mx-auto glass-card rounded-xl shadow-xl p-8 text-gray-800 relative z-10 border border-gray-100 transform transition-all duration-300 fade-in-element">
               <div className="text-center px-4 sm:px-0">
                 <Link
                   to="/"
@@ -333,7 +332,7 @@ function HomePage() {
             <div className="py-12 text-white relative overflow-hidden">
 
 
-              <div className="max-w-2xl mx-auto glass-card pattern-circles rounded-xl shadow-xl p-5 sm:p-6 md:p-8 text-gray-800 relative z-10 border border-gray-100 fade-in-element">
+              <div className="max-w-2xl mx-auto glass-card rounded-xl shadow-xl p-5 sm:p-6 md:p-8 text-gray-800 relative z-10 border border-gray-100 fade-in-element">
               <div className="flex flex-col items-center mb-4">
                 <Link
                   to="/"
@@ -597,7 +596,7 @@ function HomePage() {
               {/* End of blue background section */}
 
               {/* White background sections */}
-              <div className="pattern-dna">
+              <div className="bg-white">
                 {/* Services Section */}
                 <div id="services" className="services-bg text-white py-16 sm:py-20 md:py-24 w-full relative overflow-hidden">
                   <div className="max-w-5xl mx-auto px-4">
@@ -674,7 +673,7 @@ function HomePage() {
                 </div>
 
                 {/* Contact Section */}
-                <div id="contact" className="pattern-circles text-gray-800 py-16 sm:py-20 md:py-24 w-full relative">
+                <div id="contact" className="bg-white text-gray-800 py-16 sm:py-20 md:py-24 w-full relative">
                   <div className="max-w-5xl mx-auto px-4">
                     <div className="text-center mb-12 relative">
                       <div className="bg-gradient-to-r from-blue-50 via-blue-100 to-blue-50 h-1 w-24 mx-auto mb-4"></div>

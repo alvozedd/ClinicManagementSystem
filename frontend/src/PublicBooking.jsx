@@ -10,13 +10,13 @@ function PublicBooking() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
     // Basic validation
     if (!name || !phone || !date) {
       setError('Please fill in all required fields');
       return;
     }
-    
+
     // In a real app, this would send data to the backend
     // For now, we'll just simulate a successful submission
     setTimeout(() => {
@@ -38,7 +38,7 @@ function PublicBooking() {
           </div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Booking Request Submitted</h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Thank you for your booking request. Our secretary will contact you shortly to confirm your appointment.
+            Thank you for your booking request. Your appointment has been scheduled.
           </p>
           <div className="mt-6 text-center">
             <button
@@ -91,7 +91,7 @@ function PublicBooking() {
               </div>
             </div>
           )}
-          
+
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700">

@@ -195,6 +195,7 @@ function SecretaryPatientView({ patient, patients, appointments, onClose, onUpda
             >
               <FaEdit className="mr-1" /> Edit Patient
             </button>
+            {/* Secretary can't delete patients */}
             <button
               onClick={onClose}
               className="text-gray-500 hover:text-gray-700"

@@ -1,0 +1,27 @@
+/* Reset all margins and paddings */
+body, html, #root {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Make sure the navbar sits at the very top */
+.navbar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background-color: transparent;
+}
+
+/* Make sure the hero section starts at the top */
+.hero {
+  position: relative;
+  height: 100vh;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
