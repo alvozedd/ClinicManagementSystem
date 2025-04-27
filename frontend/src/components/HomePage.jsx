@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import apiService from '../utils/apiService';
 import { loadContent, getContentValue, getCategoryItems } from '../utils/contentUtils';
 import { FaBars, FaTimes } from 'react-icons/fa';
+import EnhancedContact from './EnhancedContact';
 import './GlassEffects.css';
 
 // Add custom CSS for responsive background image
@@ -672,150 +673,8 @@ function HomePage() {
                   </div>
                 </div>
 
-                {/* Contact Section */}
-                <div id="contact" className="bg-white text-gray-800 py-16 sm:py-20 md:py-24 w-full relative">
-                  <div className="max-w-5xl mx-auto px-4">
-                    <div className="text-center mb-12 relative">
-                      <div className="bg-gradient-to-r from-blue-50 via-blue-100 to-blue-50 h-1 w-24 mx-auto mb-4"></div>
-                      <div className="text-blue-600 text-sm font-semibold mb-3 uppercase tracking-wider text-center">{getContentValue(content, 'contact', 'Main', 'Title', 'CONTACT US')}</div>
-                      <h2 className="text-2xl md:text-3xl font-bold mb-4 text-center text-blue-800 relative inline-block">
-                        {getContentValue(content, 'contact', 'Main', 'Subtitle', 'Get in touch')}
-                        <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-blue-400 to-blue-600 transform scale-x-0 transition-transform duration-300 group-hover:scale-x-100"></div>
-                      </h2>
-                      <p className="text-center text-gray-600 mb-4 max-w-2xl mx-auto">
-                        {getContentValue(content, 'contact', 'Main', 'Description', 'Have questions about our services or need more information? Our team will get back to you as soon as possible.')}
-                      </p>
-                      <div className="h-1 w-16 bg-gradient-to-r from-blue-400 to-blue-600 mx-auto mt-4"></div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 px-4 sm:px-0 items-stretch">
-                      {/* Location Map on the left */}
-                      <div className="order-2 md:order-1">
-                        <div className="pattern-hex p-6 rounded-lg shadow-md border border-gray-100 transition-all duration-300 hover:shadow-xl hover:border-blue-200 h-full group relative flex flex-col">
-                          <div className="flex items-center mb-4">
-                            <svg className="w-7 h-7 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                            </svg>
-                            <h3 className="text-lg font-semibold text-blue-800">Our Location</h3>
-                          </div>
-
-                          <div className="rounded-lg overflow-hidden shadow-md mb-4 h-56 sm:h-64 border border-gray-200 group-hover:shadow-lg transition-all duration-300 relative">
-                            <iframe
-                              src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d7979.417165608913!2d36.9536629!3d-0.4249518!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x18285f7be335efcb%3A0xe3fe6bef56106781!2sDr.%20Muchai%20Mbugua%20Clinic!5e0!3m2!1sen!2ske!4v1745316449986!5m2!1sen!2ske"
-                              width="100%"
-                              height="100%"
-                              style={{border:0}}
-                              allowFullScreen=""
-                              loading="lazy"
-                              referrerPolicy="no-referrer-when-downgrade"
-                              title="UroHealth Central Location"
-                            ></iframe>
-
-                            {/* Clinic hours overlay on hover */}
-                            <div className="absolute inset-0 bg-blue-900/70 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-center items-center text-white p-4">
-                              <h4 className="font-semibold text-lg mb-2">Clinic Hours</h4>
-                              <p className="text-sm mb-1">{getContentValue(content, 'contact', 'Office Hours', 'Weekday Hours', 'Monday - Friday: 8:00 AM - 5:00 PM')}</p>
-                              <p className="text-sm mb-1">{getContentValue(content, 'contact', 'Office Hours', 'Saturday Hours', 'Saturday: By appointment')}</p>
-                              <p className="text-sm">{getContentValue(content, 'contact', 'Office Hours', 'Sunday Hours', 'Sunday: Closed')}</p>
-                            </div>
-                          </div>
-
-                          <div className="mt-4 animate-fadeIn">
-                            <div className="flex items-start mb-3">
-                              <svg className="w-5 h-5 text-blue-600 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                              </svg>
-                              <div>
-                                <p className="text-gray-600 text-sm mb-1">{getContentValue(content, 'contact', 'Location', 'Address Line 1', '1st Floor, Gatemu House,')}</p>
-                                <p className="text-gray-600 text-sm mb-1">{getContentValue(content, 'contact', 'Location', 'Address Line 2', 'Kimathi Way,')}</p>
-                                <p className="text-gray-600 text-sm">{getContentValue(content, 'contact', 'Location', 'Address Line 3', 'Nyeri, Kenya')}</p>
-                              </div>
-                            </div>
-                            <a
-                              href="https://maps.google.com/?q=Gatemu+House,+Kimathi+Way,+Nyeri,+Kenya"
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center text-blue-600 hover:text-blue-800 transition-colors text-sm font-medium bg-blue-50 hover:bg-blue-100 px-3 py-2 rounded-lg mt-2 group-hover:shadow-sm"
-                            >
-                              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
-                              </svg>
-                              Get Directions
-                            </a>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Contact Information on the right */}
-                      <div className="order-1 md:order-2">
-                        <div className="pattern-medical p-6 rounded-lg shadow-md border border-gray-100 transition-all duration-500 hover:shadow-xl hover:border-blue-200 transform hover:translate-y-[-8px] relative overflow-hidden h-full flex flex-col">
-                          {/* Background pattern */}
-                          <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-full -mr-16 -mt-16 opacity-50"></div>
-                          <div className="absolute bottom-0 left-0 w-32 h-32 bg-blue-50 rounded-full -ml-16 -mb-16 opacity-50"></div>
-
-                          {/* Logo with background shape */}
-                          <div className="relative">
-                            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-20 h-20 bg-blue-100 rounded-full opacity-70"></div>
-                            <div className="flex items-center justify-center w-14 h-14 bg-blue-600 text-white rounded-full mb-4 mx-auto relative z-10 shadow-md animate-float">
-                              <span className="text-xl font-bold">UH</span>
-                            </div>
-                          </div>
-
-                          <h3 className="text-xl font-bold text-center mb-2 text-blue-800 relative z-10">UROHEALTH CENTRAL LTD</h3>
-                          <p className="text-sm text-center text-gray-500 mb-4 relative z-10">Specialist Urological & Surgical Care</p>
-                          <p className="text-center font-medium text-sm text-blue-600 mb-6 relative z-10">{getContentValue(content, 'homepage', 'Doctor', 'Doctor Name', 'DR. PAUL MUCHAI MBUGUA - CONSULTANT SURGEON & UROLOGIST')}</p>
-
-                          <div className="space-y-4 relative z-10">
-                            <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-3 p-4 bg-gray-50 rounded-lg border border-gray-100 hover:border-blue-200 transition-all duration-300 hover:shadow-md group animate-slideUp">
-                              <div className="flex items-center">
-                                <div className="bg-blue-100 p-2 rounded-full mr-3 group-hover:bg-blue-200 transition-colors duration-300">
-                                  <svg className="w-6 h-6 text-blue-600 group-hover:text-blue-700 transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
-                                  </svg>
-                                </div>
-                                <div>
-                                  <p className="text-sm text-gray-500 font-medium">
-                                    Mobile: <a href="tel:+254722396296" className="text-blue-600 hover:text-blue-800">{getContentValue(content, 'footer', 'Contact', 'Mobile', '0722 396 296')}</a>
-                                  </p>
-                                  <p className="text-sm text-gray-500">
-                                    Office: <a href="tel:+254733398296" className="text-blue-600 hover:text-blue-800">{getContentValue(content, 'footer', 'Contact', 'Office', '0733 398 296')}</a>
-                                  </p>
-                                </div>
-                              </div>
-                              <a href={`tel:+${getContentValue(content, 'footer', 'Contact', 'Mobile', '0722 396 296').replace(/\s+/g, '')}`} className="w-full sm:w-auto sm:ml-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm text-center transition-all duration-300 shadow-sm hover:shadow flex items-center justify-center gap-1">
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
-                                </svg>
-                                Call
-                              </a>
-                            </div>
-
-                            <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-3 p-4 bg-gray-50 rounded-lg border border-gray-100 hover:border-blue-200 transition-all duration-300 hover:shadow-md group animate-slideUp" style={{ animationDelay: "0.2s" }}>
-                              <div className="flex items-center">
-                                <div className="bg-blue-100 p-2 rounded-full mr-3 group-hover:bg-blue-200 transition-colors duration-300">
-                                  <svg className="w-6 h-6 text-blue-600 group-hover:text-blue-700 transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                                  </svg>
-                                </div>
-                                <p className="text-sm text-gray-500 font-medium">{getContentValue(content, 'footer', 'Contact', 'Email', 'info@urohealthcentral.com')}</p>
-                              </div>
-                              <a href={`mailto:${getContentValue(content, 'footer', 'Contact', 'Email', 'info@urohealthcentral.com')}`} className="w-full sm:w-auto sm:ml-auto bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm text-center transition-all duration-300 shadow-sm hover:shadow flex items-center justify-center gap-1">
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                                </svg>
-                                Email
-                              </a>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-
-                  </div>
-                </div>
+                {/* Enhanced Contact Section */}
+                <EnhancedContact content={content} getContentValue={getContentValue} />
               </div>
 
               {/* Location section removed and integrated into contact section */}
