@@ -134,7 +134,7 @@ const defaultContent = {
         category: 'Hero',
         type: 'text',
         label: 'Hero Title',
-        value: 'DR. PAUL MUCHAI MBUGUA - CONSULTANT SURGEON & UROLOGIST',
+        value: 'UroHealth Central Ltd',
         visible: true
       },
       {
@@ -143,7 +143,16 @@ const defaultContent = {
         category: 'Hero',
         type: 'text',
         label: 'Hero Subtitle',
-        value: 'UROLOGIST',
+        value: 'Specialist Urological Care',
+        visible: true
+      },
+      {
+        id: 'homepage-hero-3',
+        section: 'homepage',
+        category: 'Hero',
+        type: 'text',
+        label: 'Hero Description',
+        value: '20+ years of specialized medical excellence',
         visible: true
       }
     ],
@@ -154,7 +163,18 @@ const defaultContent = {
         category: 'About',
         type: 'longtext',
         label: 'About Text',
-        value: 'UroHealth Central Ltd is a leading urological clinic dedicated to providing comprehensive care for urological conditions. Our team of experienced specialists is committed to delivering personalized treatment with compassion and the highest standards of medical excellence.',
+        value: 'We provide comprehensive urological care with state-of-the-art technology and personalized treatment plans.',
+        visible: true
+      }
+    ],
+    'Doctor': [
+      {
+        id: 'homepage-doctor-1',
+        section: 'homepage',
+        category: 'Doctor',
+        type: 'text',
+        label: 'Doctor Name',
+        value: 'DR. PAUL MUCHAI MBUGUA - CONSULTANT SURGEON & UROLOGIST',
         visible: true
       }
     ],
@@ -198,54 +218,14 @@ const defaultContent = {
     ]
   },
   services: {
-    'Urological Services': [
-      {
-        id: 'services-uro-1',
-        section: 'services',
-        category: 'Urological Services',
-        type: 'text',
-        label: 'Service Title',
-        value: 'General Urology',
-        visible: true
-      },
-      {
-        id: 'services-uro-2',
-        section: 'services',
-        category: 'Urological Services',
-        type: 'longtext',
-        label: 'Service Description',
-        value: 'Comprehensive evaluation and treatment of common urological conditions including urinary tract infections, kidney stones, and prostate issues.',
-        visible: true
-      }
-    ],
-    'General Surgery': [
-      {
-        id: 'services-surgery-1',
-        section: 'services',
-        category: 'General Surgery',
-        type: 'text',
-        label: 'Service Title',
-        value: 'Minimally Invasive Surgery',
-        visible: true
-      },
-      {
-        id: 'services-surgery-2',
-        section: 'services',
-        category: 'General Surgery',
-        type: 'longtext',
-        label: 'Service Description',
-        value: 'Advanced surgical techniques that minimize incision size, reduce recovery time, and decrease post-operative pain.',
-        visible: true
-      }
-    ],
     'Consultations': [
       {
         id: 'services-consult-1',
         section: 'services',
         category: 'Consultations',
         type: 'text',
-        label: 'Service Title',
-        value: 'Urological Consultations',
+        label: 'Title',
+        value: 'Consultations',
         visible: true
       },
       {
@@ -253,8 +233,17 @@ const defaultContent = {
         section: 'services',
         category: 'Consultations',
         type: 'longtext',
-        label: 'Service Description',
-        value: 'Expert evaluation and personalized treatment plans for all urological conditions.',
+        label: 'Description',
+        value: 'Comprehensive evaluation and diagnosis of urological conditions by our expert consultants.',
+        visible: true
+      },
+      {
+        id: 'services-consult-3',
+        section: 'services',
+        category: 'Consultations',
+        type: 'text',
+        label: 'Feature',
+        value: '30-60 minutes',
         visible: true
       }
     ],
@@ -264,8 +253,8 @@ const defaultContent = {
         section: 'services',
         category: 'Diagnostics',
         type: 'text',
-        label: 'Service Title',
-        value: 'Advanced Diagnostics',
+        label: 'Title',
+        value: 'Diagnostics',
         visible: true
       },
       {
@@ -273,21 +262,88 @@ const defaultContent = {
         section: 'services',
         category: 'Diagnostics',
         type: 'longtext',
-        label: 'Service Description',
-        value: 'State-of-the-art diagnostic tools and techniques for accurate assessment of urological conditions.',
+        label: 'Description',
+        value: 'Advanced diagnostic procedures including ultrasound, cystoscopy, and urodynamic studies.',
+        visible: true
+      },
+      {
+        id: 'services-diag-3',
+        section: 'services',
+        category: 'Diagnostics',
+        type: 'text',
+        label: 'Feature',
+        value: 'Accurate Results',
+        visible: true
+      }
+    ],
+    'Treatments': [
+      {
+        id: 'services-treat-1',
+        section: 'services',
+        category: 'Treatments',
+        type: 'text',
+        label: 'Title',
+        value: 'Treatments',
+        visible: true
+      },
+      {
+        id: 'services-treat-2',
+        section: 'services',
+        category: 'Treatments',
+        type: 'longtext',
+        label: 'Description',
+        value: 'Comprehensive treatment options for various urological conditions, from medication to surgical interventions.',
+        visible: true
+      },
+      {
+        id: 'services-treat-3',
+        section: 'services',
+        category: 'Treatments',
+        type: 'text',
+        label: 'Feature',
+        value: 'Personalized Care',
         visible: true
       }
     ]
   },
   contact: {
+    'Main': [
+      {
+        id: 'contact-main-1',
+        section: 'contact',
+        category: 'Main',
+        type: 'text',
+        label: 'Title',
+        value: 'CONTACT US',
+        visible: true
+      },
+      {
+        id: 'contact-main-2',
+        section: 'contact',
+        category: 'Main',
+        type: 'text',
+        label: 'Subtitle',
+        value: 'Get in touch',
+        visible: true
+      },
+      {
+        id: 'contact-main-3',
+        section: 'contact',
+        category: 'Main',
+        type: 'longtext',
+        label: 'Description',
+        value: 'Have questions about our services or need more information? Our team will get back to you as soon as possible.',
+        visible: true
+      }
+    ],
     'Office Hours': [
       {
         id: 'contact-hours-1',
         section: 'contact',
         category: 'Office Hours',
         type: 'text',
-        label: 'Working Hours',
-        value: 'Mon-Fri: 8:00 AM - 5:00 PM',
+        label: 'Weekday Hours',
+        value: 'Monday - Friday: 8:00 AM - 5:00 PM',
         visible: true
       },
       {
@@ -295,8 +351,17 @@ const defaultContent = {
         section: 'contact',
         category: 'Office Hours',
         type: 'text',
-        label: 'Weekend Hours',
-        value: 'Saturday: 9:00 AM - 1:00 PM',
+        label: 'Saturday Hours',
+        value: 'Saturday: By appointment',
+        visible: true
+      },
+      {
+        id: 'contact-hours-3',
+        section: 'contact',
+        category: 'Office Hours',
+        type: 'text',
+        label: 'Sunday Hours',
+        value: 'Sunday: Closed',
         visible: true
       }
     ],
@@ -306,8 +371,26 @@ const defaultContent = {
         section: 'contact',
         category: 'Location',
         type: 'text',
-        label: 'Address',
-        value: '123 Medical Plaza, Suite 456, Lagos, Nigeria',
+        label: 'Address Line 1',
+        value: '1st Floor, Gatemu House,',
+        visible: true
+      },
+      {
+        id: 'contact-location-2',
+        section: 'contact',
+        category: 'Location',
+        type: 'text',
+        label: 'Address Line 2',
+        value: 'Kimathi Way,',
+        visible: true
+      },
+      {
+        id: 'contact-location-3',
+        section: 'contact',
+        category: 'Location',
+        type: 'text',
+        label: 'Address Line 3',
+        value: 'Nyeri, Kenya',
         visible: true
       }
     ],
@@ -318,7 +401,7 @@ const defaultContent = {
         category: 'Contact Information',
         type: 'text',
         label: 'Mobile',
-        value: '+234 123 456 7890',
+        value: '0722 396 296',
         visible: true
       },
       {
@@ -327,7 +410,7 @@ const defaultContent = {
         category: 'Contact Information',
         type: 'text',
         label: 'Office',
-        value: '+234 987 654 3210',
+        value: '0733 398 296',
         visible: true
       },
       {

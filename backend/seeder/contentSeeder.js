@@ -45,7 +45,7 @@ const contentData = [
     category: 'Contact',
     type: 'text',
     label: 'Mobile',
-    value: '+254 722 396 296',
+    value: '0722 396 296',
     order: 2,
     visible: true
   },
@@ -54,7 +54,7 @@ const contentData = [
     category: 'Contact',
     type: 'text',
     label: 'Office',
-    value: '+254 733 398 296',
+    value: '0733 398 296',
     order: 3,
     visible: true
   },
@@ -103,7 +103,7 @@ const contentData = [
     category: 'Hero',
     type: 'text',
     label: 'Hero Title',
-    value: 'DR. PAUL MUCHAI MBUGUA - CONSULTANT SURGEON & UROLOGIST',
+    value: 'UroHealth Central Ltd',
     order: 1,
     visible: true
   },
@@ -112,8 +112,17 @@ const contentData = [
     category: 'Hero',
     type: 'text',
     label: 'Hero Subtitle',
-    value: 'UROLOGIST',
+    value: 'Specialist Urological Care',
     order: 2,
+    visible: true
+  },
+  {
+    section: 'homepage',
+    category: 'Hero',
+    type: 'text',
+    label: 'Hero Description',
+    value: '20+ years of specialized medical excellence',
+    order: 3,
     visible: true
   },
   {
@@ -121,7 +130,16 @@ const contentData = [
     category: 'About',
     type: 'longtext',
     label: 'About Text',
-    value: 'UroHealth Central Ltd is a leading urological clinic dedicated to providing comprehensive care for urological conditions. Our team of experienced specialists is committed to delivering personalized treatment with compassion and the highest standards of medical excellence.',
+    value: 'We provide comprehensive urological care with state-of-the-art technology and personalized treatment plans.',
+    order: 1,
+    visible: true
+  },
+  {
+    section: 'homepage',
+    category: 'Doctor',
+    type: 'text',
+    label: 'Doctor Name',
+    value: 'DR. PAUL MUCHAI MBUGUA - CONSULTANT SURGEON & UROLOGIST',
     order: 1,
     visible: true
   },
@@ -165,10 +183,64 @@ const contentData = [
   // Contact content
   {
     section: 'contact',
+    category: 'Main',
+    type: 'text',
+    label: 'Title',
+    value: 'CONTACT US',
+    order: 1,
+    visible: true
+  },
+  {
+    section: 'contact',
+    category: 'Main',
+    type: 'text',
+    label: 'Subtitle',
+    value: 'Get in touch',
+    order: 2,
+    visible: true
+  },
+  {
+    section: 'contact',
+    category: 'Main',
+    type: 'longtext',
+    label: 'Description',
+    value: 'Have questions about our services or need more information? Our team will get back to you as soon as possible.',
+    order: 3,
+    visible: true
+  },
+  {
+    section: 'contact',
     category: 'Office Hours',
     type: 'text',
-    label: 'Working Hours',
-    value: 'Mon-Fri: 8:00 AM - 5:00 PM',
+    label: 'Weekday Hours',
+    value: 'Monday - Friday: 8:00 AM - 5:00 PM',
+    order: 1,
+    visible: true
+  },
+  {
+    section: 'contact',
+    category: 'Office Hours',
+    type: 'text',
+    label: 'Saturday Hours',
+    value: 'Saturday: By appointment',
+    order: 2,
+    visible: true
+  },
+  {
+    section: 'contact',
+    category: 'Office Hours',
+    type: 'text',
+    label: 'Sunday Hours',
+    value: 'Sunday: Closed',
+    order: 3,
+    visible: true
+  },
+  {
+    section: 'contact',
+    category: 'Location',
+    type: 'text',
+    label: 'Address Line 1',
+    value: '1st Floor, Gatemu House,',
     order: 1,
     visible: true
   },
@@ -176,9 +248,18 @@ const contentData = [
     section: 'contact',
     category: 'Location',
     type: 'text',
-    label: 'Address',
-    value: 'Catering Building, 1st Floor, P.O. Box 31-10100, Nyeri, Kenya',
-    order: 1,
+    label: 'Address Line 2',
+    value: 'Kimathi Way,',
+    order: 2,
+    visible: true
+  },
+  {
+    section: 'contact',
+    category: 'Location',
+    type: 'text',
+    label: 'Address Line 3',
+    value: 'Nyeri, Kenya',
+    order: 3,
     visible: true
   },
 
@@ -203,6 +284,15 @@ const contentData = [
   },
   {
     section: 'services',
+    category: 'Consultations',
+    type: 'text',
+    label: 'Feature',
+    value: '30-60 minutes',
+    order: 3,
+    visible: true
+  },
+  {
+    section: 'services',
     category: 'Diagnostics',
     type: 'text',
     label: 'Title',
@@ -221,6 +311,15 @@ const contentData = [
   },
   {
     section: 'services',
+    category: 'Diagnostics',
+    type: 'text',
+    label: 'Feature',
+    value: 'Accurate Results',
+    order: 3,
+    visible: true
+  },
+  {
+    section: 'services',
     category: 'Treatments',
     type: 'text',
     label: 'Title',
@@ -235,6 +334,15 @@ const contentData = [
     label: 'Description',
     value: 'Comprehensive treatment options for various urological conditions, from medication to surgical interventions.',
     order: 2,
+    visible: true
+  },
+  {
+    section: 'services',
+    category: 'Treatments',
+    type: 'text',
+    label: 'Feature',
+    value: 'Personalized Care',
+    order: 3,
     visible: true
   }
 ];
