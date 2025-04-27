@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import apiService from '../utils/apiService';
+import { loadContent, getContentValue, getCategoryItems } from '../utils/contentUtils';
 import { FaBars, FaTimes } from 'react-icons/fa';
 
 // Add custom CSS for responsive background image
@@ -40,35 +41,16 @@ function HomePage() {
     homepage: {}
   });
 
-  // Fetch content from API
+  // Fetch content from API with fallback to default content
   useEffect(() => {
     const fetchContent = async () => {
       try {
         setContentLoading(true);
-        const contentData = await apiService.getContent();
-
-        // Organize content by section and category
-        const organizedContent = {
-          header: {},
-          footer: {},
-          homepage: {}
-        };
-
-        contentData.forEach(item => {
-          if (!organizedContent[item.section]) {
-            organizedContent[item.section] = {};
-          }
-
-          if (!organizedContent[item.section][item.category]) {
-            organizedContent[item.section][item.category] = [];
-          }
-
-          organizedContent[item.section][item.category].push(item);
-        });
-
+        // Use the loadContent utility which handles fallbacks
+        const organizedContent = await loadContent();
         setContent(organizedContent);
       } catch (err) {
-        console.error('Error fetching content:', err);
+        console.error('Error in content loading process:', err);
       } finally {
         setContentLoading(false);
       }

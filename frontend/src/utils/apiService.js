@@ -544,6 +544,73 @@ const apiService = {
       credentials: 'include', // Include cookies for refresh token
     });
   },
+
+  // Content Management endpoints
+  getContent: async (section) => {
+    try {
+      const url = section ? `${API_URL}/content?section=${section}` : `${API_URL}/content`;
+
+      // For content, we don't want to require authentication
+      // This allows public pages to load content without a token
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      return handleResponse(response);
+    } catch (error) {
+      console.error('Error fetching content:', error);
+      throw error;
+    }
+  },
+
+  getContentById: async (id) => {
+    return secureFetch(`${API_URL}/content/${id}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        ...authHeader(),
+      },
+      credentials: 'include', // Include cookies for refresh token
+    });
+  },
+
+  createContent: async (contentData) => {
+    return secureFetch(`${API_URL}/content`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...authHeader(),
+      },
+      body: JSON.stringify(contentData),
+      credentials: 'include', // Include cookies for refresh token
+    });
+  },
+
+  updateContent: async (id, contentData) => {
+    return secureFetch(`${API_URL}/content/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        ...authHeader(),
+      },
+      body: JSON.stringify(contentData),
+      credentials: 'include', // Include cookies for refresh token
+    });
+  },
+
+  deleteContent: async (id) => {
+    return secureFetch(`${API_URL}/content/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        ...authHeader(),
+      },
+      credentials: 'include', // Include cookies for refresh token
+    });
+  },
 };
 
 export default apiService;

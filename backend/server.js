@@ -15,6 +15,7 @@ const userRoutes = require('./routes/userRoutes');
 const patientRoutes = require('./routes/patientRoutes');
 const appointmentRoutes = require('./routes/appointmentRoutes');
 const diagnosisRoutes = require('./routes/diagnosisRoutes');
+const contentRoutes = require('./routes/contentRoutes');
 
 // Load environment variables
 dotenv.config();
@@ -83,6 +84,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/patients', patientRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/diagnoses', diagnosisRoutes);
+app.use('/api/content', contentRoutes);
 
 // Create compatibility routes without the /api prefix
 // User routes
@@ -449,6 +451,62 @@ app.delete('/diagnoses/:id', (req, res) => {
     } else {
       res.status(403);
       throw new Error('Not authorized as a doctor');
+    }
+  });
+});
+
+// Content routes - Use the router instead of direct controller calls
+app.use('/api/content', require('./routes/contentRoutes'));
+
+// Fallback content route for direct API access without /api prefix
+app.get('/content', (req, res) => {
+  console.log('Received GET request at /content, redirecting to /api/content');
+  // Import the controller directly
+  const { getContent } = require('./controllers/contentController');
+  // Call the controller function directly (public endpoint)
+  getContent(req, res);
+});
+
+app.get('/content/:id', (req, res) => {
+  console.log('Received GET request at /content/:id, redirecting to /api/content/:id');
+  // Import the controller directly
+  const { getContentById } = require('./controllers/contentController');
+  // Call the controller function directly (public endpoint)
+  getContentById(req, res);
+});
+
+app.put('/content/:id', (req, res) => {
+  console.log('Received PUT request at /content/:id, forwarding to controller directly');
+  // Import the controller directly
+  const { updateContent } = require('./controllers/contentController');
+  // Add authentication middleware manually
+  const { protect } = require('./middleware/authMiddleware');
+  // Call middleware then controller
+  protect(req, res, () => {
+    // Only admins can update content
+    if (req.user && req.user.role === 'admin') {
+      updateContent(req, res);
+    } else {
+      res.status(403);
+      throw new Error('Not authorized as an admin');
+    }
+  });
+});
+
+app.delete('/content/:id', (req, res) => {
+  console.log('Received DELETE request at /content/:id, forwarding to controller directly');
+  // Import the controller directly
+  const { deleteContent } = require('./controllers/contentController');
+  // Add authentication middleware manually
+  const { protect } = require('./middleware/authMiddleware');
+  // Call middleware then controller
+  protect(req, res, () => {
+    // Only admins can delete content
+    if (req.user && req.user.role === 'admin') {
+      deleteContent(req, res);
+    } else {
+      res.status(403);
+      throw new Error('Not authorized as an admin');
     }
   });
 });

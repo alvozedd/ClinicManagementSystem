@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { FaEdit, FaSave, FaTimes, FaTrash } from 'react-icons/fa';
 import apiService from '../utils/apiService';
+import { loadContent } from '../utils/contentUtils';
 
 function ContentManagement() {
   const [contentItems, setContentItems] = useState([]);
@@ -8,16 +9,22 @@ function ContentManagement() {
   const [error, setError] = useState('');
   const [activeSection, setActiveSection] = useState('homepage');
 
-  // Fetch content from API
+  // Fetch content from API with fallback
   useEffect(() => {
     const fetchContent = async () => {
       try {
         setLoading(true);
-        // Fetch content for the active section
-        const contentData = await apiService.getContent(activeSection);
+        // Use the loadContent utility which handles fallbacks
+        const organizedContent = await loadContent(activeSection);
 
-        // Filter content by section
-        const sectionContent = contentData.filter(item => item.section === activeSection);
+        // Extract the content items for the active section
+        const sectionContent = [];
+        if (organizedContent[activeSection]) {
+          // Flatten the categories into a single array
+          Object.values(organizedContent[activeSection]).forEach(categoryItems => {
+            sectionContent.push(...categoryItems);
+          });
+        }
 
         // Set the content items
         setContentItems(sectionContent);
