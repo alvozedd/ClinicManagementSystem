@@ -7,6 +7,20 @@ const PageLoader = ({ children, backgroundImage }) => {
   const [loading, setLoading] = useState(true);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [showScrollIndicator, setShowScrollIndicator] = useState(false);
+  const [scrollPosition, setScrollPosition] = useState(0);
+
+  // Handle scroll position
+  useEffect(() => {
+    const handleScroll = () => {
+      const position = window.scrollY;
+      setScrollPosition(position);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
 
   // Preload the background image
   useEffect(() => {
@@ -51,9 +65,31 @@ const PageLoader = ({ children, backgroundImage }) => {
               transition={{ duration: 0.5 }}
               className="text-center"
             >
-              <div className="text-white text-2xl md:text-3xl font-bold mb-4 flex items-center">
-                <span className="text-blue-300">Uro</span>Health
+              <div className="text-white text-2xl md:text-3xl font-bold mb-4 flex items-center justify-center">
+                <motion.span
+                  className="text-blue-300"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.8, delay: 0.3 }}
+                >
+                  Uro
+                </motion.span>
+                <motion.span
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.8, delay: 1.1 }}
+                >
+                  Health
+                </motion.span>
               </div>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.8, delay: 1.9 }}
+                className="text-sm text-blue-100 mb-4"
+              >
+                Specialist Urological Care
+              </motion.div>
               <div className="loader-dots flex space-x-2 justify-center">
                 <motion.div
                   animate={{
@@ -108,13 +144,20 @@ const PageLoader = ({ children, backgroundImage }) => {
         {children}
 
         {/* Scroll Indicator */}
-        {showScrollIndicator && (
+        {showScrollIndicator && scrollPosition < 100 && (
           <motion.div
             className="fixed bottom-10 left-1/2 transform -translate-x-1/2 z-40 text-white cursor-pointer"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}
-            onClick={() => window.scrollTo({ top: window.innerHeight, behavior: 'smooth' })}
+            onClick={() => {
+              const homeSection = document.querySelector('.hero-section');
+              if (homeSection) {
+                homeSection.scrollIntoView({ behavior: 'smooth' });
+              } else {
+                window.scrollTo({ top: window.innerHeight, behavior: 'smooth' });
+              }
+            }}
           >
             <motion.div
               animate={{

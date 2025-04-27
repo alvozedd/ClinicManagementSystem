@@ -35,8 +35,8 @@ const EnhancedContact = ({ content, getContentValue }) => {
               className="contact-card rounded-xl p-6"
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.5 }}
+              viewport={{ once: true, margin: "0px" }}
+              transition={{ duration: 0.8, delay: 0.2 }}
             >
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-xl font-bold text-blue-800">Contact Information</h3>
@@ -155,8 +155,8 @@ const EnhancedContact = ({ content, getContentValue }) => {
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.5, delay: 0.2 }}
+            viewport={{ once: true, margin: "0px" }}
+            transition={{ duration: 0.8, delay: 0.5 }}
           >
             <div className="contact-card contact-card-elevated rounded-xl p-6">
               <h3 className="text-xl font-bold text-blue-800 mb-4">Our Location</h3>
@@ -177,8 +177,8 @@ const EnhancedContact = ({ content, getContentValue }) => {
                 className="map-container mt-4 mb-4"
                 initial={{ opacity: 0, scale: 0.95 }}
                 whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true, margin: "-100px" }}
-                transition={{ duration: 0.5, delay: 0.4 }}
+                viewport={{ once: true, margin: "0px" }}
+                transition={{ duration: 0.8, delay: 0.8 }}
               >
                 <iframe
                   src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3989.7575147797847!2d36.95!3d-0.42!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMMKwMjUnMTIuMCJTIDM2wrA1NycwMC4wIkU!5e0!3m2!1sen!2sus!4v1620000000000!5m2!1sen!2sus"
