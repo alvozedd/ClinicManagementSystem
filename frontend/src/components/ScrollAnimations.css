@@ -1,0 +1,69 @@
+/* Scroll Animations Styles */
+
+/* Fade-in elements - initially hidden */
+.fade-in-element {
+  opacity: 0;
+}
+
+/* Parallax elements */
+.parallax-element {
+  will-change: transform;
+}
+
+/* Gradient sections */
+.gradient-section {
+  transition: background-color 0.5s ease;
+}
+
+/* Scroll indicator */
+.scroll-indicator {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 50;
+  pointer-events: none;
+}
+
+/* Fluid elements for parallax */
+.fluid-element {
+  position: absolute;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.4), rgba(37, 99, 235, 0.2));
+  filter: blur(40px);
+  z-index: 1;
+}
+
+.fluid-element-1 {
+  width: 300px;
+  height: 300px;
+  top: 10%;
+  left: 5%;
+}
+
+.fluid-element-2 {
+  width: 200px;
+  height: 200px;
+  top: 40%;
+  right: 10%;
+}
+
+.fluid-element-3 {
+  width: 250px;
+  height: 250px;
+  bottom: 15%;
+  left: 15%;
+}
+
+/* Background gradient transitions */
+.bg-gradient-blue-light {
+  background: linear-gradient(to bottom, rgba(219, 234, 254, 1), rgba(191, 219, 254, 1));
+}
+
+.bg-gradient-blue-medium {
+  background: linear-gradient(to bottom, rgba(191, 219, 254, 1), rgba(147, 197, 253, 1));
+}
+
+.bg-gradient-blue-dark {
+  background: linear-gradient(to bottom, rgba(147, 197, 253, 1), rgba(96, 165, 250, 1));
+}
