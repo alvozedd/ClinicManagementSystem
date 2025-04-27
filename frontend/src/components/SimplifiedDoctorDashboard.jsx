@@ -778,44 +778,6 @@ function SimplifiedDoctorDashboard({
                   onSelectPatient={setSelectedPatient}
                   onAddPatient={() => setShowAddPatientForm(true)}
                 />
-
-                {/* Recent Patients Quick Access */}
-                <div>
-                  <h3 className="text-xl font-semibold text-blue-800 mb-4 border-b pb-2">Recent Patients</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {patients.slice(0, 5).map(patient => (
-                      <div
-                        key={patient.id}
-                        onClick={() => setSelectedPatient(patient)}
-                        className="bg-white p-4 rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all duration-200 cursor-pointer"
-                      >
-                        <div className="font-medium text-blue-700 text-base">{patient.firstName} {patient.lastName}</div>
-                        <div className="text-sm text-gray-600 mt-1">{calculateAge(patient.dateOfBirth)} years • {patient.gender}</div>
-                        <div className="text-sm text-gray-600 mt-1">Phone: {patient.phone}</div>
-                        {patient.createdBy && (
-                          <div className="text-sm text-gray-500 flex items-center mt-2">
-                            <FaUser className="mr-2" size={14} />
-                            Added by: <span className="font-medium ml-1">
-                              {patient.createdBy === 'visitor' ? 'Patient (Online)' :
-                               patient.createdBy === 'doctor' ? 'Doctor' :
-                               patient.createdBy === 'secretary' ? 'Secretary' :
-                               patient.createdByName || getCreatorLabel(patient.createdBy)}
-                            </span>
-                          </div>
-                        )}
-                        <button
-                          className="mt-3 text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedPatient(patient);
-                          }}
-                        >
-                          <FaEye className="mr-2" size={16} /> View Details
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
               </div>
             )}
           </div>

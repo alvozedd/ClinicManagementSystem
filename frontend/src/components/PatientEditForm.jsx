@@ -99,13 +99,32 @@ function PatientEditForm({ patient, onSave, onCancel }) {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Year of Birth</label>
           <input
-            type="date"
-            name="dateOfBirth"
-            value={formData.dateOfBirth}
-            onChange={handleChange}
+            type="number"
+            name="yearOfBirth"
+            value={formData.dateOfBirth ? new Date(formData.dateOfBirth).getFullYear() : ''}
+            onChange={(e) => {
+              const year = e.target.value;
+              if (year && !isNaN(year)) {
+                // Create a date with just the year (Jan 1 of that year)
+                const dateStr = `${year}-01-01`;
+                setFormData(prev => ({
+                  ...prev,
+                  dateOfBirth: dateStr
+                }));
+              } else {
+                // If input is empty or invalid, clear the date
+                setFormData(prev => ({
+                  ...prev,
+                  dateOfBirth: ''
+                }));
+              }
+            }}
+            min="1900"
+            max={new Date().getFullYear()}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            placeholder="Enter year only"
           />
         </div>
         <div>

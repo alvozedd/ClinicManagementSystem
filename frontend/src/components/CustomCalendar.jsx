@@ -144,14 +144,61 @@ const CustomCalendar = ({
         }
       }
 
+      // Check if this is a weekend day
+      const day = value.getDay();
+      const isWeekend = day === 0 || day === 6; // 0 is Sunday, 6 is Saturday
+
       return (
-        <div className="relative">
-          {children}
+        <div className={`relative ${isWeekend ? 'weekend-cell' : ''}`}>
           {eventCount > 0 && (
             <div className={`appointment-count-badge ${badgeClass}`}>
               {eventCount}
             </div>
           )}
+          {children}
+        </div>
+      );
+    },
+    [events]
+  );
+
+  // Custom week/day header cell component to show appointment counts
+  const HeaderCellWrapper = useCallback(
+    ({ children, date }) => {
+      // Count events for this date
+      const eventCount = events.filter(event => {
+        const eventDate = new Date(event.start);
+        return (
+          eventDate.getDate() === date.getDate() &&
+          eventDate.getMonth() === date.getMonth() &&
+          eventDate.getFullYear() === date.getFullYear()
+        );
+      }).length;
+
+      // Determine badge class based on count
+      let badgeClass = '';
+      if (eventCount > 0) {
+        if (eventCount >= 5) {
+          badgeClass = 'appointment-count-high'; // Many appointments
+        } else if (eventCount >= 3) {
+          badgeClass = 'appointment-count-medium'; // Several appointments
+        } else {
+          badgeClass = 'appointment-count-low'; // Few appointments
+        }
+      }
+
+      // Check if this is a weekend day
+      const day = date.getDay();
+      const isWeekend = day === 0 || day === 6; // 0 is Sunday, 6 is Saturday
+
+      return (
+        <div className={`relative ${isWeekend ? 'weekend-cell' : ''}`}>
+          {eventCount > 0 && (
+            <div className={`appointment-count-badge ${badgeClass}`}>
+              {eventCount}
+            </div>
+          )}
+          {children}
         </div>
       );
     },
@@ -179,7 +226,8 @@ const CustomCalendar = ({
       components={{
         ...components,
         toolbar: CustomToolbar,
-        dateCellWrapper: DateCellWrapper
+        dateCellWrapper: DateCellWrapper,
+        headerCellWrapper: HeaderCellWrapper
       }}
       eventPropGetter={eventPropGetter}
       popup={true}

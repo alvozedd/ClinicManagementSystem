@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FaSort, FaSortAlphaDown, FaSortAlphaUp, FaSortNumericDown, FaSortNumericUp, FaUser } from 'react-icons/fa';
+import { FaSort, FaSortAlphaDown, FaSortAlphaUp, FaSortNumericDown, FaSortNumericUp, FaUser, FaList, FaTh } from 'react-icons/fa';
 import { getCreatorLabel } from '../utils/recordCreation';
 
 // Calculate age from date of birth
@@ -23,6 +23,9 @@ function PatientSearch({ patients, onSelectPatient, onAddPatient }) {
   const [recentPatients, setRecentPatients] = useState([]);
   const [sortField, setSortField] = useState('lastVisit'); // Default sort by last visit date
   const [sortDirection, setSortDirection] = useState('desc'); // Default to descending (newest first)
+  const [viewMode, setViewMode] = useState('list'); // 'list' or 'grid'
+  const [showRecentPatients, setShowRecentPatients] = useState(true); // Toggle for recent patients
+  const [recentPatientsCount, setRecentPatientsCount] = useState(5); // Number of recent patients to show
 
   // Function to sort patients based on selected field and direction
   const sortPatients = (patientsToSort) => {
@@ -150,20 +153,40 @@ function PatientSearch({ patients, onSelectPatient, onAddPatient }) {
             <FaUser className="mr-2 text-blue-600" size={16} />
             Patient Search
           </h2>
-          {onAddPatient && (
-            <button
-              onClick={onAddPatient}
-              className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-md text-sm font-medium flex items-center"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
-              </svg>
-              Add Patient
-            </button>
-          )}
-          <span className="text-xs md:text-sm text-gray-500">
-            {searchTerm ? `Results: ${searchResults.length}` : `Total: ${searchResults.length}`}
-          </span>
+          <div className="flex items-center gap-2">
+            {/* View mode toggle */}
+            <div className="flex border rounded overflow-hidden">
+              <button
+                onClick={() => setViewMode('list')}
+                className={`p-1.5 ${viewMode === 'list' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-600'}`}
+                title="List view"
+              >
+                <FaList size={14} />
+              </button>
+              <button
+                onClick={() => setViewMode('grid')}
+                className={`p-1.5 ${viewMode === 'grid' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-600'}`}
+                title="Grid view"
+              >
+                <FaTh size={14} />
+              </button>
+            </div>
+
+            {onAddPatient && (
+              <button
+                onClick={onAddPatient}
+                className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded-md text-sm font-medium flex items-center"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
+                </svg>
+                Add Patient
+              </button>
+            )}
+            <span className="text-xs md:text-sm text-gray-500">
+              {searchTerm ? `Results: ${searchResults.length}` : `Total: ${searchResults.length}`}
+            </span>
+          </div>
         </div>
 
         <div className="relative mb-3 md:mb-4">
@@ -218,15 +241,107 @@ function PatientSearch({ patients, onSelectPatient, onAddPatient }) {
             </button>
           </div>
         </div>
+
+        {/* Recent Patients Toggle */}
+        <div className="flex items-center justify-between mb-3 md:mb-4 bg-gray-50 p-2 rounded-lg">
+          <div className="flex items-center">
+            <input
+              type="checkbox"
+              id="showRecentPatients"
+              checked={showRecentPatients}
+              onChange={() => setShowRecentPatients(!showRecentPatients)}
+              className="mr-2 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            />
+            <label htmlFor="showRecentPatients" className="text-sm font-medium text-gray-700">Show Recent Patients</label>
+          </div>
+
+          {showRecentPatients && (
+            <div className="flex items-center">
+              <label htmlFor="recentPatientsCount" className="text-sm text-gray-700 mr-2">Max:</label>
+              <select
+                id="recentPatientsCount"
+                value={recentPatientsCount}
+                onChange={(e) => setRecentPatientsCount(Number(e.target.value))}
+                className="text-sm border border-gray-300 rounded-md p-1 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              >
+                <option value="3">3</option>
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="15">15</option>
+              </select>
+            </div>
+          )}
+        </div>
       </div>
 
       <div>
+        {/* Recent Patients Section */}
+        {showRecentPatients && recentPatients.length > 0 && (
+          <div className="mb-4">
+            <h3 className="text-sm font-semibold text-gray-700 mb-2">Recent Patients</h3>
+            <div className={viewMode === 'grid'
+              ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"
+              : "space-y-2"
+            }>
+              {recentPatients.slice(0, recentPatientsCount).map(patient => (
+                <div
+                  key={`recent-${patient.id}`}
+                  className={`border rounded-lg hover:bg-blue-50 cursor-pointer transition-colors ${
+                    viewMode === 'grid'
+                      ? 'p-3 flex flex-col'
+                      : 'p-3 flex justify-between items-center'
+                  }`}
+                  onClick={() => {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    onSelectPatient(patient);
+                  }}
+                >
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm md:text-base truncate">{patient.firstName} {patient.lastName}</p>
+                    <div className="flex flex-wrap items-center text-xs md:text-sm text-gray-600 mt-1">
+                      <span>{calculateAge(patient.dateOfBirth)} years</span>
+                      <span className="mx-1">•</span>
+                      <span>{patient.gender}</span>
+                      <span className="mx-1">•</span>
+                      <span>{patient.phone}</span>
+                    </div>
+                  </div>
+                  <div className={`flex items-center space-x-2 ${viewMode === 'grid' ? 'mt-2 justify-end' : ''}`}>
+                    <button
+                      className="text-blue-600 hover:text-blue-800 bg-blue-50 p-1.5 rounded-md"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onSelectPatient(patient);
+                      }}
+                      title="View Patient"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 md:h-5 md:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                      </svg>
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="border-t my-4"></div>
+          </div>
+        )}
+
+        {/* Search Results */}
         {searchResults.length > 0 ? (
-          <div className="space-y-2 md:space-y-3 max-h-[400px] md:max-h-[500px] overflow-y-auto">
+          <div className={viewMode === 'grid'
+            ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[400px] md:max-h-[500px] overflow-y-auto"
+            : "space-y-2 md:space-y-3 max-h-[400px] md:max-h-[500px] overflow-y-auto"
+          }>
             {searchResults.map(patient => (
               <div
                 key={patient.id}
-                className="flex justify-between items-center p-3 md:p-4 border rounded-lg hover:bg-blue-50 cursor-pointer transition-colors"
+                className={`border rounded-lg hover:bg-blue-50 cursor-pointer transition-colors ${
+                  viewMode === 'grid'
+                    ? 'p-3 flex flex-col'
+                    : 'p-3 md:p-4 flex justify-between items-center'
+                }`}
                 onClick={() => {
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                   onSelectPatient(patient);
@@ -242,7 +357,7 @@ function PatientSearch({ patients, onSelectPatient, onAddPatient }) {
                     <span>{patient.phone}</span>
                   </div>
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className={`flex items-center space-x-2 ${viewMode === 'grid' ? 'mt-2 justify-end' : ''}`}>
                   <button
                     className="text-blue-600 hover:text-blue-800 bg-blue-50 p-1.5 rounded-md"
                     onClick={(e) => {

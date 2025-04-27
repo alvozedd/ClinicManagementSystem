@@ -575,49 +575,6 @@ function SimplifiedSecretaryDashboard({
                   onSelectPatient={setSelectedPatient}
                   onAddPatient={() => setShowAddPatientForm(true)}
                 />
-
-                {/* Recent Patients Quick Access */}
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-800 mb-1">Recent Patients</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1">
-                    {patients.slice(0, 6).map(patient => (
-                      <div
-                        key={patient.id}
-                        onClick={() => setSelectedPatient(patient)}
-                        className="bg-white p-2 rounded border border-gray-200 hover:border-blue-300 hover:shadow-sm transition-all duration-200 cursor-pointer"
-                      >
-                        <div className="font-medium text-sm text-blue-700">{patient.firstName} {patient.lastName}</div>
-                        <div className="text-xs text-gray-600">{patient.gender} • {patient.phone}</div>
-                        {patient.createdBy && (
-                          <div className="text-xs text-gray-500 flex items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-0.5" viewBox="0 0 20 20" fill="currentColor">
-                              <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                            </svg>
-                            By: <span className="font-medium ml-0.5">
-                              {patient.createdBy === 'visitor' ? 'Patient' :
-                               patient.createdBy === 'doctor' ? 'Doctor' :
-                               patient.createdBy === 'secretary' ? 'Secretary' :
-                               'Unknown'}
-                            </span>
-                          </div>
-                        )}
-                        <button
-                          className="mt-1 text-blue-600 hover:text-blue-800 text-xs font-medium flex items-center"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedPatient(patient);
-                          }}
-                        >
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-0.5" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                            <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
-                          </svg>
-                          View
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
               </div>
             )}
           </div>

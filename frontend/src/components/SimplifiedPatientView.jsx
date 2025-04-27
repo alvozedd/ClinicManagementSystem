@@ -316,20 +316,11 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
                   </span>
                   <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm leading-none flex items-center">
                     Ph: {patient.phone}
-                    {patient.phone && (
-                      <a
-                        href={`tel:${patient.phone}`}
-                        className="bg-green-500 hover:bg-green-600 text-white p-1 rounded-full ml-2"
-                        title="Call patient"
-                      >
-                        <FaPhone size={10} />
-                      </a>
-                    )}
                   </span>
                   {patient.phone && (
                     <a
                       href={`tel:${patient.phone}`}
-                      className="bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded-full text-sm leading-none flex items-center"
+                      className="bg-gray-800 hover:bg-gray-900 text-white px-2 py-1 rounded-full text-sm leading-none flex items-center"
                       title="Call patient"
                     >
                       <FaPhoneAlt className="mr-1" size={10} /> Call
@@ -648,10 +639,10 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
                     {patient.phone && (
                       <a
                         href={`tel:${patient.phone}`}
-                        className="bg-green-500 hover:bg-green-600 text-white p-1.5 rounded-full"
+                        className="bg-gray-800 hover:bg-gray-900 text-white p-1.5 rounded-full"
                         title="Call patient"
                       >
-                        <FaPhone size={12} />
+                        <FaPhoneAlt size={12} />
                       </a>
                     )}
                   </div>
@@ -725,10 +716,10 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
                     {patient.nextOfKinPhone && (
                       <a
                         href={`tel:${patient.nextOfKinPhone}`}
-                        className="bg-green-500 hover:bg-green-600 text-white p-1.5 rounded-full"
+                        className="bg-gray-800 hover:bg-gray-900 text-white p-1.5 rounded-full"
                         title="Call next of kin"
                       >
-                        <FaPhone size={12} />
+                        <FaPhoneAlt size={12} />
                       </a>
                     )}
                   </div>

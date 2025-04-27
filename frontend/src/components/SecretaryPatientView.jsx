@@ -481,7 +481,16 @@ function SecretaryPatientView({ patient, patients, appointments, onClose, onUpda
             <PatientEditForm
               patient={patient}
               onSave={(updatedPatient) => {
+                // Clear caches to ensure fresh data
+                clearAllCaches();
+
+                // Update patient data
                 onUpdatePatient(updatedPatient);
+
+                // Force a re-render by updating the local state
+                setEditedPatient({...updatedPatient});
+
+                // Close the form
                 setShowEditForm(false);
               }}
               onCancel={() => setShowEditForm(false)}
