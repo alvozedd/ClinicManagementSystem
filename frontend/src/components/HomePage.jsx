@@ -4,6 +4,7 @@ import apiService from '../utils/apiService';
 import { loadContent, getContentValue, getCategoryItems } from '../utils/contentUtils';
 import { FaBars, FaTimes } from 'react-icons/fa';
 import './GlassEffects.css';
+import ScrollAnimationsInit from './ScrollAnimationsInit';
 
 // Add custom CSS for responsive background image
 const responsiveBackgroundStyles = `
@@ -108,11 +109,14 @@ function HomePage() {
         name: `${formData.firstName} ${formData.lastName}`,
         gender: formData.gender,
         phone: formData.phone,
+        year_of_birth: formData.yearOfBirth ? parseInt(formData.yearOfBirth) : null,
         next_of_kin_name: 'Not Provided',
         next_of_kin_relationship: 'Not Provided',
         next_of_kin_phone: '0000000000',
         createdBy: 'visitor' // Explicitly set the creator as visitor
       };
+
+      console.log('Creating patient with year of birth:', formData.yearOfBirth);
 
       console.log('Creating new patient:', patientData);
       const newPatient = await apiService.createPatient(patientData);
@@ -147,6 +151,9 @@ function HomePage() {
 
   return (
     <>
+      {/* Initialize scroll animations */}
+      <ScrollAnimationsInit />
+
       {/* Add style tag for responsive background */}
       <style dangerouslySetInnerHTML={{ __html: responsiveBackgroundStyles }} />
 
@@ -278,7 +285,7 @@ function HomePage() {
             <div className="py-12 text-white relative overflow-hidden">
 
 
-              <div className="max-w-2xl mx-auto bg-white rounded-xl shadow-xl p-8 text-gray-800 relative z-10 border border-gray-100 transform transition-all duration-300">
+              <div className="max-w-2xl mx-auto glass-card rounded-xl shadow-xl p-8 text-gray-800 relative z-10 border border-gray-100 transform transition-all duration-300 fade-in-element">
               <div className="text-center px-4 sm:px-0">
                 <Link
                   to="/"
@@ -329,7 +336,7 @@ function HomePage() {
             <div className="py-12 text-white relative overflow-hidden">
 
 
-              <div className="max-w-2xl mx-auto bg-white rounded-xl shadow-xl p-5 sm:p-6 md:p-8 text-gray-800 relative z-10 border border-gray-100">
+              <div className="max-w-2xl mx-auto glass-card rounded-xl shadow-xl p-5 sm:p-6 md:p-8 text-gray-800 relative z-10 border border-gray-100 fade-in-element">
               <div className="flex flex-col items-center mb-4">
                 <Link
                   to="/"
@@ -351,7 +358,7 @@ function HomePage() {
               )}
 
               <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="bg-blue-50 p-3 sm:p-5 rounded-xl mb-5 shadow-sm border border-blue-100">
+                <div className="glass-card-blue p-3 sm:p-5 rounded-xl mb-5 shadow-sm border border-blue-100">
                   <h3 className="font-semibold text-blue-700 mb-3 text-base sm:text-lg border-b border-blue-200 pb-2">Your Information</h3>
 
                   <div className="mb-4">
@@ -452,7 +459,7 @@ function HomePage() {
                   </div>
                 </div>
 
-                <div className="bg-blue-50 p-3 sm:p-5 rounded-xl shadow-sm border border-blue-100">
+                <div className="glass-card-blue p-3 sm:p-5 rounded-xl shadow-sm border border-blue-100">
                   <h3 className="font-semibold text-blue-700 mb-3 text-base sm:text-lg border-b border-blue-200 pb-2">Appointment Details</h3>
 
                   <div className="mb-4">
@@ -821,9 +828,9 @@ function HomePage() {
         </main>
 
         {/* Footer */}
-        <footer className="py-12 enhanced-footer-pattern text-white relative overflow-hidden">
+        <footer className="py-12 bg-blue-600 text-white relative overflow-hidden">
           <div className="max-w-5xl mx-auto px-4">
-            <div className="flex flex-col md:flex-row justify-between mb-8">
+            <div className="flex flex-col md:flex-row justify-between mb-8 fade-in-element">
               <div className="mb-8 md:mb-0">
                 <h3 className="text-xl font-bold mb-4 text-white">UroHealth Central Ltd</h3>
                 <p className="text-blue-100 mb-4 max-w-xs">

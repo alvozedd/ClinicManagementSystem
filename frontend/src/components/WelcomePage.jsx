@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import apiService from '../utils/apiService';
 import { FaPhone, FaEnvelope, FaMapMarkerAlt, FaClock, FaArrowRight, FaInfoCircle, FaCalendarAlt, FaUserMd, FaHospital, FaUserLock } from 'react-icons/fa';
+import ScrollAnimationsInit from './ScrollAnimationsInit';
+import './GlassEffects.css';
 
 function WelcomePage() {
   const [step, setStep] = useState(1); // 1: Form, 2: Success
@@ -44,6 +46,7 @@ function WelcomePage() {
         name: `${formData.firstName} ${formData.lastName}`,
         gender: formData.gender,
         phone: formData.phone,
+        year_of_birth: formData.yearOfBirth ? parseInt(formData.yearOfBirth) : null,
         next_of_kin_name: 'Not Provided',
         next_of_kin_relationship: 'Not Provided',
         next_of_kin_phone: '0000000000',
@@ -52,6 +55,8 @@ function WelcomePage() {
         lastName: formData.lastName,
         email: formData.email || ''
       };
+
+      console.log('Creating patient with year of birth:', formData.yearOfBirth);
 
       console.log('Creating new patient:', patientData);
       const newPatient = await apiService.createPatient(patientData);
@@ -94,7 +99,7 @@ function WelcomePage() {
             <p className="text-blue-600 mt-2 text-lg">Consultant Surgeon & Urologist</p>
           </div>
 
-          <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden border border-blue-100">
+          <div className="max-w-2xl mx-auto glass-card rounded-lg shadow-lg overflow-hidden border border-blue-100 fade-in-element">
             <div className="bg-blue-600 p-6 relative">
               <div className="absolute inset-0 opacity-15">
                 <div className="absolute top-0 left-0 w-full h-full" style={{backgroundImage: "url('data:image/svg+xml,%3Csvg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\",%3E%3Cg fill=\"none\" fill-rule=\"evenodd\",%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"0.4\",%3E%3Cpath d=\"M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')"}}
@@ -142,6 +147,8 @@ function WelcomePage() {
   // Booking form
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white py-8 relative">
+      {/* Initialize scroll animations */}
+      <ScrollAnimationsInit />
       {/* Subtle background pattern */}
       <div className="absolute inset-0 opacity-5 pointer-events-none">
         <div className="absolute top-0 left-0 w-full h-full" style={{backgroundImage: "url('data:image/svg+xml,%3Csvg width=\"40\" height=\"40\" viewBox=\"0 0 40 40\" xmlns=\"http://www.w3.org/2000/svg\",%3E%3Cg fill=\"none\" fill-rule=\"evenodd\",%3E%3Cg fill=\"%233b82f6\" fill-opacity=\"0.2\",%3E%3Cpath d=\"M0 38.59l2.83-2.83 1.41 1.41L1.41 40H0v-1.41zM0 1.4l2.83 2.83 1.41-1.41L1.41 0H0v1.41zM38.59 40l-2.83-2.83 1.41-1.41L40 38.59V40h-1.41zM40 1.41l-2.83 2.83-1.41-1.41L38.59 0H40v1.41zM20 18.6l2.83-2.83 1.41 1.41L21.41 20l2.83 2.83-1.41 1.41L20 21.41l-2.83 2.83-1.41-1.41L18.59 20l-2.83-2.83 1.41-1.41L20 18.59z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')"}}
@@ -225,7 +232,7 @@ function WelcomePage() {
           {/* Left column - Contact info and map */}
           <div className="lg:col-span-1 mx-auto max-w-md w-full flex justify-center">
             <div id="contact" className="scroll-mt-24"></div> {/* Anchor point with scroll margin */}
-            <div className="bg-white rounded-lg shadow-lg overflow-hidden mb-6 border border-blue-100 w-full">
+            <div className="glass-card rounded-lg shadow-lg overflow-hidden mb-6 border border-blue-100 w-full fade-in-element">
               <div className="bg-blue-600 p-4 relative">
                 <div className="absolute inset-0 opacity-40">
                   <div className="absolute top-0 left-0 w-full h-full" style={{backgroundImage: "url('data:image/svg+xml,%3Csvg width=\"20\" height=\"20\" viewBox=\"0 0 20 20\" xmlns=\"http://www.w3.org/2000/svg\",%3E%3Cg fill=\"none\" fill-rule=\"evenodd\",%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"0.6\",%3E%3Cpath d=\"M0 0h10v10H0V0zm10 10h10v10H10V10z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')", backgroundSize: "20px 20px"}}
@@ -289,7 +296,7 @@ function WelcomePage() {
             </div>
 
             {/* Google Maps Embed */}
-            <div className="bg-white rounded-lg shadow-lg overflow-hidden border border-blue-100 w-full">
+            <div className="glass-card rounded-lg shadow-lg overflow-hidden border border-blue-100 w-full fade-in-element">
               <div className="bg-blue-600 p-4 relative">
                 <div className="absolute inset-0 opacity-40">
                   <div className="absolute top-0 left-0 w-full h-full" style={{backgroundImage: "url('data:image/svg+xml,%3Csvg width=\"20\" height=\"20\" viewBox=\"0 0 20 20\" xmlns=\"http://www.w3.org/2000/svg\",%3E%3Cg fill=\"none\" fill-rule=\"evenodd\",%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"0.6\",%3E%3Cpath d=\"M0 0h10v10H0V0zm10 10h10v10H10V10z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')", backgroundSize: "20px 20px"}}
@@ -315,7 +322,7 @@ function WelcomePage() {
 
           {/* Right column - Booking form */}
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-lg shadow-lg overflow-hidden border border-blue-100">
+            <div className="glass-card rounded-lg shadow-lg overflow-hidden border border-blue-100 fade-in-element">
               <div className="bg-blue-600 p-6 relative">
                 <div className="absolute inset-0 opacity-40">
                   <div className="absolute top-0 left-0 w-full h-full" style={{backgroundImage: "url('data:image/svg+xml,%3Csvg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\",%3E%3Cg fill=\"none\" fill-rule=\"evenodd\",%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"0.6\",%3E%3Cpath d=\"M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')", backgroundSize: "30px 30px"}}
@@ -667,12 +674,7 @@ function WelcomePage() {
 
         {/* Footer */}
         <div className="mt-16 pt-8 border-t border-blue-100 bg-blue-600 text-white relative">
-          {/* Footer pattern */}
-          <div className="absolute inset-0 opacity-40">
-            <div className="absolute top-0 left-0 w-full h-full" style={{backgroundImage: "url('data:image/svg+xml,%3Csvg width=\"20\" height=\"20\" viewBox=\"0 0 20 20\" xmlns=\"http://www.w3.org/2000/svg\",%3E%3Cg fill=\"none\" fill-rule=\"evenodd\",%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"0.6\",%3E%3Cpath d=\"M0 0h10v10H0V0zm10 10h10v10H10V10z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')", backgroundSize: "20px 20px"}}
-            </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8 relative z-10 px-4 py-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8 relative z-10 px-4 py-6 fade-in-element">
             <div>
               <h3 className="font-bold text-white mb-4">UroHealth Central</h3>
               <p className="text-blue-100 text-sm">Providing specialized urological care with a patient-centered approach since 2010.</p>
