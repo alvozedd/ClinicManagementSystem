@@ -43,7 +43,7 @@ function SimplifiedSecretaryDashboard({
 
   // State for today's appointments and time filter
   const [todaysAppointments, setTodaysAppointments] = useState([]);
-  const [timeFilter, setTimeFilter] = useState('all');
+  const [timeFilter, setTimeFilter] = useState('today');
 
   // Fetch today's appointments whenever appointments change
   useEffect(() => {
@@ -223,20 +223,21 @@ function SimplifiedSecretaryDashboard({
                   </div>
                   <div className="flex justify-between items-center text-xs mt-1">
                     <span className={`px-1.5 py-0.5 rounded-full text-xs ${
-                      appointment.status === 'Scheduled' ? 'bg-green-100 text-green-800' :
-                      appointment.status === 'Completed' ? 'bg-blue-100 text-blue-800' :
-                      appointment.status === 'Cancelled' ? 'bg-red-100 text-red-800' :
-                      appointment.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-gray-100 text-gray-800'
+                      appointment.status === 'Scheduled' ? 'bg-green-50 text-green-700' :
+                      appointment.status === 'Completed' ? 'bg-blue-50 text-blue-700' :
+                      appointment.status === 'Cancelled' ? 'bg-red-50 text-red-700' :
+                      appointment.status === 'Pending' ? 'bg-yellow-50 text-yellow-700' :
+                      appointment.status === 'Needs Diagnosis' ? 'bg-purple-50 text-purple-700' :
+                      'bg-gray-50 text-gray-700'
                     }`}>
                       {appointment.status}
                     </span>
                     {appointment.createdBy && (
                       <span className={`px-1.5 py-0.5 rounded-full text-xs ${
-                        appointment.createdBy === 'doctor' ? 'bg-blue-100 text-blue-800' :
-                        appointment.createdBy === 'secretary' ? 'bg-green-100 text-green-800' :
-                        appointment.createdBy === 'admin' ? 'bg-gray-100 text-gray-800' :
-                        'bg-purple-100 text-purple-800'
+                        appointment.createdBy === 'doctor' ? 'bg-blue-50 text-blue-700' :
+                        appointment.createdBy === 'secretary' ? 'bg-green-50 text-green-700' :
+                        appointment.createdBy === 'admin' ? 'bg-gray-50 text-gray-700' :
+                        'bg-purple-50 text-purple-700'
                       }`}>
                         <FaUser className="inline mr-1" size={8} />
                         {getCreatorLabel(appointment.createdBy)}

@@ -2,6 +2,7 @@ import React from 'react';
 import ActionButtons from './ActionButtons';
 import { FaUser } from 'react-icons/fa';
 import { getCreatorLabel } from '../utils/recordCreation';
+import { getRelativeDateLabel } from '../utils/timeUtils';
 import './GlassEffects.css';
 
 /**
@@ -65,14 +66,19 @@ const AppointmentCard = ({
       <div>
         <div className="font-medium text-lg">{appointment.time} - {appointment.patientName}</div>
         <div className="text-gray-600">{appointment.type || ''}: {appointment.reason}</div>
+        {appointment.date && (
+          <div className="text-xs text-gray-500 mt-1">
+            {getRelativeDateLabel(appointment.date)}
+          </div>
+        )}
         {appointment.createdBy && (
           <div className="flex items-center mt-1">
             <span className="text-gray-500 text-xs mr-1">Added by:</span>
             <span className={`px-2 py-0.5 rounded text-xs font-medium ${
-              appointment.createdBy === 'doctor' ? 'bg-blue-100 text-blue-800' :
-              appointment.createdBy === 'secretary' ? 'bg-green-100 text-green-800' :
-              appointment.createdBy === 'admin' ? 'bg-gray-100 text-gray-800' :
-              'bg-purple-100 text-purple-800'
+              appointment.createdBy === 'doctor' ? 'bg-blue-50 text-blue-700' :
+              appointment.createdBy === 'secretary' ? 'bg-green-50 text-green-700' :
+              appointment.createdBy === 'admin' ? 'bg-gray-50 text-gray-700' :
+              'bg-purple-50 text-purple-700'
             }`}>
               <FaUser className="inline mr-1" size={10} />
               {getCreatorLabel(appointment.createdBy)}
@@ -82,11 +88,12 @@ const AppointmentCard = ({
       </div>
       <div className="flex space-x-2">
         <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-          appointment.status === 'Scheduled' ? 'bg-green-100 text-green-800' :
-          appointment.status === 'Completed' ? 'bg-blue-100 text-blue-800' :
-          appointment.status === 'Cancelled' ? 'bg-red-100 text-red-800' :
-          appointment.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
-          'bg-gray-100 text-gray-800'
+          appointment.status === 'Scheduled' ? 'bg-green-50 text-green-700' :
+          appointment.status === 'Completed' ? 'bg-blue-50 text-blue-700' :
+          appointment.status === 'Cancelled' ? 'bg-red-50 text-red-700' :
+          appointment.status === 'Pending' ? 'bg-yellow-50 text-yellow-700' :
+          appointment.status === 'Needs Diagnosis' ? 'bg-purple-50 text-purple-700' :
+          'bg-gray-50 text-gray-700'
         }`}>
           {appointment.status}
         </span>

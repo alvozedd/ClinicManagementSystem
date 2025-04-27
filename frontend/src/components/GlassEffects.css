@@ -5,39 +5,39 @@
   backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);
   border: 1px solid rgba(255, 255, 255, 0.18);
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+  box-shadow: 0 4px 6px 0 rgba(31, 38, 135, 0.05);
 }
 
 .glass-card-blue {
-  background: rgba(59, 130, 246, 0.25);
+  background: rgba(219, 234, 254, 0.7); /* Lighter blue */
   backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);
   border: 1px solid rgba(96, 165, 250, 0.18);
-  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
+  box-shadow: 0 2px 4px 0 rgba(31, 38, 135, 0.05);
 }
 
 .glass-card-green {
-  background: rgba(16, 185, 129, 0.25);
+  background: rgba(209, 250, 229, 0.7); /* Lighter green */
   backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);
   border: 1px solid rgba(16, 185, 129, 0.18);
-  box-shadow: 0 8px 32px 0 rgba(16, 185, 129, 0.15);
+  box-shadow: 0 2px 4px 0 rgba(16, 185, 129, 0.05);
 }
 
 .glass-card-yellow {
-  background: rgba(245, 158, 11, 0.25);
+  background: rgba(254, 243, 199, 0.7); /* Lighter yellow */
   backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);
   border: 1px solid rgba(245, 158, 11, 0.18);
-  box-shadow: 0 8px 32px 0 rgba(245, 158, 11, 0.15);
+  box-shadow: 0 2px 4px 0 rgba(245, 158, 11, 0.05);
 }
 
 .glass-card-red {
-  background: rgba(239, 68, 68, 0.25);
+  background: rgba(254, 226, 226, 0.7); /* Lighter red */
   backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);
   border: 1px solid rgba(239, 68, 68, 0.18);
-  box-shadow: 0 8px 32px 0 rgba(239, 68, 68, 0.15);
+  box-shadow: 0 2px 4px 0 rgba(239, 68, 68, 0.05);
 }
 
 /* True Glass Morphism Effect */
@@ -48,6 +48,45 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
   border-radius: 12px;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.true-glass-card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.15);
+}
+
+/* Card perimeter animation */
+.card-perimeter-animation::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  border: 2px solid transparent;
+  background: linear-gradient(90deg, rgba(255,255,255,0.3), rgba(255,255,255,0.1), rgba(255,255,255,0.3)) border-box;
+  -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: destination-out;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.true-glass-card:hover .card-perimeter-animation::before {
+  opacity: 1;
+  animation: borderRotate 2s linear infinite;
+}
+
+@keyframes borderRotate {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 200% 0%;
+  }
 }
 
 /* Services Section Background */
@@ -68,6 +107,20 @@
   background-size: 30px 30px;
   opacity: 0.5;
   z-index: 0;
+}
+
+/* Mouse glow effect for services section */
+.mouse-glow {
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 /* Enhanced Footer Pattern */
