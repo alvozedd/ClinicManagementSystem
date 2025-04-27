@@ -99,11 +99,11 @@ function DoctorCalendarView({ appointments, onDiagnoseAppointment, onViewPatient
 
     return (
       <div
-        className={`p-1 rounded ${statusStyles.container}`}
-        style={{ overflow: 'hidden' }}
+        className={`p-2 rounded ${statusStyles.container}`}
+        style={{ overflow: 'visible' }}
       >
-        <div className="font-medium text-xs">{appointment.time} - {appointment.patientName}</div>
-        <div className="text-xs truncate">{appointment.reason}</div>
+        <div className="font-medium text-sm text-black">{appointment.time} - {appointment.patientName}</div>
+        <div className="text-sm text-black">{appointment.reason}</div>
         <div className="flex justify-between items-center mt-1">
           <span className={`text-xs px-1 py-0.5 rounded-full ${statusStyles.badge}`}>
             {appointment.status}
@@ -114,7 +114,7 @@ function DoctorCalendarView({ appointments, onDiagnoseAppointment, onViewPatient
                 e.stopPropagation();
                 setDiagnosingAppointment(appointment);
               }}
-              className="text-xs bg-yellow-500 text-white px-1 py-0.5 rounded hover:bg-yellow-600"
+              className="text-xs bg-yellow-500 text-black px-1 py-0.5 rounded hover:bg-yellow-600 font-medium"
             >
               Add Diagnosis
             </button>
@@ -125,7 +125,7 @@ function DoctorCalendarView({ appointments, onDiagnoseAppointment, onViewPatient
                 e.stopPropagation();
                 setDiagnosingAppointment(appointment);
               }}
-              className="text-xs bg-blue-500 text-white px-1 py-0.5 rounded hover:bg-blue-600"
+              className="text-xs bg-blue-500 text-black px-1 py-0.5 rounded hover:bg-blue-600 font-medium"
             >
               Edit
             </button>
@@ -175,7 +175,7 @@ function DoctorCalendarView({ appointments, onDiagnoseAppointment, onViewPatient
         <p className="text-sm text-gray-600">Click on an appointment to view patient details</p>
       </div>
 
-      <div className="h-[500px]">
+      <div className="h-[600px]">
         <CustomCalendar
           localizer={localizer}
           events={events}

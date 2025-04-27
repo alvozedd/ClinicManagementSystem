@@ -97,11 +97,11 @@ function SecretaryCalendarView({ appointments, onUpdateAppointment, onViewPatien
 
     return (
       <div
-        className={`p-1 rounded ${statusStyles.container}`}
-        style={{ overflow: 'hidden' }}
+        className={`p-2 rounded ${statusStyles.container}`}
+        style={{ overflow: 'visible' }}
       >
-        <div className="font-medium text-xs">{appointment.time} - {appointment.patientName}</div>
-        <div className="text-xs truncate">{appointment.reason}</div>
+        <div className="font-medium text-sm text-black">{appointment.time} - {appointment.patientName}</div>
+        <div className="text-sm text-black">{appointment.reason}</div>
         <div className="flex justify-between items-center mt-1">
           <span className={`text-xs px-1 py-0.5 rounded-full ${statusStyles.badge}`}>
             {appointment.status}
@@ -112,7 +112,7 @@ function SecretaryCalendarView({ appointments, onUpdateAppointment, onViewPatien
               setManagingAppointment(appointment);
               setIsNewAppointment(false);
             }}
-            className="text-xs bg-blue-500 text-white px-1 py-0.5 rounded hover:bg-blue-600"
+            className="text-xs bg-blue-500 text-black px-1 py-0.5 rounded hover:bg-blue-600 font-medium"
           >
             Edit
           </button>
@@ -183,7 +183,7 @@ function SecretaryCalendarView({ appointments, onUpdateAppointment, onViewPatien
         <p className="text-sm text-gray-600">Click on an appointment to view patient details or click on an empty slot to create a new appointment</p>
       </div>
 
-      <div className="h-[500px]">
+      <div className="h-[600px]">
         <CustomCalendar
           localizer={localizer}
           events={events}

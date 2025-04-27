@@ -4,6 +4,7 @@ import apiService from '../utils/apiService';
 import { loadContent, getContentValue, getCategoryItems } from '../utils/contentUtils';
 import { FaBars, FaTimes } from 'react-icons/fa';
 import './GlassEffects.css';
+import './MedicalPatterns.css';
 
 // Add custom CSS for responsive background image
 const responsiveBackgroundStyles = `
@@ -281,7 +282,7 @@ function HomePage() {
             <div className="py-12 text-white relative overflow-hidden">
 
 
-              <div className="max-w-2xl mx-auto glass-card rounded-xl shadow-xl p-8 text-gray-800 relative z-10 border border-gray-100 transform transition-all duration-300 fade-in-element">
+              <div className="max-w-2xl mx-auto glass-card pattern-dna rounded-xl shadow-xl p-8 text-gray-800 relative z-10 border border-gray-100 transform transition-all duration-300 fade-in-element">
               <div className="text-center px-4 sm:px-0">
                 <Link
                   to="/"
@@ -332,7 +333,7 @@ function HomePage() {
             <div className="py-12 text-white relative overflow-hidden">
 
 
-              <div className="max-w-2xl mx-auto glass-card rounded-xl shadow-xl p-5 sm:p-6 md:p-8 text-gray-800 relative z-10 border border-gray-100 fade-in-element">
+              <div className="max-w-2xl mx-auto glass-card pattern-circles rounded-xl shadow-xl p-5 sm:p-6 md:p-8 text-gray-800 relative z-10 border border-gray-100 fade-in-element">
               <div className="flex flex-col items-center mb-4">
                 <Link
                   to="/"
@@ -596,30 +597,30 @@ function HomePage() {
               {/* End of blue background section */}
 
               {/* White background sections */}
-              <div className="bg-white">
+              <div className="pattern-dna">
                 {/* Services Section */}
-                <div id="services" className="bg-white text-gray-800 py-16 sm:py-20 md:py-24 w-full relative overflow-hidden">
+                <div id="services" className="services-bg text-white py-16 sm:py-20 md:py-24 w-full relative overflow-hidden">
                   <div className="max-w-5xl mx-auto px-4">
                     <div className="text-center mb-12 relative">
-                      <div className="bg-gradient-to-r from-blue-50 via-blue-100 to-blue-50 h-1 w-24 mx-auto mb-4"></div>
-                      <h3 className="text-3xl md:text-4xl font-bold text-blue-700 mb-4 text-center relative inline-block">
+                      <div className="bg-gradient-to-r from-white/30 via-white/50 to-white/30 h-1 w-24 mx-auto mb-4"></div>
+                      <h3 className="text-3xl md:text-4xl font-bold text-white mb-4 text-center relative inline-block">
                         Our Services
-                        <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-blue-400 to-blue-600 transform scale-x-0 transition-transform duration-300 group-hover:scale-x-100"></div>
+                        <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-blue-200 to-white transform scale-x-0 transition-transform duration-300 group-hover:scale-x-100"></div>
                       </h3>
-                      <p className="text-lg md:text-xl text-gray-600 mb-2 max-w-3xl mx-auto">{getContentValue(content, 'homepage', 'About', 'About Text', 'We provide comprehensive urological care with state-of-the-art technology and personalized treatment plans.')}</p>
-                      <div className="h-1 w-16 bg-gradient-to-r from-blue-400 to-blue-600 mx-auto mt-4"></div>
+                      <p className="text-lg md:text-xl text-blue-100 mb-2 max-w-3xl mx-auto">{getContentValue(content, 'homepage', 'About', 'About Text', 'We provide comprehensive urological care with state-of-the-art technology and personalized treatment plans.')}</p>
+                      <div className="h-1 w-16 bg-gradient-to-r from-blue-200 to-white mx-auto mt-4"></div>
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8 px-4 sm:px-0">
-                      <div className="bg-blue-50 rounded-xl p-8 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col items-center text-center border border-blue-100 hover:border-blue-300 transform hover:translate-y-[-8px] h-full group">
-                        <div className="bg-blue-100 p-5 rounded-full mb-6 group-hover:bg-blue-200 transition-all duration-300 transform group-hover:scale-110">
-                          <svg className="w-14 h-14 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8 px-4 sm:px-0 relative z-10">
+                      <div className="true-glass-card p-8 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col items-center text-center border border-white/10 hover:border-white/30 transform hover:translate-y-[-8px] h-full group">
+                        <div className="bg-white/20 p-5 rounded-full mb-6 group-hover:bg-white/30 transition-all duration-300 transform group-hover:scale-110">
+                          <svg className="w-14 h-14 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                           </svg>
                         </div>
-                        <h4 className="text-2xl font-semibold mb-4 text-blue-800">{getContentValue(content, 'services', 'Consultations', 'Title', 'Consultations')}</h4>
-                        <p className="text-gray-600 text-lg leading-relaxed mb-6">{getContentValue(content, 'services', 'Consultations', 'Description', 'Comprehensive evaluation and diagnosis of urological conditions by our expert consultants.')}</p>
+                        <h4 className="text-2xl font-semibold mb-4 text-white">{getContentValue(content, 'services', 'Consultations', 'Title', 'Consultations')}</h4>
+                        <p className="text-blue-100 text-lg leading-relaxed mb-6">{getContentValue(content, 'services', 'Consultations', 'Description', 'Comprehensive evaluation and diagnosis of urological conditions by our expert consultants.')}</p>
                         <div className="mt-auto">
-                          <div className="mb-6 flex items-center justify-center text-blue-600">
+                          <div className="mb-6 flex items-center justify-center text-white">
                             <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                             </svg>
@@ -629,10 +630,10 @@ function HomePage() {
                         </div>
                       </div>
 
-                      <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:translate-y-[-8px] text-white flex flex-col items-center text-center border border-blue-500 h-full group relative overflow-hidden">
-                        <div className="absolute top-0 right-0 w-24 h-24 bg-blue-400 opacity-10 rounded-full -mr-8 -mt-8"></div>
-                        <div className="absolute bottom-0 left-0 w-24 h-24 bg-blue-800 opacity-10 rounded-full -ml-8 -mb-8"></div>
-                        <div className="bg-blue-500 p-5 rounded-full mb-6 group-hover:bg-blue-400 transition-all duration-300 transform group-hover:scale-110 relative z-10">
+                      <div className="true-glass-card p-8 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col items-center text-center border border-white/20 hover:border-white/40 transform hover:translate-y-[-8px] h-full group relative overflow-hidden">
+                        <div className="absolute top-0 right-0 w-24 h-24 bg-white opacity-5 rounded-full -mr-8 -mt-8"></div>
+                        <div className="absolute bottom-0 left-0 w-24 h-24 bg-white opacity-5 rounded-full -ml-8 -mb-8"></div>
+                        <div className="bg-white/30 p-5 rounded-full mb-6 group-hover:bg-white/40 transition-all duration-300 transform group-hover:scale-110 relative z-10">
                           <svg className="w-14 h-14 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                           </svg>
@@ -640,7 +641,7 @@ function HomePage() {
                         <h4 className="text-2xl font-semibold mb-4 text-white relative z-10">{getContentValue(content, 'services', 'Diagnostics', 'Title', 'Diagnostics')}</h4>
                         <p className="text-blue-100 mb-6 text-lg leading-relaxed relative z-10">{getContentValue(content, 'services', 'Diagnostics', 'Description', 'Advanced diagnostic procedures including ultrasound, cystoscopy, and urodynamic studies.')}</p>
                         <div className="mt-auto relative z-10">
-                          <div className="mb-6 flex items-center justify-center text-blue-100">
+                          <div className="mb-6 flex items-center justify-center text-white">
                             <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
                             </svg>
@@ -650,18 +651,18 @@ function HomePage() {
                         </div>
                       </div>
 
-                      <div className="bg-blue-50 rounded-xl p-8 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col items-center text-center border border-blue-100 hover:border-blue-300 transform hover:translate-y-[-8px] h-full group">
-                        <div className="bg-blue-100 p-5 rounded-full mb-6 group-hover:bg-blue-200 transition-all duration-300 transform group-hover:scale-110">
-                          <svg className="w-14 h-14 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <div className="true-glass-card p-8 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col items-center text-center border border-white/10 hover:border-white/30 transform hover:translate-y-[-8px] h-full group">
+                        <div className="bg-white/20 p-5 rounded-full mb-6 group-hover:bg-white/30 transition-all duration-300 transform group-hover:scale-110">
+                          <svg className="w-14 h-14 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
                           </svg>
                         </div>
-                        <h4 className="text-2xl font-semibold mb-4 text-blue-800">{getContentValue(content, 'services', 'Treatments', 'Title', 'Treatments')}</h4>
-                        <p className="text-gray-600 text-lg leading-relaxed mb-6">{getContentValue(content, 'services', 'Treatments', 'Description', 'Comprehensive treatment options for various urological conditions, from medication to surgical interventions.')}</p>
+                        <h4 className="text-2xl font-semibold mb-4 text-white">{getContentValue(content, 'services', 'Treatments', 'Title', 'Treatments')}</h4>
+                        <p className="text-blue-100 text-lg leading-relaxed mb-6">{getContentValue(content, 'services', 'Treatments', 'Description', 'Comprehensive treatment options for various urological conditions, from medication to surgical interventions.')}</p>
                         <div className="mt-auto">
-                          <div className="mb-6 flex items-center justify-center text-blue-600">
+                          <div className="mb-6 flex items-center justify-center text-white">
                             <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                             </svg>
                             <span className="text-lg">{getContentValue(content, 'services', 'Treatments', 'Feature', 'Personalized Care')}</span>
                           </div>
@@ -673,7 +674,7 @@ function HomePage() {
                 </div>
 
                 {/* Contact Section */}
-                <div id="contact" className="bg-white text-gray-800 py-16 sm:py-20 md:py-24 w-full relative">
+                <div id="contact" className="pattern-circles text-gray-800 py-16 sm:py-20 md:py-24 w-full relative">
                   <div className="max-w-5xl mx-auto px-4">
                     <div className="text-center mb-12 relative">
                       <div className="bg-gradient-to-r from-blue-50 via-blue-100 to-blue-50 h-1 w-24 mx-auto mb-4"></div>
@@ -688,10 +689,10 @@ function HomePage() {
                       <div className="h-1 w-16 bg-gradient-to-r from-blue-400 to-blue-600 mx-auto mt-4"></div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 px-4 sm:px-0">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 px-4 sm:px-0 items-stretch">
                       {/* Location Map on the left */}
                       <div className="order-2 md:order-1">
-                        <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100 transition-all duration-300 hover:shadow-xl hover:border-blue-200 h-full group relative">
+                        <div className="pattern-hex p-6 rounded-lg shadow-md border border-gray-100 transition-all duration-300 hover:shadow-xl hover:border-blue-200 h-full group relative flex flex-col">
                           <div className="flex items-center mb-4">
                             <svg className="w-7 h-7 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
@@ -700,7 +701,7 @@ function HomePage() {
                             <h3 className="text-lg font-semibold text-blue-800">Our Location</h3>
                           </div>
 
-                          <div className="rounded-lg overflow-hidden shadow-md mb-4 h-48 sm:h-56 border border-gray-200 group-hover:shadow-lg transition-all duration-300 relative">
+                          <div className="rounded-lg overflow-hidden shadow-md mb-4 h-56 sm:h-64 border border-gray-200 group-hover:shadow-lg transition-all duration-300 relative">
                             <iframe
                               src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d7979.417165608913!2d36.9536629!3d-0.4249518!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x18285f7be335efcb%3A0xe3fe6bef56106781!2sDr.%20Muchai%20Mbugua%20Clinic!5e0!3m2!1sen!2ske!4v1745316449986!5m2!1sen!2ske"
                               width="100%"
@@ -750,7 +751,7 @@ function HomePage() {
 
                       {/* Contact Information on the right */}
                       <div className="order-1 md:order-2">
-                        <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100 transition-all duration-500 hover:shadow-xl hover:border-blue-200 transform hover:translate-y-[-8px] relative overflow-hidden">
+                        <div className="pattern-medical p-6 rounded-lg shadow-md border border-gray-100 transition-all duration-500 hover:shadow-xl hover:border-blue-200 transform hover:translate-y-[-8px] relative overflow-hidden h-full flex flex-col">
                           {/* Background pattern */}
                           <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-full -mr-16 -mt-16 opacity-50"></div>
                           <div className="absolute bottom-0 left-0 w-32 h-32 bg-blue-50 rounded-full -ml-16 -mb-16 opacity-50"></div>
@@ -833,18 +834,7 @@ function HomePage() {
                   {content.footer?.['UroHealth Central Ltd']?.find(item => item.label === 'About Text')?.value ||
                    'Providing specialized urological care with a patient-centered approach since 2010.'}
                 </p>
-                <div className="flex space-x-4 mb-4">
-                  <a href="#" className="text-white hover:text-blue-300 transition-colors bg-blue-700 p-2 rounded-full">
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"></path>
-                    </svg>
-                  </a>
-                  <a href="#" className="text-white hover:text-blue-300 transition-colors bg-blue-700 p-2 rounded-full">
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84"></path>
-                    </svg>
-                  </a>
-                </div>
+                <div className="h-1 w-24 bg-blue-500/30 rounded-full mb-4"></div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8">

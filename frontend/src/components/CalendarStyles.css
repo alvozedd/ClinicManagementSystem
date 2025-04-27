@@ -63,8 +63,9 @@
 .rbc-event {
   background-color: #3b82f6;
   border-radius: 4px;
-  color: white;
+  color: black;
   padding: 2px 5px;
+  font-weight: 500;
 }
 
 /* Today Highlight */
@@ -122,6 +123,7 @@
 .rbc-header {
   padding: 8px 3px;
   font-weight: 600;
+  color: #000000;
 }
 
 /* Current Time Indicator */
@@ -130,4 +132,41 @@
   background-color: #ef4444;
   position: absolute;
   z-index: 3;
+}
+
+/* Ensure appointment content is fully visible */
+.rbc-event-content {
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  font-size: 12px;
+  line-height: 1.3;
+  color: #000000;
+  font-weight: 500;
+}
+
+/* Increase event height to show more content */
+.rbc-event {
+  min-height: 30px;
+}
+
+/* Improve day cell content visibility */
+.rbc-day-bg {
+  background-color: #ffffff;
+}
+
+.rbc-date-cell {
+  color: #000000;
+  font-weight: 500;
+  padding: 4px;
+}
+
+/* Improve off-range day visibility */
+.rbc-off-range {
+  color: #6b7280;
+}
+
+/* Improve row height in month view */
+.rbc-month-row {
+  min-height: 100px;
 }

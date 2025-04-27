@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import apiService from '../utils/apiService';
 import { FaPhone, FaEnvelope, FaMapMarkerAlt, FaClock, FaArrowRight, FaInfoCircle, FaCalendarAlt, FaUserMd, FaHospital, FaUserLock } from 'react-icons/fa';
 import './GlassEffects.css';
+import './MedicalPatterns.css';
 
 function WelcomePage() {
   const [step, setStep] = useState(1); // 1: Form, 2: Success
@@ -98,7 +99,7 @@ function WelcomePage() {
             <p className="text-blue-600 mt-2 text-lg">Consultant Surgeon & Urologist</p>
           </div>
 
-          <div className="max-w-2xl mx-auto glass-card rounded-lg shadow-lg overflow-hidden border border-blue-100 fade-in-element">
+          <div className="max-w-2xl mx-auto glass-card pattern-cross rounded-lg shadow-lg overflow-hidden border border-blue-100 fade-in-element">
             <div className="bg-blue-600 p-6 relative">
               <div className="absolute inset-0 opacity-15">
                 <div className="absolute top-0 left-0 w-full h-full" style={{backgroundImage: "url('data:image/svg+xml,%3Csvg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\",%3E%3Cg fill=\"none\" fill-rule=\"evenodd\",%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"0.4\",%3E%3Cpath d=\"M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')"}}
@@ -227,9 +228,9 @@ function WelcomePage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div id="booking" className="scroll-mt-24 w-full"></div> {/* Anchor point with scroll margin */}
           {/* Left column - Contact info and map */}
-          <div className="lg:col-span-1 mx-auto max-w-md w-full flex justify-center">
+          <div className="lg:col-span-1 mx-auto max-w-md w-full flex flex-col justify-start">
             <div id="contact" className="scroll-mt-24"></div> {/* Anchor point with scroll margin */}
-            <div className="glass-card rounded-lg shadow-lg overflow-hidden mb-6 border border-blue-100 w-full fade-in-element">
+            <div className="glass-card pattern-plus rounded-lg shadow-lg overflow-hidden mb-8 border border-blue-100 w-full fade-in-element h-full">
               <div className="bg-blue-600 p-4 relative">
                 <div className="absolute inset-0 opacity-40">
                   <div className="absolute top-0 left-0 w-full h-full" style={{backgroundImage: "url('data:image/svg+xml,%3Csvg width=\"20\" height=\"20\" viewBox=\"0 0 20 20\" xmlns=\"http://www.w3.org/2000/svg\",%3E%3Cg fill=\"none\" fill-rule=\"evenodd\",%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"0.6\",%3E%3Cpath d=\"M0 0h10v10H0V0zm10 10h10v10H10V10z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')", backgroundSize: "20px 20px"}}
@@ -293,7 +294,7 @@ function WelcomePage() {
             </div>
 
             {/* Google Maps Embed */}
-            <div className="glass-card rounded-lg shadow-lg overflow-hidden border border-blue-100 w-full fade-in-element">
+            <div className="glass-card pattern-grid rounded-lg shadow-lg overflow-hidden border border-blue-100 w-full fade-in-element h-full">
               <div className="bg-blue-600 p-4 relative">
                 <div className="absolute inset-0 opacity-40">
                   <div className="absolute top-0 left-0 w-full h-full" style={{backgroundImage: "url('data:image/svg+xml,%3Csvg width=\"20\" height=\"20\" viewBox=\"0 0 20 20\" xmlns=\"http://www.w3.org/2000/svg\",%3E%3Cg fill=\"none\" fill-rule=\"evenodd\",%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"0.6\",%3E%3Cpath d=\"M0 0h10v10H0V0zm10 10h10v10H10V10z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')", backgroundSize: "20px 20px"}}
@@ -305,7 +306,7 @@ function WelcomePage() {
                 <iframe
                   src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d7979.417165608913!2d36.9536629!3d-0.4249518!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x18285f7be335efcb%3A0xe3fe6bef56106781!2sDr.%20Muchai%20Mbugua%20Clinic!5e0!3m2!1sen!2ske!4v1745262820405!5m2!1sen!2ske"
                   width="100%"
-                  height="300"
+                  height="350"
                   style={{border:0}}
                   allowFullScreen=""
                   loading="lazy"
@@ -319,7 +320,7 @@ function WelcomePage() {
 
           {/* Right column - Booking form */}
           <div className="lg:col-span-2">
-            <div className="glass-card rounded-lg shadow-lg overflow-hidden border border-blue-100 fade-in-element">
+            <div className="glass-card pattern-wave rounded-lg shadow-lg overflow-hidden border border-blue-100 fade-in-element">
               <div className="bg-blue-600 p-6 relative">
                 <div className="absolute inset-0 opacity-40">
                   <div className="absolute top-0 left-0 w-full h-full" style={{backgroundImage: "url('data:image/svg+xml,%3Csvg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\",%3E%3Cg fill=\"none\" fill-rule=\"evenodd\",%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"0.6\",%3E%3Cpath d=\"M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')", backgroundSize: "30px 30px"}}

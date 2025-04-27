@@ -10,6 +10,7 @@ import GlobalDiagnosesView from './GlobalDiagnosesView';
 import DoctorPatientSearchAppointmentModal from './DoctorPatientSearchAppointmentModal';
 import AppointmentManagementModal from './AppointmentManagementModal';
 import AppointmentCard from './AppointmentCard';
+import ActionButtons from './ActionButtons';
 import { FaCalendarAlt, FaUserMd, FaClipboardList, FaEye, FaArrowLeft, FaUser, FaFileMedical } from 'react-icons/fa';
 import { getCreatorLabel } from '../utils/recordCreation';
 import { getTimeBasedGreeting, getFormattedDate, filterAppointmentsByTimePeriod, updateAppointmentStatuses, identifyAppointmentsNeedingDiagnosis, getRelativeDateLabel } from '../utils/timeUtils';
@@ -782,7 +783,7 @@ function SimplifiedDoctorDashboard({
                 <div>
                   <h3 className="text-xl font-semibold text-blue-800 mb-4 border-b pb-2">Recent Patients</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {patients.slice(0, 6).map(patient => (
+                    {patients.slice(0, 5).map(patient => (
                       <div
                         key={patient.id}
                         onClick={() => setSelectedPatient(patient)}
