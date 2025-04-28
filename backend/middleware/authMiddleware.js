@@ -100,4 +100,14 @@ const secretary = (req, res, next) => {
   }
 };
 
-module.exports = { protect, optionalAuth, admin, doctor, secretary };
+// Middleware to check if user has doctor or secretary role
+const doctorOrSecretary = (req, res, next) => {
+  if (req.user && (req.user.role === 'doctor' || req.user.role === 'secretary' || req.user.role === 'admin')) {
+    next();
+  } else {
+    res.status(403);
+    throw new Error('Not authorized as a doctor or secretary');
+  }
+};
+
+module.exports = { protect, optionalAuth, admin, doctor, secretary, doctorOrSecretary };
