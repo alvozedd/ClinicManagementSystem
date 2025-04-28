@@ -230,9 +230,9 @@ function PatientDiagnosesTab({ patient, appointments, onEditDiagnosis, onDeleteD
     return (
       <div className="bg-blue-50 border border-blue-200 text-blue-700 px-6 py-8 rounded-lg text-center">
         <FaFileMedical className="mx-auto text-4xl mb-4 text-blue-400" />
-        <h3 className="text-lg font-semibold mb-2">No Diagnoses Found</h3>
+        <h3 className="text-lg font-semibold mb-2">No Notes Found</h3>
         <p className="text-blue-600 mb-4">
-          This patient doesn't have any recorded diagnoses yet.
+          This patient doesn't have any recorded notes yet.
         </p>
         <button
           onClick={() => {
@@ -243,7 +243,7 @@ function PatientDiagnosesTab({ patient, appointments, onEditDiagnosis, onDeleteD
           disabled={loading}
         >
           <FaSync className={`mr-2 ${loading ? "animate-spin" : ""}`} />
-          {loading ? "Refreshing..." : "Refresh Diagnoses"}
+          {loading ? "Refreshing..." : "Refresh Notes"}
         </button>
       </div>
     );
@@ -255,7 +255,7 @@ function PatientDiagnosesTab({ patient, appointments, onEditDiagnosis, onDeleteD
         <div className="flex items-center">
           <h3 className="text-xl font-bold text-gray-800 flex items-center">
             <FaFileMedical className="mr-2 text-blue-600" />
-            Patient Diagnoses
+            Patient Notes
             <span className="ml-2 bg-blue-100 text-blue-800 text-sm font-medium px-2.5 py-0.5 rounded-full">
               {filteredDiagnoses.length}
             </span>
@@ -267,7 +267,7 @@ function PatientDiagnosesTab({ patient, appointments, onEditDiagnosis, onDeleteD
               setRefreshKey(prev => prev + 1);
             }}
             className="ml-3 text-blue-600 hover:text-blue-800 p-1 rounded-full hover:bg-blue-100 transition-colors"
-            title="Refresh diagnoses"
+            title="Refresh notes"
           >
             <FaSync className={loading ? "animate-spin" : ""} />
           </button>
@@ -326,18 +326,18 @@ function PatientDiagnosesTab({ patient, appointments, onEditDiagnosis, onDeleteD
                     <button
                       onClick={() => onEditDiagnosis(diagnosis)}
                       className="text-blue-600 hover:text-blue-800 p-1 rounded-full hover:bg-blue-100 transition-colors"
-                      title="Edit Diagnosis"
+                      title="Edit Notes"
                     >
                       <FaEdit className="h-4 w-4" />
                     </button>
                     <button
                       onClick={() => {
-                        if (window.confirm('Are you sure you want to delete this diagnosis? This action cannot be undone.')) {
+                        if (window.confirm('Are you sure you want to delete these notes? This action cannot be undone.')) {
                           onDeleteDiagnosis(diagnosis.id);
                         }
                       }}
                       className="text-red-600 hover:text-red-800 p-1 rounded-full hover:bg-red-100 transition-colors"
-                      title="Delete Diagnosis"
+                      title="Delete Notes"
                     >
                       <FaTrashAlt className="h-4 w-4" />
                     </button>
@@ -347,7 +347,7 @@ function PatientDiagnosesTab({ patient, appointments, onEditDiagnosis, onDeleteD
             </div>
 
             <div className="mb-4">
-              <h4 className="font-semibold text-blue-800 mb-2">Diagnosis</h4>
+              <h4 className="font-semibold text-blue-800 mb-2">Notes</h4>
               <div className="bg-blue-50 p-4 rounded-lg">
                 <p className="text-gray-800 whitespace-pre-line">{diagnosis.diagnosisText}</p>
               </div>

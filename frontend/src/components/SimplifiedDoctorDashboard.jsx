@@ -114,23 +114,23 @@ function SimplifiedDoctorDashboard({
     setSelectedPatient(null);
   };
 
-  // Handle saving diagnosis
-  const handleSaveDiagnosis = (updatedAppointment) => {
-    // Make sure the appointment status is set to Completed when adding a diagnosis
+  // Handle saving notes
+  const handleSaveNotes = (updatedAppointment) => {
+    // Make sure the appointment status is set to Completed when adding notes
     const appointmentWithStatus = {
       ...updatedAppointment,
       status: 'Completed'
     };
 
-    console.log('Saving diagnosis in SimplifiedDoctorDashboard:', appointmentWithStatus);
+    console.log('Saving notes in SimplifiedDoctorDashboard:', appointmentWithStatus);
 
-    // Check if this is a new diagnosis or an update to an existing one
-    const isNewDiagnosis = !diagnosingAppointment.diagnosis;
+    // Check if this is a new note or an update to an existing one
+    const isNewNote = !diagnosingAppointment.diagnosis;
 
-    // If this is a new diagnosis for an appointment that already has diagnoses,
-    // we need to preserve the existing diagnoses array
-    if (!isNewDiagnosis && diagnosingAppointment.diagnoses) {
-      // Add the new diagnosis to the existing diagnoses array
+    // If this is a new note for an appointment that already has notes,
+    // we need to preserve the existing notes array
+    if (!isNewNote && diagnosingAppointment.diagnoses) {
+      // Add the new note to the existing notes array
       appointmentWithStatus.diagnoses = [
         appointmentWithStatus.diagnosis,
         ...diagnosingAppointment.diagnoses
@@ -140,7 +140,7 @@ function SimplifiedDoctorDashboard({
     // Update the appointment in the global state
     onDiagnoseAppointment(appointmentWithStatus);
 
-    // Close the diagnosis modal
+    // Close the notes modal
     setDiagnosingAppointment(null);
 
     // Trigger a local refresh to ensure UI is updated
@@ -148,7 +148,7 @@ function SimplifiedDoctorDashboard({
 
     // If we're in the patient management tab, wait a moment then refresh the patient view
     if (activeTab === 'patient-management' && selectedPatient) {
-      // Wait a moment to ensure the diagnosis is saved before refreshing
+      // Wait a moment to ensure the notes are saved before refreshing
       setTimeout(() => {
         // This will trigger a re-render of the SimplifiedPatientView component
         setSelectedPatient({...selectedPatient});
@@ -784,12 +784,12 @@ function SimplifiedDoctorDashboard({
         )}
       </div>
 
-      {/* Diagnosis Modal */}
+      {/* Notes Modal */}
       {diagnosingAppointment && (
-        <SimplifiedDiagnosisModal
+        <SimplifiedNotesModal
           appointment={diagnosingAppointment}
           onClose={() => setDiagnosingAppointment(null)}
-          onSave={handleSaveDiagnosis}
+          onSave={handleSaveNotes}
         />
       )}
 
