@@ -85,6 +85,31 @@ app.use(cookieParser());
 // CSRF middleware completely removed
 console.log('CSRF middleware completely removed');
 
+// Helper function to add CORS headers to non-API routes
+const addCorsHeaders = (req, res, next) => {
+  const origin = req.headers.origin;
+  const allowedOrigins = [
+    'https://urohealthltd.netlify.app',
+    'https://www.urohealthltd.netlify.app',
+    'http://localhost:3000',
+    'http://localhost:5173'
+  ];
+
+  if (allowedOrigins.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+    res.header('Access-Control-Allow-Credentials', 'true');
+  }
+
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
+  next();
+};
+
 // API Routes section
 
 // API Routes
@@ -215,7 +240,7 @@ app.post('/users/logout', (req, res) => {
 });
 
 // Patient routes
-app.get('/patients', (req, res) => {
+app.get('/patients', addCorsHeaders, (req, res) => {
   console.log('Received GET request at /patients, forwarding to controller directly');
   // Import the controller directly
   const { getPatients } = require('./controllers/patientController');
@@ -235,8 +260,9 @@ app.get('/patients/:id', (req, res) => {
   protect(req, res, () => getPatientById(req, res));
 });
 
-app.post('/patients', (req, res) => {
+app.post('/patients', addCorsHeaders, (req, res) => {
   console.log('Received POST request at /patients, forwarding to controller directly');
+
   // Import the controller directly
   const { createPatient } = require('./controllers/patientController');
   // Add authentication middleware manually
@@ -282,8 +308,9 @@ app.delete('/patients/:id', (req, res) => {
 });
 
 // Appointment routes
-app.get('/appointments', (req, res) => {
+app.get('/appointments', addCorsHeaders, (req, res) => {
   console.log('Received GET request at /appointments, forwarding to controller directly');
+
   // Import the controller directly
   const { getAppointments } = require('./controllers/appointmentController');
   // Add authentication middleware manually
@@ -303,8 +330,9 @@ app.get('/patients/:id/appointments', (req, res) => {
   protect(req, res, () => getAppointmentsByPatientId(req, res));
 });
 
-app.post('/appointments', (req, res) => {
+app.post('/appointments', addCorsHeaders, (req, res) => {
   console.log('Received POST request at /appointments, forwarding to controller directly');
+
   // Import the controller directly
   const { createAppointment } = require('./controllers/appointmentController');
   // Add authentication middleware manually
@@ -313,7 +341,7 @@ app.post('/appointments', (req, res) => {
   optionalAuth(req, res, () => createAppointment(req, res));
 });
 
-app.get('/appointments/:id', (req, res) => {
+app.get('/appointments/:id', addCorsHeaders, (req, res) => {
   console.log('Received GET request at /appointments/:id, forwarding to controller directly');
   // Import the controller directly
   const { getAppointmentById } = require('./controllers/appointmentController');
@@ -323,7 +351,7 @@ app.get('/appointments/:id', (req, res) => {
   protect(req, res, () => getAppointmentById(req, res));
 });
 
-app.put('/appointments/:id', (req, res) => {
+app.put('/appointments/:id', addCorsHeaders, (req, res) => {
   console.log('Received PUT request at /appointments/:id, forwarding to controller directly');
   // Import the controller directly
   const { updateAppointment } = require('./controllers/appointmentController');
@@ -341,7 +369,7 @@ app.put('/appointments/:id', (req, res) => {
   });
 });
 
-app.delete('/appointments/:id', (req, res) => {
+app.delete('/appointments/:id', addCorsHeaders, (req, res) => {
   console.log('Received DELETE request at /appointments/:id, forwarding to controller directly');
   // Import the controller directly
   const { deleteAppointment } = require('./controllers/appointmentController');
