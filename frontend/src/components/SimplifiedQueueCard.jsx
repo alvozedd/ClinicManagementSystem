@@ -63,7 +63,10 @@ function SimplifiedQueueCard({ queueEntry, onUpdateStatus, onRemove, onPrintTick
   // Get appointment info
   const getAppointmentInfo = () => {
     if (queueEntry.appointment_id) {
-      return queueEntry.appointment_id.type || 'Consultation';
+      const appointmentType = queueEntry.appointment_id.type || 'Consultation';
+      const appointmentReason = queueEntry.appointment_id.reason ? ` - ${queueEntry.appointment_id.reason}` : '';
+      const appointmentTime = queueEntry.appointment_id.optional_time ? ` at ${queueEntry.appointment_id.optional_time}` : '';
+      return `${appointmentType}${appointmentReason}${appointmentTime}`;
     } else if (queueEntry.is_walk_in) {
       return 'Walk-in';
     } else {
@@ -114,7 +117,7 @@ function SimplifiedQueueCard({ queueEntry, onUpdateStatus, onRemove, onPrintTick
             Start
           </button>
         )}
-        
+
         {queueEntry.status === 'In Progress' && userRole === 'doctor' && (
           <button
             onClick={() => onUpdateStatus('Completed')}
@@ -124,7 +127,7 @@ function SimplifiedQueueCard({ queueEntry, onUpdateStatus, onRemove, onPrintTick
             Complete
           </button>
         )}
-        
+
         {queueEntry.status === 'Waiting' && (
           <button
             onClick={() => onUpdateStatus('No-show')}
@@ -134,7 +137,7 @@ function SimplifiedQueueCard({ queueEntry, onUpdateStatus, onRemove, onPrintTick
             No-show
           </button>
         )}
-        
+
         <button
           onClick={() => onPrintTicket(queueEntry)}
           className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-1 rounded text-sm font-medium flex items-center"
@@ -142,7 +145,7 @@ function SimplifiedQueueCard({ queueEntry, onUpdateStatus, onRemove, onPrintTick
           <FaPrint className="mr-1" />
           Print
         </button>
-        
+
         {userRole === 'secretary' && (
           <button
             onClick={onRemove}

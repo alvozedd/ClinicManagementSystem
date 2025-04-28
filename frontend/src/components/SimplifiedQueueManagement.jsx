@@ -40,15 +40,15 @@ function SimplifiedQueueManagement({ patients, appointments, userRole }) {
   // Filter today's appointments
   useEffect(() => {
     const today = new Date().toISOString().split('T')[0];
-    
+
     const filteredAppointments = appointments.filter(appointment => {
       const appointmentDate = new Date(appointment.appointment_date || appointment.date).toISOString().split('T')[0];
       return appointmentDate === today && appointment.status !== 'Completed' && appointment.status !== 'Cancelled';
     });
-    
+
     // Check which appointments are already in the queue
     const appointmentsInQueue = queueEntries.map(entry => entry.appointment_id?._id || entry.appointment_id);
-    
+
     // Mark appointments that are already in the queue
     const appointmentsWithQueueStatus = filteredAppointments.map(appointment => {
       const isInQueue = appointmentsInQueue.includes(appointment._id || appointment.id);
@@ -57,9 +57,16 @@ function SimplifiedQueueManagement({ patients, appointments, userRole }) {
         isInQueue
       };
     });
-    
+
     setTodaysAppointments(appointmentsWithQueueStatus);
-  }, [appointments, queueEntries]);
+
+    // If we're in the appointments tab and there are appointments not in the queue,
+    // show a message or highlight them
+    if (activeTab === 'appointments' && appointmentsWithQueueStatus.length > 0 &&
+        appointmentsWithQueueStatus.filter(a => !a.isInQueue).length > 0) {
+      console.log('Found appointments not in queue, they can be added manually');
+    }
+  }, [appointments, queueEntries, activeTab]);
 
   useEffect(() => {
     fetchQueueData();
@@ -126,7 +133,7 @@ function SimplifiedQueueManagement({ patients, appointments, userRole }) {
     try {
       // Find the patient for this appointment
       const patientId = appointment.patient_id || appointment.patientId;
-      
+
       // Create queue data
       const queueData = {
         patient_id: patientId,
@@ -134,7 +141,7 @@ function SimplifiedQueueManagement({ patients, appointments, userRole }) {
         is_walk_in: false,
         notes: `Checked in for ${appointment.type || 'appointment'}`
       };
-      
+
       // Add to queue
       const newQueueEntry = await apiService.addToQueue(queueData);
       setTicketToPrint(newQueueEntry);
@@ -150,9 +157,9 @@ function SimplifiedQueueManagement({ patients, appointments, userRole }) {
     // First sort by status priority
     const statusPriority = { 'In Progress': 1, 'Waiting': 2, 'Completed': 3, 'No-show': 4, 'Cancelled': 5 };
     const statusDiff = statusPriority[a.status] - statusPriority[b.status];
-    
+
     if (statusDiff !== 0) return statusDiff;
-    
+
     // Then sort by ticket number
     return a.ticket_number - b.ticket_number;
   });
@@ -171,7 +178,7 @@ function SimplifiedQueueManagement({ patients, appointments, userRole }) {
               Add to Queue
             </button>
           )}
-          
+
           {userRole === 'doctor' && (
             <button
               onClick={handleGetNextPatient}
@@ -182,7 +189,7 @@ function SimplifiedQueueManagement({ patients, appointments, userRole }) {
               Next Patient
             </button>
           )}
-          
+
           <button
             onClick={fetchQueueData}
             className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-md text-sm font-medium flex items-center"
@@ -275,7 +282,17 @@ function SimplifiedQueueManagement({ patients, appointments, userRole }) {
             ))
           ) : (
             <div className="text-center py-8 bg-gray-50 rounded-lg">
-              <p className="text-gray-500">No patients in the queue today</p>
+              {todaysAppointments.length > 0 ? (
+                <>
+                  <p className="text-gray-500 mb-2">No patients in the queue yet</p>
+                  <p className="text-blue-600">
+                    There {todaysAppointments.length === 1 ? 'is' : 'are'} {todaysAppointments.length} appointment{todaysAppointments.length !== 1 ? 's' : ''} scheduled for today.
+                    {userRole === 'secretary' && 'Check the "Today\'s Appointments" tab to check them in.'}
+                  </p>
+                </>
+              ) : (
+                <p className="text-gray-500">No patients in the queue today</p>
+              )}
             </div>
           )}
         </div>
@@ -285,9 +302,31 @@ function SimplifiedQueueManagement({ patients, appointments, userRole }) {
       {activeTab === 'appointments' && (
         <div className="space-y-3 mt-4">
           {todaysAppointments.length > 0 ? (
-            todaysAppointments.map(appointment => (
-              <div 
-                key={appointment._id || appointment.id} 
+            <>
+              <div className="mb-4 flex justify-between items-center">
+                <h3 className="text-lg font-semibold text-blue-800">Today's Appointments</h3>
+                {todaysAppointments.filter(a => !a.isInQueue).length > 0 && userRole === 'secretary' && (
+                  <button
+                    onClick={() => {
+                      // Check in all appointments that are not in queue
+                      const promises = todaysAppointments
+                        .filter(a => !a.isInQueue)
+                        .map(appointment => handleCheckInAppointment(appointment));
+
+                      Promise.all(promises).then(() => {
+                        fetchQueueData();
+                      });
+                    }}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm font-medium flex items-center"
+                  >
+                    <FaUserCheck className="mr-1" />
+                    Check In All
+                  </button>
+                )}
+              </div>
+              {todaysAppointments.map(appointment => (
+              <div
+                key={appointment._id || appointment.id}
                 className={`p-4 rounded-lg border ${appointment.isInQueue ? 'border-green-200 bg-green-50' : 'border-gray-200'} flex flex-col md:flex-row justify-between items-start md:items-center hover:shadow-md transition-all duration-300`}
               >
                 <div>
@@ -317,7 +356,7 @@ function SimplifiedQueueManagement({ patients, appointments, userRole }) {
                     )}
                   </div>
                 </div>
-                
+
                 {!appointment.isInQueue && userRole === 'secretary' && (
                   <button
                     onClick={() => handleCheckInAppointment(appointment)}
@@ -327,12 +366,12 @@ function SimplifiedQueueManagement({ patients, appointments, userRole }) {
                     Check In & Print Ticket
                   </button>
                 )}
-                
+
                 {appointment.isInQueue && (
                   <button
                     onClick={() => {
                       // Find the queue entry for this appointment
-                      const queueEntry = queueEntries.find(entry => 
+                      const queueEntry = queueEntries.find(entry =>
                         (entry.appointment_id?._id || entry.appointment_id) === (appointment._id || appointment.id)
                       );
                       if (queueEntry) {
@@ -347,6 +386,7 @@ function SimplifiedQueueManagement({ patients, appointments, userRole }) {
                 )}
               </div>
             ))
+            </>
           ) : (
             <div className="text-center py-8 bg-gray-50 rounded-lg">
               <p className="text-gray-500">No appointments scheduled for today</p>

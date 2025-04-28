@@ -14,31 +14,56 @@ function SimplifiedAddToQueueModal({ patients, appointments, onClose, onSave }) 
   // Handle patient selection
   const handlePatientSelect = async (patient) => {
     setSelectedPatient(patient);
-    
+
     // Check if patient has an appointment today
     const today = new Date().toISOString().split('T')[0];
-    
+
     const patientAppointments = appointments.filter(appointment => {
       const appointmentDate = new Date(appointment.appointment_date || appointment.date).toISOString().split('T')[0];
-      const patientMatches = 
-        appointment.patient_id === patient._id || 
+      const patientMatches =
+        appointment.patient_id === patient._id ||
         appointment.patient_id === patient.id ||
         appointment.patientId === patient._id ||
         appointment.patientId === patient.id;
-      
+
       return appointmentDate === today && patientMatches && appointment.status !== 'Completed' && appointment.status !== 'Cancelled';
     });
-    
+
     if (patientAppointments.length > 0) {
       // Patient has appointment(s) today
       setIsWalkIn(false);
-      
+
       // Automatically add to queue with the first appointment
       await handleAddToQueue(patient, patientAppointments[0], false);
     } else {
-      // Patient doesn't have appointments today, add as walk-in
+      // Patient doesn't have appointments today, create a walk-in appointment
       setIsWalkIn(true);
-      await handleAddToQueue(patient, null, true);
+
+      // Create a new appointment for today
+      const now = new Date();
+      const appointmentData = {
+        patient_id: patient._id || patient.id,
+        appointment_date: now,
+        optional_time: now.toTimeString().substring(0, 5),
+        notes: 'Walk-in patient',
+        status: 'Scheduled',
+        type: 'Walk-in',
+        reason: 'Walk-in visit',
+        createdBy: 'secretary'
+      };
+
+      try {
+        // Create the appointment
+        const newAppointment = await apiService.createAppointment(appointmentData);
+        console.log('Created appointment for existing patient walk-in:', newAppointment);
+
+        // Add to queue with the new appointment
+        await handleAddToQueue(patient, newAppointment, true);
+      } catch (error) {
+        console.error('Error creating appointment for walk-in:', error);
+        // If appointment creation fails, still add to queue as walk-in
+        await handleAddToQueue(patient, null, true);
+      }
     }
   };
 
@@ -46,28 +71,53 @@ function SimplifiedAddToQueueModal({ patients, appointments, onClose, onSave }) 
   const handleAddPatient = async (newPatient) => {
     setSelectedPatient(newPatient);
     setShowAddPatientForm(false);
-    
+
     // New patients are always walk-ins
     setIsWalkIn(true);
-    await handleAddToQueue(newPatient, null, true);
+
+    // Create a new appointment for today
+    const today = new Date();
+    const appointmentData = {
+      patient_id: newPatient._id,
+      appointment_date: today,
+      optional_time: today.toTimeString().substring(0, 5),
+      notes: 'Walk-in patient',
+      status: 'Scheduled',
+      type: 'Walk-in',
+      reason: 'Walk-in visit',
+      createdBy: 'secretary'
+    };
+
+    try {
+      // Create the appointment
+      const newAppointment = await apiService.createAppointment(appointmentData);
+      console.log('Created appointment for walk-in:', newAppointment);
+
+      // Add to queue with the new appointment
+      await handleAddToQueue(newPatient, newAppointment, true);
+    } catch (error) {
+      console.error('Error creating appointment for walk-in:', error);
+      // If appointment creation fails, still add to queue as walk-in
+      await handleAddToQueue(newPatient, null, true);
+    }
   };
 
   // Handle adding to queue
   const handleAddToQueue = async (patient, appointment, isWalkIn) => {
     setLoading(true);
     setError('');
-    
+
     try {
       // Create queue data
       const queueData = {
         patient_id: patient._id || patient.id,
         is_walk_in: isWalkIn,
       };
-      
+
       if (appointment && !isWalkIn) {
         queueData.appointment_id = appointment._id || appointment.id;
       }
-      
+
       // If it's a walk-in, create an appointment automatically
       if (isWalkIn) {
         try {
@@ -82,9 +132,9 @@ function SimplifiedAddToQueueModal({ patients, appointments, onClose, onSave }) 
             status: 'Scheduled',
             createdBy: 'secretary'
           };
-          
+
           const newAppointment = await apiService.createAppointment(appointmentData);
-          
+
           // Add the appointment ID to the queue data
           queueData.appointment_id = newAppointment._id;
         } catch (error) {
@@ -92,7 +142,7 @@ function SimplifiedAddToQueueModal({ patients, appointments, onClose, onSave }) 
           // Continue with queue creation even if appointment creation fails
         }
       }
-      
+
       // Save to queue
       onSave(queueData);
     } catch (error) {
@@ -148,7 +198,7 @@ function SimplifiedAddToQueueModal({ patients, appointments, onClose, onSave }) 
                     New Patient
                   </button>
                 </div>
-                
+
                 <div className="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-100">
                   <div className="flex items-center mb-2">
                     <FaCalendarAlt className="text-blue-600 mr-2" />
@@ -159,7 +209,7 @@ function SimplifiedAddToQueueModal({ patients, appointments, onClose, onSave }) 
                     <span className="font-medium">Walk-in patients will get a ticket number and an appointment will be created.</span>
                   </div>
                 </div>
-                
+
                 <PatientSearch
                   patients={patients}
                   onSelectPatient={handlePatientSelect}
