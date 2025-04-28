@@ -560,6 +560,67 @@ app.delete('/content/:id', (req, res) => {
   });
 });
 
+// Queue routes without /api prefix
+app.get('/queue', addCorsHeaders, (req, res) => {
+  console.log('Received GET request at /queue, forwarding to controller directly');
+  // Import the controller directly
+  const { getQueueEntries } = require('./controllers/queueController');
+  // Add authentication middleware manually
+  const { protect, doctorOrSecretary } = require('./middleware/authMiddleware');
+  // Call middleware then controller
+  protect(req, res, () => doctorOrSecretary(req, res, () => getQueueEntries(req, res)));
+});
+
+app.post('/queue', addCorsHeaders, (req, res) => {
+  console.log('Received POST request at /queue, forwarding to controller directly');
+  // Import the controller directly
+  const { addToQueue } = require('./controllers/queueController');
+  // Add authentication middleware manually
+  const { protect, doctorOrSecretary } = require('./middleware/authMiddleware');
+  // Call middleware then controller
+  protect(req, res, () => doctorOrSecretary(req, res, () => addToQueue(req, res)));
+});
+
+app.get('/queue/stats', addCorsHeaders, (req, res) => {
+  console.log('Received GET request at /queue/stats, forwarding to controller directly');
+  // Import the controller directly
+  const { getQueueStats } = require('./controllers/queueController');
+  // Add authentication middleware manually
+  const { protect, doctorOrSecretary } = require('./middleware/authMiddleware');
+  // Call middleware then controller
+  protect(req, res, () => doctorOrSecretary(req, res, () => getQueueStats(req, res)));
+});
+
+app.get('/queue/next', addCorsHeaders, (req, res) => {
+  console.log('Received GET request at /queue/next, forwarding to controller directly');
+  // Import the controller directly
+  const { getNextPatient } = require('./controllers/queueController');
+  // Add authentication middleware manually
+  const { protect, doctor } = require('./middleware/authMiddleware');
+  // Call middleware then controller
+  protect(req, res, () => doctor(req, res, () => getNextPatient(req, res)));
+});
+
+app.put('/queue/:id', addCorsHeaders, (req, res) => {
+  console.log('Received PUT request at /queue/:id, forwarding to controller directly');
+  // Import the controller directly
+  const { updateQueueEntry } = require('./controllers/queueController');
+  // Add authentication middleware manually
+  const { protect, doctorOrSecretary } = require('./middleware/authMiddleware');
+  // Call middleware then controller
+  protect(req, res, () => doctorOrSecretary(req, res, () => updateQueueEntry(req, res)));
+});
+
+app.delete('/queue/:id', addCorsHeaders, (req, res) => {
+  console.log('Received DELETE request at /queue/:id, forwarding to controller directly');
+  // Import the controller directly
+  const { removeFromQueue } = require('./controllers/queueController');
+  // Add authentication middleware manually
+  const { protect, secretary } = require('./middleware/authMiddleware');
+  // Call middleware then controller
+  protect(req, res, () => secretary(req, res, () => removeFromQueue(req, res)));
+});
+
 // Root route
 app.get('/', (req, res) => {
   res.send('API is running...');
