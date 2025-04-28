@@ -287,7 +287,7 @@ function SimplifiedQueueManagement({ patients, appointments, userRole }) {
                   <p className="text-gray-500 mb-2">No patients in the queue yet</p>
                   <p className="text-blue-600">
                     There {todaysAppointments.length === 1 ? 'is' : 'are'} {todaysAppointments.length} appointment{todaysAppointments.length !== 1 ? 's' : ''} scheduled for today.
-                    {userRole === 'secretary' && 'Check the "Today\'s Appointments" tab to check them in.'}
+                    {userRole === 'secretary' && "Check the Today's Appointments tab to check them in."}
                   </p>
                 </>
               ) : (
