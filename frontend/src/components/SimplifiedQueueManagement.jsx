@@ -6,6 +6,7 @@ import SimplifiedAddToQueueModal from './SimplifiedAddToQueueModal';
 import QueueTicketPrint from './QueueTicketPrint';
 
 function SimplifiedQueueManagement({ patients, appointments, userRole }) {
+  // State for queue management
   const [queueEntries, setQueueEntries] = useState([]);
   const [todaysAppointments, setTodaysAppointments] = useState([]);
   const [queueStats, setQueueStats] = useState({
@@ -19,6 +20,10 @@ function SimplifiedQueueManagement({ patients, appointments, userRole }) {
   const [showAddToQueueModal, setShowAddToQueueModal] = useState(false);
   const [activeTab, setActiveTab] = useState('queue'); // 'queue' or 'appointments'
   const [ticketToPrint, setTicketToPrint] = useState(null);
+
+  // New state for direct queue management
+  const [directQueueEntries, setDirectQueueEntries] = useState([]);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   // Fetch queue entries and stats
   const fetchQueueData = async () => {
@@ -37,11 +42,105 @@ function SimplifiedQueueManagement({ patients, appointments, userRole }) {
     }
   };
 
-  // Filter today's appointments
+  // Process today's appointments for direct queue management
   useEffect(() => {
     const today = new Date().toISOString().split('T')[0];
-    console.log('Filtering appointments for today:', today);
+    console.log('Processing appointments for direct queue:', today);
     console.log('Total appointments:', appointments.length);
+
+    // Filter appointments for today
+    const filteredAppointments = appointments.filter(appointment => {
+      // Get the appointment date, handling different formats
+      let appointmentDate;
+      if (appointment.appointment_date) {
+        appointmentDate = new Date(appointment.appointment_date).toISOString().split('T')[0];
+      } else if (appointment.date) {
+        appointmentDate = new Date(appointment.date).toISOString().split('T')[0];
+      } else {
+        return false; // Skip appointments without a date
+      }
+
+      // Check if the appointment is for today
+      const isToday = appointmentDate === today;
+
+      if (isToday) {
+        console.log('Found appointment for today:', appointment);
+      }
+
+      return isToday;
+    });
+
+    console.log('Filtered appointments for today:', filteredAppointments.length);
+
+    // Transform appointments into queue entries
+    const queueEntries = filteredAppointments.map(appointment => {
+      const appointmentId = appointment._id || appointment.id;
+      const patientId = appointment.patient_id || appointment.patientId;
+      const patientName = appointment.patientName || 'Unknown Patient';
+
+      // Determine queue status based on appointment status
+      let queueStatus = 'Waiting';
+      if (appointment.status === 'Completed') {
+        queueStatus = 'Completed';
+      } else if (appointment.status === 'Cancelled') {
+        queueStatus = 'Cancelled';
+      }
+
+      // Find if this appointment already has a ticket number in the existing queue entries
+      const existingEntry = queueEntries.find(entry =>
+        (entry.appointment_id?._id || entry.appointment_id) === appointmentId
+      );
+
+      // Generate a ticket number if none exists
+      const ticketNumber = existingEntry ? existingEntry.ticket_number : filteredAppointments.indexOf(appointment) + 1;
+
+      return {
+        _id: appointmentId, // Use appointment ID as queue entry ID for simplicity
+        appointment_id: appointmentId,
+        patient_id: patientId,
+        patientName: patientName,
+        ticket_number: ticketNumber,
+        status: queueStatus,
+        check_in_time: appointment.createdAt || new Date().toISOString(),
+        appointment: appointment, // Store the full appointment for reference
+        // Add any other fields needed for the queue entry
+      };
+    });
+
+    // Sort queue entries by status and ticket number
+    queueEntries.sort((a, b) => {
+      // First sort by status priority
+      const statusPriority = { 'In Progress': 1, 'Waiting': 2, 'Completed': 3, 'Cancelled': 4 };
+      const statusDiff = statusPriority[a.status] - statusPriority[b.status];
+
+      if (statusDiff !== 0) return statusDiff;
+
+      // Then sort by ticket number
+      return a.ticket_number - b.ticket_number;
+    });
+
+    setDirectQueueEntries(queueEntries);
+    console.log('Direct queue entries set:', queueEntries);
+
+    // Update queue stats
+    const stats = {
+      totalPatients: queueEntries.length,
+      waitingPatients: queueEntries.filter(entry => entry.status === 'Waiting').length,
+      inProgressPatients: queueEntries.filter(entry => entry.status === 'In Progress').length,
+      completedPatients: queueEntries.filter(entry => entry.status === 'Completed').length,
+      nextTicketNumber: queueEntries.length > 0 ? Math.max(...queueEntries.map(e => e.ticket_number)) + 1 : 1,
+    };
+
+    setQueueStats(stats);
+    console.log('Queue stats updated:', stats);
+
+    // Also update the traditional todaysAppointments for compatibility
+    setTodaysAppointments(filteredAppointments);
+  }, [appointments, refreshTrigger]);
+
+  // Legacy filter for today's appointments (for compatibility)
+  useEffect(() => {
+    const today = new Date().toISOString().split('T')[0];
 
     const filteredAppointments = appointments.filter(appointment => {
       // Get the appointment date, handling different formats
@@ -58,27 +157,16 @@ function SimplifiedQueueManagement({ patients, appointments, userRole }) {
       const isToday = appointmentDate === today;
       const isActive = appointment.status !== 'Completed' && appointment.status !== 'Cancelled';
 
-      if (isToday) {
-        console.log('Found appointment for today:', appointment);
-      }
-
       return isToday && isActive;
     });
 
-    console.log('Filtered appointments for today:', filteredAppointments.length);
-
     // Check which appointments are already in the queue
     const appointmentsInQueue = queueEntries.map(entry => entry.appointment_id?._id || entry.appointment_id);
-    console.log('Appointments already in queue:', appointmentsInQueue);
 
     // Mark appointments that are already in the queue
     const appointmentsWithQueueStatus = filteredAppointments.map(appointment => {
       const appointmentId = appointment._id || appointment.id;
       const isInQueue = appointmentsInQueue.includes(appointmentId);
-
-      if (isInQueue) {
-        console.log('Appointment already in queue:', appointmentId);
-      }
 
       return {
         ...appointment,
@@ -86,14 +174,9 @@ function SimplifiedQueueManagement({ patients, appointments, userRole }) {
       };
     });
 
-    setTodaysAppointments(appointmentsWithQueueStatus);
-    console.log('Today\'s appointments set:', appointmentsWithQueueStatus);
-
-    // If we're in the appointments tab and there are appointments not in the queue,
-    // show a message or highlight them
-    if (activeTab === 'appointments' && appointmentsWithQueueStatus.length > 0 &&
-        appointmentsWithQueueStatus.filter(a => !a.isInQueue).length > 0) {
-      console.log('Found appointments not in queue, they can be added manually');
+    // Only update if we're not using the direct queue approach
+    if (activeTab === 'appointments') {
+      setTodaysAppointments(appointmentsWithQueueStatus);
     }
   }, [appointments, queueEntries, activeTab]);
 
@@ -181,10 +264,12 @@ function SimplifiedQueueManagement({ patients, appointments, userRole }) {
     }
   };
 
+  // Direct queue management functions
+
   // Handle moving a queue entry up in the order
   const handleMoveUp = async (entryId) => {
     // Find the entry and its index
-    const waitingEntries = queueEntries.filter(entry => entry.status === 'Waiting');
+    const waitingEntries = directQueueEntries.filter(entry => entry.status === 'Waiting');
     const entryIndex = waitingEntries.findIndex(entry => entry._id === entryId);
 
     // If it's already at the top, do nothing
@@ -199,7 +284,7 @@ function SimplifiedQueueManagement({ patients, appointments, userRole }) {
     updatedWaitingEntries[entryIndex - 1] = temp;
 
     // Update the queue order in the UI immediately (optimistic update)
-    const updatedEntries = [...queueEntries];
+    const updatedEntries = [...directQueueEntries];
     const waitingIndices = updatedEntries.map((entry, index) => entry.status === 'Waiting' ? index : -1).filter(index => index !== -1);
 
     // Replace the waiting entries in the original array
@@ -207,26 +292,18 @@ function SimplifiedQueueManagement({ patients, appointments, userRole }) {
       updatedEntries[waitingIndices[i]] = entry;
     });
 
-    setQueueEntries(updatedEntries);
+    setDirectQueueEntries(updatedEntries);
 
-    try {
-      // Update the queue order in the database
-      // This would typically involve updating the priority or order field of each entry
-      console.log('Queue entry moved up:', entryId);
+    // Trigger a refresh to update any dependent components
+    setRefreshTrigger(prev => prev + 1);
 
-      // In a real implementation, you would call an API to update the queue order
-      // await apiService.updateQueueOrder(updatedWaitingEntries.map(e => e._id));
-    } catch (error) {
-      console.error('Error updating queue order:', error);
-      // Revert to the original order if the update fails
-      fetchQueueData();
-    }
+    console.log('Queue entry moved up:', entryId);
   };
 
   // Handle moving a queue entry down in the order
   const handleMoveDown = async (entryId) => {
     // Find the entry and its index
-    const waitingEntries = queueEntries.filter(entry => entry.status === 'Waiting');
+    const waitingEntries = directQueueEntries.filter(entry => entry.status === 'Waiting');
     const entryIndex = waitingEntries.findIndex(entry => entry._id === entryId);
 
     // If it's already at the bottom, do nothing
@@ -241,7 +318,7 @@ function SimplifiedQueueManagement({ patients, appointments, userRole }) {
     updatedWaitingEntries[entryIndex + 1] = temp;
 
     // Update the queue order in the UI immediately (optimistic update)
-    const updatedEntries = [...queueEntries];
+    const updatedEntries = [...directQueueEntries];
     const waitingIndices = updatedEntries.map((entry, index) => entry.status === 'Waiting' ? index : -1).filter(index => index !== -1);
 
     // Replace the waiting entries in the original array
@@ -249,19 +326,136 @@ function SimplifiedQueueManagement({ patients, appointments, userRole }) {
       updatedEntries[waitingIndices[i]] = entry;
     });
 
-    setQueueEntries(updatedEntries);
+    setDirectQueueEntries(updatedEntries);
 
+    // Trigger a refresh to update any dependent components
+    setRefreshTrigger(prev => prev + 1);
+
+    console.log('Queue entry moved down:', entryId);
+  };
+
+  // Handle updating a queue entry status
+  const handleUpdateQueueStatus = async (entryId, newStatus) => {
+    // Find the entry
+    const entryIndex = directQueueEntries.findIndex(entry => entry._id === entryId);
+
+    if (entryIndex === -1) return;
+
+    // Create a copy of the queue entries
+    const updatedEntries = [...directQueueEntries];
+
+    // Update the status
+    updatedEntries[entryIndex] = {
+      ...updatedEntries[entryIndex],
+      status: newStatus
+    };
+
+    // If the status is changing to 'In Progress', also update the appointment status
+    if (newStatus === 'In Progress') {
+      // Find the appointment and update its status
+      const appointmentId = updatedEntries[entryIndex].appointment_id;
+
+      try {
+        // Update the appointment status in the database
+        await apiService.updateAppointment(appointmentId, { status: 'In Progress' });
+        console.log('Appointment status updated to In Progress:', appointmentId);
+      } catch (error) {
+        console.error('Error updating appointment status:', error);
+      }
+    }
+
+    // If the status is changing to 'Completed', also update the appointment status
+    if (newStatus === 'Completed') {
+      // Find the appointment and update its status
+      const appointmentId = updatedEntries[entryIndex].appointment_id;
+
+      try {
+        // Update the appointment status in the database
+        await apiService.updateAppointment(appointmentId, { status: 'Completed' });
+        console.log('Appointment status updated to Completed:', appointmentId);
+      } catch (error) {
+        console.error('Error updating appointment status:', error);
+      }
+    }
+
+    setDirectQueueEntries(updatedEntries);
+
+    // Update queue stats
+    const stats = {
+      totalPatients: updatedEntries.length,
+      waitingPatients: updatedEntries.filter(entry => entry.status === 'Waiting').length,
+      inProgressPatients: updatedEntries.filter(entry => entry.status === 'In Progress').length,
+      completedPatients: updatedEntries.filter(entry => entry.status === 'Completed').length,
+      nextTicketNumber: queueStats.nextTicketNumber,
+    };
+
+    setQueueStats(stats);
+
+    // Trigger a refresh to update any dependent components
+    setRefreshTrigger(prev => prev + 1);
+
+    console.log('Queue entry status updated:', entryId, newStatus);
+  };
+
+  // Handle adding a new walk-in patient to the queue
+  const handleAddWalkIn = async (patientData) => {
     try {
-      // Update the queue order in the database
-      // This would typically involve updating the priority or order field of each entry
-      console.log('Queue entry moved down:', entryId);
+      setLoading(true);
 
-      // In a real implementation, you would call an API to update the queue order
-      // await apiService.updateQueueOrder(updatedWaitingEntries.map(e => e._id));
+      // Create a new appointment for the walk-in patient
+      const today = new Date();
+      const appointmentData = {
+        patient_id: patientData.patient_id,
+        appointment_date: today,
+        optional_time: today.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        type: 'Walk-in',
+        reason: patientData.reason || 'Walk-in visit',
+        status: 'Scheduled',
+        createdBy: 'secretary'
+      };
+
+      // Create the appointment in the database
+      const newAppointment = await apiService.createAppointment(appointmentData);
+      console.log('Created appointment for walk-in:', newAppointment);
+
+      // Add the appointment to the queue
+      const newQueueEntry = {
+        _id: newAppointment._id,
+        appointment_id: newAppointment._id,
+        patient_id: patientData.patient_id,
+        patientName: patientData.patientName,
+        ticket_number: queueStats.nextTicketNumber,
+        status: 'Waiting',
+        check_in_time: new Date().toISOString(),
+        appointment: newAppointment,
+        is_walk_in: true
+      };
+
+      // Add to the direct queue entries
+      setDirectQueueEntries(prev => [...prev, newQueueEntry]);
+
+      // Update queue stats
+      setQueueStats(prev => ({
+        ...prev,
+        totalPatients: prev.totalPatients + 1,
+        waitingPatients: prev.waitingPatients + 1,
+        nextTicketNumber: prev.nextTicketNumber + 1
+      }));
+
+      // Trigger a refresh to update any dependent components
+      setRefreshTrigger(prev => prev + 1);
+
+      // Show the ticket for printing
+      setTicketToPrint(newQueueEntry);
+
+      console.log('Walk-in patient added to queue:', newQueueEntry);
+
+      return newQueueEntry;
     } catch (error) {
-      console.error('Error updating queue order:', error);
-      // Revert to the original order if the update fails
-      fetchQueueData();
+      console.error('Error adding walk-in patient to queue:', error);
+      throw error;
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -382,13 +576,13 @@ function SimplifiedQueueManagement({ patients, appointments, userRole }) {
         </div>
       </div>
 
-      {/* Queue List */}
+      {/* Queue List - Direct Queue Approach */}
       {activeTab === 'queue' && (
         <div className="space-y-3 mt-4">
-          {sortedQueueEntries.length > 0 ? (
+          {directQueueEntries.length > 0 ? (
             <div>
               <div className="mb-4 flex justify-between items-center">
-                <h3 className="text-lg font-semibold text-blue-800">Current Queue</h3>
+                <h3 className="text-lg font-semibold text-blue-800">Today's Queue</h3>
                 <div className="flex space-x-2">
                   {userRole === 'secretary' && (
                     <button
@@ -396,37 +590,73 @@ function SimplifiedQueueManagement({ patients, appointments, userRole }) {
                       className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm font-medium flex items-center"
                     >
                       <FaUserPlus className="mr-1" />
-                      Add Patient
+                      Add Walk-in Patient
                     </button>
                   )}
                 </div>
               </div>
               <div>
                 {/* In Progress Patients */}
-                {sortedQueueEntries.filter(entry => entry.status === 'In Progress').length > 0 && (
+                {directQueueEntries.filter(entry => entry.status === 'In Progress').length > 0 && (
                   <div className="mb-4">
                     <h4 className="text-sm font-medium text-blue-700 mb-2 flex items-center">
                       <FaUserCheck className="mr-1" /> In Progress
                     </h4>
                     <div className="space-y-3">
-                      {sortedQueueEntries
+                      {directQueueEntries
                         .filter(entry => entry.status === 'In Progress')
                         .map(entry => (
-                          <SimplifiedQueueCard
-                            key={entry._id}
-                            queueEntry={entry}
-                            onUpdateStatus={(status) => handleUpdateQueueEntry(entry._id, { status })}
-                            onRemove={() => handleRemoveFromQueue(entry._id)}
-                            onPrintTicket={() => handlePrintTicket(entry)}
-                            userRole={userRole}
-                          />
+                          <div key={entry._id} className="p-4 rounded-lg border border-blue-200 bg-blue-50 flex flex-col md:flex-row justify-between items-start md:items-center hover:shadow-md transition-all duration-300">
+                            <div className="flex items-center mb-3 md:mb-0">
+                              <div className="bg-blue-600 text-white font-bold text-xl rounded-full w-10 h-10 flex items-center justify-center mr-4">
+                                {entry.ticket_number}
+                              </div>
+                              <div>
+                                <h3 className="font-semibold text-lg">{entry.patientName}</h3>
+                                <div className="text-sm text-gray-600 mt-1">
+                                  <span className="inline-block mr-4">
+                                    <span className="font-medium">Type:</span> {entry.appointment?.type || 'Consultation'}
+                                  </span>
+                                  {entry.appointment?.optional_time && (
+                                    <span className="inline-block mr-4">
+                                      <span className="font-medium">Time:</span> {entry.appointment.optional_time}
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="mt-2">
+                                  <span className="px-2 py-1 rounded-full text-xs font-medium flex items-center w-fit bg-blue-100 text-blue-800">
+                                    <FaUserCheck className="mr-1" />
+                                    In Progress
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                              {userRole === 'doctor' && (
+                                <button
+                                  onClick={() => handleUpdateQueueStatus(entry._id, 'Completed')}
+                                  className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm font-medium flex items-center"
+                                >
+                                  <FaUserCheck className="mr-1" />
+                                  Complete
+                                </button>
+                              )}
+                              <button
+                                onClick={() => setTicketToPrint(entry)}
+                                className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-1 rounded text-sm font-medium flex items-center"
+                              >
+                                <FaPrint className="mr-1" />
+                                Print
+                              </button>
+                            </div>
+                          </div>
                         ))}
                     </div>
                   </div>
                 )}
 
                 {/* Waiting Patients - Reorderable */}
-                {waitingEntries.length > 0 && (
+                {directQueueEntries.filter(entry => entry.status === 'Waiting').length > 0 && (
                   <div className="mb-4">
                     <h4 className="text-sm font-medium text-yellow-700 mb-2 flex items-center">
                       <FaUserClock className="mr-1" /> Waiting
@@ -437,59 +667,130 @@ function SimplifiedQueueManagement({ patients, appointments, userRole }) {
                       )}
                     </h4>
                     <div className="space-y-3">
-                      {waitingEntries.map((entry, index) => (
-                        <div key={entry._id} className="relative">
-                          {userRole === 'secretary' && (
-                            <div className="absolute right-2 top-2 flex flex-col space-y-1 z-10">
-                              <button
-                                onClick={() => handleMoveUp(entry._id)}
-                                disabled={index === 0}
-                                className={`p-1 rounded ${index === 0 ? 'text-gray-300 cursor-not-allowed' : 'text-blue-600 hover:bg-blue-100'}`}
-                                title="Move up"
-                              >
-                                <FaArrowUp size={14} />
-                              </button>
-                              <button
-                                onClick={() => handleMoveDown(entry._id)}
-                                disabled={index === waitingEntries.length - 1}
-                                className={`p-1 rounded ${index === waitingEntries.length - 1 ? 'text-gray-300 cursor-not-allowed' : 'text-blue-600 hover:bg-blue-100'}`}
-                                title="Move down"
-                              >
-                                <FaArrowDown size={14} />
-                              </button>
+                      {directQueueEntries
+                        .filter(entry => entry.status === 'Waiting')
+                        .map((entry, index) => (
+                          <div key={entry._id} className="relative">
+                            {userRole === 'secretary' && (
+                              <div className="absolute right-2 top-2 flex flex-col space-y-1 z-10">
+                                <button
+                                  onClick={() => handleMoveUp(entry._id)}
+                                  disabled={index === 0}
+                                  className={`p-1 rounded ${index === 0 ? 'text-gray-300 cursor-not-allowed' : 'text-blue-600 hover:bg-blue-100'}`}
+                                  title="Move up"
+                                >
+                                  <FaArrowUp size={14} />
+                                </button>
+                                <button
+                                  onClick={() => handleMoveDown(entry._id)}
+                                  disabled={index === directQueueEntries.filter(e => e.status === 'Waiting').length - 1}
+                                  className={`p-1 rounded ${index === directQueueEntries.filter(e => e.status === 'Waiting').length - 1 ? 'text-gray-300 cursor-not-allowed' : 'text-blue-600 hover:bg-blue-100'}`}
+                                  title="Move down"
+                                >
+                                  <FaArrowDown size={14} />
+                                </button>
+                              </div>
+                            )}
+                            <div className="p-4 rounded-lg border border-yellow-200 bg-yellow-50 flex flex-col md:flex-row justify-between items-start md:items-center hover:shadow-md transition-all duration-300">
+                              <div className="flex items-center mb-3 md:mb-0">
+                                <div className="bg-blue-600 text-white font-bold text-xl rounded-full w-10 h-10 flex items-center justify-center mr-4">
+                                  {entry.ticket_number}
+                                </div>
+                                <div>
+                                  <h3 className="font-semibold text-lg">{entry.patientName}</h3>
+                                  <div className="text-sm text-gray-600 mt-1">
+                                    <span className="inline-block mr-4">
+                                      <span className="font-medium">Type:</span> {entry.appointment?.type || 'Consultation'}
+                                    </span>
+                                    {entry.appointment?.optional_time && (
+                                      <span className="inline-block mr-4">
+                                        <span className="font-medium">Time:</span> {entry.appointment.optional_time}
+                                      </span>
+                                    )}
+                                    {entry.appointment?.reason && (
+                                      <span className="inline-block">
+                                        <span className="font-medium">Reason:</span> {entry.appointment.reason}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div className="mt-2">
+                                    <span className="px-2 py-1 rounded-full text-xs font-medium flex items-center w-fit bg-yellow-100 text-yellow-800">
+                                      <FaUserClock className="mr-1" />
+                                      Waiting
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="flex flex-wrap gap-2">
+                                {userRole === 'doctor' && (
+                                  <button
+                                    onClick={() => handleUpdateQueueStatus(entry._id, 'In Progress')}
+                                    className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm font-medium flex items-center"
+                                  >
+                                    <FaUserCheck className="mr-1" />
+                                    Start
+                                  </button>
+                                )}
+                                <button
+                                  onClick={() => setTicketToPrint(entry)}
+                                  className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-1 rounded text-sm font-medium flex items-center"
+                                >
+                                  <FaPrint className="mr-1" />
+                                  Print
+                                </button>
+                              </div>
                             </div>
-                          )}
-                          <SimplifiedQueueCard
-                            queueEntry={entry}
-                            onUpdateStatus={(status) => handleUpdateQueueEntry(entry._id, { status })}
-                            onRemove={() => handleRemoveFromQueue(entry._id)}
-                            onPrintTicket={() => handlePrintTicket(entry)}
-                            userRole={userRole}
-                          />
-                        </div>
-                      ))}
+                          </div>
+                        ))}
                     </div>
                   </div>
                 )}
 
-                {/* Completed and Other Patients */}
-                {sortedQueueEntries.filter(entry => entry.status !== 'In Progress' && entry.status !== 'Waiting').length > 0 && (
+                {/* Completed Patients */}
+                {directQueueEntries.filter(entry => entry.status === 'Completed').length > 0 && (
                   <div>
                     <h4 className="text-sm font-medium text-green-700 mb-2 flex items-center">
-                      <FaUserCheck className="mr-1" /> Completed / Other
+                      <FaUserCheck className="mr-1" /> Completed
                     </h4>
                     <div className="space-y-3">
-                      {sortedQueueEntries
-                        .filter(entry => entry.status !== 'In Progress' && entry.status !== 'Waiting')
+                      {directQueueEntries
+                        .filter(entry => entry.status === 'Completed')
                         .map(entry => (
-                          <SimplifiedQueueCard
-                            key={entry._id}
-                            queueEntry={entry}
-                            onUpdateStatus={(status) => handleUpdateQueueEntry(entry._id, { status })}
-                            onRemove={() => handleRemoveFromQueue(entry._id)}
-                            onPrintTicket={() => handlePrintTicket(entry)}
-                            userRole={userRole}
-                          />
+                          <div key={entry._id} className="p-4 rounded-lg border border-green-200 bg-green-50 flex flex-col md:flex-row justify-between items-start md:items-center hover:shadow-md transition-all duration-300">
+                            <div className="flex items-center mb-3 md:mb-0">
+                              <div className="bg-blue-600 text-white font-bold text-xl rounded-full w-10 h-10 flex items-center justify-center mr-4">
+                                {entry.ticket_number}
+                              </div>
+                              <div>
+                                <h3 className="font-semibold text-lg">{entry.patientName}</h3>
+                                <div className="text-sm text-gray-600 mt-1">
+                                  <span className="inline-block mr-4">
+                                    <span className="font-medium">Type:</span> {entry.appointment?.type || 'Consultation'}
+                                  </span>
+                                  {entry.appointment?.optional_time && (
+                                    <span className="inline-block mr-4">
+                                      <span className="font-medium">Time:</span> {entry.appointment.optional_time}
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="mt-2">
+                                  <span className="px-2 py-1 rounded-full text-xs font-medium flex items-center w-fit bg-green-100 text-green-800">
+                                    <FaUserCheck className="mr-1" />
+                                    Completed
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                            <div className="flex flex-wrap gap-2">
+                              <button
+                                onClick={() => setTicketToPrint(entry)}
+                                className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-1 rounded text-sm font-medium flex items-center"
+                              >
+                                <FaPrint className="mr-1" />
+                                Print
+                              </button>
+                            </div>
+                          </div>
                         ))}
                     </div>
                   </div>
@@ -498,140 +799,17 @@ function SimplifiedQueueManagement({ patients, appointments, userRole }) {
             </div>
           ) : (
             <div className="text-center py-8 bg-gray-50 rounded-lg">
-              {todaysAppointments.length > 0 ? (
-                <div className="queue-message">
-                  <p className="text-gray-500 mb-2">No patients in the queue yet</p>
-                  <p className="text-blue-600 mb-4">
-                    There {todaysAppointments.length === 1 ? 'is' : 'are'} {todaysAppointments.length} appointment{todaysAppointments.length !== 1 ? 's' : ''} scheduled for today.
-                  </p>
-                  {userRole === 'secretary' && (
-                    <div className="flex justify-center space-x-4 mt-4">
-                      <button
-                        onClick={() => setActiveTab('appointments')}
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-medium flex items-center"
-                      >
-                        <FaCalendarCheck className="mr-2" />
-                        View Today's Appointments
-                      </button>
-                      <button
-                        onClick={() => setShowAddToQueueModal(true)}
-                        className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm font-medium flex items-center"
-                      >
-                        <FaUserPlus className="mr-2" />
-                        Add Walk-in Patient
-                      </button>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div>
-                  <p className="text-gray-500 mb-4">No patients in the queue today</p>
-                  {userRole === 'secretary' && (
-                    <button
-                      onClick={() => setShowAddToQueueModal(true)}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-medium flex items-center mx-auto"
-                    >
-                      <FaUserPlus className="mr-2" />
-                      Add Walk-in Patient
-                    </button>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Show Today's Appointments in Queue Tab */}
-          {todaysAppointments.length > 0 && sortedQueueEntries.length > 0 && (
-            <div className="mt-8 pt-6 border-t border-gray-200">
-              <div className="mb-4 flex justify-between items-center">
-                <h3 className="text-lg font-semibold text-blue-800">Today's Appointments</h3>
-                {todaysAppointments.filter(a => !a.isInQueue).length > 0 && userRole === 'secretary' && (
+              <div>
+                <p className="text-gray-500 mb-4">No patients in the queue today</p>
+                {userRole === 'secretary' && (
                   <button
-                    onClick={() => {
-                      const promises = todaysAppointments
-                        .filter(a => !a.isInQueue)
-                        .map(appointment => handleCheckInAppointment(appointment));
-
-                      Promise.all(promises).then(() => {
-                        fetchQueueData();
-                      });
-                    }}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm font-medium flex items-center"
+                    onClick={() => setShowAddToQueueModal(true)}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-medium flex items-center mx-auto"
                   >
-                    <FaUserCheck className="mr-1" />
-                    Check In All
+                    <FaUserPlus className="mr-2" />
+                    Add Walk-in Patient
                   </button>
                 )}
-              </div>
-              <div className="space-y-3">
-                {todaysAppointments.map(appointment => {
-                  const isInQueue = appointment.isInQueue;
-                  const appointmentId = appointment._id || appointment.id;
-                  const patientName = appointment.patientName || 'Patient';
-                  const appointmentType = appointment.type || 'Consultation';
-                  const appointmentTime = appointment.optional_time || appointment.time;
-                  const appointmentReason = appointment.reason;
-
-                  return (
-                    <div
-                      key={appointmentId}
-                      className={`p-4 rounded-lg border ${isInQueue ? 'border-green-200 bg-green-50' : 'border-gray-200'} flex flex-col md:flex-row justify-between items-start md:items-center hover:shadow-md transition-all duration-300`}
-                    >
-                      <div>
-                        <div className="flex items-center">
-                          <h3 className="font-semibold text-lg">{patientName}</h3>
-                          {isInQueue && (
-                            <span className="ml-2 px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
-                              Already in queue
-                            </span>
-                          )}
-                        </div>
-                        <div className="text-sm text-gray-600 mt-1">
-                          <span className="inline-block mr-4">
-                            <span className="font-medium">Type:</span> {appointmentType}
-                          </span>
-                          {appointmentTime && (
-                            <span className="inline-block mr-4">
-                              <span className="font-medium">Time:</span> {appointmentTime}
-                            </span>
-                          )}
-                          {appointmentReason && (
-                            <span className="inline-block">
-                              <span className="font-medium">Reason:</span> {appointmentReason}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-
-                      {!isInQueue && userRole === 'secretary' && (
-                        <button
-                          onClick={() => handleCheckInAppointment(appointment)}
-                          className="mt-3 md:mt-0 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm font-medium flex items-center"
-                        >
-                          <FaUserCheck className="mr-1" />
-                          Check In
-                        </button>
-                      )}
-
-                      {isInQueue && (
-                        <button
-                          onClick={() => {
-                            const queueEntry = queueEntries.find(entry =>
-                              (entry.appointment_id?._id || entry.appointment_id) === appointmentId
-                            );
-                            if (queueEntry) {
-                              handlePrintTicket(queueEntry);
-                            }
-                          }}
-                          className="mt-3 md:mt-0 bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-1 rounded text-sm font-medium flex items-center"
-                        >
-                          <FaPrint className="mr-1" />
-                          Print Ticket
-                        </button>
-                      )}
-                    </div>
-                  );
-                })}
               </div>
             </div>
           )}
@@ -748,7 +926,18 @@ function SimplifiedQueueManagement({ patients, appointments, userRole }) {
           patients={patients}
           appointments={appointments}
           onClose={() => setShowAddToQueueModal(false)}
-          onSave={handleAddToQueue}
+          onSave={async (patientData) => {
+            try {
+              // Use our direct queue management function
+              await handleAddWalkIn(patientData);
+
+              // Close the modal
+              setShowAddToQueueModal(false);
+            } catch (error) {
+              console.error('Error adding to queue:', error);
+              alert('Failed to add patient to queue');
+            }
+          }}
         />
       )}
 
