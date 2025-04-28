@@ -187,10 +187,7 @@ function SimplifiedSecretaryDashboard({
               <div className="font-semibold text-sm leading-tight">{pendingAppointments}</div>
               <div className="text-xs">Scheduled Appointments</div>
             </div>
-            <div className="bg-white bg-opacity-20 rounded-md p-1.5 backdrop-blur-sm">
-              <div className="font-semibold text-sm leading-tight">{needsDiagnosisCount}</div>
-              <div className="text-xs">Needs Diagnosis</div>
-            </div>
+
             <div className="bg-white bg-opacity-20 rounded-md p-1.5 backdrop-blur-sm">
               <div className="font-semibold text-sm leading-tight">{totalPatients}</div>
               <div className="text-xs">Total Patients</div>
@@ -440,13 +437,7 @@ function SimplifiedSecretaryDashboard({
                     >
                       Cancelled
                     </button>
-                    <button
-                      onClick={() => setStatusFilter('Needs Diagnosis')}
-                      className={`px-2 py-1 rounded text-xs font-medium transition-all ${statusFilter === 'Needs Diagnosis' ? 'bg-purple-600 text-white' : 'bg-purple-100 text-purple-800 hover:bg-purple-200'}`}
-                      aria-label="Show appointments needing diagnosis"
-                    >
-                      Needs Diag
-                    </button>
+
                   </div>
                 </div>
               </div>

@@ -121,53 +121,17 @@ export const filterAppointmentsByTimePeriod = (appointments, period) => {
       return appointments.filter(a => a.date < today);
 
     case 'needsDiagnosis':
-      return appointments.filter(a =>
-        // Past appointments that are completed but have no diagnosis
-        (a.date < today && a.status === 'Completed' && !a.diagnosis) ||
-        // Past appointments that are still scheduled (time has passed but status not updated)
-        (a.date < today && a.status === 'Scheduled')
-      );
+      // We no longer use this status, so return an empty array
+      return [];
 
     default:
       return appointments;
   }
 };
 
-// Function to identify appointments that need diagnoses
+// Function to identify appointments that need diagnoses (now returns an empty array since we don't use this status anymore)
 export const identifyAppointmentsNeedingDiagnosis = (appointments) => {
-  if (!appointments || !Array.isArray(appointments) || appointments.length === 0) {
-    return [];
-  }
-
-  const today = new Date().toISOString().split('T')[0];
-
-  return appointments.filter(appointment => {
-    // Check if the appointment has diagnoses in the diagnoses array
-    const hasDiagnosesArray = appointment.diagnoses && appointment.diagnoses.length > 0;
-
-    // Check if the appointment has a diagnosis object
-    const hasDiagnosisObject = appointment.diagnosis &&
-      (typeof appointment.diagnosis === 'object' || typeof appointment.diagnosis === 'string');
-
-    // Past appointments that are completed but have no diagnosis
-    const isCompletedWithoutDiagnosis =
-      appointment.status === 'Completed' &&
-      !hasDiagnosisObject &&
-      !hasDiagnosesArray &&
-      appointment.date <= today;
-
-    // Past appointments that are still scheduled (time has passed but status not updated)
-    const isPastScheduled =
-      appointment.status === 'Scheduled' &&
-      appointment.date < today;
-
-    // Appointments explicitly marked as needing diagnosis
-    const isMarkedNeedsDiagnosis =
-      appointment.status === 'Needs Diagnosis' ||
-      appointment.needsDiagnosis === true;
-
-    return isCompletedWithoutDiagnosis || isPastScheduled || isMarkedNeedsDiagnosis;
-  });
+  return [];
 };
 
 // Function to update appointment statuses based on time
@@ -206,11 +170,11 @@ export const updateAppointmentStatuses = (appointments) => {
 
     // Check if appointment date has passed
     if (appointment.date < today) {
-      // Past appointment without diagnosis should be marked as needing diagnosis
+      // Past appointment without diagnosis should be marked as completed
       return {
         ...appointment,
-        status: 'Needs Diagnosis',
-        needsDiagnosis: true
+        status: 'Completed',
+        needsDiagnosis: false
       };
     }
 
@@ -221,11 +185,11 @@ export const updateAppointmentStatuses = (appointments) => {
       appointmentTime.setHours(hours, minutes, 0, 0);
 
       if (now > appointmentTime) {
-        // Today's appointment with passed time should be marked as needing diagnosis
+        // Today's appointment with passed time should be marked as completed
         return {
           ...appointment,
-          status: 'Needs Diagnosis',
-          needsDiagnosis: true
+          status: 'Completed',
+          needsDiagnosis: false
         };
       }
     }

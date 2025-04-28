@@ -281,10 +281,7 @@ function SimplifiedDoctorDashboard({
               <div className="font-semibold text-sm leading-tight">{todaysAppointments.length}</div>
               <div className="text-xs">Today's Appointments</div>
             </div>
-            <div className="bg-white bg-opacity-20 rounded-md p-1.5 backdrop-blur-sm">
-              <div className="font-semibold text-sm leading-tight">{pendingDiagnoses}</div>
-              <div className="text-xs">Needs Diagnosis</div>
-            </div>
+
             <div className="bg-white bg-opacity-20 rounded-md p-1.5 backdrop-blur-sm">
               <div className="font-semibold text-sm leading-tight">{patients.length}</div>
               <div className="text-xs">Total Patients</div>
@@ -526,13 +523,6 @@ function SimplifiedDoctorDashboard({
                       All
                     </button>
                     <button
-                      onClick={() => setStatusFilter('Pending')}
-                      className={`px-2 py-1 rounded text-xs font-medium transition-all ${statusFilter === 'Pending' ? 'bg-yellow-500 text-white' : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'}`}
-                      aria-label="Show pending appointments"
-                    >
-                      Pending
-                    </button>
-                    <button
                       onClick={() => setStatusFilter('Scheduled')}
                       className={`px-2 py-1 rounded text-xs font-medium transition-all ${statusFilter === 'Scheduled' ? 'bg-green-600 text-white' : 'bg-green-100 text-green-800 hover:bg-green-200'}`}
                       aria-label="Show scheduled appointments"
@@ -552,13 +542,6 @@ function SimplifiedDoctorDashboard({
                       aria-label="Show cancelled appointments"
                     >
                       Cancelled
-                    </button>
-                    <button
-                      onClick={() => setStatusFilter('Needs Diagnosis')}
-                      className={`px-2 py-1 rounded text-xs font-medium transition-all ${statusFilter === 'Needs Diagnosis' ? 'bg-purple-600 text-white' : 'bg-purple-100 text-purple-800 hover:bg-purple-200'}`}
-                      aria-label="Show appointments needing diagnosis"
-                    >
-                      Needs Diag
                     </button>
                   </div>
                 </div>
@@ -637,86 +620,7 @@ function SimplifiedDoctorDashboard({
               })()}
             </div>
 
-            {/* Pending Diagnoses Section */}
-            {appointmentsNeedingDiagnosis.length > 0 && (
-              <div className="mb-4">
-                <h2 className="text-xl font-semibold text-blue-800 mb-3 flex items-center">
-                  <span className="bg-yellow-100 text-yellow-800 px-3 py-1.5 rounded-full text-base font-medium mr-2">
-                    {appointmentsNeedingDiagnosis.length}
-                  </span>
-                  Appointments Needing Diagnosis
-                </h2>
-                <div className="space-y-3">
-                  {appointmentsNeedingDiagnosis
-                    .sort((a, b) => {
-                      // Sort by date first (oldest first)
-                      const dateCompare = new Date(a.date) - new Date(b.date);
-                      if (dateCompare !== 0) return dateCompare;
-                      // If same date, sort by time
-                      return a.time.localeCompare(b.time);
-                    })
-                    .map(appointment => (
-                      <div
-                        key={appointment.id}
-                        className="p-4 rounded-lg border border-yellow-300 bg-yellow-50 flex justify-between items-center cursor-pointer hover:bg-yellow-100 transition-colors"
-                        onClick={() => {
-                          const patient = patients.find(p => p.id === appointment.patientId);
-                          if (patient) {
-                            handleViewPatient(patient);
-                          } else {
-                            // If patient not found, create a basic patient object from appointment data
-                            const newPatient = {
-                              id: appointment.patientId,
-                              firstName: appointment.patientName.split(' ')[0],
-                              lastName: appointment.patientName.split(' ').slice(1).join(' '),
-                              dateOfBirth: '',
-                              gender: '',
-                              phone: '',
-                              lastVisit: new Date().toISOString().split('T')[0],
-                              medicalHistory: [],
-                              medications: [],
-                              allergies: []
-                            };
-                            onUpdatePatient(newPatient); // Add to global state
-                            handleViewPatient(newPatient);
-                          }
-                        }}
-                      >
-                        <div>
-                          <div className="font-medium text-lg">{appointment.date} at {appointment.time} - {appointment.patientName}</div>
-                          <div className="text-gray-600">{appointment.type}: {appointment.reason}</div>
-                          <div className="text-sm text-yellow-700 mt-1">
-                            <span className="font-medium">Status:</span> {appointment.status === 'Needs Diagnosis' ? 'Needs Diagnosis' : 'Completed without diagnosis'}
-                          </div>
-                          {appointment.createdBy && (
-                            <div className="flex items-center mt-1">
-                              <span className="text-gray-500 text-xs mr-1">Added by:</span>
-                              <span className={`px-2 py-0.5 rounded text-xs font-medium ${
-                                appointment.createdBy === 'doctor' ? 'bg-blue-100 text-blue-800' :
-                                appointment.createdBy === 'secretary' ? 'bg-green-100 text-green-800' :
-                                appointment.createdBy === 'admin' ? 'bg-gray-100 text-gray-800' :
-                                'bg-purple-100 text-purple-800'
-                              }`}>
-                                <FaUser className="inline mr-1" size={10} />
-                                {getCreatorLabel(appointment.createdBy)}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                        <ActionButtons
-                          appointment={appointment}
-                          onViewPatient={handleViewPatient}
-                          onDiagnoseAppointment={setDiagnosingAppointment}
-                          onDeleteAppointment={onDeleteAppointment}
-                          patients={patients}
-                          onUpdatePatient={onUpdatePatient}
-                          isDoctor={true}
-                        />
-                      </div>
-                    ))}
-                </div>
-              </div>
-            )}
+
 
             {/* Upcoming Appointments Section */}
             <div>
