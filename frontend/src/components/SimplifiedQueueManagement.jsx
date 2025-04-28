@@ -283,13 +283,13 @@ function SimplifiedQueueManagement({ patients, appointments, userRole }) {
           ) : (
             <div className="text-center py-8 bg-gray-50 rounded-lg">
               {todaysAppointments.length > 0 ? (
-                <>
+                <div className="queue-message">
                   <p className="text-gray-500 mb-2">No patients in the queue yet</p>
                   <p className="text-blue-600">
                     There {todaysAppointments.length === 1 ? 'is' : 'are'} {todaysAppointments.length} appointment{todaysAppointments.length !== 1 ? 's' : ''} scheduled for today.
                     {userRole === 'secretary' && "Check the Today's Appointments tab to check them in."}
                   </p>
-                </>
+                </div>
               ) : (
                 <p className="text-gray-500">No patients in the queue today</p>
               )}
@@ -302,7 +302,7 @@ function SimplifiedQueueManagement({ patients, appointments, userRole }) {
       {activeTab === 'appointments' && (
         <div className="space-y-3 mt-4">
           {todaysAppointments.length > 0 ? (
-            <>
+            <div className="appointments-wrapper">
               <div className="mb-4 flex justify-between items-center">
                 <h3 className="text-lg font-semibold text-blue-800">Today's Appointments</h3>
                 {todaysAppointments.filter(a => !a.isInQueue).length > 0 && userRole === 'secretary' && (
@@ -386,7 +386,7 @@ function SimplifiedQueueManagement({ patients, appointments, userRole }) {
                 )}
               </div>
             ))
-            </>
+            </div>
           ) : (
             <div className="text-center py-8 bg-gray-50 rounded-lg">
               <p className="text-gray-500">No appointments scheduled for today</p>
