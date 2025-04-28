@@ -302,13 +302,12 @@ function SimplifiedQueueManagement({ patients, appointments, userRole }) {
       {activeTab === 'appointments' && (
         <div className="space-y-3 mt-4">
           {todaysAppointments.length > 0 ? (
-            <div className="appointments-wrapper">
+            <div>
               <div className="mb-4 flex justify-between items-center">
                 <h3 className="text-lg font-semibold text-blue-800">Today's Appointments</h3>
                 {todaysAppointments.filter(a => !a.isInQueue).length > 0 && userRole === 'secretary' && (
                   <button
                     onClick={() => {
-                      // Check in all appointments that are not in queue
                       const promises = todaysAppointments
                         .filter(a => !a.isInQueue)
                         .map(appointment => handleCheckInAppointment(appointment));
@@ -324,68 +323,76 @@ function SimplifiedQueueManagement({ patients, appointments, userRole }) {
                   </button>
                 )}
               </div>
-              {todaysAppointments.map(appointment => (
-              <div
-                key={appointment._id || appointment.id}
-                className={`p-4 rounded-lg border ${appointment.isInQueue ? 'border-green-200 bg-green-50' : 'border-gray-200'} flex flex-col md:flex-row justify-between items-start md:items-center hover:shadow-md transition-all duration-300`}
-              >
-                <div>
-                  <div className="flex items-center">
-                    <h3 className="font-semibold text-lg">
-                      {appointment.patientName || 'Patient'}
-                    </h3>
-                    {appointment.isInQueue && (
-                      <span className="ml-2 px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
-                        Already in queue
-                      </span>
-                    )}
-                  </div>
-                  <div className="text-sm text-gray-600 mt-1">
-                    <span className="inline-block mr-4">
-                      <span className="font-medium">Type:</span> {appointment.type || 'Consultation'}
-                    </span>
-                    {appointment.optional_time && (
-                      <span className="inline-block mr-4">
-                        <span className="font-medium">Time:</span> {appointment.optional_time}
-                      </span>
-                    )}
-                    {appointment.reason && (
-                      <span className="inline-block">
-                        <span className="font-medium">Reason:</span> {appointment.reason}
-                      </span>
-                    )}
-                  </div>
-                </div>
+              <div className="appointment-list">
+                {todaysAppointments.map(appointment => {
+                  const isInQueue = appointment.isInQueue;
+                  const appointmentId = appointment._id || appointment.id;
+                  const patientName = appointment.patientName || 'Patient';
+                  const appointmentType = appointment.type || 'Consultation';
+                  const appointmentTime = appointment.optional_time;
+                  const appointmentReason = appointment.reason;
 
-                {!appointment.isInQueue && userRole === 'secretary' && (
-                  <button
-                    onClick={() => handleCheckInAppointment(appointment)}
-                    className="mt-3 md:mt-0 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm font-medium flex items-center"
-                  >
-                    <FaUserCheck className="mr-1" />
-                    Check In & Print Ticket
-                  </button>
-                )}
+                  return (
+                    <div
+                      key={appointmentId}
+                      className={`p-4 rounded-lg border ${isInQueue ? 'border-green-200 bg-green-50' : 'border-gray-200'} flex flex-col md:flex-row justify-between items-start md:items-center hover:shadow-md transition-all duration-300`}
+                    >
+                      <div>
+                        <div className="flex items-center">
+                          <h3 className="font-semibold text-lg">{patientName}</h3>
+                          {isInQueue && (
+                            <span className="ml-2 px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+                              Already in queue
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-sm text-gray-600 mt-1">
+                          <span className="inline-block mr-4">
+                            <span className="font-medium">Type:</span> {appointmentType}
+                          </span>
+                          {appointmentTime && (
+                            <span className="inline-block mr-4">
+                              <span className="font-medium">Time:</span> {appointmentTime}
+                            </span>
+                          )}
+                          {appointmentReason && (
+                            <span className="inline-block">
+                              <span className="font-medium">Reason:</span> {appointmentReason}
+                            </span>
+                          )}
+                        </div>
+                      </div>
 
-                {appointment.isInQueue && (
-                  <button
-                    onClick={() => {
-                      // Find the queue entry for this appointment
-                      const queueEntry = queueEntries.find(entry =>
-                        (entry.appointment_id?._id || entry.appointment_id) === (appointment._id || appointment.id)
-                      );
-                      if (queueEntry) {
-                        handlePrintTicket(queueEntry);
-                      }
-                    }}
-                    className="mt-3 md:mt-0 bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-1 rounded text-sm font-medium flex items-center"
-                  >
-                    <FaPrint className="mr-1" />
-                    Print Ticket
-                  </button>
-                )}
+                      {!isInQueue && userRole === 'secretary' && (
+                        <button
+                          onClick={() => handleCheckInAppointment(appointment)}
+                          className="mt-3 md:mt-0 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm font-medium flex items-center"
+                        >
+                          <FaUserCheck className="mr-1" />
+                          Check In & Print Ticket
+                        </button>
+                      )}
+
+                      {isInQueue && (
+                        <button
+                          onClick={() => {
+                            const queueEntry = queueEntries.find(entry =>
+                              (entry.appointment_id?._id || entry.appointment_id) === appointmentId
+                            );
+                            if (queueEntry) {
+                              handlePrintTicket(queueEntry);
+                            }
+                          }}
+                          className="mt-3 md:mt-0 bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-1 rounded text-sm font-medium flex items-center"
+                        >
+                          <FaPrint className="mr-1" />
+                          Print Ticket
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
-            ))
             </div>
           ) : (
             <div className="text-center py-8 bg-gray-50 rounded-lg">
