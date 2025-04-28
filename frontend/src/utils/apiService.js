@@ -313,7 +313,14 @@ const apiService = {
 
     console.log('Creating patient with headers:', headers, 'isVisitorBooking:', isVisitorBooking);
 
-    const response = await fetch(`${API_URL}/patients`, {
+    // For visitor bookings, use the non-API endpoint to avoid authentication
+    const endpoint = isVisitorBooking
+      ? `${API_URL.replace('/api', '')}/patients`
+      : `${API_URL}/patients`;
+
+    console.log('Using patient endpoint:', endpoint);
+
+    const response = await fetch(endpoint, {
       method: 'POST',
       headers,
       body: JSON.stringify(patientData),
@@ -378,7 +385,14 @@ const apiService = {
 
     console.log('Creating appointment with headers:', headers, 'isVisitorBooking:', isVisitorBooking);
 
-    const response = await fetch(`${API_URL}/appointments`, {
+    // For visitor bookings, use the non-API endpoint to avoid authentication
+    const endpoint = isVisitorBooking
+      ? `${API_URL.replace('/api', '')}/appointments`
+      : `${API_URL}/appointments`;
+
+    console.log('Using appointment endpoint:', endpoint);
+
+    const response = await fetch(endpoint, {
       method: 'POST',
       headers,
       body: JSON.stringify(appointmentData),

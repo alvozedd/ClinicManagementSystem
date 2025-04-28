@@ -133,7 +133,7 @@ function HomePage() {
         appointment_date: new Date(formData.appointmentDate),
         optional_time: '09:00', // Default time set to 9:00 AM
         notes: `Booked online by patient. Time to be confirmed by secretary.`,
-        status: 'Pending',
+        status: 'Scheduled',
         type: formData.appointmentType,
         reason: formData.appointmentReason || 'Not specified',
         createdBy: 'visitor' // Explicitly set the creator as visitor

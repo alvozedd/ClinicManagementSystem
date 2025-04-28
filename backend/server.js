@@ -100,10 +100,14 @@ const addCorsHeaders = (req, res, next) => {
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
     res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
     res.header('Access-Control-Allow-Credentials', 'true');
+    console.log(`CORS headers set for non-API route: ${req.path} from origin: ${origin}`);
+  } else {
+    console.log(`Non-API route ${req.path} accessed from non-allowed origin: ${origin || 'unknown'}`);
   }
 
   // Handle preflight requests
   if (req.method === 'OPTIONS') {
+    console.log(`Handling OPTIONS request for ${req.path}`);
     return res.status(200).end();
   }
 
@@ -320,7 +324,7 @@ app.get('/appointments', addCorsHeaders, (req, res) => {
 });
 
 // Get appointments by patient ID
-app.get('/patients/:id/appointments', (req, res) => {
+app.get('/patients/:id/appointments', addCorsHeaders, (req, res) => {
   console.log('Received GET request at /patients/:id/appointments, forwarding to controller directly');
   // Import the controller directly
   const { getAppointmentsByPatientId } = require('./controllers/appointmentController');
