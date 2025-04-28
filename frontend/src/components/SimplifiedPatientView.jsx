@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { FaUser, FaTrash, FaPhone, FaEnvelope, FaPhoneAlt } from 'react-icons/fa';
 import { getCreatorLabel } from '../utils/recordCreation';
 import AppointmentManagementModal from './AppointmentManagementModal';
-import SimplifiedDiagnosisModal from './SimplifiedDiagnosisModal';
+import SimplifiedNotesModal from './SimplifiedNotesModal';
 import MedicalHistoryManager from './MedicalHistoryManager';
 import AllergiesManager from './AllergiesManager';
 import MedicationsManager from './MedicationsManager';
@@ -1319,7 +1319,7 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
                             }}
                             className="px-3 py-1 bg-blue-600 text-white rounded text-sm font-medium hover:bg-blue-700"
                           >
-                            Edit Diagnosis
+                            Edit Notes
                           </button>
                         </div>
                       </div>
@@ -1332,7 +1332,7 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
                           }}
                           className="px-4 py-2 bg-yellow-500 text-white rounded-md text-sm font-medium hover:bg-yellow-600 shadow-md w-full md:w-auto"
                         >
-                          Add Diagnosis
+                          Add Notes
                         </button>
                       </div>
                     )}
@@ -1367,40 +1367,40 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
         />
       )}
 
-      {/* Diagnosis Modal */}
+      {/* Notes Modal */}
       {diagnosingAppointment && (
-        <SimplifiedDiagnosisModal
+        <SimplifiedNotesModal
           appointment={diagnosingAppointment}
           onClose={() => setDiagnosingAppointment(null)}
           onSave={(updatedAppointment) => {
-            // Make sure the appointment status is set to Completed when adding a diagnosis
+            // Make sure the appointment status is set to Completed when adding notes
             const appointmentWithStatus = {
               ...updatedAppointment,
               status: 'Completed'
             };
 
-            console.log('Saving diagnosis in SimplifiedPatientView:', appointmentWithStatus);
+            console.log('Saving notes in SimplifiedPatientView:', appointmentWithStatus);
 
-            // Check if this is a new diagnosis or an update to an existing one
-            const isNewDiagnosis = !diagnosingAppointment.diagnosis;
+            // Check if this is a new note or an update to an existing one
+            const isNewNote = !diagnosingAppointment.diagnosis;
 
-            // If this is a new diagnosis for an appointment that already has diagnoses,
-            // we need to preserve the existing diagnoses array
-            if (!isNewDiagnosis && diagnosingAppointment.diagnoses) {
-              // Add the new diagnosis to the existing diagnoses array
+            // If this is a new note for an appointment that already has notes,
+            // we need to preserve the existing notes array
+            if (!isNewNote && diagnosingAppointment.diagnoses) {
+              // Add the new note to the existing notes array
               appointmentWithStatus.diagnoses = [
                 appointmentWithStatus.diagnosis,
                 ...diagnosingAppointment.diagnoses
               ];
             }
 
-            // Update the appointment with diagnosis
+            // Update the appointment with notes
             onDiagnoseAppointment(appointmentWithStatus);
             setDiagnosingAppointment(null);
 
             // Wait a moment before switching tabs to ensure state is updated
             setTimeout(() => {
-              // Switch to the diagnoses tab to show the new diagnosis
+              // Switch to the diagnoses tab to show the new notes
               setActiveTab('diagnoses');
             }, 500);
           }}
