@@ -2,7 +2,7 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { dateFnsLocalizer } from 'react-big-calendar';
 import { format, parse, startOfWeek, getDay } from 'date-fns';
 import { enUS } from 'date-fns/locale';
-import SimplifiedDiagnosisModal from './SimplifiedDiagnosisModal';
+import SimplifiedNotesModal from './SimplifiedNotesModal';
 import CustomCalendar from './CustomCalendar';
 import { transformAppointmentFromBackend } from '../utils/dataTransformers';
 
@@ -119,7 +119,7 @@ function DoctorCalendarView({ appointments, onDiagnoseAppointment, onViewPatient
               }}
               className="text-xs bg-yellow-500 text-black px-1 py-0.5 rounded hover:bg-yellow-600 font-medium"
             >
-              Add Diagnosis
+              Add Notes
             </button>
           )}
           {hasDiagnosis && (
@@ -138,23 +138,23 @@ function DoctorCalendarView({ appointments, onDiagnoseAppointment, onViewPatient
     );
   };
 
-  // Handle saving diagnosis
-  const handleSaveDiagnosis = (updatedAppointment) => {
+  // Handle saving notes
+  const handleSaveNotes = (updatedAppointment) => {
     // Make sure the appointment status is set to Completed when adding a diagnosis
     const appointmentWithStatus = {
       ...updatedAppointment,
       status: 'Completed'
     };
 
-    console.log('Saving diagnosis in DoctorCalendarView:', appointmentWithStatus);
+    console.log('Saving notes in DoctorCalendarView:', appointmentWithStatus);
 
-    // Check if this is a new diagnosis or an update to an existing one
-    const isNewDiagnosis = !diagnosingAppointment.diagnosis;
+    // Check if this is a new note or an update to an existing one
+    const isNewNote = !diagnosingAppointment.diagnosis;
 
-    // If this is a new diagnosis for an appointment that already has diagnoses,
-    // we need to preserve the existing diagnoses array
-    if (!isNewDiagnosis && diagnosingAppointment.diagnoses) {
-      // Add the new diagnosis to the existing diagnoses array
+    // If this is a new note for an appointment that already has notes,
+    // we need to preserve the existing notes array
+    if (!isNewNote && diagnosingAppointment.diagnoses) {
+      // Add the new note to the existing notes array
       appointmentWithStatus.diagnoses = [
         appointmentWithStatus.diagnosis,
         ...diagnosingAppointment.diagnoses
@@ -201,12 +201,12 @@ function DoctorCalendarView({ appointments, onDiagnoseAppointment, onViewPatient
         />
       </div>
 
-      {/* Diagnosis Modal */}
+      {/* Notes Modal */}
       {diagnosingAppointment && (
-        <SimplifiedDiagnosisModal
+        <SimplifiedNotesModal
           appointment={diagnosingAppointment}
           onClose={() => setDiagnosingAppointment(null)}
-          onSave={handleSaveDiagnosis}
+          onSave={handleSaveNotes}
         />
       )}
     </div>
