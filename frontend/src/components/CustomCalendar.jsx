@@ -227,7 +227,31 @@ const CustomCalendar = ({
         ...components,
         toolbar: CustomToolbar,
         dateCellWrapper: DateCellWrapper,
-        headerCellWrapper: HeaderCellWrapper
+        headerCellWrapper: HeaderCellWrapper,
+        month: {
+          dateHeader: ({ date }) => {
+            // Count events for this date
+            const eventCount = events.filter(event => {
+              const eventDate = new Date(event.start);
+              return (
+                eventDate.getDate() === date.getDate() &&
+                eventDate.getMonth() === date.getMonth() &&
+                eventDate.getFullYear() === date.getFullYear()
+              );
+            }).length;
+
+            return (
+              <div className="relative">
+                <span>{date.getDate()}</span>
+                {eventCount > 0 && (
+                  <div className={`appointment-count-badge ${eventCount >= 5 ? 'appointment-count-high' : eventCount >= 3 ? 'appointment-count-medium' : 'appointment-count-low'}`}>
+                    {eventCount}
+                  </div>
+                )}
+              </div>
+            );
+          }
+        }
       }}
       eventPropGetter={eventPropGetter}
       popup={true}

@@ -183,7 +183,7 @@ function SimplifiedSecretaryDashboard({
             </div>
             <div className="bg-white bg-opacity-20 rounded-md p-1.5 backdrop-blur-sm">
               <div className="font-semibold text-sm leading-tight">{pendingAppointments}</div>
-              <div className="text-xs">Pending Appointments</div>
+              <div className="text-xs">Scheduled Appointments</div>
             </div>
             <div className="bg-white bg-opacity-20 rounded-md p-1.5 backdrop-blur-sm">
               <div className="font-semibold text-sm leading-tight">{needsDiagnosisCount}</div>
@@ -226,7 +226,6 @@ function SimplifiedSecretaryDashboard({
                       appointment.status === 'Scheduled' ? 'bg-green-50 text-green-700' :
                       appointment.status === 'Completed' ? 'bg-blue-50 text-blue-700' :
                       appointment.status === 'Cancelled' ? 'bg-red-50 text-red-700' :
-                      appointment.status === 'Pending' ? 'bg-yellow-50 text-yellow-700' :
                       appointment.status === 'Needs Diagnosis' ? 'bg-purple-50 text-purple-700' :
                       'bg-gray-50 text-gray-700'
                     }`}>
@@ -400,13 +399,7 @@ function SimplifiedSecretaryDashboard({
                     >
                       All
                     </button>
-                    <button
-                      onClick={() => setStatusFilter('Pending')}
-                      className={`px-2 py-1 rounded text-xs font-medium transition-all ${statusFilter === 'Pending' ? 'bg-yellow-500 text-white' : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'}`}
-                      aria-label="Show pending appointments"
-                    >
-                      Pending
-                    </button>
+
                     <button
                       onClick={() => setStatusFilter('Scheduled')}
                       className={`px-2 py-1 rounded text-xs font-medium transition-all ${statusFilter === 'Scheduled' ? 'bg-green-600 text-white' : 'bg-green-100 text-green-800 hover:bg-green-200'}`}

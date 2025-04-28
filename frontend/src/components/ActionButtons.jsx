@@ -63,7 +63,7 @@ const ActionButtons = ({
   };
 
   return (
-    <div className="flex space-x-3">
+    <div className="flex space-x-3 action-buttons">
       <button
         className="text-blue-600 hover:text-blue-800 bg-blue-50 p-3 rounded-lg shadow-sm"
         onClick={handleViewPatient}

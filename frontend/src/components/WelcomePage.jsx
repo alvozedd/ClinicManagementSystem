@@ -69,7 +69,7 @@ function WelcomePage() {
         notes: `Type: ${formData.appointmentType}\nStatus: Scheduled\nBooked online by patient.`,
         reason: formData.appointmentReason || 'General consultation', // Use a default reason if not specified
         type: formData.appointmentType,
-        status: 'Pending', // Set status to Pending for visitor bookings
+        status: 'Scheduled', // Set status to Scheduled for visitor bookings
         createdBy: 'visitor' // Explicitly set the creator as visitor
       };
 
@@ -303,7 +303,7 @@ function WelcomePage() {
               </div>
               <div className="p-0">
                 <iframe
-                  src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d7979.417165608913!2d36.9536629!3d-0.4249518!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x18285f7be335efcb%3A0xe3fe6bef56106781!2sDr.%20Muchai%20Mbugua%20Clinic!5e0!3m2!1sen!2ske!4v1745262820405!5m2!1sen!2ske"
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d4031.2694726181694!2d36.950227399999996!3d-0.42221149999999996!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x18285f7be335efcb%3A0xe3fe6bef56106781!2sDr.%20Muchai%20Mbugua%20Clinic!5e1!3m2!1sen!2ske!4v1745775112645!5m2!1sen!2ske"
                   width="100%"
                   height="350"
                   style={{border:0}}
@@ -671,23 +671,13 @@ function WelcomePage() {
 
         {/* Footer */}
         <div className="mt-16 pt-8 border-t border-blue-100 bg-blue-600 text-white relative">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8 relative z-10 px-4 py-6 fade-in-element">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8 relative z-10 px-4 py-6 fade-in-element">
             <div>
               <h3 className="font-bold text-white mb-4">UroHealth Central</h3>
               <p className="text-blue-100 text-sm">Providing specialized urological care with a patient-centered approach since 2010.</p>
             </div>
 
-            <div>
-              <h3 className="font-bold text-white mb-4">Quick Links</h3>
-              <ul className="space-y-2 text-sm">
-                <li><a href="#services" className="text-blue-100 hover:text-white">Services</a></li>
-                <li><a href="#about" className="text-blue-100 hover:text-white">About Us</a></li>
-                <li><a href="#booking" className="text-blue-100 hover:text-white">Book Appointment</a></li>
-                <li><a href="#contact" className="text-blue-100 hover:text-white">Contact</a></li>
-                <li><a href="#location" className="text-blue-100 hover:text-white">Find Us</a></li>
-                <li><Link to="/login" className="text-blue-100 hover:text-white">Staff Login</Link></li>
-              </ul>
-            </div>
+
 
             <div>
               <h3 className="font-bold text-white mb-4">Contact</h3>

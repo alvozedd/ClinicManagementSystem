@@ -98,7 +98,7 @@ function LoginForm() {
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
               <label htmlFor="username" className="form-label">
-                Email
+                Username or Email
               </label>
               <div className="mt-1">
                 <input
@@ -111,7 +111,9 @@ function LoginForm() {
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   onKeyDown={handleKeyDown}
+                  placeholder="Enter your username or email"
                 />
+                <p className="mt-1 text-xs text-gray-500">You can use either your username or email address to sign in</p>
               </div>
             </div>
 

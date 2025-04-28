@@ -137,7 +137,7 @@ function GlobalDiagnosesView({ onViewPatient, onEditDiagnosis, onDeleteDiagnosis
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <h2 className="text-2xl font-bold text-gray-800 flex items-center">
           <FaFileMedical className="mr-2 text-blue-600" />
-          All Diagnoses
+          All Notes
           <span className="ml-2 bg-blue-100 text-blue-800 text-sm font-medium px-2.5 py-0.5 rounded-full">
             {filteredDiagnoses.length}
           </span>
@@ -156,7 +156,7 @@ function GlobalDiagnosesView({ onViewPatient, onEditDiagnosis, onDeleteDiagnosis
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2.5"
-              placeholder="Search diagnoses..."
+              placeholder="Search notes..."
             />
           </div>
 
@@ -196,9 +196,9 @@ function GlobalDiagnosesView({ onViewPatient, onEditDiagnosis, onDeleteDiagnosis
       {filteredDiagnoses.length === 0 ? (
         <div className="bg-blue-50 border border-blue-200 text-blue-700 px-6 py-8 rounded-lg text-center">
           <FaFileMedical className="mx-auto text-4xl mb-4 text-blue-400" />
-          <h3 className="text-lg font-semibold mb-2">No Diagnoses Found</h3>
+          <h3 className="text-lg font-semibold mb-2">No Notes Found</h3>
           <p className="text-blue-600">
-            No diagnoses match your current filters. Try adjusting your search criteria.
+            No notes match your current filters. Try adjusting your search criteria.
           </p>
         </div>
       ) : (
@@ -239,7 +239,7 @@ function GlobalDiagnosesView({ onViewPatient, onEditDiagnosis, onDeleteDiagnosis
                       <button
                         onClick={() => onEditDiagnosis(diagnosis)}
                         className="text-blue-600 hover:text-blue-800 p-1 rounded-full hover:bg-blue-100 transition-colors"
-                        title="Edit Diagnosis"
+                        title="Edit Notes"
                       >
                         <FaEdit className="h-4 w-4" />
                       </button>
@@ -250,7 +250,7 @@ function GlobalDiagnosesView({ onViewPatient, onEditDiagnosis, onDeleteDiagnosis
                           }
                         }}
                         className="text-red-600 hover:text-red-800 p-1 rounded-full hover:bg-red-100 transition-colors"
-                        title="Delete Diagnosis"
+                        title="Delete Notes"
                       >
                         <FaTrashAlt className="h-4 w-4" />
                       </button>
@@ -260,7 +260,7 @@ function GlobalDiagnosesView({ onViewPatient, onEditDiagnosis, onDeleteDiagnosis
               </div>
 
               <div className="mb-4">
-                <h4 className="font-semibold text-blue-800 mb-2">Diagnosis</h4>
+                <h4 className="font-semibold text-blue-800 mb-2">Notes</h4>
                 <div className="bg-blue-50 p-4 rounded-lg">
                   <p className="text-gray-800 whitespace-pre-line">{diagnosis.diagnosisText}</p>
                 </div>

@@ -1,0 +1,42 @@
+/* Mobile responsive fixes */
+
+/* Fix buttons going too far right on mobile */
+@media (max-width: 640px) {
+  .action-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    max-width: 100%;
+  }
+  
+  .action-buttons button,
+  .action-buttons a {
+    margin-bottom: 0.25rem;
+  }
+  
+  /* Ensure buttons don't overflow */
+  .flex.space-x-2 {
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+  
+  /* Ensure appointment cards are properly sized */
+  .appointment-card {
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+  }
+}
+
+/* Fix UroHealth title position in mobile view */
+@media (max-width: 768px) {
+  header {
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+  }
+  
+  .container {
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+  }
+}

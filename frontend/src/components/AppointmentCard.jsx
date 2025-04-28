@@ -54,11 +54,10 @@ const AppointmentCard = ({
   return (
     <div
       key={appointment.id || appointment._id}
-      className={`p-4 rounded-lg border border-gray-200 flex justify-between items-center cursor-pointer hover:shadow-lg transition-all duration-300 ${
+      className={`p-4 rounded-lg border border-gray-200 flex justify-between items-center cursor-pointer hover:shadow-lg transition-all duration-300 appointment-card ${
         appointment.status === 'Scheduled' ? 'glass-card-green' :
         appointment.status === 'Completed' ? 'glass-card-blue' :
         appointment.status === 'Cancelled' ? 'glass-card-red' :
-        appointment.status === 'Pending' ? 'glass-card-yellow' :
         'glass-card'
       }`}
       onClick={handleCardClick}
@@ -91,7 +90,6 @@ const AppointmentCard = ({
           appointment.status === 'Scheduled' ? 'bg-green-50 text-green-700' :
           appointment.status === 'Completed' ? 'bg-blue-50 text-blue-700' :
           appointment.status === 'Cancelled' ? 'bg-red-50 text-red-700' :
-          appointment.status === 'Pending' ? 'bg-yellow-50 text-yellow-700' :
           appointment.status === 'Needs Diagnosis' ? 'bg-purple-50 text-purple-700' :
           'bg-gray-50 text-gray-700'
         }`}>

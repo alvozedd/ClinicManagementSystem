@@ -55,10 +55,10 @@ const EnhancedContact = ({ content, getContentValue }) => {
                     <div>
                       <p className="text-sm text-gray-500 font-medium">Mobile</p>
                       <a
-                        href={`tel:+${getContentValue(content, 'contact', 'Contact Information', 'Mobile', '0722 396 296').replace(/\s+/g, '')}`}
+                        href={`tel:+${getContentValue(content, 'footer', 'Contact', 'Mobile', '0722 396 296').replace(/\s+/g, '')}`}
                         className="text-blue-700 hover:text-blue-500 font-semibold text-lg transition-colors flex items-center"
                       >
-                        {getContentValue(content, 'contact', 'Contact Information', 'Mobile', '0722 396 296')}
+                        {getContentValue(content, 'footer', 'Contact', 'Mobile', '0722 396 296')}
                         <span className="ml-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
                           Call Now
                         </span>
@@ -77,10 +77,10 @@ const EnhancedContact = ({ content, getContentValue }) => {
                     <div>
                       <p className="text-sm text-gray-500 font-medium">Office</p>
                       <a
-                        href={`tel:+${getContentValue(content, 'contact', 'Contact Information', 'Office', '0733 398 296').replace(/\s+/g, '')}`}
+                        href={`tel:+${getContentValue(content, 'footer', 'Contact', 'Office', '0733 398 296').replace(/\s+/g, '')}`}
                         className="text-blue-700 hover:text-blue-500 font-semibold text-lg transition-colors flex items-center"
                       >
-                        {getContentValue(content, 'contact', 'Contact Information', 'Office', '0733 398 296')}
+                        {getContentValue(content, 'footer', 'Contact', 'Office', '0733 398 296')}
                         <span className="ml-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
                           Call Now
                         </span>
@@ -99,10 +99,10 @@ const EnhancedContact = ({ content, getContentValue }) => {
                     <div>
                       <p className="text-sm text-gray-500 font-medium">Email</p>
                       <a
-                        href={`mailto:${getContentValue(content, 'contact', 'Contact Information', 'Email', 'info@urohealthcentral.com')}`}
+                        href={`mailto:${getContentValue(content, 'footer', 'Contact', 'Email', 'info@urohealthcentral.com')}`}
                         className="text-blue-700 hover:text-blue-500 font-semibold transition-colors flex items-center"
                       >
-                        {getContentValue(content, 'contact', 'Contact Information', 'Email', 'info@urohealthcentral.com')}
+                        {getContentValue(content, 'footer', 'Contact', 'Email', 'info@urohealthcentral.com')}
                         <span className="ml-2 bg-blue-500 text-white text-xs px-2 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
                           Email Us
                         </span>
@@ -124,7 +124,7 @@ const EnhancedContact = ({ content, getContentValue }) => {
                     </div>
                     <div className="office-hours-text">
                       <span className="office-hours-day">Monday - Friday:</span>
-                      <span className="office-hours-time ml-2">8:00 AM - 5:00 PM</span>
+                      <span className="office-hours-time ml-2">{getContentValue(content, 'contact', 'Office Hours', 'Weekday Hours', '8:00 AM - 5:00 PM')}</span>
                     </div>
                   </div>
                   <div className="office-hours">
@@ -133,7 +133,7 @@ const EnhancedContact = ({ content, getContentValue }) => {
                     </div>
                     <div className="office-hours-text">
                       <span className="office-hours-day">Saturday:</span>
-                      <span className="office-hours-time ml-2">9:00 AM - 1:00 PM</span>
+                      <span className="office-hours-time ml-2">{getContentValue(content, 'contact', 'Office Hours', 'Saturday Hours', 'By appointment')}</span>
                     </div>
                   </div>
                   <div className="office-hours">
@@ -142,7 +142,7 @@ const EnhancedContact = ({ content, getContentValue }) => {
                     </div>
                     <div className="office-hours-text">
                       <span className="office-hours-day">Sunday:</span>
-                      <span className="office-hours-time ml-2">Closed</span>
+                      <span className="office-hours-time ml-2">{getContentValue(content, 'contact', 'Office Hours', 'Sunday Hours', 'Closed')}</span>
                     </div>
                   </div>
                 </div>
@@ -181,7 +181,7 @@ const EnhancedContact = ({ content, getContentValue }) => {
                 transition={{ duration: 0.8, delay: 0.8 }}
               >
                 <iframe
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3989.7575147797847!2d36.95!3d-0.42!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMMKwMjUnMTIuMCJTIDM2wrA1NycwMC4wIkU!5e0!3m2!1sen!2sus!4v1620000000000!5m2!1sen!2sus"
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d4031.2694726181694!2d36.950227399999996!3d-0.42221149999999996!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x18285f7be335efcb%3A0xe3fe6bef56106781!2sDr.%20Muchai%20Mbugua%20Clinic!5e1!3m2!1sen!2ske!4v1745775112645!5m2!1sen!2ske"
                   width="100%"
                   height="300"
                   style={{ border: 0 }}

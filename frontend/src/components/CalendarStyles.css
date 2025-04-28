@@ -180,17 +180,20 @@
 .rbc-month-view .rbc-month-row .rbc-row-bg .rbc-day-bg.rbc-sat,
 .rbc-month-view .rbc-month-row .rbc-row-bg .rbc-day-bg:nth-child(7) {
   background-color: #e0f2fe !important; /* Light blue for Saturday */
+  position: relative;
 }
 
 .rbc-month-view .rbc-month-row .rbc-row-bg .rbc-day-bg.rbc-sun,
 .rbc-month-view .rbc-month-row .rbc-row-bg .rbc-day-bg:nth-child(1) {
   background-color: #dbeafe !important; /* Slightly darker blue for Sunday */
+  position: relative;
 }
 
 .rbc-date-cell {
   color: #000000;
   font-weight: 500;
   padding: 4px;
+  position: relative;
 }
 
 /* Improve off-range day visibility */
@@ -232,8 +235,16 @@
   color: white;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
   padding: 0 4px;
-  z-index: 10 !important;
+  z-index: 20 !important;
   pointer-events: none;
+}
+
+/* Month view date header badge */
+.rbc-date-cell .appointment-count-badge {
+  position: absolute;
+  top: 0;
+  left: 18px;
+  font-size: 0.7rem;
 }
 
 /* Badge colors based on appointment count */

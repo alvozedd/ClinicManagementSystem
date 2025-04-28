@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { getTodaysAppointments } from '../data/mockData';
 import PatientSearch from './PatientSearch';
 import SimplifiedPatientView from './SimplifiedPatientView';
-import SimplifiedDiagnosisModal from './SimplifiedDiagnosisModal';
+import SimplifiedNotesModal from './SimplifiedNotesModal';
 import AddPatientForm from './AddPatientForm';
 import DoctorCalendarView from './DoctorCalendarView';
 import PatientNavigator from './PatientNavigator';
@@ -320,7 +320,6 @@ function SimplifiedDoctorDashboard({
                       appointment.status === 'Scheduled' ? 'bg-green-50 text-green-700' :
                       appointment.status === 'Completed' ? 'bg-blue-50 text-blue-700' :
                       appointment.status === 'Cancelled' ? 'bg-red-50 text-red-700' :
-                      appointment.status === 'Pending' ? 'bg-yellow-50 text-yellow-700' :
                       appointment.status === 'Needs Diagnosis' ? 'bg-purple-50 text-purple-700' :
                       'bg-gray-50 text-gray-700'
                     }`}>
@@ -382,7 +381,7 @@ function SimplifiedDoctorDashboard({
             }`}
           >
             <FaFileMedical className="h-6 w-6 mb-1" />
-            <span className="text-sm font-medium text-center">Diagnoses</span>
+            <span className="text-sm font-medium text-center">Notes</span>
           </button>
 
           <button

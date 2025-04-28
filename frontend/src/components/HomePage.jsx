@@ -586,32 +586,29 @@ function HomePage() {
                 {/* Hero Section - Blue Background */}
                 <div className="max-w-4xl mx-auto text-center relative px-4 sm:px-6 h-screen flex flex-col justify-center items-center z-10">
                   <motion.div
-                    className="transform translate-y-[-10vh]"
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8, delay: 0.2 }}
+                    className="transform translate-y-[-12vh]"
                   >
                     <motion.h1
                       className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4 text-white hero-title"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ duration: 0.5, delay: 0.3 }}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 1.2, delay: 0.3 }}
                     >
                       {getContentValue(content, 'homepage', 'Hero', 'Hero Title', 'UroHealth Central Ltd')}
                     </motion.h1>
                     <motion.p
                       className="text-xl sm:text-2xl md:text-3xl mb-2 text-white font-light hero-subtitle"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ duration: 0.5, delay: 0.5 }}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 1.2, delay: 1.5 }}
                     >
                       {getContentValue(content, 'homepage', 'Hero', 'Hero Subtitle', 'Specialist Urological Care')}
                     </motion.p>
                     <motion.p
                       className="text-sm sm:text-base md:text-lg mb-6 sm:mb-8 leading-relaxed text-white max-w-xl mx-auto hero-description"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ duration: 0.5, delay: 0.7 }}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 1.2, delay: 2.7 }}
                     >
                       {getContentValue(content, 'homepage', 'Hero', 'Hero Description', '20+ years of specialized medical excellence')}
                     </motion.p>
@@ -619,52 +616,23 @@ function HomePage() {
                       className="flex flex-row justify-center gap-5 sm:gap-8 mt-6 sm:mt-8"
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.5, delay: 0.9 }}
+                      transition={{ duration: 1.2, delay: 3.9 }}
                     >
-                      <div className="relative overflow-hidden w-36 sm:w-auto">
+                      <div className="relative w-36 sm:w-auto">
                         <motion.button
                           onClick={() => {
                             setShowBookingForm(true);
                             window.scrollTo({ top: 0, behavior: 'smooth' });
                           }}
-                          className="bg-white text-blue-700 hover:bg-blue-50 px-6 sm:px-8 py-3 rounded-full font-medium transition duration-300 text-sm sm:text-base flex items-center justify-center gap-2 w-full"
-                          animate={{
-                            boxShadow: [
-                              "0 4px 6px rgba(0, 0, 0, 0.1)",
-                              "0 6px 8px rgba(0, 0, 0, 0.15)",
-                              "0 4px 6px rgba(0, 0, 0, 0.1)"
-                            ]
-                          }}
-                          transition={{
-                            duration: 3,
-                            ease: "easeInOut",
-                            times: [0, 0.5, 1],
-                            repeat: Infinity,
-                            repeatDelay: 0
-                          }}
-                          whileHover={{ backgroundColor: "#f8fafc" }}
+                          className="bg-white text-blue-700 hover:bg-blue-50 px-6 sm:px-8 py-3 rounded-full font-medium transition duration-300 text-sm sm:text-base flex items-center justify-center gap-2 w-full relative z-10 shadow-md"
+                          whileHover={{ scale: 1.05, backgroundColor: "#f8fafc" }}
+                          transition={{ duration: 0.3 }}
                         >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                        </svg>
-                        Book Now
-                      </motion.button>
-                        <motion.div
-                          className="absolute inset-0 pointer-events-none border border-white rounded-full"
-                          animate={{
-                            boxShadow: [
-                              "0 0 0 0 rgba(255, 255, 255, 0.2)",
-                              "0 0 0 8px rgba(255, 255, 255, 0)"
-                            ]
-                          }}
-                          transition={{
-                            duration: 2,
-                            ease: "easeOut",
-                            times: [0, 1],
-                            repeat: Infinity,
-                            repeatDelay: 1
-                          }}
-                        />
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                          </svg>
+                          Book Now
+                        </motion.button>
                       </div>
                       <motion.button
                         onClick={() => window.location.href = 'tel:+254722396296'}
@@ -687,7 +655,20 @@ function HomePage() {
               {/* White background sections */}
               <div className="bg-white">
                 {/* Services Section */}
-                <div id="services" className="services-bg text-white py-16 sm:py-20 md:py-24 w-full relative overflow-hidden">
+                <div id="services" className="services-bg text-white py-16 sm:py-20 md:py-24 w-full relative overflow-hidden" onMouseMove={(e) => {
+                    const mouseGlow = document.querySelector('.services-mouse-glow');
+                    if (mouseGlow) {
+                      mouseGlow.style.opacity = '1';
+                      mouseGlow.style.left = `${e.pageX}px`;
+                      mouseGlow.style.top = `${e.pageY}px`;
+                    }
+                  }} onMouseLeave={() => {
+                    const mouseGlow = document.querySelector('.services-mouse-glow');
+                    if (mouseGlow) {
+                      mouseGlow.style.opacity = '0';
+                    }
+                  }}>
+                  <div className="services-mouse-glow mouse-glow"></div>
                   <div className="max-w-5xl mx-auto px-4">
                     <div className="text-center mb-12 relative">
                       <motion.div
@@ -726,12 +707,14 @@ function HomePage() {
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8 px-4 sm:px-0 relative z-10 services-grid">
                       <motion.div
-                        className="true-glass-card p-8 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col items-center text-center border border-white/10 hover:border-white/30 transform hover:translate-y-[-8px] h-full group service-card relative overflow-hidden"
+                        className="true-glass-card p-8 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col items-center text-center border border-white/10 hover:border-white/30 h-full group service-card relative overflow-hidden"
                         initial={{ opacity: 0, y: 80 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true, margin: "0px" }}
                         transition={{ duration: 0.8, delay: 0.1 }}
+                        whileHover={{ scale: 1.05 }}
                       >
+                        <div className="card-perimeter-animation absolute inset-0"></div>
                         <motion.div
                           className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent w-[200%]"
                           initial={{ x: '-100%' }}
@@ -794,12 +777,14 @@ function HomePage() {
                       </motion.div>
 
                       <motion.div
-                        className="true-glass-card p-8 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col items-center text-center border border-white/20 hover:border-white/40 transform hover:translate-y-[-8px] h-full group relative overflow-hidden service-card"
+                        className="true-glass-card p-8 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col items-center text-center border border-white/20 hover:border-white/40 h-full group relative overflow-hidden service-card"
                         initial={{ opacity: 0, y: 80 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true, margin: "0px" }}
                         transition={{ duration: 0.8, delay: 0.3 }}
+                        whileHover={{ scale: 1.05 }}
                       >
+                        <div className="card-perimeter-animation absolute inset-0"></div>
                         <motion.div
                           className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent w-[200%]"
                           initial={{ x: '-100%' }}
@@ -864,12 +849,14 @@ function HomePage() {
                       </motion.div>
 
                       <motion.div
-                        className="true-glass-card p-8 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col items-center text-center border border-white/10 hover:border-white/30 transform hover:translate-y-[-8px] h-full group service-card relative overflow-hidden"
+                        className="true-glass-card p-8 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col items-center text-center border border-white/10 hover:border-white/30 h-full group service-card relative overflow-hidden"
                         initial={{ opacity: 0, y: 80 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true, margin: "0px" }}
                         transition={{ duration: 0.8, delay: 0.5 }}
+                        whileHover={{ scale: 1.05 }}
                       >
+                        <div className="card-perimeter-animation absolute inset-0"></div>
                         <motion.div
                           className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent w-[200%]"
                           initial={{ x: '-100%' }}
@@ -947,7 +934,7 @@ function HomePage() {
         <footer className="py-12 bg-blue-600 text-white relative overflow-hidden">
           <div className="max-w-5xl mx-auto px-4">
             <div className="flex flex-col md:flex-row justify-between mb-8 fade-in-element">
-              <div className="mb-8 md:mb-0">
+              <div className="mb-8 md:mb-0 md:w-1/3">
                 <h3 className="text-xl font-bold mb-4 text-white">UroHealth Central Ltd</h3>
                 <p className="text-blue-100 mb-4 max-w-xs">
                   {content.footer?.['UroHealth Central Ltd']?.find(item => item.label === 'About Text')?.value ||
@@ -956,53 +943,16 @@ function HomePage() {
                 <div className="h-1 w-24 bg-blue-500/30 rounded-full mb-4"></div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 md:gap-8">
-                <div>
-                  <h4 className="text-lg font-semibold mb-4 text-white">Quick Links</h4>
-                  <ul className="space-y-2 text-sm text-blue-100">
-                    {content.footer?.['Quick Links']?.filter(item => item.visible)?.map(link => (
-                      <li key={link.id}>
-                        {link.label === 'Book Appointment' ? (
-                          <button
-                            onClick={() => {
-                              setShowBookingForm(true);
-                              window.scrollTo({ top: 0, behavior: 'smooth' });
-                            }}
-                            className="hover:text-white transition-colors"
-                          >
-                            {link.label}
-                          </button>
-                        ) : link.label === 'Contact Us' ? (
-                          <button
-                            onClick={() => {
-                              setShowBookingForm(false);
-                              setBookingSuccess(false);
-                              setTimeout(() => {
-                                document.getElementById('contact').scrollIntoView({ behavior: 'smooth' });
-                              }, 100);
-                            }}
-                            className="hover:text-white transition-colors"
-                          >
-                            {link.label}
-                          </button>
-                        ) : link.label === 'Staff Login' ? (
-                          <Link to="/login" className="hover:text-white transition-colors">{link.label}</Link>
-                        ) : (
-                          <a href={link.url} className="hover:text-white transition-colors">{link.label}</a>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+              <div className="md:w-2/3 md:pl-10">
 
                 <div>
                   <h4 className="text-lg font-semibold mb-4 text-white">Contact</h4>
-                  <ul className="space-y-2 text-sm text-blue-100">
+                  <ul className="space-y-4 text-sm text-blue-100">
                     {content.footer?.['Contact']?.filter(item => item.visible)?.map(contactItem => (
-                      <li key={contactItem.id} className="footer-contact-item">
+                      <li key={contactItem.id} className="footer-contact-item flex items-start">
                         {contactItem.label === 'Address' && (
                           <>
-                            <svg className="w-4 h-4 mr-2 mt-0.5 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <svg className="w-4 h-4 mr-3 mt-0.5 text-blue-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                             </svg>
@@ -1011,34 +961,38 @@ function HomePage() {
                         )}
                         {contactItem.label === 'Phone' && (
                           <>
-                            <svg className="w-4 h-4 mr-2 mt-0.5 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <svg className="w-4 h-4 mr-3 mt-0.5 text-blue-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
                             </svg>
-                            <a href={`tel:${contactItem.value.replace(/\s+/g, '')}`} className="hover:text-white transition-colors">
-                              {contactItem.value}
-                            </a>
-                            <button
-                              className="ml-2 bg-blue-700 hover:bg-blue-600 text-xs px-2 py-1 rounded transition-colors"
-                              onClick={() => window.location.href = `tel:${contactItem.value.replace(/\s+/g, '')}`}
-                            >
-                              Call
-                            </button>
+                            <div>
+                              <a href={`tel:${contactItem.value.replace(/\s+/g, '')}`} className="hover:text-white transition-colors">
+                                {contactItem.value}
+                              </a>
+                              <button
+                                className="ml-2 bg-blue-700 hover:bg-blue-600 text-xs px-2 py-1 rounded transition-colors"
+                                onClick={() => window.location.href = `tel:${contactItem.value.replace(/\s+/g, '')}`}
+                              >
+                                Call
+                              </button>
+                            </div>
                           </>
                         )}
                         {contactItem.label === 'Email' && (
                           <>
-                            <svg className="w-4 h-4 mr-2 mt-0.5 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <svg className="w-4 h-4 mr-3 mt-0.5 text-blue-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                             </svg>
-                            <a href={`mailto:${contactItem.value}`} className="hover:text-white transition-colors">
-                              {contactItem.value}
-                            </a>
-                            <button
-                              className="ml-2 bg-blue-700 hover:bg-blue-600 text-xs px-2 py-1 rounded transition-colors"
-                              onClick={() => window.location.href = `mailto:${contactItem.value}`}
-                            >
-                              Email
-                            </button>
+                            <div>
+                              <a href={`mailto:${contactItem.value}`} className="hover:text-white transition-colors">
+                                {contactItem.value}
+                              </a>
+                              <button
+                                className="ml-2 bg-blue-700 hover:bg-blue-600 text-xs px-2 py-1 rounded transition-colors"
+                                onClick={() => window.location.href = `mailto:${contactItem.value}`}
+                              >
+                                Email
+                              </button>
+                            </div>
                           </>
                         )}
                       </li>

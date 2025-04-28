@@ -184,7 +184,6 @@ function AppointmentManagementModal({ appointment, onClose, onSave, isNew = fals
                   onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-500 shadow-sm transition-all duration-200"
                 >
-                  <option value="Pending">Pending</option>
                   <option value="Scheduled">Scheduled</option>
                   <option value="Completed">Completed</option>
                   <option value="Cancelled">Cancelled</option>

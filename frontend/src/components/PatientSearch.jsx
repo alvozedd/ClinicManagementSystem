@@ -23,8 +23,8 @@ function PatientSearch({ patients, onSelectPatient, onAddPatient }) {
   const [recentPatients, setRecentPatients] = useState([]);
   const [sortField, setSortField] = useState('lastVisit'); // Default sort by last visit date
   const [sortDirection, setSortDirection] = useState('desc'); // Default to descending (newest first)
-  const [viewMode, setViewMode] = useState('list'); // 'list' or 'grid'
-  const [showRecentPatients, setShowRecentPatients] = useState(true); // Toggle for recent patients
+  const [viewMode, setViewMode] = useState('grid'); // 'list' or 'grid'
+  const [showRecentPatients, setShowRecentPatients] = useState(false); // Toggle for recent patients
   const [recentPatientsCount, setRecentPatientsCount] = useState(5); // Number of recent patients to show
 
   // Function to sort patients based on selected field and direction
