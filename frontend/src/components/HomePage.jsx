@@ -623,252 +623,93 @@ function HomePage() {
                   <div className="services-mouse-glow mouse-glow"></div>
                   <div className="max-w-5xl mx-auto px-4">
                     <div className="text-center mb-12 relative">
-                      <motion.div
-                        className="bg-gradient-to-r from-white/30 via-white/50 to-white/30 h-1 w-24 mx-auto mb-4"
-                        initial={{ opacity: 0, width: 0 }}
-                        whileInView={{ opacity: 1, width: 96 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.7 }}
-                      ></motion.div>
-                      <motion.h3
-                        className="text-3xl md:text-4xl font-bold text-white mb-4 text-center relative inline-block"
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        whileInView={{ opacity: 1, scale: 1 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.7, delay: 0.1 }}
-                      >
+                      <div className="bg-gradient-to-r from-white/30 via-white/50 to-white/30 h-1 w-24 mx-auto mb-4"></div>
+                      <h3 className="text-3xl md:text-4xl font-bold text-white mb-4 text-center relative inline-block">
                         Our Services
                         <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-blue-200 to-white transform scale-x-0 transition-transform duration-300 group-hover:scale-x-100"></div>
-                      </motion.h3>
-                      <motion.p
-                        className="text-lg md:text-xl text-blue-100 mb-2 max-w-3xl mx-auto"
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.5, delay: 0.3 }}
-                      >
+                      </h3>
+                      <p className="text-lg md:text-xl text-blue-100 mb-2 max-w-3xl mx-auto">
                         {getContentValue(content, 'homepage', 'About', 'About Text', 'We provide comprehensive urological care with state-of-the-art technology and personalized treatment plans.')}
-                      </motion.p>
-                      <motion.div
-                        className="h-1 w-16 bg-gradient-to-r from-blue-200 to-white mx-auto mt-4"
-                        initial={{ opacity: 0, width: 0 }}
-                        whileInView={{ opacity: 1, width: 64 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.7, delay: 0.4 }}
-                      ></motion.div>
+                      </p>
+                      <div className="h-1 w-16 bg-gradient-to-r from-blue-200 to-white mx-auto mt-4"></div>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8 px-4 sm:px-0 relative z-10 services-grid">
-                      <motion.div
-                        className="true-glass-card p-8 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col items-center text-center border border-white/10 hover:border-white/30 h-full group service-card relative overflow-hidden"
-                        initial={{ opacity: 0, y: 80 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true, margin: "0px" }}
-                        transition={{ duration: 0.8, delay: 0.1 }}
-                        whileHover={{ scale: 1.05 }}
-                      >
+                      <div className="true-glass-card p-8 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col items-center text-center border border-white/10 hover:border-white/30 h-full group service-card relative overflow-hidden">
                         <div className="card-perimeter-animation absolute inset-0"></div>
-                        <motion.div
-                          className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent w-[200%]"
-                          initial={{ x: '-100%' }}
-                          whileInView={{ x: '100%' }}
-                          viewport={{ once: true }}
-                          transition={{ duration: 1.5, delay: 1.2, ease: 'easeInOut' }}
-                        />
-                        <motion.div
-                          className="absolute inset-0 bg-gradient-to-r from-transparent to-white/5 w-[200%]"
-                          initial={{ x: '100%' }}
-                          whileInView={{ x: '-100%' }}
-                          viewport={{ once: true }}
-                          transition={{ duration: 1.5, delay: 1.2, ease: 'easeInOut' }}
-                        />
-                        <motion.div
-                          className="bg-white/20 p-5 rounded-full mb-6 group-hover:bg-white/30 transition-all duration-300"
-                          initial={{ opacity: 0, scale: 0.8 }}
-                          whileInView={{ opacity: 1, scale: 1 }}
-                          viewport={{ once: true }}
-                          transition={{ duration: 0.6, delay: 0.5 }}
-                          whileHover={{ scale: 1.1, rotate: 5 }}
-                        >
+                        <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent w-[200%]"></div>
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent to-white/5 w-[200%]"></div>
+                        <div className="bg-white/20 p-5 rounded-full mb-6 group-hover:bg-white/30 transition-all duration-300">
                           <svg className="w-14 h-14 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                           </svg>
-                        </motion.div>
-                        <motion.h4
-                          className="text-2xl font-semibold mb-4 text-white"
-                          initial={{ opacity: 0, y: 20 }}
-                          whileInView={{ opacity: 1, y: 0 }}
-                          viewport={{ once: true }}
-                          transition={{ duration: 0.6, delay: 0.7 }}
-                        >
+                        </div>
+                        <h4 className="text-2xl font-semibold mb-4 text-white">
                           {getContentValue(content, 'services', 'Consultations', 'Title', 'Consultations')}
-                        </motion.h4>
-                        <motion.p
-                          className="text-blue-100 text-lg leading-relaxed mb-6"
-                          initial={{ opacity: 0, y: 20 }}
-                          whileInView={{ opacity: 1, y: 0 }}
-                          viewport={{ once: true }}
-                          transition={{ duration: 0.6, delay: 0.9 }}
-                        >
+                        </h4>
+                        <p className="text-blue-100 text-lg leading-relaxed mb-6">
                           {getContentValue(content, 'services', 'Consultations', 'Description', 'Comprehensive evaluation and diagnosis of urological conditions by our expert consultants.')}
-                        </motion.p>
+                        </p>
                         <div className="mt-auto">
-                          <motion.div
-                            className="mb-6 flex items-center justify-center text-white"
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.6, delay: 1.1 }}
-                          >
+                          <div className="mb-6 flex items-center justify-center text-white">
                             <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                             </svg>
                             <span className="text-lg">{getContentValue(content, 'services', 'Consultations', 'Feature', '30-60 minutes')}</span>
-                          </motion.div>
-
+                          </div>
                         </div>
-                      </motion.div>
+                      </div>
 
-                      <motion.div
-                        className="true-glass-card p-8 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col items-center text-center border border-white/20 hover:border-white/40 h-full group relative overflow-hidden service-card"
-                        initial={{ opacity: 0, y: 80 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true, margin: "0px" }}
-                        transition={{ duration: 0.8, delay: 0.3 }}
-                        whileHover={{ scale: 1.05 }}
-                      >
+                      <div className="true-glass-card p-8 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col items-center text-center border border-white/20 hover:border-white/40 h-full group relative overflow-hidden service-card">
                         <div className="card-perimeter-animation absolute inset-0"></div>
-                        <motion.div
-                          className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent w-[200%]"
-                          initial={{ x: '-100%' }}
-                          whileInView={{ x: '100%' }}
-                          viewport={{ once: true }}
-                          transition={{ duration: 1.5, delay: 1.4, ease: 'easeInOut' }}
-                        />
-                        <motion.div
-                          className="absolute inset-0 bg-gradient-to-r from-transparent to-white/5 w-[200%]"
-                          initial={{ x: '100%' }}
-                          whileInView={{ x: '-100%' }}
-                          viewport={{ once: true }}
-                          transition={{ duration: 1.5, delay: 1.4, ease: 'easeInOut' }}
-                        />
+                        <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent w-[200%]"></div>
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent to-white/5 w-[200%]"></div>
                         <div className="absolute top-0 right-0 w-24 h-24 bg-white opacity-5 rounded-full -mr-8 -mt-8"></div>
                         <div className="absolute bottom-0 left-0 w-24 h-24 bg-white opacity-5 rounded-full -ml-8 -mb-8"></div>
-                        <motion.div
-                          className="bg-white/30 p-5 rounded-full mb-6 group-hover:bg-white/40 transition-all duration-300 relative z-10"
-                          initial={{ opacity: 0, scale: 0.8 }}
-                          whileInView={{ opacity: 1, scale: 1 }}
-                          viewport={{ once: true }}
-                          transition={{ duration: 0.6, delay: 0.7 }}
-                          whileHover={{ scale: 1.1, rotate: 5 }}
-                        >
+                        <div className="bg-white/30 p-5 rounded-full mb-6 group-hover:bg-white/40 transition-all duration-300 relative z-10">
                           <svg className="w-14 h-14 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                           </svg>
-                        </motion.div>
-                        <motion.h4
-                          className="text-2xl font-semibold mb-4 text-white relative z-10"
-                          initial={{ opacity: 0, y: 20 }}
-                          whileInView={{ opacity: 1, y: 0 }}
-                          viewport={{ once: true }}
-                          transition={{ duration: 0.6, delay: 0.9 }}
-                        >
+                        </div>
+                        <h4 className="text-2xl font-semibold mb-4 text-white relative z-10">
                           {getContentValue(content, 'services', 'Diagnostics', 'Title', 'Diagnostics')}
-                        </motion.h4>
-                        <motion.p
-                          className="text-blue-100 mb-6 text-lg leading-relaxed relative z-10"
-                          initial={{ opacity: 0, y: 20 }}
-                          whileInView={{ opacity: 1, y: 0 }}
-                          viewport={{ once: true }}
-                          transition={{ duration: 0.6, delay: 1.1 }}
-                        >
+                        </h4>
+                        <p className="text-blue-100 mb-6 text-lg leading-relaxed relative z-10">
                           {getContentValue(content, 'services', 'Diagnostics', 'Description', 'Advanced diagnostic procedures including ultrasound, cystoscopy, and urodynamic studies.')}
-                        </motion.p>
+                        </p>
                         <div className="mt-auto relative z-10">
-                          <motion.div
-                            className="mb-6 flex items-center justify-center text-white"
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.6, delay: 1.3 }}
-                          >
+                          <div className="mb-6 flex items-center justify-center text-white">
                             <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
                             </svg>
                             <span className="text-lg">{getContentValue(content, 'services', 'Diagnostics', 'Feature', 'Accurate Results')}</span>
-                          </motion.div>
-
+                          </div>
                         </div>
-                      </motion.div>
+                      </div>
 
-                      <motion.div
-                        className="true-glass-card p-8 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col items-center text-center border border-white/10 hover:border-white/30 h-full group service-card relative overflow-hidden"
-                        initial={{ opacity: 0, y: 80 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true, margin: "0px" }}
-                        transition={{ duration: 0.8, delay: 0.5 }}
-                        whileHover={{ scale: 1.05 }}
-                      >
+                      <div className="true-glass-card p-8 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col items-center text-center border border-white/10 hover:border-white/30 h-full group service-card relative overflow-hidden">
                         <div className="card-perimeter-animation absolute inset-0"></div>
-                        <motion.div
-                          className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent w-[200%]"
-                          initial={{ x: '-100%' }}
-                          whileInView={{ x: '100%' }}
-                          viewport={{ once: true }}
-                          transition={{ duration: 1.5, delay: 1.6, ease: 'easeInOut' }}
-                        />
-                        <motion.div
-                          className="absolute inset-0 bg-gradient-to-r from-transparent to-white/5 w-[200%]"
-                          initial={{ x: '100%' }}
-                          whileInView={{ x: '-100%' }}
-                          viewport={{ once: true }}
-                          transition={{ duration: 1.5, delay: 1.6, ease: 'easeInOut' }}
-                        />
-                        <motion.div
-                          className="bg-white/20 p-5 rounded-full mb-6 group-hover:bg-white/30 transition-all duration-300"
-                          initial={{ opacity: 0, scale: 0.8 }}
-                          whileInView={{ opacity: 1, scale: 1 }}
-                          viewport={{ once: true }}
-                          transition={{ duration: 0.6, delay: 0.9 }}
-                          whileHover={{ scale: 1.1, rotate: 5 }}
-                        >
+                        <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent w-[200%]"></div>
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent to-white/5 w-[200%]"></div>
+                        <div className="bg-white/20 p-5 rounded-full mb-6 group-hover:bg-white/30 transition-all duration-300">
                           <svg className="w-14 h-14 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
                           </svg>
-                        </motion.div>
-                        <motion.h4
-                          className="text-2xl font-semibold mb-4 text-white"
-                          initial={{ opacity: 0, y: 20 }}
-                          whileInView={{ opacity: 1, y: 0 }}
-                          viewport={{ once: true }}
-                          transition={{ duration: 0.6, delay: 1.1 }}
-                        >
+                        </div>
+                        <h4 className="text-2xl font-semibold mb-4 text-white">
                           {getContentValue(content, 'services', 'Treatments', 'Title', 'Treatments')}
-                        </motion.h4>
-                        <motion.p
-                          className="text-blue-100 text-lg leading-relaxed mb-6"
-                          initial={{ opacity: 0, y: 20 }}
-                          whileInView={{ opacity: 1, y: 0 }}
-                          viewport={{ once: true }}
-                          transition={{ duration: 0.6, delay: 1.3 }}
-                        >
+                        </h4>
+                        <p className="text-blue-100 text-lg leading-relaxed mb-6">
                           {getContentValue(content, 'services', 'Treatments', 'Description', 'Comprehensive treatment options for various urological conditions, from medication to surgical interventions.')}
-                        </motion.p>
+                        </p>
                         <div className="mt-auto">
-                          <motion.div
-                            className="mb-6 flex items-center justify-center text-white"
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.6, delay: 1.5 }}
-                          >
+                          <div className="mb-6 flex items-center justify-center text-white">
                             <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                             </svg>
                             <span className="text-lg">{getContentValue(content, 'services', 'Treatments', 'Feature', 'Personalized Care')}</span>
-                          </motion.div>
-
+                          </div>
                         </div>
-                      </motion.div>
+                      </div>
                     </div>
                   </div>
                 </div>
