@@ -2,11 +2,13 @@ import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import apiService from '../utils/apiService';
 import { loadContent, getContentValue } from '../utils/contentUtils';
+import { initScrollAnimations, addVisibleClass } from '../utils/scrollAnimations';
 import { FaBars, FaTimes } from 'react-icons/fa';
 import EnhancedContact from './EnhancedContact';
 import './GlassEffects.css';
 import '../styles/animations.css';
 import '../styles/fallbackAnimations.css';
+import '../styles/textAnimations.css';
 import PageLoader from './PageLoader';
 // Removed framer-motion import as animations are no longer needed
 
@@ -38,6 +40,7 @@ function HomePage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const menuRef = useRef(null);
   // Content loading state removed as animations are no longer needed
   const [content, setContent] = useState({
@@ -64,7 +67,26 @@ function HomePage() {
     fetchContent();
   }, []);
 
-  // All animations have been removed from the homepage text
+  // Handle window resize for mobile detection
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Initialize scroll animations
+  useEffect(() => {
+    // Add CSS class for animation visibility
+    addVisibleClass();
+
+    // Initialize scroll animations with IntersectionObserver
+    const cleanup = initScrollAnimations();
+
+    return cleanup;
+  }, []);
 
   // Close mobile menu when clicking outside
   useEffect(() => {
@@ -165,7 +187,7 @@ function HomePage() {
           backgroundImage: "url('/image/Theone.jpeg')",
           backgroundSize: "cover",
           backgroundPosition: "center center", /* Center position for all screen sizes */
-          backgroundAttachment: "fixed",
+          backgroundAttachment: isMobile ? "scroll" : "fixed", /* Use scroll on mobile to prevent parallax issues */
           minHeight: "100vh",
           overflowX: "hidden", /* Prevent horizontal scrolling on mobile */
           position: "relative" /* For overlay positioning */
@@ -590,7 +612,7 @@ function HomePage() {
                       </div>
                       <button
                         onClick={() => window.location.href = 'tel:+254722396296'}
-                        className="border-2 border-white text-white hover:bg-white/10 px-6 sm:px-8 py-3 rounded-full font-medium transition duration-300 text-sm sm:text-base flex items-center justify-center gap-2 w-36 sm:w-auto"
+                        className="bg-blue-700 hover:bg-blue-800 text-white px-6 sm:px-8 py-3 rounded-full font-medium transition duration-300 text-sm sm:text-base flex items-center justify-center gap-2 w-36 sm:w-auto shadow-md pulse-animation"
                       >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
@@ -624,11 +646,11 @@ function HomePage() {
                   <div className="max-w-5xl mx-auto px-4">
                     <div className="text-center mb-12 relative">
                       <div className="bg-gradient-to-r from-white/30 via-white/50 to-white/30 h-1 w-24 mx-auto mb-4"></div>
-                      <h3 className="text-3xl md:text-4xl font-bold text-white mb-4 text-center relative inline-block">
+                      <h3 className="text-3xl md:text-4xl font-bold text-white mb-4 text-center relative inline-block services-title">
                         Our Services
                         <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-blue-200 to-white transform scale-x-0 transition-transform duration-300 group-hover:scale-x-100"></div>
                       </h3>
-                      <p className="text-lg md:text-xl text-blue-100 mb-2 max-w-3xl mx-auto">
+                      <p className="text-lg md:text-xl text-blue-100 mb-2 max-w-3xl mx-auto services-subtitle">
                         {getContentValue(content, 'homepage', 'About', 'About Text', 'We provide comprehensive urological care with state-of-the-art technology and personalized treatment plans.')}
                       </p>
                       <div className="h-1 w-16 bg-gradient-to-r from-blue-200 to-white mx-auto mt-4"></div>
@@ -636,6 +658,7 @@ function HomePage() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8 px-4 sm:px-0 relative z-10 services-grid">
                       <div className="true-glass-card p-8 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col items-center text-center border border-white/10 hover:border-white/30 h-full group service-card relative overflow-hidden">
                         <div className="card-perimeter-animation absolute inset-0"></div>
+                        <div className="card-light-effect"></div>
                         <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent w-[200%]"></div>
                         <div className="absolute inset-0 bg-gradient-to-r from-transparent to-white/5 w-[200%]"></div>
                         <div className="bg-white/20 p-5 rounded-full mb-6 group-hover:bg-white/30 transition-all duration-300">
@@ -661,6 +684,7 @@ function HomePage() {
 
                       <div className="true-glass-card p-8 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col items-center text-center border border-white/20 hover:border-white/40 h-full group relative overflow-hidden service-card">
                         <div className="card-perimeter-animation absolute inset-0"></div>
+                        <div className="card-light-effect"></div>
                         <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent w-[200%]"></div>
                         <div className="absolute inset-0 bg-gradient-to-r from-transparent to-white/5 w-[200%]"></div>
                         <div className="absolute top-0 right-0 w-24 h-24 bg-white opacity-5 rounded-full -mr-8 -mt-8"></div>
@@ -688,6 +712,7 @@ function HomePage() {
 
                       <div className="true-glass-card p-8 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col items-center text-center border border-white/10 hover:border-white/30 h-full group service-card relative overflow-hidden">
                         <div className="card-perimeter-animation absolute inset-0"></div>
+                        <div className="card-light-effect"></div>
                         <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent w-[200%]"></div>
                         <div className="absolute inset-0 bg-gradient-to-r from-transparent to-white/5 w-[200%]"></div>
                         <div className="bg-white/20 p-5 rounded-full mb-6 group-hover:bg-white/30 transition-all duration-300">

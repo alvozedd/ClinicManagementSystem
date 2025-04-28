@@ -605,6 +605,16 @@ app.get('/queue/next', addCorsHeaders, (req, res) => {
   protect(req, res, () => doctor(req, res, () => getNextPatient(req, res)));
 });
 
+app.put('/queue/reorder', addCorsHeaders, (req, res) => {
+  console.log('Received PUT request at /queue/reorder, forwarding to controller directly');
+  // Import the controller directly
+  const { reorderQueue } = require('./controllers/queueController');
+  // Add authentication middleware manually
+  const { protect, secretary } = require('./middleware/authMiddleware');
+  // Call middleware then controller
+  protect(req, res, () => secretary(req, res, () => reorderQueue(req, res)));
+});
+
 app.put('/queue/:id', addCorsHeaders, (req, res) => {
   console.log('Received PUT request at /queue/:id, forwarding to controller directly');
   // Import the controller directly

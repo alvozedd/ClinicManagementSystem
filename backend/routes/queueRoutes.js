@@ -7,6 +7,7 @@ const {
   removeFromQueue,
   getQueueStats,
   getNextPatient,
+  reorderQueue,
 } = require('../controllers/queueController');
 const { protect, doctor, secretary, doctorOrSecretary } = require('../middleware/authMiddleware');
 const { apiLimiter } = require('../middleware/rateLimitMiddleware');
@@ -22,6 +23,7 @@ router.route('/')
 
 router.route('/stats').get(doctorOrSecretary, getQueueStats);
 router.route('/next').get(doctor, getNextPatient);
+router.route('/reorder').put(secretary, reorderQueue);
 
 router.route('/:id')
   .put(doctorOrSecretary, updateQueueEntry)

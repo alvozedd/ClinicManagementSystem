@@ -69,7 +69,7 @@ const addToQueue = asyncHandler(async (req, res) => {
     const populatedEntry = await Queue.findById(queueEntry._id)
       .populate('patient_id', 'name gender phone year_of_birth')
       .populate('appointment_id', 'appointment_date optional_time type reason status');
-      
+
     res.status(201).json(populatedEntry);
   } else {
     res.status(400);
@@ -91,7 +91,7 @@ const getQueueEntries = asyncHandler(async (req, res) => {
   })
     .populate('patient_id', 'name gender phone year_of_birth')
     .populate('appointment_id', 'appointment_date optional_time type reason status')
-    .sort({ status: 1, ticket_number: 1 });
+    .sort({ status: 1, queue_position: 1, ticket_number: 1 });
 
   res.json(queueEntries);
 });
@@ -108,10 +108,10 @@ const updateQueueEntry = asyncHandler(async (req, res) => {
     // Update status and related timestamps
     if (status) {
       queueEntry.status = status;
-      
+
       if (status === 'In Progress' && !queueEntry.start_time) {
         queueEntry.start_time = new Date();
-        
+
         // If there's an associated appointment, update its status
         if (queueEntry.appointment_id) {
           const appointment = await Appointment.findById(queueEntry.appointment_id);
@@ -122,7 +122,7 @@ const updateQueueEntry = asyncHandler(async (req, res) => {
         }
       } else if (status === 'Completed' && !queueEntry.end_time) {
         queueEntry.end_time = new Date();
-        
+
         // If there's an associated appointment, update its status
         if (queueEntry.appointment_id) {
           const appointment = await Appointment.findById(queueEntry.appointment_id);
@@ -146,12 +146,12 @@ const updateQueueEntry = asyncHandler(async (req, res) => {
     if (notes !== undefined) queueEntry.notes = notes;
 
     const updatedEntry = await queueEntry.save();
-    
+
     // Populate patient information
     const populatedEntry = await Queue.findById(updatedEntry._id)
       .populate('patient_id', 'name gender phone year_of_birth')
       .populate('appointment_id', 'appointment_date optional_time type reason status');
-      
+
     res.json(populatedEntry);
   } else {
     res.status(404);
@@ -266,6 +266,43 @@ const getNextPatient = asyncHandler(async (req, res) => {
   }
 });
 
+// @desc    Reorder queue entries
+// @route   PUT /api/queue/reorder
+// @access  Private/Secretary
+const reorderQueue = asyncHandler(async (req, res) => {
+  const { queueOrder } = req.body;
+
+  if (!queueOrder || !Array.isArray(queueOrder)) {
+    res.status(400);
+    throw new Error('Invalid queue order data');
+  }
+
+  // Update each queue entry with its new position
+  const updatePromises = queueOrder.map((item, index) => {
+    return Queue.findByIdAndUpdate(
+      item.id,
+      { queue_position: index },
+      { new: true }
+    );
+  });
+
+  await Promise.all(updatePromises);
+
+  // Get the updated queue
+  const today = new Date();
+  const startOfDay = new Date(today.setHours(0, 0, 0, 0));
+  const endOfDay = new Date(today.setHours(23, 59, 59, 999));
+
+  const queueEntries = await Queue.find({
+    check_in_time: { $gte: startOfDay, $lte: endOfDay },
+  })
+    .populate('patient_id', 'name gender phone year_of_birth')
+    .populate('appointment_id', 'appointment_date optional_time type reason status')
+    .sort({ status: 1, queue_position: 1, ticket_number: 1 });
+
+  res.json(queueEntries);
+});
+
 module.exports = {
   addToQueue,
   getQueueEntries,
@@ -273,4 +310,5 @@ module.exports = {
   removeFromQueue,
   getQueueStats,
   getNextPatient,
+  reorderQueue,
 };

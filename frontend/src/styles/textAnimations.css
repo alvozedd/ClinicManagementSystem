@@ -1,0 +1,114 @@
+/* Text animations for UroHealth homepage */
+
+/* Typewriter effect for hero title */
+.hero-title {
+  overflow: hidden;
+  white-space: nowrap;
+  border-right: 3px solid transparent;
+  animation: typing 2s steps(40, end), blink-caret 0.75s step-end infinite;
+  animation-fill-mode: forwards;
+  width: 0;
+}
+
+@keyframes typing {
+  from { width: 0 }
+  to { width: 100% }
+}
+
+@keyframes blink-caret {
+  from, to { border-color: transparent }
+  50% { border-color: rgba(255, 255, 255, 0.5); }
+}
+
+/* Fade in for subtitle */
+.hero-subtitle {
+  opacity: 0;
+  animation: fadeIn 1.5s ease 1.5s forwards;
+}
+
+/* Fade in for description */
+.hero-description {
+  opacity: 0;
+  animation: fadeIn 1.5s ease 2.5s forwards;
+}
+
+/* Fade in animation */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Services section title animation */
+.services-title {
+  opacity: 0;
+  animation: fadeInSlowly 1.5s ease forwards;
+}
+
+.services-subtitle {
+  opacity: 0;
+  animation: fadeInSlowly 1.5s ease 0.5s forwards;
+}
+
+@keyframes fadeInSlowly {
+  0% { opacity: 0; transform: translateY(15px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+/* Card perimeter light animation */
+.card-light-effect {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 12px;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.card-light-effect::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  transform: rotate(45deg);
+  animation: lightSweep 3s linear infinite;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.service-card:hover .card-light-effect::before {
+  opacity: 1;
+}
+
+@keyframes lightSweep {
+  0% {
+    transform: rotate(45deg) translateX(-100%);
+  }
+  100% {
+    transform: rotate(45deg) translateX(100%);
+  }
+}
+
+/* Accessibility - respect user preferences */
+@media (prefers-reduced-motion) {
+  .hero-title,
+  .hero-subtitle,
+  .hero-description,
+  .services-title,
+  .services-subtitle,
+  .card-light-effect::before {
+    animation: none !important;
+    opacity: 1 !important;
+    width: auto !important;
+    transform: none !important;
+  }
+}

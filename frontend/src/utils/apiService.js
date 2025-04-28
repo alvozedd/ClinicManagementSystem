@@ -694,6 +694,18 @@ const apiService = {
       credentials: 'include', // Include cookies for refresh token
     });
   },
+
+  reorderQueue: async (queueOrderData) => {
+    return secureFetch(`${API_URL}/queue/reorder`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        ...authHeader(),
+      },
+      body: JSON.stringify(queueOrderData),
+      credentials: 'include', // Include cookies for refresh token
+    });
+  },
 };
 
 export default apiService;
