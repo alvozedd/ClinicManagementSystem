@@ -433,11 +433,13 @@ function Dashboard() {
             // If parsing fails, create a simple diagnosis object
             diagnosisObj = {
               notes: diagnosisText,
+              diagnosis: '', // Include empty diagnosis field
               treatment: '',
               followUp: '',
               files: [],
               updatedAt: new Date().toISOString()
             };
+            console.log('Created fallback diagnosis object after parse failure:', diagnosisObj);
           }
         } else if (typeof appointmentToSave.diagnosis === 'object') {
           // If it's already an object, use it directly
@@ -448,11 +450,13 @@ function Dashboard() {
           diagnosisText = appointmentToSave.diagnosis;
           diagnosisObj = {
             notes: diagnosisText,
+            diagnosis: '', // Include empty diagnosis field
             treatment: '',
             followUp: '',
             files: [],
             updatedAt: new Date().toISOString()
           };
+          console.log('Created fallback diagnosis object from string:', diagnosisObj);
         }
 
         let diagnosisResponse;
@@ -468,11 +472,14 @@ function Dashboard() {
           // Make sure we're sending the complete diagnosis object as a JSON string
           const updatedDiagnosisObj = {
             notes: diagnosisData.notes || '',
+            diagnosis: diagnosisData.diagnosis || '', // Include the diagnosis field
             treatment: diagnosisData.treatment || '',
             followUp: diagnosisData.followUp || '',
             files: diagnosisData.files || [],
             updatedAt: new Date().toISOString()
           };
+
+          console.log('Updating diagnosis with complete object:', updatedDiagnosisObj);
 
           console.log('Updating diagnosis with data:', updatedDiagnosisObj);
 
@@ -498,11 +505,14 @@ function Dashboard() {
           id: appointmentToSave.diagnosisId || diagnosisResponse._id,
           _id: appointmentToSave.diagnosisId || diagnosisResponse._id,
           notes: diagnosisData.notes || '',
+          diagnosis: diagnosisData.diagnosis || '', // Include the diagnosis field
           treatment: diagnosisData.treatment || '',
           followUp: diagnosisData.followUp || '',
           files: diagnosisData.files || [],
           updatedAt: new Date().toISOString()
         };
+
+        console.log('Diagnosis object for UI updates (complete):', diagnosisObjForUI);
 
         console.log('Diagnosis object for UI updates:', diagnosisObjForUI);
 

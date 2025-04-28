@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FaUserPlus, FaSync, FaUserClock, FaUserCheck, FaUserTimes, FaPrint, FaCalendarCheck } from 'react-icons/fa';
+import { FaUserPlus, FaSync, FaUserClock, FaUserCheck, FaUserTimes, FaPrint, FaCalendarCheck, FaArrowUp, FaArrowDown } from 'react-icons/fa';
 import apiService from '../utils/apiService';
 import SimplifiedQueueCard from './SimplifiedQueueCard';
 import SimplifiedAddToQueueModal from './SimplifiedAddToQueueModal';
@@ -40,18 +40,46 @@ function SimplifiedQueueManagement({ patients, appointments, userRole }) {
   // Filter today's appointments
   useEffect(() => {
     const today = new Date().toISOString().split('T')[0];
+    console.log('Filtering appointments for today:', today);
+    console.log('Total appointments:', appointments.length);
 
     const filteredAppointments = appointments.filter(appointment => {
-      const appointmentDate = new Date(appointment.appointment_date || appointment.date).toISOString().split('T')[0];
-      return appointmentDate === today && appointment.status !== 'Completed' && appointment.status !== 'Cancelled';
+      // Get the appointment date, handling different formats
+      let appointmentDate;
+      if (appointment.appointment_date) {
+        appointmentDate = new Date(appointment.appointment_date).toISOString().split('T')[0];
+      } else if (appointment.date) {
+        appointmentDate = new Date(appointment.date).toISOString().split('T')[0];
+      } else {
+        return false; // Skip appointments without a date
+      }
+
+      // Check if the appointment is for today and not completed or cancelled
+      const isToday = appointmentDate === today;
+      const isActive = appointment.status !== 'Completed' && appointment.status !== 'Cancelled';
+
+      if (isToday) {
+        console.log('Found appointment for today:', appointment);
+      }
+
+      return isToday && isActive;
     });
+
+    console.log('Filtered appointments for today:', filteredAppointments.length);
 
     // Check which appointments are already in the queue
     const appointmentsInQueue = queueEntries.map(entry => entry.appointment_id?._id || entry.appointment_id);
+    console.log('Appointments already in queue:', appointmentsInQueue);
 
     // Mark appointments that are already in the queue
     const appointmentsWithQueueStatus = filteredAppointments.map(appointment => {
-      const isInQueue = appointmentsInQueue.includes(appointment._id || appointment.id);
+      const appointmentId = appointment._id || appointment.id;
+      const isInQueue = appointmentsInQueue.includes(appointmentId);
+
+      if (isInQueue) {
+        console.log('Appointment already in queue:', appointmentId);
+      }
+
       return {
         ...appointment,
         isInQueue
@@ -59,6 +87,7 @@ function SimplifiedQueueManagement({ patients, appointments, userRole }) {
     });
 
     setTodaysAppointments(appointmentsWithQueueStatus);
+    console.log('Today\'s appointments set:', appointmentsWithQueueStatus);
 
     // If we're in the appointments tab and there are appointments not in the queue,
     // show a message or highlight them
@@ -152,6 +181,90 @@ function SimplifiedQueueManagement({ patients, appointments, userRole }) {
     }
   };
 
+  // Handle moving a queue entry up in the order
+  const handleMoveUp = async (entryId) => {
+    // Find the entry and its index
+    const waitingEntries = queueEntries.filter(entry => entry.status === 'Waiting');
+    const entryIndex = waitingEntries.findIndex(entry => entry._id === entryId);
+
+    // If it's already at the top, do nothing
+    if (entryIndex <= 0) return;
+
+    // Create a copy of the waiting entries
+    const updatedWaitingEntries = [...waitingEntries];
+
+    // Swap the entry with the one above it
+    const temp = updatedWaitingEntries[entryIndex];
+    updatedWaitingEntries[entryIndex] = updatedWaitingEntries[entryIndex - 1];
+    updatedWaitingEntries[entryIndex - 1] = temp;
+
+    // Update the queue order in the UI immediately (optimistic update)
+    const updatedEntries = [...queueEntries];
+    const waitingIndices = updatedEntries.map((entry, index) => entry.status === 'Waiting' ? index : -1).filter(index => index !== -1);
+
+    // Replace the waiting entries in the original array
+    updatedWaitingEntries.forEach((entry, i) => {
+      updatedEntries[waitingIndices[i]] = entry;
+    });
+
+    setQueueEntries(updatedEntries);
+
+    try {
+      // Update the queue order in the database
+      // This would typically involve updating the priority or order field of each entry
+      console.log('Queue entry moved up:', entryId);
+
+      // In a real implementation, you would call an API to update the queue order
+      // await apiService.updateQueueOrder(updatedWaitingEntries.map(e => e._id));
+    } catch (error) {
+      console.error('Error updating queue order:', error);
+      // Revert to the original order if the update fails
+      fetchQueueData();
+    }
+  };
+
+  // Handle moving a queue entry down in the order
+  const handleMoveDown = async (entryId) => {
+    // Find the entry and its index
+    const waitingEntries = queueEntries.filter(entry => entry.status === 'Waiting');
+    const entryIndex = waitingEntries.findIndex(entry => entry._id === entryId);
+
+    // If it's already at the bottom, do nothing
+    if (entryIndex === -1 || entryIndex >= waitingEntries.length - 1) return;
+
+    // Create a copy of the waiting entries
+    const updatedWaitingEntries = [...waitingEntries];
+
+    // Swap the entry with the one below it
+    const temp = updatedWaitingEntries[entryIndex];
+    updatedWaitingEntries[entryIndex] = updatedWaitingEntries[entryIndex + 1];
+    updatedWaitingEntries[entryIndex + 1] = temp;
+
+    // Update the queue order in the UI immediately (optimistic update)
+    const updatedEntries = [...queueEntries];
+    const waitingIndices = updatedEntries.map((entry, index) => entry.status === 'Waiting' ? index : -1).filter(index => index !== -1);
+
+    // Replace the waiting entries in the original array
+    updatedWaitingEntries.forEach((entry, i) => {
+      updatedEntries[waitingIndices[i]] = entry;
+    });
+
+    setQueueEntries(updatedEntries);
+
+    try {
+      // Update the queue order in the database
+      // This would typically involve updating the priority or order field of each entry
+      console.log('Queue entry moved down:', entryId);
+
+      // In a real implementation, you would call an API to update the queue order
+      // await apiService.updateQueueOrder(updatedWaitingEntries.map(e => e._id));
+    } catch (error) {
+      console.error('Error updating queue order:', error);
+      // Revert to the original order if the update fails
+      fetchQueueData();
+    }
+  };
+
   // Sort queue entries by status and ticket number
   const sortedQueueEntries = [...queueEntries].sort((a, b) => {
     // First sort by status priority
@@ -163,6 +276,9 @@ function SimplifiedQueueManagement({ patients, appointments, userRole }) {
     // Then sort by ticket number
     return a.ticket_number - b.ticket_number;
   });
+
+  // Get only the waiting entries for drag and drop
+  const waitingEntries = sortedQueueEntries.filter(entry => entry.status === 'Waiting');
 
   return (
     <div className="bg-white rounded-lg shadow-sm p-4">
@@ -270,29 +386,253 @@ function SimplifiedQueueManagement({ patients, appointments, userRole }) {
       {activeTab === 'queue' && (
         <div className="space-y-3 mt-4">
           {sortedQueueEntries.length > 0 ? (
-            sortedQueueEntries.map(entry => (
-              <SimplifiedQueueCard
-                key={entry._id}
-                queueEntry={entry}
-                onUpdateStatus={(status) => handleUpdateQueueEntry(entry._id, { status })}
-                onRemove={() => handleRemoveFromQueue(entry._id)}
-                onPrintTicket={() => handlePrintTicket(entry)}
-                userRole={userRole}
-              />
-            ))
+            <div>
+              <div className="mb-4 flex justify-between items-center">
+                <h3 className="text-lg font-semibold text-blue-800">Current Queue</h3>
+                <div className="flex space-x-2">
+                  {userRole === 'secretary' && (
+                    <button
+                      onClick={() => setShowAddToQueueModal(true)}
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm font-medium flex items-center"
+                    >
+                      <FaUserPlus className="mr-1" />
+                      Add Patient
+                    </button>
+                  )}
+                </div>
+              </div>
+              <div>
+                {/* In Progress Patients */}
+                {sortedQueueEntries.filter(entry => entry.status === 'In Progress').length > 0 && (
+                  <div className="mb-4">
+                    <h4 className="text-sm font-medium text-blue-700 mb-2 flex items-center">
+                      <FaUserCheck className="mr-1" /> In Progress
+                    </h4>
+                    <div className="space-y-3">
+                      {sortedQueueEntries
+                        .filter(entry => entry.status === 'In Progress')
+                        .map(entry => (
+                          <SimplifiedQueueCard
+                            key={entry._id}
+                            queueEntry={entry}
+                            onUpdateStatus={(status) => handleUpdateQueueEntry(entry._id, { status })}
+                            onRemove={() => handleRemoveFromQueue(entry._id)}
+                            onPrintTicket={() => handlePrintTicket(entry)}
+                            userRole={userRole}
+                          />
+                        ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Waiting Patients - Reorderable */}
+                {waitingEntries.length > 0 && (
+                  <div className="mb-4">
+                    <h4 className="text-sm font-medium text-yellow-700 mb-2 flex items-center">
+                      <FaUserClock className="mr-1" /> Waiting
+                      {userRole === 'secretary' && (
+                        <span className="ml-2 text-xs text-gray-500 flex items-center">
+                          <FaArrowUp className="mr-1" /><FaArrowDown className="mr-1" /> Use arrows to reorder
+                        </span>
+                      )}
+                    </h4>
+                    <div className="space-y-3">
+                      {waitingEntries.map((entry, index) => (
+                        <div key={entry._id} className="relative">
+                          {userRole === 'secretary' && (
+                            <div className="absolute right-2 top-2 flex flex-col space-y-1 z-10">
+                              <button
+                                onClick={() => handleMoveUp(entry._id)}
+                                disabled={index === 0}
+                                className={`p-1 rounded ${index === 0 ? 'text-gray-300 cursor-not-allowed' : 'text-blue-600 hover:bg-blue-100'}`}
+                                title="Move up"
+                              >
+                                <FaArrowUp size={14} />
+                              </button>
+                              <button
+                                onClick={() => handleMoveDown(entry._id)}
+                                disabled={index === waitingEntries.length - 1}
+                                className={`p-1 rounded ${index === waitingEntries.length - 1 ? 'text-gray-300 cursor-not-allowed' : 'text-blue-600 hover:bg-blue-100'}`}
+                                title="Move down"
+                              >
+                                <FaArrowDown size={14} />
+                              </button>
+                            </div>
+                          )}
+                          <SimplifiedQueueCard
+                            queueEntry={entry}
+                            onUpdateStatus={(status) => handleUpdateQueueEntry(entry._id, { status })}
+                            onRemove={() => handleRemoveFromQueue(entry._id)}
+                            onPrintTicket={() => handlePrintTicket(entry)}
+                            userRole={userRole}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Completed and Other Patients */}
+                {sortedQueueEntries.filter(entry => entry.status !== 'In Progress' && entry.status !== 'Waiting').length > 0 && (
+                  <div>
+                    <h4 className="text-sm font-medium text-green-700 mb-2 flex items-center">
+                      <FaUserCheck className="mr-1" /> Completed / Other
+                    </h4>
+                    <div className="space-y-3">
+                      {sortedQueueEntries
+                        .filter(entry => entry.status !== 'In Progress' && entry.status !== 'Waiting')
+                        .map(entry => (
+                          <SimplifiedQueueCard
+                            key={entry._id}
+                            queueEntry={entry}
+                            onUpdateStatus={(status) => handleUpdateQueueEntry(entry._id, { status })}
+                            onRemove={() => handleRemoveFromQueue(entry._id)}
+                            onPrintTicket={() => handlePrintTicket(entry)}
+                            userRole={userRole}
+                          />
+                        ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
           ) : (
             <div className="text-center py-8 bg-gray-50 rounded-lg">
               {todaysAppointments.length > 0 ? (
                 <div className="queue-message">
                   <p className="text-gray-500 mb-2">No patients in the queue yet</p>
-                  <p className="text-blue-600">
+                  <p className="text-blue-600 mb-4">
                     There {todaysAppointments.length === 1 ? 'is' : 'are'} {todaysAppointments.length} appointment{todaysAppointments.length !== 1 ? 's' : ''} scheduled for today.
-                    {userRole === 'secretary' && "Check the Today's Appointments tab to check them in."}
                   </p>
+                  {userRole === 'secretary' && (
+                    <div className="flex justify-center space-x-4 mt-4">
+                      <button
+                        onClick={() => setActiveTab('appointments')}
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-medium flex items-center"
+                      >
+                        <FaCalendarCheck className="mr-2" />
+                        View Today's Appointments
+                      </button>
+                      <button
+                        onClick={() => setShowAddToQueueModal(true)}
+                        className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded text-sm font-medium flex items-center"
+                      >
+                        <FaUserPlus className="mr-2" />
+                        Add Walk-in Patient
+                      </button>
+                    </div>
+                  )}
                 </div>
               ) : (
-                <p className="text-gray-500">No patients in the queue today</p>
+                <div>
+                  <p className="text-gray-500 mb-4">No patients in the queue today</p>
+                  {userRole === 'secretary' && (
+                    <button
+                      onClick={() => setShowAddToQueueModal(true)}
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-medium flex items-center mx-auto"
+                    >
+                      <FaUserPlus className="mr-2" />
+                      Add Walk-in Patient
+                    </button>
+                  )}
+                </div>
               )}
+            </div>
+          )}
+
+          {/* Show Today's Appointments in Queue Tab */}
+          {todaysAppointments.length > 0 && sortedQueueEntries.length > 0 && (
+            <div className="mt-8 pt-6 border-t border-gray-200">
+              <div className="mb-4 flex justify-between items-center">
+                <h3 className="text-lg font-semibold text-blue-800">Today's Appointments</h3>
+                {todaysAppointments.filter(a => !a.isInQueue).length > 0 && userRole === 'secretary' && (
+                  <button
+                    onClick={() => {
+                      const promises = todaysAppointments
+                        .filter(a => !a.isInQueue)
+                        .map(appointment => handleCheckInAppointment(appointment));
+
+                      Promise.all(promises).then(() => {
+                        fetchQueueData();
+                      });
+                    }}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm font-medium flex items-center"
+                  >
+                    <FaUserCheck className="mr-1" />
+                    Check In All
+                  </button>
+                )}
+              </div>
+              <div className="space-y-3">
+                {todaysAppointments.map(appointment => {
+                  const isInQueue = appointment.isInQueue;
+                  const appointmentId = appointment._id || appointment.id;
+                  const patientName = appointment.patientName || 'Patient';
+                  const appointmentType = appointment.type || 'Consultation';
+                  const appointmentTime = appointment.optional_time || appointment.time;
+                  const appointmentReason = appointment.reason;
+
+                  return (
+                    <div
+                      key={appointmentId}
+                      className={`p-4 rounded-lg border ${isInQueue ? 'border-green-200 bg-green-50' : 'border-gray-200'} flex flex-col md:flex-row justify-between items-start md:items-center hover:shadow-md transition-all duration-300`}
+                    >
+                      <div>
+                        <div className="flex items-center">
+                          <h3 className="font-semibold text-lg">{patientName}</h3>
+                          {isInQueue && (
+                            <span className="ml-2 px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+                              Already in queue
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-sm text-gray-600 mt-1">
+                          <span className="inline-block mr-4">
+                            <span className="font-medium">Type:</span> {appointmentType}
+                          </span>
+                          {appointmentTime && (
+                            <span className="inline-block mr-4">
+                              <span className="font-medium">Time:</span> {appointmentTime}
+                            </span>
+                          )}
+                          {appointmentReason && (
+                            <span className="inline-block">
+                              <span className="font-medium">Reason:</span> {appointmentReason}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      {!isInQueue && userRole === 'secretary' && (
+                        <button
+                          onClick={() => handleCheckInAppointment(appointment)}
+                          className="mt-3 md:mt-0 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm font-medium flex items-center"
+                        >
+                          <FaUserCheck className="mr-1" />
+                          Check In
+                        </button>
+                      )}
+
+                      {isInQueue && (
+                        <button
+                          onClick={() => {
+                            const queueEntry = queueEntries.find(entry =>
+                              (entry.appointment_id?._id || entry.appointment_id) === appointmentId
+                            );
+                            if (queueEntry) {
+                              handlePrintTicket(queueEntry);
+                            }
+                          }}
+                          className="mt-3 md:mt-0 bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-1 rounded text-sm font-medium flex items-center"
+                        >
+                          <FaPrint className="mr-1" />
+                          Print Ticket
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           )}
         </div>

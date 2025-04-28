@@ -77,12 +77,14 @@ function SimplifiedNotesModal({ appointment, onClose, onSave }) {
       // Create a structured notes object
       const notesObj = {
         notes: notes,
-        diagnosis: diagnosis,
+        diagnosis: diagnosis, // This is the diagnosis field from the form
         treatment: treatment,
         followUp: followUp,
         files: fileData,
         updatedAt: new Date().toISOString()
       };
+
+      console.log('Notes object being saved:', notesObj);
 
       // For API compatibility, convert the notes object to a string
       // The backend expects a diagnosis_text field
