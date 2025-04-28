@@ -10,7 +10,6 @@
     "install": "cd backend && npm install"
   },
   "dependencies": {
-    "framer-motion": "^12.9.2",
-    "react-beautiful-dnd": "^13.1.1"
+    "framer-motion": "^12.9.2"
   }
 }

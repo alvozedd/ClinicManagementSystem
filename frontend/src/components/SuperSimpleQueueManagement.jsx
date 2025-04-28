@@ -195,8 +195,12 @@ function SuperSimpleQueueManagement({ patients, appointments, userRole }) {
 
       setQueueEntries(sortedEntries);
 
-      // In a real implementation, you would call an API endpoint here to update the order in the database
-      // await apiService.reorderQueue(reorderedEntries.map(entry => entry._id));
+      // Call the API to update the order in the database
+      const queueOrder = reorderedEntries.map((entry, index) => ({
+        id: entry._id,
+        position: index
+      }));
+      await apiService.reorderQueue({ queueOrder });
 
     } catch (error) {
       console.error('Error reordering queue:', error);
@@ -245,8 +249,12 @@ function SuperSimpleQueueManagement({ patients, appointments, userRole }) {
 
       setQueueEntries(sortedEntries);
 
-      // In a real implementation, you would call an API endpoint here to update the order in the database
-      // await apiService.reorderQueue(reorderedEntries.map(entry => entry._id));
+      // Call the API to update the order in the database
+      const queueOrder = reorderedEntries.map((entry, index) => ({
+        id: entry._id,
+        position: index
+      }));
+      await apiService.reorderQueue({ queueOrder });
 
     } catch (error) {
       console.error('Error reordering queue:', error);
