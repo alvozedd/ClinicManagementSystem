@@ -16,14 +16,14 @@ import PageLoader from './PageLoader';
 const responsiveBackgroundStyles = `
   @media (max-width: 768px) {
     .responsive-bg {
-      background-position: 65% center !important;
+      background-position: center center !important;
       background-size: cover !important;
     }
   }
 
   @media (max-width: 480px) {
     .responsive-bg {
-      background-position: 70% center !important;
+      background-position: center center !important;
     }
   }
 
@@ -40,7 +40,6 @@ function HomePage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const menuRef = useRef(null);
   // Content loading state removed as animations are no longer needed
   const [content, setContent] = useState({
@@ -67,10 +66,11 @@ function HomePage() {
     fetchContent();
   }, []);
 
-  // Handle window resize for mobile detection
+  // We no longer need the isMobile state since we're using fixed background for all devices
+  // But we'll keep the resize handler for other responsive features
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768);
+      // Update any responsive UI elements if needed
     };
 
     window.addEventListener('resize', handleResize);
@@ -181,13 +181,13 @@ function HomePage() {
       {/* Add style tag for responsive background */}
       <style dangerouslySetInnerHTML={{ __html: responsiveBackgroundStyles }} />
 
-      <PageLoader backgroundImage="/image/Theone.jpeg">
+      <PageLoader backgroundImage="/backgroundimg/Leonardo_Phoenix_10_Create_a_visually_striking_innovative_back_3 (1) (1).jpg">
         <div className="text-gray-800 responsive-bg bg-image" style={{
           scrollBehavior: 'smooth',
-          backgroundImage: "url('/image/Theone.jpeg')",
+          backgroundImage: "url('/backgroundimg/Leonardo_Phoenix_10_Create_a_visually_striking_innovative_back_3 (1) (1).jpg')",
           backgroundSize: "cover",
           backgroundPosition: "center center", /* Center position for all screen sizes */
-          backgroundAttachment: isMobile ? "scroll" : "fixed", /* Use scroll on mobile to prevent parallax issues */
+          backgroundAttachment: "fixed", /* Use fixed for both mobile and desktop for consistent appearance */
           minHeight: "100vh",
           overflowX: "hidden", /* Prevent horizontal scrolling on mobile */
           position: "relative" /* For overlay positioning */

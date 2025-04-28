@@ -1,5 +1,5 @@
 :root {
-  --dynamic-background-image: url('/backgroundimg/Leonardo_Phoenix_10_Create_a_visually_striking_innovative_back_2 (3).jpg'); /* Default fallback */
+  --dynamic-background-image: url('/backgroundimg/Leonardo_Phoenix_10_Create_a_visually_striking_innovative_back_3 (1) (1).jpg'); /* Default fallback */
 }
 
 .bg-image {
@@ -7,7 +7,15 @@
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+  background-attachment: fixed;
   transition: background-image 0.5s ease-in-out;
+}
+
+/* Fix for iOS devices which don't handle background-attachment: fixed well */
+@supports (-webkit-touch-callout: none) {
+  .bg-image {
+    background-attachment: scroll;
+  }
 }
 
 .bg-pattern {
