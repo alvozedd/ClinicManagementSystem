@@ -400,7 +400,7 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
                 : 'border-transparent text-gray-500 hover:text-gray-700'
             }`}
           >
-            Diagnoses
+            Notes
           </button>
         )}
         <button
@@ -1400,7 +1400,7 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
 
             // Wait a moment before switching tabs to ensure state is updated
             setTimeout(() => {
-              // Switch to the diagnoses tab to show the new notes
+              // Switch to the notes tab to show the new notes
               setActiveTab('diagnoses');
             }, 500);
           }}

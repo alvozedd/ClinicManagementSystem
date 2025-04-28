@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { transformAppointmentFromBackend } from '../utils/dataTransformers';
 
 function SimplifiedNotesModal({ appointment, onClose, onSave }) {
+  const [notes, setNotes] = useState('');
   const [diagnosis, setDiagnosis] = useState('');
   const [treatment, setTreatment] = useState('');
   const [followUp, setFollowUp] = useState('');
@@ -15,17 +16,19 @@ function SimplifiedNotesModal({ appointment, onClose, onSave }) {
       if (typeof appointment.diagnosis === 'string') {
         try {
           const parsedDiagnosis = JSON.parse(appointment.diagnosis);
-          setDiagnosis(parsedDiagnosis.notes || '');
+          setNotes(parsedDiagnosis.notes || '');
+          setDiagnosis(parsedDiagnosis.diagnosis || '');
           setTreatment(parsedDiagnosis.treatment || '');
           setFollowUp(parsedDiagnosis.followUp || '');
           setExistingFiles(parsedDiagnosis.files || []);
         } catch (e) {
           // If parsing fails, use the string as is
-          setDiagnosis(appointment.diagnosis);
+          setNotes(appointment.diagnosis);
         }
       } else {
         // It's already an object
-        setDiagnosis(appointment.diagnosis.notes || '');
+        setNotes(appointment.diagnosis.notes || '');
+        setDiagnosis(appointment.diagnosis.diagnosis || '');
         setTreatment(appointment.diagnosis.treatment || '');
         setFollowUp(appointment.diagnosis.followUp || '');
         setExistingFiles(appointment.diagnosis.files || []);
@@ -73,7 +76,8 @@ function SimplifiedNotesModal({ appointment, onClose, onSave }) {
 
       // Create a structured notes object
       const notesObj = {
-        notes: diagnosis,
+        notes: notes,
+        diagnosis: diagnosis,
         treatment: treatment,
         followUp: followUp,
         files: fileData,
@@ -123,12 +127,23 @@ function SimplifiedNotesModal({ appointment, onClose, onSave }) {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
               <textarea
-                value={diagnosis}
-                onChange={(e) => setDiagnosis(e.target.value)}
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
                 rows="4"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
                 required
                 placeholder="Enter your clinical notes..."
+              ></textarea>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Diagnosis</label>
+              <textarea
+                value={diagnosis}
+                onChange={(e) => setDiagnosis(e.target.value)}
+                rows="3"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
+                placeholder="Enter diagnosis..."
               ></textarea>
             </div>
 

@@ -8,7 +8,7 @@ import './GlassEffects.css';
 import '../styles/animations.css';
 import '../styles/fallbackAnimations.css';
 import PageLoader from './PageLoader';
-import { motion } from 'framer-motion';
+// Removed framer-motion import as animations are no longer needed
 
 // Add custom CSS for responsive background image
 const responsiveBackgroundStyles = `
@@ -39,7 +39,7 @@ function HomePage() {
   const [error, setError] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const menuRef = useRef(null);
-  const [contentLoading, setContentLoading] = useState(true);
+  // Content loading state removed as animations are no longer needed
   const [content, setContent] = useState({
     header: {},
     footer: {},
@@ -50,43 +50,21 @@ function HomePage() {
   useEffect(() => {
     const fetchContent = async () => {
       try {
-        setContentLoading(true);
+        // Content loading state removed
         // Use the loadContent utility which handles fallbacks
         const organizedContent = await loadContent();
         setContent(organizedContent);
       } catch (err) {
         console.error('Error in content loading process:', err);
       } finally {
-        setContentLoading(false);
+        // Content loading state removed
       }
     };
 
     fetchContent();
   }, []);
 
-  // Setup basic animations when component mounts
-  useEffect(() => {
-    // Only run animations if content is loaded
-    if (!contentLoading) {
-      try {
-        // Add fade-in class to elements that should animate
-        document.querySelectorAll('.service-card').forEach((card, index) => {
-          card.classList.add('fade-in');
-          card.style.animationDelay = `${index * 100}ms`;
-        });
-
-        // Add fade-in to hero elements
-        const heroElements = document.querySelectorAll('.hero-title, .hero-subtitle, .hero-description');
-        heroElements.forEach((el, index) => {
-          el.classList.add('fade-in');
-          el.style.animationDelay = `${index * 200}ms`;
-        });
-      } catch (error) {
-        console.error('Animation setup error:', error);
-        // Continue rendering the page even if animations fail
-      }
-    }
-  }, [contentLoading]);
+  // All animations have been removed from the homepage text
 
   // Close mobile menu when clicking outside
   useEffect(() => {
@@ -585,68 +563,42 @@ function HomePage() {
 
                 {/* Hero Section - Blue Background */}
                 <div className="max-w-4xl mx-auto text-center relative px-4 sm:px-6 h-screen flex flex-col justify-center items-center z-10">
-                  <motion.div
-                    className="transform translate-y-[-12vh]"
-                  >
-                    <motion.h1
-                      className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4 text-white hero-title"
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 1.2, delay: 0.3 }}
-                    >
+                  <div className="transform translate-y-[-12vh]">
+                    <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4 text-white hero-title">
                       {getContentValue(content, 'homepage', 'Hero', 'Hero Title', 'UroHealth Central Ltd')}
-                    </motion.h1>
-                    <motion.p
-                      className="text-xl sm:text-2xl md:text-3xl mb-2 text-white font-light hero-subtitle"
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 1.2, delay: 1.5 }}
-                    >
+                    </h1>
+                    <p className="text-xl sm:text-2xl md:text-3xl mb-2 text-white font-light hero-subtitle">
                       {getContentValue(content, 'homepage', 'Hero', 'Hero Subtitle', 'Specialist Urological Care')}
-                    </motion.p>
-                    <motion.p
-                      className="text-sm sm:text-base md:text-lg mb-6 sm:mb-8 leading-relaxed text-white max-w-xl mx-auto hero-description"
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 1.2, delay: 2.7 }}
-                    >
+                    </p>
+                    <p className="text-sm sm:text-base md:text-lg mb-6 sm:mb-8 leading-relaxed text-white max-w-xl mx-auto hero-description">
                       {getContentValue(content, 'homepage', 'Hero', 'Hero Description', '20+ years of specialized medical excellence')}
-                    </motion.p>
-                    <motion.div
-                      className="flex flex-row justify-center gap-5 sm:gap-8 mt-6 sm:mt-8"
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 1.2, delay: 3.9 }}
-                    >
+                    </p>
+                    <div className="flex flex-row justify-center gap-5 sm:gap-8 mt-6 sm:mt-8">
                       <div className="relative w-36 sm:w-auto">
-                        <motion.button
+                        <button
                           onClick={() => {
                             setShowBookingForm(true);
                             window.scrollTo({ top: 0, behavior: 'smooth' });
                           }}
                           className="bg-white text-blue-700 hover:bg-blue-50 px-6 sm:px-8 py-3 rounded-full font-medium transition duration-300 text-sm sm:text-base flex items-center justify-center gap-2 w-full relative z-10 shadow-md"
-                          whileHover={{ scale: 1.05, backgroundColor: "#f8fafc" }}
-                          transition={{ duration: 0.3 }}
                         >
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                           </svg>
                           Book Now
-                        </motion.button>
+                        </button>
                       </div>
-                      <motion.button
+                      <button
                         onClick={() => window.location.href = 'tel:+254722396296'}
                         className="border-2 border-white text-white hover:bg-white/10 px-6 sm:px-8 py-3 rounded-full font-medium transition duration-300 text-sm sm:text-base flex items-center justify-center gap-2 w-36 sm:w-auto"
-                        whileHover={{ scale: 1.05, backgroundColor: 'rgba(255, 255, 255, 0.1)' }}
-                        transition={{ duration: 0.3 }}
                       >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
                         </svg>
                         Call Us
-                      </motion.button>
-                    </motion.div>
-                  </motion.div>
+                      </button>
+                    </div>
+                  </div>
                 </div>
 
               </div>

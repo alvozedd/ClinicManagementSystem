@@ -1,26 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { FaChevronDown } from 'react-icons/fa';
 import '../styles/fallbackAnimations.css';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const PageLoader = ({ children, backgroundImage }) => {
   const [loading, setLoading] = useState(true);
   const [imageLoaded, setImageLoaded] = useState(false);
-  const [showScrollIndicator, setShowScrollIndicator] = useState(false);
-  const [scrollPosition, setScrollPosition] = useState(0);
-
-  // Handle scroll position
-  useEffect(() => {
-    const handleScroll = () => {
-      const position = window.scrollY;
-      setScrollPosition(position);
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, []);
+  // Scroll indicator and scroll position tracking removed
 
   // Preload the background image
   useEffect(() => {
@@ -31,10 +16,7 @@ const PageLoader = ({ children, backgroundImage }) => {
       // After image is loaded, wait a bit before removing the loader
       setTimeout(() => {
         setLoading(false);
-        // Show scroll indicator after content is loaded
-        setTimeout(() => {
-          setShowScrollIndicator(true);
-        }, 1000);
+        // Removed scroll indicator code
       }, 500);
     };
 
@@ -143,40 +125,7 @@ const PageLoader = ({ children, backgroundImage }) => {
       >
         {children}
 
-        {/* Scroll Indicator */}
-        {showScrollIndicator && scrollPosition < 100 && (
-          <motion.div
-            className="fixed bottom-10 left-1/2 transform -translate-x-1/2 z-40 text-white cursor-pointer"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5 }}
-            onClick={() => {
-              const homeSection = document.querySelector('.hero-section');
-              if (homeSection) {
-                homeSection.scrollIntoView({ behavior: 'smooth' });
-              } else {
-                window.scrollTo({ top: window.innerHeight, behavior: 'smooth' });
-              }
-            }}
-          >
-            <motion.div
-              animate={{
-                y: [0, -10, -5, 0]
-              }}
-              transition={{
-                duration: 2,
-                ease: "easeInOut",
-                times: [0, 0.4, 0.6, 1],
-                repeat: Infinity,
-                repeatDelay: 0
-              }}
-              className="flex flex-col items-center"
-            >
-              <span className="text-sm mb-2 font-light">Scroll Down</span>
-              <FaChevronDown size={20} />
-            </motion.div>
-          </motion.div>
-        )}
+        {/* Scroll Indicator removed */}
       </motion.div>
     </>
   );
