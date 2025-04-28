@@ -10,7 +10,7 @@ import GlobalDiagnosesView from './GlobalDiagnosesView';
 import DoctorPatientSearchAppointmentModal from './DoctorPatientSearchAppointmentModal';
 import AppointmentManagementModal from './AppointmentManagementModal';
 import AppointmentCard from './AppointmentCard';
-import QueueManagement from './QueueManagement';
+import SimplifiedQueueManagement from './SimplifiedQueueManagement';
 import ActionButtons from './ActionButtons';
 import { FaCalendarAlt, FaUserMd, FaClipboardList, FaEye, FaArrowLeft, FaUser, FaFileMedical, FaUserClock } from 'react-icons/fa';
 import { getCreatorLabel } from '../utils/recordCreation';
@@ -415,7 +415,7 @@ function SimplifiedDoctorDashboard({
       {/* Content Area - Enhanced Styling */}
       <div className="bg-white rounded-md shadow-sm p-4">
         {activeTab === 'queue' ? (
-          <QueueManagement
+          <SimplifiedQueueManagement
             patients={patients}
             appointments={appointments}
             userRole="doctor"

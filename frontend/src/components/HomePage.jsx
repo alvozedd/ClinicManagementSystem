@@ -522,7 +522,7 @@ function HomePage() {
                   <button
                     type="button"
                     onClick={() => setShowBookingForm(false)}
-                    className="text-blue-600 hover:text-blue-800 text-sm sm:text-base font-medium px-4 py-2 border border-blue-200 rounded-md hover:bg-blue-50 transition-all duration-200 order-2 sm:order-1 shadow-sm hover:shadow"
+                    className="bg-red-600 hover:bg-red-700 text-white text-sm sm:text-base font-medium px-4 py-2 border border-transparent rounded-md transition-all duration-200 order-2 sm:order-1 shadow-sm hover:shadow"
                   >
                     Cancel
                   </button>
