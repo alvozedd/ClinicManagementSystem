@@ -611,6 +611,75 @@ const apiService = {
       credentials: 'include', // Include cookies for refresh token
     });
   },
+
+  // Queue Management endpoints
+  getQueueEntries: async () => {
+    return secureFetch(`${API_URL}/queue`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        ...authHeader(),
+      },
+      credentials: 'include', // Include cookies for refresh token
+    });
+  },
+
+  getQueueStats: async () => {
+    return secureFetch(`${API_URL}/queue/stats`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        ...authHeader(),
+      },
+      credentials: 'include', // Include cookies for refresh token
+    });
+  },
+
+  addToQueue: async (queueData) => {
+    return secureFetch(`${API_URL}/queue`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...authHeader(),
+      },
+      body: JSON.stringify(queueData),
+      credentials: 'include', // Include cookies for refresh token
+    });
+  },
+
+  updateQueueEntry: async (id, updateData) => {
+    return secureFetch(`${API_URL}/queue/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        ...authHeader(),
+      },
+      body: JSON.stringify(updateData),
+      credentials: 'include', // Include cookies for refresh token
+    });
+  },
+
+  removeFromQueue: async (id) => {
+    return secureFetch(`${API_URL}/queue/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        ...authHeader(),
+      },
+      credentials: 'include', // Include cookies for refresh token
+    });
+  },
+
+  getNextPatient: async () => {
+    return secureFetch(`${API_URL}/queue/next`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        ...authHeader(),
+      },
+      credentials: 'include', // Include cookies for refresh token
+    });
+  },
 };
 
 export default apiService;

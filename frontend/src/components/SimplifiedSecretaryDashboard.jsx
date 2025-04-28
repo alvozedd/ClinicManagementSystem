@@ -10,7 +10,8 @@ import AppointmentManagementModal from './AppointmentManagementModal';
 import PatientSearchAppointmentModal from './PatientSearchAppointmentModal';
 import PatientNavigator from './PatientNavigator';
 import AppointmentCard from './AppointmentCard';
-import { FaCalendarAlt, FaUserTie, FaClipboardList, FaUser } from 'react-icons/fa';
+import QueueManagement from './QueueManagement';
+import { FaCalendarAlt, FaUserTie, FaClipboardList, FaUser, FaUserClock } from 'react-icons/fa';
 import { getTimeBasedGreeting, getFormattedDate, identifyAppointmentsNeedingDiagnosis, getRelativeDateLabel } from '../utils/timeUtils';
 import { getCreatorLabel } from '../utils/recordCreation';
 import { transformAppointmentFromBackend } from '../utils/dataTransformers';
@@ -33,6 +34,7 @@ function SimplifiedSecretaryDashboard({
 
   // Set global user role for patient view component
   window.userRole = 'secretary';
+  // State for active tab (patient-management, appointments, calendar, or queue)
   const [activeTab, setActiveTab] = useState('patient-management');
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [showAddPatientForm, setShowAddPatientForm] = useState(false);
@@ -252,7 +254,7 @@ function SimplifiedSecretaryDashboard({
 
       {/* Enhanced Tab Navigation - Mobile Optimized */}
       <div className="bg-white rounded-md shadow-sm mb-4 p-2">
-        <div className="grid grid-cols-3 gap-1">
+        <div className="grid grid-cols-4 gap-1">
           <button
             onClick={() => setActiveTab('patient-management')}
             className={`py-3 px-2 rounded-md flex flex-col justify-center items-center transition-all ${
@@ -289,12 +291,29 @@ function SimplifiedSecretaryDashboard({
             <FaCalendarAlt className="h-6 w-6 mb-1" />
             <span className="text-sm font-medium text-center">Calendar</span>
           </button>
+          <button
+            onClick={() => setActiveTab('queue')}
+            className={`py-3 px-2 rounded-md flex flex-col justify-center items-center transition-all ${
+              activeTab === 'queue'
+                ? 'bg-blue-100 text-blue-700 shadow-sm'
+                : 'text-gray-600 hover:bg-gray-100'
+            }`}
+          >
+            <FaUserClock className="h-6 w-6 mb-1" />
+            <span className="text-sm font-medium text-center">Queue</span>
+          </button>
         </div>
       </div>
 
       {/* Content Area - Enhanced Styling */}
       <div className="bg-white rounded-md shadow-sm p-4">
-        {activeTab === 'calendar' ? (
+        {activeTab === 'queue' ? (
+          <QueueManagement
+            patients={patients}
+            appointments={appointments}
+            userRole="secretary"
+          />
+        ) : activeTab === 'calendar' ? (
           <SecretaryCalendarView
             appointments={appointments}
             onUpdateAppointment={(updatedAppointment) => {

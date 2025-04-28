@@ -10,8 +10,9 @@ import GlobalDiagnosesView from './GlobalDiagnosesView';
 import DoctorPatientSearchAppointmentModal from './DoctorPatientSearchAppointmentModal';
 import AppointmentManagementModal from './AppointmentManagementModal';
 import AppointmentCard from './AppointmentCard';
+import QueueManagement from './QueueManagement';
 import ActionButtons from './ActionButtons';
-import { FaCalendarAlt, FaUserMd, FaClipboardList, FaEye, FaArrowLeft, FaUser, FaFileMedical } from 'react-icons/fa';
+import { FaCalendarAlt, FaUserMd, FaClipboardList, FaEye, FaArrowLeft, FaUser, FaFileMedical, FaUserClock } from 'react-icons/fa';
 import { getCreatorLabel } from '../utils/recordCreation';
 import { getTimeBasedGreeting, getFormattedDate, filterAppointmentsByTimePeriod, updateAppointmentStatuses, identifyAppointmentsNeedingDiagnosis, getRelativeDateLabel } from '../utils/timeUtils';
 import apiService from '../utils/apiService';
@@ -49,6 +50,7 @@ function SimplifiedDoctorDashboard({
 
   // Set global user role for patient view component
   window.userRole = 'doctor';
+  // State for active tab (patient-management, appointments, diagnoses, calendar, or queue)
   const [activeTab, setActiveTab] = useState('patient-management');
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [diagnosingAppointment, setDiagnosingAppointment] = useState(null);
@@ -395,13 +397,30 @@ function SimplifiedDoctorDashboard({
             <FaCalendarAlt className="h-6 w-6 mb-1" />
             <span className="text-sm font-medium text-center">Calendar</span>
           </button>
+          <button
+            onClick={() => setActiveTab('queue')}
+            className={`py-3 px-2 rounded-md flex flex-col justify-center items-center transition-all ${
+              activeTab === 'queue'
+                ? 'bg-blue-100 text-blue-700 shadow-sm'
+                : 'text-gray-600 hover:bg-gray-100'
+            }`}
+          >
+            <FaUserClock className="h-6 w-6 mb-1" />
+            <span className="text-sm font-medium text-center">Queue</span>
+          </button>
 
         </div>
       </div>
 
       {/* Content Area - Enhanced Styling */}
       <div className="bg-white rounded-md shadow-sm p-4">
-        {activeTab === 'diagnoses' ? (
+        {activeTab === 'queue' ? (
+          <QueueManagement
+            patients={patients}
+            appointments={appointments}
+            userRole="doctor"
+          />
+        ) : activeTab === 'diagnoses' ? (
           <GlobalDiagnosesView
             onViewPatient={(patientId) => {
               const patient = patients.find(p => p._id === patientId || p.id === patientId);

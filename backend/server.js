@@ -16,6 +16,7 @@ const patientRoutes = require('./routes/patientRoutes');
 const appointmentRoutes = require('./routes/appointmentRoutes');
 const diagnosisRoutes = require('./routes/diagnosisRoutes');
 const contentRoutes = require('./routes/contentRoutes');
+const queueRoutes = require('./routes/queueRoutes');
 
 // Load environment variables
 dotenv.config();
@@ -92,6 +93,7 @@ app.use('/api/patients', patientRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/diagnoses', diagnosisRoutes);
 app.use('/api/content', contentRoutes);
+app.use('/api/queue', queueRoutes);
 
 // Create compatibility routes without the /api prefix
 // User routes
