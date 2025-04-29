@@ -31,6 +31,10 @@ export const clearQueueStorage = () => {
   localStorage.setItem('use_queue_fallbacks', 'false');
   console.log('Disabled queue fallbacks to prevent phantom entries');
 
+  // Disable offline mode to ensure we only use database data
+  localStorage.setItem('offline_mode', 'false');
+  console.log('Disabled offline mode to ensure database-only data');
+
   // Enable auto-clearing of fallbacks
   localStorage.setItem('auto_clear_fallbacks', 'true');
   console.log('Enabled auto-clearing of fallback entries');

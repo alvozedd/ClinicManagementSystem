@@ -24,6 +24,9 @@ function SuperSimpleQueueManagement({ patients, appointments, userRole }) {
   const fetchQueueData = async () => {
     setLoading(true);
     try {
+      // Ensure we're not in offline mode to get real database data
+      localStorage.setItem('offline_mode', 'false');
+
       const [entriesResponse, statsResponse] = await Promise.all([
         apiService.getQueueEntries(),
         apiService.getQueueStats(),
@@ -38,17 +41,21 @@ function SuperSimpleQueueManagement({ patients, appointments, userRole }) {
       // If we got fallback data and the database is empty, clear the queue entries
       if (!isRealData && entriesResponse.length > 0) {
         console.log('Detected fallback queue data. Database may be empty.');
+        console.warn('SHOWING FALLBACK DATA - NOT FROM DATABASE');
 
-        // Check if we should automatically clear fallback entries
-        const autoClearFallbacks = localStorage.getItem('auto_clear_fallbacks') === 'true';
-
-        if (autoClearFallbacks) {
-          console.log('Auto-clearing fallback queue entries');
-          clearQueueStorage();
-          return []; // Return empty array instead of fallbacks
-        } else {
-          console.log('Keeping fallback entries. Use Clear Cache button to remove them.');
-        }
+        // Always clear fallback entries to ensure we only show database data
+        console.log('Auto-clearing fallback queue entries to ensure database-only data');
+        clearQueueStorage();
+        setQueueEntries([]);
+        setQueueStats({
+          totalPatients: 0,
+          waitingPatients: 0,
+          inProgressPatients: 0,
+          completedPatients: 0,
+          nextTicketNumber: 1,
+        });
+        setLoading(false);
+        return; // Exit early after clearing
       }
 
       // Sort entries: Waiting first (by ticket number), then In Progress, then Completed
@@ -442,10 +449,32 @@ function SuperSimpleQueueManagement({ patients, appointments, userRole }) {
   console.log('Queue stats:', queueStats);
   console.log('Appointments to check in:', appointmentsToCheckIn);
 
+  // Check if we're showing fallback data
+  const [showingFallbackData, setShowingFallbackData] = useState(false);
+
+  // Check if any entries are fallbacks
+  useEffect(() => {
+    if (queueEntries.length > 0) {
+      const hasFallbacks = queueEntries.some(entry =>
+        entry._id?.startsWith('temp_') || entry._id?.startsWith('fallback_')
+      );
+      setShowingFallbackData(hasFallbacks);
+    } else {
+      setShowingFallbackData(false);
+    }
+  }, [queueEntries]);
+
   return (
     <div className="bg-white rounded-lg shadow-sm p-4">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-        <h2 className="text-xl font-bold text-blue-800 mb-3 md:mb-0">Patient Queue</h2>
+        <div>
+          <h2 className="text-xl font-bold text-blue-800 mb-1">Patient Queue</h2>
+          {showingFallbackData && (
+            <div className="text-red-600 text-sm font-medium bg-red-100 px-2 py-1 rounded-md inline-block">
+              Warning: Showing cached data (not from database)
+            </div>
+          )}
+        </div>
         <div className="flex flex-wrap gap-2">
           {(userRole === 'secretary' || userRole === 'admin') && (
             <button
@@ -488,11 +517,11 @@ function SuperSimpleQueueManagement({ patients, appointments, userRole }) {
           {/* Clear Queue Storage Button */}
           <button
             onClick={handleClearQueueStorage}
-            className="bg-red-100 hover:bg-red-200 text-red-700 px-3 py-2 rounded-md text-sm font-medium flex items-center"
+            className={`${showingFallbackData ? 'bg-red-600 hover:bg-red-700 text-white animate-pulse' : 'bg-red-100 hover:bg-red-200 text-red-700'} px-3 py-2 rounded-md text-sm font-medium flex items-center`}
             title="Clear temporary queue data"
           >
             <FaTrash className="mr-2" />
-            Clear Cache
+            {showingFallbackData ? 'Clear Cached Data!' : 'Clear Cache'}
           </button>
         </div>
       </div>

@@ -813,13 +813,17 @@ const apiService = {
         } catch (secondError) {
           console.warn('Second attempt failed, checking localStorage for fallbacks:', secondError);
 
-          // Check if we should use localStorage fallbacks
-          const useLocalStorageFallbacks = localStorage.getItem('use_queue_fallbacks') === 'true';
+          // By default, disable localStorage fallbacks completely
+          // Only use fallbacks if explicitly enabled AND we're in offline mode
+          const useLocalStorageFallbacks = localStorage.getItem('use_queue_fallbacks') === 'true' &&
+                                          localStorage.getItem('offline_mode') === 'true';
 
           if (!useLocalStorageFallbacks) {
             console.log('Queue fallbacks disabled, returning empty array');
             return [];
           }
+
+          console.warn('USING OFFLINE MODE WITH FALLBACKS - data may not be from database');
 
           // Look for any temporary queue entries in localStorage
           const tempEntries = [];
