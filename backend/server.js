@@ -85,7 +85,7 @@ app.use(cors({
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization'],
+  allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization', 'Cache-Control'],
   optionsSuccessStatus: 200 // Some legacy browsers (IE11) choke on 204
 }));
 
@@ -117,7 +117,7 @@ const addCorsHeaders = (req, res, next) => {
   if (allowedOrigins.includes(origin)) {
     res.header('Access-Control-Allow-Origin', origin);
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, Cache-Control');
     res.header('Access-Control-Allow-Credentials', 'true');
     console.log(`CORS headers set for non-API route: ${req.path} from origin: ${origin}`);
   } else {
@@ -589,7 +589,7 @@ app.get('/queue', (req, res) => {
   // Set CORS headers explicitly for this route
   res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, Cache-Control');
   res.header('Access-Control-Allow-Credentials', 'true');
 
   // Import the controller directly
@@ -605,7 +605,7 @@ app.post('/queue', (req, res) => {
   // Set CORS headers explicitly for this route
   res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, Cache-Control');
   res.header('Access-Control-Allow-Credentials', 'true');
 
   // Import the controller directly
@@ -694,26 +694,55 @@ const server = app.listen(PORT, () => {
 // Schedule queue reset at midnight
 cron.schedule('0 0 * * *', async () => {
   try {
-    console.log('Running scheduled queue reset at midnight');
+    console.log('Running scheduled queue reset at midnight:', new Date().toISOString());
     // Reset the queue by calling the resetQueue endpoint
     const { resetQueue } = require('./controllers/queueController');
 
-    // Create a mock request and response
-    const req = {};
-    const res = {
-      json: (data) => {
-        console.log('Queue reset result:', data);
-      },
-      status: (code) => {
-        console.log('Queue reset status code:', code);
-        return res;
-      }
-    };
+    // Call the resetQueue function directly without mock request/response
+    const result = await resetQueue();
 
-    // Call the resetQueue function directly
-    await resetQueue(req, res);
-    console.log('Queue reset completed successfully');
+    if (result.success) {
+      console.log('Queue reset completed successfully. Removed entries:', result.deletedCount);
+    } else {
+      console.error('Queue reset failed:', result.error);
+    }
+
+    // Double-check that the queue is empty
+    const Queue = require('./models/queueModel');
+    const count = await Queue.countDocuments({});
+    console.log(`Queue entries after reset: ${count}`);
+
+    if (count > 0) {
+      console.log('Queue not fully reset. Attempting force reset...');
+      await Queue.deleteMany({});
+      const finalCount = await Queue.countDocuments({});
+      console.log(`Queue entries after force reset: ${finalCount}`);
+    }
   } catch (error) {
-    console.error('Error resetting queue:', error);
+    console.error('Error in midnight queue reset cron job:', error);
+  }
+});
+
+// Also schedule a check every hour to verify the queue reset worked
+cron.schedule('5 * * * *', async () => {
+  try {
+    const now = new Date();
+    // If it's between 00:00 and 00:10, check if the queue was reset
+    if (now.getHours() === 0 && now.getMinutes() < 10) {
+      console.log('Verifying midnight queue reset at:', now.toISOString());
+      const Queue = require('./models/queueModel');
+      const count = await Queue.countDocuments({});
+      console.log(`Queue entries at verification check: ${count}`);
+
+      // If there are still entries, force a reset
+      if (count > 0) {
+        console.log('Queue not properly reset at midnight. Forcing reset now...');
+        await Queue.deleteMany({});
+        const finalCount = await Queue.countDocuments({});
+        console.log(`Queue entries after force reset: ${finalCount}`);
+      }
+    }
+  } catch (error) {
+    console.error('Error in queue reset verification job:', error);
   }
 });

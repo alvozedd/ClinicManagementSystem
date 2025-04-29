@@ -762,7 +762,7 @@ const apiService = {
   },
 
   // Queue Management endpoints
-  getQueueEntries: async (queryParams = '') => {
+  getQueueEntries: async (queryParams = '', options = {}) => {
     try {
       console.log('Fetching queue entries');
 
@@ -781,9 +781,11 @@ const apiService = {
             ...authHeader(),
             'Cache-Control': 'no-cache, no-store, must-revalidate',
             'Pragma': 'no-cache',
-            'Expires': '0'
+            'Expires': '0',
+            ...(options.headers || {})
           },
           credentials: 'include', // Include cookies for refresh token
+          ...options
         });
         const data = await handleResponse(response);
         console.log('Successfully fetched queue entries with credentials:', data.length);
@@ -793,12 +795,17 @@ const apiService = {
 
         try {
           // Second try: without credentials
-          const response2 = await fetch(`${baseUrl}/queue`, {
+          const response2 = await fetch(`${baseUrl}/queue${queryParams}`, {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',
               ...authHeader(),
+              'Cache-Control': 'no-cache, no-store, must-revalidate',
+              'Pragma': 'no-cache',
+              'Expires': '0',
+              ...(options.headers || {})
             },
+            ...options
           });
           const data = await handleResponse(response2);
           console.log('Successfully fetched queue entries without credentials:', data.length);
@@ -837,14 +844,21 @@ const apiService = {
     }
   },
 
-  getQueueStats: async () => {
-    return secureFetch(`${API_URL}/queue/stats`, {
+  getQueueStats: async (options = {}) => {
+    // Add timestamp to prevent caching
+    const timestamp = new Date().getTime();
+    return secureFetch(`${API_URL}/queue/stats?_t=${timestamp}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
         ...authHeader(),
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+        ...(options.headers || {})
       },
       credentials: 'include', // Include cookies for refresh token
+      ...options
     });
   },
 

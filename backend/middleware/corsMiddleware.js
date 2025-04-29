@@ -24,7 +24,7 @@ const corsMiddleware = (req, res, next) => {
   if (ALLOW_ALL_ORIGINS) {
     res.header('Access-Control-Allow-Origin', origin || '*');
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, Cache-Control');
     res.header('Access-Control-Allow-Credentials', 'true');
 
     console.log('CORS: Development mode - allowing all origins');
@@ -34,7 +34,7 @@ const corsMiddleware = (req, res, next) => {
     // Set CORS headers - never use wildcard with credentials
     res.header('Access-Control-Allow-Origin', origin);
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, Cache-Control');
     res.header('Access-Control-Allow-Credentials', 'true');
 
     // Log CORS headers for debugging
@@ -46,7 +46,7 @@ const corsMiddleware = (req, res, next) => {
     // For requests without origin (like curl) or non-allowed origins
     // We still need to set some CORS headers for OPTIONS requests to work
     res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, Cache-Control');
 
     // For API testing tools and server-to-server requests
     if (!origin) {

@@ -30,10 +30,14 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
 
   // Fetch queue data on component mount and set up polling
   useEffect(() => {
+    // Initial fetch with cache-busting parameter
     fetchQueueData();
 
     // Set up polling to refresh queue data every 15 seconds
-    const interval = setInterval(fetchQueueData, 15000);
+    const interval = setInterval(() => {
+      // Add cache-busting parameter to prevent caching
+      fetchQueueData();
+    }, 15000);
 
     // Set up a check for midnight to reset the queue
     const checkMidnight = () => {
@@ -41,9 +45,19 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
       const hours = now.getHours();
       const minutes = now.getMinutes();
 
-      // If it's midnight (00:00-00:01), refresh the queue data
-      if (hours === 0 && minutes <= 1) {
-        console.log('Midnight detected, refreshing queue data');
+      // If it's midnight (00:00-00:05), refresh the queue data more aggressively
+      if (hours === 0 && minutes <= 5) {
+        console.log('Midnight detected, refreshing queue data with force refresh');
+        // Force a complete refresh by clearing any cached data
+        setQueueEntries([]);
+        setQueueStats({
+          totalPatients: 0,
+          waitingPatients: 0,
+          inProgressPatients: 0,
+          completedPatients: 0,
+          nextTicketNumber: 1
+        });
+        // Then fetch fresh data
         fetchQueueData();
       }
     };
@@ -71,8 +85,16 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
       try {
         // Add timestamp to prevent caching
         const timestamp = new Date().getTime();
-        data = await apiService.getQueueEntries(`?_t=${timestamp}`);
-        console.log('Queue data fetched successfully:', data);
+        // Add cache control headers to the request
+        const options = {
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+          }
+        };
+        data = await apiService.getQueueEntries(`?_t=${timestamp}`, options);
+        console.log('Queue data fetched successfully, entries:', data.length);
       } catch (fetchError) {
         console.error('Error fetching queue entries:', fetchError);
         // If we can't fetch data, use the existing queue entries
@@ -809,10 +831,10 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
                   let appointment = null;
                   try {
                     const appointmentId = typeof entry.appointment_id === 'object' ?
-                      (entry.appointment_id._id || entry.appointment_id.id) :
+                      (entry.appointment_id?._id || entry.appointment_id?.id) :
                       entry.appointment_id;
 
-                    if (appointmentId) {
+                    if (appointmentId && appointments && appointments.length > 0) {
                       appointment = appointments.find(a =>
                         (a && (a._id === appointmentId || a.id === appointmentId))
                       );
@@ -840,7 +862,7 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
                           </div>
                         </div>
                         <div className="ml-auto">
-                          {userRole === 'doctor' && (
+                          {(userRole === 'doctor' || userRole === 'secretary' || userRole === 'admin') && (
                             <button
                               onClick={() => handleUpdateQueueStatus(entry._id, 'Completed')}
                               className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm font-medium flex items-center"
@@ -870,10 +892,10 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
                   let appointment = null;
                   try {
                     const appointmentId = typeof entry.appointment_id === 'object' ?
-                      (entry.appointment_id._id || entry.appointment_id.id) :
+                      (entry.appointment_id?._id || entry.appointment_id?.id) :
                       entry.appointment_id;
 
-                    if (appointmentId) {
+                    if (appointmentId && appointments && appointments.length > 0) {
                       appointment = appointments.find(a =>
                         (a && (a._id === appointmentId || a.id === appointmentId))
                       );
@@ -936,7 +958,7 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
                               </button>
                             </div>
                           )}
-                          {userRole === 'doctor' && (
+                          {(userRole === 'doctor' || userRole === 'secretary' || userRole === 'admin') && (
                             <button
                               onClick={() => handleUpdateQueueStatus(entry._id, 'In Progress')}
                               className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm font-medium flex items-center"
@@ -995,10 +1017,10 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
                   let appointment = null;
                   try {
                     const appointmentId = typeof entry.appointment_id === 'object' ?
-                      (entry.appointment_id._id || entry.appointment_id.id) :
+                      (entry.appointment_id?._id || entry.appointment_id?.id) :
                       entry.appointment_id;
 
-                    if (appointmentId) {
+                    if (appointmentId && appointments && appointments.length > 0) {
                       appointment = appointments.find(a =>
                         (a && (a._id === appointmentId || a.id === appointmentId))
                       );

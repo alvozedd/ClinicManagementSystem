@@ -152,7 +152,7 @@ function SuperSimpleQueueCard({ queueEntry, onUpdateStatus, onRemove, onPrintTic
       </div>
 
       <div className="flex flex-wrap gap-2 mt-2 md:mt-0">
-        {queueEntry.status === 'Waiting' && userRole === 'doctor' && (
+        {queueEntry.status === 'Waiting' && (userRole === 'doctor' || userRole === 'secretary' || userRole === 'admin') && (
           <button
             onClick={() => onUpdateStatus('In Progress')}
             className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm font-medium flex items-center"
@@ -162,7 +162,7 @@ function SuperSimpleQueueCard({ queueEntry, onUpdateStatus, onRemove, onPrintTic
           </button>
         )}
 
-        {queueEntry.status === 'In Progress' && userRole === 'doctor' && (
+        {queueEntry.status === 'In Progress' && (userRole === 'doctor' || userRole === 'secretary' || userRole === 'admin') && (
           <button
             onClick={() => onUpdateStatus('Completed')}
             className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm font-medium flex items-center"

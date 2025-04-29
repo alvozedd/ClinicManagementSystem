@@ -327,13 +327,56 @@ const clearCompletedQueue = asyncHandler(async (req, res) => {
 // @route   DELETE /api/queue/reset
 // @access  Private/Admin
 const resetQueue = asyncHandler(async (req, res) => {
-  // Delete all queue entries
-  const result = await Queue.deleteMany({});
+  try {
+    console.log('Resetting queue at', new Date().toISOString());
 
-  res.json({
-    message: `Queue has been reset. ${result.deletedCount} entries removed.`,
-    deletedCount: result.deletedCount
-  });
+    // Get today's date for logging
+    const today = new Date();
+    const startOfDay = new Date(today.setHours(0, 0, 0, 0));
+    const endOfDay = new Date(today.setHours(23, 59, 59, 999));
+
+    // First, get a count of today's queue entries for logging
+    const todayCount = await Queue.countDocuments({
+      check_in_time: { $gte: startOfDay, $lte: endOfDay },
+    });
+
+    console.log(`Found ${todayCount} queue entries for today`);
+
+    // Delete all queue entries
+    const result = await Queue.deleteMany({});
+
+    console.log(`Queue has been reset. ${result.deletedCount} total entries removed.`);
+
+    // Verify that the queue is empty
+    const remainingCount = await Queue.countDocuments({});
+    console.log(`Remaining queue entries after reset: ${remainingCount}`);
+
+    if (res) {
+      res.json({
+        message: `Queue has been reset. ${result.deletedCount} entries removed.`,
+        deletedCount: result.deletedCount
+      });
+    }
+
+    return {
+      success: true,
+      deletedCount: result.deletedCount
+    };
+  } catch (error) {
+    console.error('Error resetting queue:', error);
+
+    if (res) {
+      res.status(500).json({
+        message: 'Failed to reset queue',
+        error: error.message
+      });
+    }
+
+    return {
+      success: false,
+      error: error.message
+    };
+  }
 });
 
 module.exports = {
