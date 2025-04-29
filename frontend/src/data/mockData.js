@@ -50,17 +50,35 @@ export const getTodaysAppointments = async () => {
     }
 
     // Filter appointments for today
-    const todaysAppointments = currentAppointments.filter(appointment => {
-      // Use the date field which is already in YYYY-MM-DD format in our transformed data
-      console.log(`Comparing appointment date: ${appointment.date} with today: ${formattedDate}`);
-      return appointment.date === formattedDate;
-    }).sort((a, b) => {
-      // Sort by time
-      if (a.time && b.time) {
-        return a.time.localeCompare(b.time);
-      }
-      return 0;
-    });
+    const todaysAppointments = currentAppointments
+      .filter(appointment => {
+        try {
+          // Skip invalid appointments
+          if (!appointment || !appointment.date) {
+            console.warn('Skipping invalid appointment in today\'s filter:', appointment);
+            return false;
+          }
+
+          // Use the date field which is already in YYYY-MM-DD format in our transformed data
+          console.log(`Comparing appointment date: ${appointment.date} with today: ${formattedDate}`);
+          return appointment.date === formattedDate;
+        } catch (err) {
+          console.error('Error filtering appointment:', err, appointment);
+          return false;
+        }
+      })
+      .sort((a, b) => {
+        try {
+          // Sort by time
+          if (a.time && b.time) {
+            return a.time.localeCompare(b.time);
+          }
+          return 0;
+        } catch (err) {
+          console.error('Error sorting appointments:', err);
+          return 0;
+        }
+      });
 
     console.log('Today\'s appointments:', todaysAppointments);
     return todaysAppointments;

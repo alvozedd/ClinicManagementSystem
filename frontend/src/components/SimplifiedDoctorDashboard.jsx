@@ -83,19 +83,37 @@ function SimplifiedDoctorDashboard({
   // Filter upcoming appointments (excluding today's)
   const upcomingAppointments = appointments
     .filter(a => {
-      // Get today's date in YYYY-MM-DD format
-      const today = new Date();
-      const todayStr = today.toISOString().split('T')[0];
+      // Skip invalid appointments
+      if (!a || !a.date) {
+        console.warn('Skipping invalid appointment in upcoming filter:', a);
+        return false;
+      }
 
-      // Get appointment date
-      const appointmentDateStr = a.date;
+      try {
+        // Get today's date in YYYY-MM-DD format
+        const today = new Date();
+        const todayStr = today.toISOString().split('T')[0];
 
-      console.log(`Upcoming filter - Appointment date: ${appointmentDateStr}, Today: ${todayStr}`);
+        // Get appointment date
+        const appointmentDateStr = a.date;
 
-      // Only include future dates (strictly after today)
-      return appointmentDateStr > todayStr;
+        console.log(`Upcoming filter - Appointment date: ${appointmentDateStr}, Today: ${todayStr}`);
+
+        // Only include future dates (strictly after today)
+        return appointmentDateStr > todayStr;
+      } catch (error) {
+        console.error('Error filtering appointment:', error, a);
+        return false;
+      }
     })
-    .sort((a, b) => new Date(a.date) - new Date(b.date))
+    .sort((a, b) => {
+      try {
+        return new Date(a.date) - new Date(b.date);
+      } catch (error) {
+        console.error('Error sorting appointments:', error);
+        return 0;
+      }
+    })
     .slice(0, 5); // Show only next 5 upcoming appointments
 
   console.log('Upcoming appointments:', upcomingAppointments);
@@ -468,19 +486,27 @@ function SimplifiedDoctorDashboard({
 
               {upcomingAppointments.length > 0 ? (
                 <div className="space-y-3">
-                  {upcomingAppointments.map(appointment => (
-                    <AppointmentCard
-                      key={appointment.id}
-                      appointment={appointment}
-                      onViewPatient={handleViewPatient}
-                      onEditAppointment={setEditingAppointment}
-                      onDiagnoseAppointment={setDiagnosingAppointment}
-                      onDeleteAppointment={onDeleteAppointment}
-                      patients={patients}
-                      onUpdatePatient={onUpdatePatient}
-                      isDoctor={true}
-                    />
-                  ))}
+                  {upcomingAppointments.map(appointment => {
+                    // Skip invalid appointments
+                    if (!appointment || (!appointment._id && !appointment.id)) {
+                      console.warn('Skipping invalid appointment in render:', appointment);
+                      return null;
+                    }
+
+                    return (
+                      <AppointmentCard
+                        key={appointment.id || appointment._id}
+                        appointment={appointment}
+                        onViewPatient={handleViewPatient}
+                        onEditAppointment={setEditingAppointment}
+                        onDiagnoseAppointment={setDiagnosingAppointment}
+                        onDeleteAppointment={onDeleteAppointment}
+                        patients={patients}
+                        onUpdatePatient={onUpdatePatient}
+                        isDoctor={true}
+                      />
+                    );
+                  })}
                 </div>
               ) : (
                 <div className="no-appointments">

@@ -12,9 +12,30 @@ function TodaysAppointments({ onViewPatient, onEditAppointment, onDeleteAppointm
       try {
         setLoading(true);
         const todaysAppointments = await getTodaysAppointments();
-        setAppointments(todaysAppointments);
+
+        // Validate appointments data before setting state
+        if (Array.isArray(todaysAppointments)) {
+          // Filter out any invalid appointments
+          const validAppointments = todaysAppointments.filter(appointment => {
+            if (!appointment) {
+              console.warn('Found null or undefined appointment');
+              return false;
+            }
+            if (!appointment._id && !appointment.id) {
+              console.warn('Found appointment without ID:', appointment);
+              return false;
+            }
+            return true;
+          });
+
+          setAppointments(validAppointments);
+        } else {
+          console.error('Invalid appointments data received:', todaysAppointments);
+          setAppointments([]);
+        }
       } catch (error) {
         console.error('Error fetching today\'s appointments:', error);
+        setAppointments([]); // Set empty array on error
       } finally {
         setLoading(false);
       }
@@ -99,12 +120,19 @@ function TodaysAppointments({ onViewPatient, onEditAppointment, onDeleteAppointm
         </div>
       ) : appointments.length > 0 ? (
         <div className="space-y-2">
-          {appointments.map((appointment) => (
-            <div
-              key={appointment._id || appointment.id}
-              className="flex items-center p-3 hover:bg-gray-50 rounded-md cursor-pointer transition-colors border border-gray-100 mb-2"
-              onClick={() => handleAppointmentClick(appointment)}
-            >
+          {appointments.map((appointment) => {
+            // Skip rendering if appointment is invalid
+            if (!appointment || (!appointment._id && !appointment.id)) {
+              console.warn('Skipping invalid appointment in render:', appointment);
+              return null;
+            }
+
+            return (
+              <div
+                key={appointment._id || appointment.id}
+                className="flex items-center p-3 hover:bg-gray-50 rounded-md cursor-pointer transition-colors border border-gray-100 mb-2"
+                onClick={() => handleAppointmentClick(appointment)}
+              >
               <div className="flex-grow">
                 <div className="font-medium">{appointment.patientName}</div>
                 <div className="text-xs text-gray-500">{appointment.reason || 'Consultation'}</div>
@@ -163,7 +191,8 @@ function TodaysAppointments({ onViewPatient, onEditAppointment, onDeleteAppointm
                 )}
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       ) : (
         <div className="text-center py-4 text-gray-500">
