@@ -269,27 +269,49 @@ function SuperSimpleQueueManagement({ patients, appointments, userRole }) {
   // Get today's appointments that aren't in the queue yet
   const getTodaysAppointments = () => {
     const today = new Date().toISOString().split('T')[0];
+    console.log('Today is:', today);
+    console.log('All appointments:', appointments);
 
     // Get all appointments for today
     const todaysAppointments = appointments.filter(appointment => {
       const appointmentDate = new Date(appointment.appointment_date || appointment.date).toISOString().split('T')[0];
+      console.log('Appointment date:', appointmentDate, 'for appointment:', appointment);
       return appointmentDate === today;
     });
+
+    console.log('Today\'s appointments:', todaysAppointments);
 
     // Get IDs of appointments already in the queue
     const queueAppointmentIds = queueEntries
       .filter(entry => entry.appointment_id)
-      .map(entry => entry.appointment_id._id || entry.appointment_id);
+      .map(entry => {
+        // Handle both populated and non-populated appointment_id
+        return typeof entry.appointment_id === 'object' ?
+          (entry.appointment_id._id || entry.appointment_id.id) :
+          entry.appointment_id;
+      });
+
+    console.log('Queue appointment IDs:', queueAppointmentIds);
 
     // Filter out appointments already in the queue
-    return todaysAppointments.filter(appointment => {
+    const appointmentsNotInQueue = todaysAppointments.filter(appointment => {
       const appointmentId = appointment._id || appointment.id;
-      return !queueAppointmentIds.includes(appointmentId);
+      const isInQueue = queueAppointmentIds.includes(appointmentId);
+      console.log('Appointment ID:', appointmentId, 'is in queue:', isInQueue);
+      return !isInQueue;
     });
+
+    console.log('Appointments not in queue:', appointmentsNotInQueue);
+    return appointmentsNotInQueue;
   };
 
   // Check if there are any appointments that can be checked in
   const appointmentsToCheckIn = getTodaysAppointments();
+
+  // Debug output
+  console.log('Queue entries:', queueEntries);
+  console.log('Queue stats:', queueStats);
+  console.log('Appointments to check in:', appointmentsToCheckIn);
 
   return (
     <div className="bg-white rounded-lg shadow-sm p-4">
@@ -361,10 +383,17 @@ function SuperSimpleQueueManagement({ patients, appointments, userRole }) {
               There are <span className="font-bold">{appointmentsToCheckIn.length}</span> appointments today that haven't been checked in yet.
             </p>
             <div className="flex flex-wrap gap-2">
-              {appointmentsToCheckIn.slice(0, 3).map(appointment => (
+              {appointmentsToCheckIn.map(appointment => (
                 <div key={appointment._id || appointment.id} className="bg-white p-2 rounded border border-gray-200 flex-1 min-w-[200px]">
                   <div className="font-medium">
-                    {appointment.patientName || (appointment.patient_id && appointment.patient_id.name) || 'Unknown Patient'}
+                    {appointment.patientName ||
+                     (appointment.patient_id && typeof appointment.patient_id === 'object' ? appointment.patient_id.name : null) ||
+                     (() => {
+                       // Find patient name if patient_id is just an ID
+                       const patientId = appointment.patient_id || appointment.patientId;
+                       const patient = patients.find(p => p._id === patientId || p.id === patientId);
+                       return patient ? patient.name : 'Unknown Patient';
+                     })()}
                   </div>
                   <div className="text-sm text-gray-600">
                     {appointment.optional_time || appointment.time || 'No time'} - {appointment.type || 'Consultation'}
@@ -378,12 +407,26 @@ function SuperSimpleQueueManagement({ patients, appointments, userRole }) {
                   </button>
                 </div>
               ))}
-              {appointmentsToCheckIn.length > 3 && (
-                <div className="bg-white p-2 rounded border border-gray-200 flex-1 min-w-[200px] flex items-center justify-center">
-                  <span className="text-gray-500">+{appointmentsToCheckIn.length - 3} more</span>
-                </div>
-              )}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Display message when no appointments to check in */}
+      {appointmentsToCheckIn.length === 0 && (
+        <div className="mb-6">
+          <h3 className="text-lg font-semibold text-blue-800 mb-2">Today's Appointments</h3>
+          <div className="bg-blue-50 p-4 rounded-lg border border-blue-100 text-center">
+            <p>No appointments to check in today.</p>
+            {(userRole === 'secretary' || userRole === 'admin') && (
+              <button
+                onClick={() => setShowAddToQueueModal(true)}
+                className="mt-3 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-md text-sm font-medium flex items-center mx-auto"
+              >
+                <FaUserPlus className="mr-2" />
+                Add Walk-in Patient
+              </button>
+            )}
           </div>
         </div>
       )}
@@ -405,6 +448,7 @@ function SuperSimpleQueueManagement({ patients, appointments, userRole }) {
                     onRemove={() => handleRemoveFromQueue(entry._id)}
                     onPrintTicket={() => handlePrintTicket(entry)}
                     userRole={userRole}
+                    patients={patients}
                   />
                 ))}
             </div>
@@ -446,6 +490,7 @@ function SuperSimpleQueueManagement({ patients, appointments, userRole }) {
                       onRemove={() => handleRemoveFromQueue(entry._id)}
                       onPrintTicket={() => handlePrintTicket(entry)}
                       userRole={userRole}
+                      patients={patients}
                     />
                   </div>
                 ))}
@@ -470,6 +515,7 @@ function SuperSimpleQueueManagement({ patients, appointments, userRole }) {
                     onRemove={() => handleRemoveFromQueue(entry._id)}
                     onPrintTicket={() => handlePrintTicket(entry)}
                     userRole={userRole}
+                    patients={patients}
                   />
                 ))}
             </div>

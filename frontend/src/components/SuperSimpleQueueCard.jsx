@@ -1,7 +1,7 @@
 import { FaUserClock, FaUserCheck, FaUserTimes, FaPrint, FaPhone } from 'react-icons/fa';
 import { formatDistanceToNow } from 'date-fns';
 
-function SuperSimpleQueueCard({ queueEntry, onUpdateStatus, onRemove, onPrintTicket, userRole }) {
+function SuperSimpleQueueCard({ queueEntry, onUpdateStatus, onRemove, onPrintTicket, userRole, patients }) {
   // Format check-in time
   const formatTime = (dateString) => {
     const date = new Date(dateString);
@@ -15,10 +15,28 @@ function SuperSimpleQueueCard({ queueEntry, onUpdateStatus, onRemove, onPrintTic
 
   // Get patient name
   const getPatientName = () => {
-    if (queueEntry.patient_id && queueEntry.patient_id.name) {
+    // If patient_id is an object with name property
+    if (queueEntry.patient_id && typeof queueEntry.patient_id === 'object' && queueEntry.patient_id.name) {
       return queueEntry.patient_id.name;
     }
-    return queueEntry.patientName || 'Unknown Patient';
+
+    // If patientName is directly available
+    if (queueEntry.patientName) {
+      return queueEntry.patientName;
+    }
+
+    // If patient_id is just an ID, try to find the patient in the global patients array
+    if (patients && Array.isArray(patients) && queueEntry.patient_id) {
+      const patientId = typeof queueEntry.patient_id === 'object' ?
+        (queueEntry.patient_id._id || queueEntry.patient_id.id) : queueEntry.patient_id;
+
+      const patient = patients.find(p => p._id === patientId || p.id === patientId);
+      if (patient) {
+        return patient.name;
+      }
+    }
+
+    return 'Unknown Patient';
   };
 
   // Get appointment info
@@ -27,8 +45,11 @@ function SuperSimpleQueueCard({ queueEntry, onUpdateStatus, onRemove, onPrintTic
       return 'Walk-in';
     }
     if (queueEntry.appointment_id) {
+      // Handle both populated and non-populated appointment_id
       const appointment = queueEntry.appointment_id;
-      return appointment.type || 'Appointment';
+      if (typeof appointment === 'object') {
+        return appointment.type || 'Appointment';
+      }
     }
     return 'Appointment';
   };
@@ -113,7 +134,7 @@ function SuperSimpleQueueCard({ queueEntry, onUpdateStatus, onRemove, onPrintTic
                 <span>Waiting for: {calculateWaitTime(queueEntry.check_in_time)}</span>
               </>
             )}
-            {queueEntry.patient_id?.phone && (
+            {queueEntry.patient_id && typeof queueEntry.patient_id === 'object' && queueEntry.patient_id.phone && (
               <>
                 <span>•</span>
                 <a
