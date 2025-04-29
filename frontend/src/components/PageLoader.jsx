@@ -10,7 +10,7 @@ const PageLoader = ({ children, backgroundImage }) => {
   // Preload the background image
   useEffect(() => {
     const img = new Image();
-    img.src = backgroundImage || '/backgroundimg/Leonardo_Phoenix_10_Create_a_visually_striking_innovative_back_3 (1) (1).jpg';
+    img.src = backgroundImage || '/backgroundimg/Theone.jpeg';
     img.onload = () => {
       setImageLoaded(true);
       // After image is loaded, wait a bit before removing the loader

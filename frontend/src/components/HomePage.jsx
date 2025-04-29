@@ -181,10 +181,10 @@ function HomePage() {
       {/* Add style tag for responsive background */}
       <style dangerouslySetInnerHTML={{ __html: responsiveBackgroundStyles }} />
 
-      <PageLoader backgroundImage="/backgroundimg/Leonardo_Phoenix_10_Create_a_visually_striking_innovative_back_3 (1) (1).jpg">
+      <PageLoader backgroundImage="/backgroundimg/Theone.jpeg">
         <div className="text-gray-800 responsive-bg bg-image" style={{
           scrollBehavior: 'smooth',
-          backgroundImage: "url('/backgroundimg/Leonardo_Phoenix_10_Create_a_visually_striking_innovative_back_3 (1) (1).jpg')",
+          backgroundImage: "url('/backgroundimg/Theone.jpeg')",
           backgroundSize: "cover",
           backgroundPosition: "center center", /* Center position for all screen sizes */
           backgroundAttachment: "fixed", /* Use fixed for both mobile and desktop for consistent appearance */

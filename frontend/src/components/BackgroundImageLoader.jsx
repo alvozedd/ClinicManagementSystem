@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import apiService from '../utils/apiService';
 
 function BackgroundImageLoader() {
-  const [backgroundImage, setBackgroundImage] = useState('/backgroundimg/Leonardo_Phoenix_10_Create_a_visually_striking_innovative_back_3 (1) (1).jpg');
+  const [backgroundImage, setBackgroundImage] = useState('/backgroundimg/Theone.jpeg');
 
   useEffect(() => {
     // Force a cache-busting parameter to ensure the image is refreshed
@@ -40,7 +40,7 @@ function BackgroundImageLoader() {
       } catch (error) {
         console.error('Error loading background images:', error);
         // Fallback to using the default image with cache busting
-        const fallbackImage = '/backgroundimg/Leonardo_Phoenix_10_Create_a_visually_striking_innovative_back_3 (1) (1).jpg';
+        const fallbackImage = '/backgroundimg/Theone.jpeg';
         const timestamp = new Date().getTime();
         const imageWithCacheBusting = `${fallbackImage}?t=${timestamp}`;
 
@@ -57,7 +57,7 @@ function BackgroundImageLoader() {
     // Function to check if images exist directly in the public folder
     const checkImageExists = () => {
       const commonImageNames = [
-        'Leonardo_Phoenix_10_Create_a_visually_striking_innovative_back_3 (1) (1).jpg',
+        'Theone.jpeg',
         'background.jpg',
         'background1.jpg',
         'background2.jpg',
