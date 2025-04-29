@@ -33,20 +33,20 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
   const fetchQueueData = async () => {
     try {
       setLoading(true);
-      const data = await apiService.getQueue();
-      
+      const data = await apiService.getQueueEntries();
+
       // Sort queue entries by status and ticket number
       const sortedEntries = [...data].sort((a, b) => {
         const statusPriority = { 'Waiting': 0, 'In Progress': 1, 'Completed': 2, 'No-show': 3, 'Cancelled': 4 };
         const statusDiff = statusPriority[a.status] - statusPriority[b.status];
-        
+
         if (statusDiff !== 0) return statusDiff;
-        
+
         return a.ticket_number - b.ticket_number;
       });
-      
+
       setQueueEntries(sortedEntries);
-      
+
       // Calculate queue statistics
       const stats = {
         totalPatients: data.length,
@@ -54,7 +54,7 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
         inProgressPatients: data.filter(entry => entry.status === 'In Progress').length,
         completedPatients: data.filter(entry => entry.status === 'Completed').length
       };
-      
+
       setQueueStats(stats);
     } catch (error) {
       console.error('Error fetching queue data:', error);
@@ -67,19 +67,19 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
   const handleAddWalkIn = async (patientData) => {
     try {
       setLoading(true);
-      
+
       // Create queue data
       const queueData = {
         patient_id: patientData.patient_id,
         is_walk_in: true,
         notes: patientData.notes || 'Walk-in patient'
       };
-      
+
       // Add to queue
       const newQueueEntry = await apiService.addToQueue(queueData);
       setTicketToPrint(newQueueEntry);
       await fetchQueueData();
-      
+
       // If this is a new patient, refresh the patients list
       if (patientData.isNewPatient && onUpdatePatient) {
         onUpdatePatient();
@@ -97,7 +97,7 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
     try {
       setLoading(true);
       await apiService.updateQueueStatus(queueEntryId, { status: newStatus });
-      
+
       // If completing an appointment, update the appointment status
       if (newStatus === 'Completed') {
         const queueEntry = queueEntries.find(entry => entry._id === queueEntryId);
@@ -105,13 +105,13 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
           const appointmentId = typeof queueEntry.appointment_id === 'object' ?
             (queueEntry.appointment_id._id || queueEntry.appointment_id.id) :
             queueEntry.appointment_id;
-          
+
           if (appointmentId && onUpdateAppointment) {
             await onUpdateAppointment(appointmentId, { status: 'completed' });
           }
         }
       }
-      
+
       await fetchQueueData();
     } catch (error) {
       console.error('Error updating queue status:', error);
@@ -124,7 +124,7 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
   // Handle removing a patient from the queue
   const handleRemoveFromQueue = async (queueEntryId) => {
     if (!confirm('Are you sure you want to remove this patient from the queue?')) return;
-    
+
     try {
       setLoading(true);
       await apiService.removeFromQueue(queueEntryId);
@@ -147,7 +147,7 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
     try {
       // Find the patient for this appointment
       const patientId = appointment.patient_id || appointment.patientId;
-      
+
       // Create queue data
       const queueData = {
         patient_id: patientId,
@@ -155,7 +155,7 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
         is_walk_in: false,
         notes: `Checked in for ${appointment.type || 'appointment'}`
       };
-      
+
       // Add to queue
       const newQueueEntry = await apiService.addToQueue(queueData);
       setTicketToPrint(newQueueEntry);
@@ -170,28 +170,28 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
   const handleMoveUp = async (entryId) => {
     try {
       setLoading(true);
-      
+
       // Get only the waiting entries
       const waitingEntries = queueEntries.filter(entry => entry.status === 'Waiting');
-      
+
       // Find the index of the entry to move
       const index = waitingEntries.findIndex(entry => entry._id === entryId);
-      
+
       // Can't move up if already at the top
       if (index <= 0) return;
-      
+
       // Create a new array with the reordered items
       const reorderedEntries = Array.from(waitingEntries);
       const temp = reorderedEntries[index];
       reorderedEntries[index] = reorderedEntries[index - 1];
       reorderedEntries[index - 1] = temp;
-      
+
       // Update the queue entries with the new order
       const updatedQueueEntries = queueEntries.filter(entry => entry.status !== 'Waiting');
       updatedQueueEntries.push(...reorderedEntries);
-      
+
       setQueueEntries(updatedQueueEntries);
-      
+
       // Call the API to update the order in the database
       const queueOrder = reorderedEntries.map((entry, idx) => ({
         id: entry._id,
@@ -206,32 +206,32 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
       setLoading(false);
     }
   };
-  
+
   const handleMoveDown = async (entryId) => {
     try {
       setLoading(true);
-      
+
       // Get only the waiting entries
       const waitingEntries = queueEntries.filter(entry => entry.status === 'Waiting');
-      
+
       // Find the index of the entry to move
       const index = waitingEntries.findIndex(entry => entry._id === entryId);
-      
+
       // Can't move down if already at the bottom
       if (index === -1 || index >= waitingEntries.length - 1) return;
-      
+
       // Create a new array with the reordered items
       const reorderedEntries = Array.from(waitingEntries);
       const temp = reorderedEntries[index];
       reorderedEntries[index] = reorderedEntries[index + 1];
       reorderedEntries[index + 1] = temp;
-      
+
       // Update the queue entries with the new order
       const updatedQueueEntries = queueEntries.filter(entry => entry.status !== 'Waiting');
       updatedQueueEntries.push(...reorderedEntries);
-      
+
       setQueueEntries(updatedQueueEntries);
-      
+
       // Call the API to update the order in the database
       const queueOrder = reorderedEntries.map((entry, idx) => ({
         id: entry._id,
@@ -250,13 +250,13 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
   // Get today's appointments that aren't in the queue yet
   const getAppointmentsToCheckIn = () => {
     const today = new Date().toISOString().split('T')[0];
-    
+
     // Get all appointments for today
     const todaysAppointments = appointments.filter(appointment => {
       const appointmentDate = new Date(appointment.appointment_date || appointment.date).toISOString().split('T')[0];
       return appointmentDate === today;
     });
-    
+
     // Get IDs of appointments already in the queue
     const queueAppointmentIds = queueEntries
       .filter(entry => entry.appointment_id)
@@ -266,7 +266,7 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
           (entry.appointment_id._id || entry.appointment_id.id) :
           entry.appointment_id;
       });
-    
+
     // Filter out appointments already in the queue
     return todaysAppointments.filter(appointment => {
       const appointmentId = appointment._id || appointment.id;
@@ -291,7 +291,7 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
               Add Walk-in
             </button>
           )}
-          
+
           {appointmentsToCheckIn.length > 0 && (userRole === 'secretary' || userRole === 'admin') && (
             <button
               onClick={() => {
@@ -306,7 +306,7 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
               Check In All ({appointmentsToCheckIn.length})
             </button>
           )}
-          
+
           <button
             onClick={fetchQueueData}
             className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-md text-sm font-medium flex items-center"
@@ -390,11 +390,11 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
                   const appointmentId = typeof entry.appointment_id === 'object' ?
                     (entry.appointment_id._id || entry.appointment_id.id) :
                     entry.appointment_id;
-                  
+
                   const appointment = appointments.find(a =>
                     (a._id === appointmentId || a.id === appointmentId)
                   );
-                  
+
                   return (
                     <div key={entry._id} className="p-4 rounded-lg border border-blue-200 bg-blue-50">
                       <div className="flex items-center">
@@ -443,14 +443,14 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
                   const appointmentId = typeof entry.appointment_id === 'object' ?
                     (entry.appointment_id._id || entry.appointment_id.id) :
                     entry.appointment_id;
-                  
+
                   const appointment = appointments.find(a =>
                     (a._id === appointmentId || a.id === appointmentId)
                   );
-                  
+
                   return (
-                    <div 
-                      key={entry._id} 
+                    <div
+                      key={entry._id}
                       className="p-4 rounded-lg border border-yellow-200 bg-yellow-50 hover:shadow-md transition-all duration-300"
                     >
                       <div className="flex items-center">
@@ -535,11 +535,11 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
                   const appointmentId = typeof entry.appointment_id === 'object' ?
                     (entry.appointment_id._id || entry.appointment_id.id) :
                     entry.appointment_id;
-                  
+
                   const appointment = appointments.find(a =>
                     (a._id === appointmentId || a.id === appointmentId)
                   );
-                  
+
                   return (
                     <div key={entry._id} className="p-4 rounded-lg border border-green-200 bg-green-50">
                       <div className="flex items-center">

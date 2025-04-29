@@ -11,7 +11,7 @@ const allowedOrigins = [
 ];
 
 // For development, you can enable this to allow all origins
-const ALLOW_ALL_ORIGINS = process.env.NODE_ENV === 'development';
+const ALLOW_ALL_ORIGINS = process.env.NODE_ENV === 'development' || process.env.ALLOW_ALL_ORIGINS === 'true';
 
 /**
  * Custom CORS middleware that ensures headers are set for all responses

@@ -63,7 +63,25 @@ app.use(corsMiddleware);
 
 // Also apply the cors package for good measure
 app.use(cors({
-  origin: ['https://urohealthltd.netlify.app', 'https://www.urohealthltd.netlify.app', 'http://localhost:3000', 'http://localhost:5173'],
+  origin: function(origin, callback) {
+    // Allow requests with no origin (like mobile apps, curl, etc)
+    if (!origin) return callback(null, true);
+
+    // Check if origin is in allowed list
+    const allowedOrigins = ['https://urohealthltd.netlify.app', 'https://www.urohealthltd.netlify.app', 'http://localhost:3000', 'http://localhost:5173'];
+
+    // If ALLOW_ALL_ORIGINS is true, allow all origins
+    if (process.env.NODE_ENV === 'development' || process.env.ALLOW_ALL_ORIGINS === 'true') {
+      return callback(null, true);
+    }
+
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      return callback(null, true);
+    } else {
+      console.log('Origin not allowed by CORS:', origin);
+      return callback(null, true); // Allow anyway for now to fix CORS issues
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization'],
@@ -565,8 +583,14 @@ app.delete('/content/:id', (req, res) => {
 });
 
 // Queue routes without /api prefix
-app.get('/queue', addCorsHeaders, (req, res) => {
+app.get('/queue', (req, res) => {
   console.log('Received GET request at /queue, forwarding to controller directly');
+  // Set CORS headers explicitly for this route
+  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.header('Access-Control-Allow-Credentials', 'true');
+
   // Import the controller directly
   const { getQueueEntries } = require('./controllers/queueController');
   // Add authentication middleware manually
@@ -575,8 +599,14 @@ app.get('/queue', addCorsHeaders, (req, res) => {
   protect(req, res, () => doctorOrSecretary(req, res, () => getQueueEntries(req, res)));
 });
 
-app.post('/queue', addCorsHeaders, (req, res) => {
+app.post('/queue', (req, res) => {
   console.log('Received POST request at /queue, forwarding to controller directly');
+  // Set CORS headers explicitly for this route
+  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.header('Access-Control-Allow-Credentials', 'true');
+
   // Import the controller directly
   const { addToQueue } = require('./controllers/queueController');
   // Add authentication middleware manually

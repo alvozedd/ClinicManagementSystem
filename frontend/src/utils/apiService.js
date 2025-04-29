@@ -628,14 +628,24 @@ const apiService = {
 
   // Queue Management endpoints
   getQueueEntries: async () => {
-    return secureFetch(`${API_URL}/queue`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        ...authHeader(),
-      },
-      credentials: 'include', // Include cookies for refresh token
-    });
+    try {
+      // Use the non-API endpoint for queue to avoid CORS issues
+      const baseUrl = API_URL.replace('/api', '');
+      console.log('Using queue endpoint:', `${baseUrl}/queue`);
+
+      const response = await fetch(`${baseUrl}/queue`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeader(),
+        },
+        credentials: 'include', // Include cookies for refresh token
+      });
+      return handleResponse(response);
+    } catch (error) {
+      console.error('Error fetching queue entries:', error);
+      throw error;
+    }
   },
 
   getQueueStats: async () => {
@@ -650,15 +660,25 @@ const apiService = {
   },
 
   addToQueue: async (queueData) => {
-    return secureFetch(`${API_URL}/queue`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...authHeader(),
-      },
-      body: JSON.stringify(queueData),
-      credentials: 'include', // Include cookies for refresh token
-    });
+    try {
+      // Use the non-API endpoint for queue to avoid CORS issues
+      const baseUrl = API_URL.replace('/api', '');
+      console.log('Using queue endpoint for adding:', `${baseUrl}/queue`);
+
+      const response = await fetch(`${baseUrl}/queue`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeader(),
+        },
+        body: JSON.stringify(queueData),
+        credentials: 'include', // Include cookies for refresh token
+      });
+      return handleResponse(response);
+    } catch (error) {
+      console.error('Error adding to queue:', error);
+      throw error;
+    }
   },
 
   updateQueueEntry: async (id, updateData) => {

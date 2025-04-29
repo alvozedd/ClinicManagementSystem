@@ -91,9 +91,6 @@ function TodaysAppointments({ onViewPatient, onEditAppointment, onDeleteAppointm
               className="flex items-center p-3 hover:bg-gray-50 rounded-md cursor-pointer transition-colors border border-gray-100 mb-2"
               onClick={() => handleAppointmentClick(appointment)}
             >
-              <div className="w-16 text-sm font-medium text-gray-700">
-                {formatTime(appointment.time)}
-              </div>
               <div className="flex-grow">
                 <div className="font-medium">{appointment.patientName}</div>
                 <div className="text-xs text-gray-500">{appointment.reason || 'Consultation'}</div>
