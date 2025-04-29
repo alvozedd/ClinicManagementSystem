@@ -86,8 +86,9 @@ function PatientDiagnosesTab({ patient, appointments, onEditDiagnosis, onDeleteD
                 appointmentType: appointment?.type || 'Consultation',
                 appointmentReason: appointment?.reason || 'Not specified',
                 diagnosisText: parsedDiagnosis.notes || parsedDiagnosis,
-                treatment: parsedDiagnosis.treatment,
-                followUp: parsedDiagnosis.followUp,
+                diagnosis: parsedDiagnosis.diagnosis || '',
+                treatment: parsedDiagnosis.treatment || '',
+                followUp: parsedDiagnosis.followUp || '',
                 files: parsedDiagnosis.files || [],
                 createdAt: new Date(diagnosis.createdAt),
                 createdBy: diagnosis.created_by_user_id || 'doctor'
@@ -146,7 +147,9 @@ function PatientDiagnosesTab({ patient, appointments, onEditDiagnosis, onDeleteD
                   let parsedDiagnosis = diagnosis.diagnosis_text;
                   try {
                     parsedDiagnosis = JSON.parse(diagnosis.diagnosis_text);
+                    console.log('Successfully parsed diagnosis:', parsedDiagnosis);
                   } catch (e) {
+                    console.error('Error parsing diagnosis_text:', e);
                     // If it's not valid JSON, keep the original text
                   }
 
@@ -158,8 +161,9 @@ function PatientDiagnosesTab({ patient, appointments, onEditDiagnosis, onDeleteD
                     appointmentType: appointment.type,
                     appointmentReason: appointment.reason,
                     diagnosisText: parsedDiagnosis.notes || parsedDiagnosis,
-                    treatment: parsedDiagnosis.treatment,
-                    followUp: parsedDiagnosis.followUp,
+                    diagnosis: parsedDiagnosis.diagnosis || '',
+                    treatment: parsedDiagnosis.treatment || '',
+                    followUp: parsedDiagnosis.followUp || '',
                     files: parsedDiagnosis.files || [],
                     createdAt: new Date(diagnosis.createdAt),
                     createdBy: appointment.created_by_user_id || 'doctor'
@@ -373,6 +377,15 @@ function PatientDiagnosesTab({ patient, appointments, onEditDiagnosis, onDeleteD
                 <p className="text-gray-800 whitespace-pre-line">{diagnosis.diagnosisText}</p>
               </div>
             </div>
+
+            {diagnosis.diagnosis && (
+              <div className="mb-4">
+                <h4 className="font-semibold text-blue-800 mb-2">Diagnosis</h4>
+                <div className="bg-purple-50 p-4 rounded-lg">
+                  <p className="text-gray-800">{diagnosis.diagnosis}</p>
+                </div>
+              </div>
+            )}
 
             {diagnosis.treatment && (
               <div className="mb-4">

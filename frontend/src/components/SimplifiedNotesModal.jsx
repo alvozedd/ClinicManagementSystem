@@ -12,27 +12,42 @@ function SimplifiedNotesModal({ appointment, onClose, onSave }) {
 
   useEffect(() => {
     if (appointment && appointment.diagnosis) {
+      console.log('Loading diagnosis data:', appointment.diagnosis);
       // Handle both string and object formats
       if (typeof appointment.diagnosis === 'string') {
         try {
           const parsedDiagnosis = JSON.parse(appointment.diagnosis);
+          console.log('Parsed diagnosis from string:', parsedDiagnosis);
           setNotes(parsedDiagnosis.notes || '');
           setDiagnosis(parsedDiagnosis.diagnosis || '');
           setTreatment(parsedDiagnosis.treatment || '');
           setFollowUp(parsedDiagnosis.followUp || '');
           setExistingFiles(parsedDiagnosis.files || []);
         } catch (e) {
+          console.error('Error parsing diagnosis string:', e);
           // If parsing fails, use the string as is
           setNotes(appointment.diagnosis);
+          setDiagnosis('');
+          setTreatment('');
+          setFollowUp('');
         }
       } else {
         // It's already an object
+        console.log('Using diagnosis object directly:', appointment.diagnosis);
         setNotes(appointment.diagnosis.notes || '');
         setDiagnosis(appointment.diagnosis.diagnosis || '');
         setTreatment(appointment.diagnosis.treatment || '');
         setFollowUp(appointment.diagnosis.followUp || '');
         setExistingFiles(appointment.diagnosis.files || []);
       }
+    } else {
+      // Reset form if no diagnosis
+      console.log('No diagnosis data found, resetting form');
+      setNotes('');
+      setDiagnosis('');
+      setTreatment('');
+      setFollowUp('');
+      setExistingFiles([]);
     }
   }, [appointment]);
 
@@ -86,6 +101,13 @@ function SimplifiedNotesModal({ appointment, onClose, onSave }) {
 
       console.log('Notes object being saved:', notesObj);
 
+      // Validate that we have the diagnosis field
+      if (diagnosis !== undefined && diagnosis !== null) {
+        console.log('Diagnosis field is present:', diagnosis);
+      } else {
+        console.warn('Diagnosis field is missing or empty');
+      }
+
       // For API compatibility, convert the notes object to a string
       // The backend expects a diagnosis_text field
       const updatedAppointment = {
@@ -100,7 +122,13 @@ function SimplifiedNotesModal({ appointment, onClose, onSave }) {
       };
 
       console.log('Saving notes with appointment:', updatedAppointment);
-      onSave(updatedAppointment);
+
+      // Force a deep clone to ensure React detects the change
+      const clonedAppointment = JSON.parse(JSON.stringify(updatedAppointment));
+      onSave(clonedAppointment);
+
+      // Show success message
+      console.log('Notes saved successfully');
     } catch (error) {
       console.error('Error saving notes:', error);
       alert('Failed to save notes. Please try again.');

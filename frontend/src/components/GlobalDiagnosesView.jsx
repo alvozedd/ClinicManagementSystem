@@ -34,7 +34,9 @@ function GlobalDiagnosesView({ onViewPatient, onEditDiagnosis, onDeleteDiagnosis
           let parsedDiagnosis = diagnosis.diagnosis_text;
           try {
             parsedDiagnosis = JSON.parse(diagnosis.diagnosis_text);
+            console.log('Successfully parsed diagnosis in GlobalDiagnosesView:', parsedDiagnosis);
           } catch (e) {
+            console.error('Error parsing diagnosis_text in GlobalDiagnosesView:', e);
             // If it's not valid JSON, keep the original text
           }
 
@@ -47,8 +49,9 @@ function GlobalDiagnosesView({ onViewPatient, onEditDiagnosis, onDeleteDiagnosis
             patientId: patient?._id,
             patientName: patient?.name || 'Unknown Patient',
             diagnosisText: parsedDiagnosis.notes || parsedDiagnosis,
-            treatment: parsedDiagnosis.treatment,
-            followUp: parsedDiagnosis.followUp,
+            diagnosis: parsedDiagnosis.diagnosis || '',
+            treatment: parsedDiagnosis.treatment || '',
+            followUp: parsedDiagnosis.followUp || '',
             files: parsedDiagnosis.files || [],
             createdAt: new Date(diagnosis.createdAt)
           };
@@ -86,7 +89,9 @@ function GlobalDiagnosesView({ onViewPatient, onEditDiagnosis, onDeleteDiagnosis
       result = result.filter(d =>
         d.patientName.toLowerCase().includes(term) ||
         d.diagnosisText.toLowerCase().includes(term) ||
+        (d.diagnosis && d.diagnosis.toLowerCase().includes(term)) ||
         (d.treatment && d.treatment.toLowerCase().includes(term)) ||
+        (d.followUp && d.followUp.toLowerCase().includes(term)) ||
         (d.appointmentReason && d.appointmentReason.toLowerCase().includes(term))
       );
     }
@@ -265,6 +270,15 @@ function GlobalDiagnosesView({ onViewPatient, onEditDiagnosis, onDeleteDiagnosis
                   <p className="text-gray-800 whitespace-pre-line">{diagnosis.diagnosisText}</p>
                 </div>
               </div>
+
+              {diagnosis.diagnosis && (
+                <div className="mb-4">
+                  <h4 className="font-semibold text-blue-800 mb-2">Diagnosis</h4>
+                  <div className="bg-purple-50 p-4 rounded-lg">
+                    <p className="text-gray-800">{diagnosis.diagnosis}</p>
+                  </div>
+                </div>
+              )}
 
               {diagnosis.treatment && (
                 <div className="mb-4">
