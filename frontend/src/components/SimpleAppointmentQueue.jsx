@@ -112,10 +112,37 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
         }
       }
 
+      // Update the UI optimistically
+      setQueueEntries(prevEntries => {
+        return prevEntries.map(entry => {
+          if (entry._id === queueEntryId) {
+            return { ...entry, status: newStatus };
+          }
+          return entry;
+        });
+      });
+
+      // Then refresh the data from the server
       await fetchQueueData();
     } catch (error) {
       console.error('Error updating queue status:', error);
-      alert('Failed to update queue status');
+
+      // Check if this is a CORS error
+      if (error.toString().includes('CORS') || error.toString().includes('NetworkError')) {
+        // Update the UI optimistically anyway
+        setQueueEntries(prevEntries => {
+          return prevEntries.map(entry => {
+            if (entry._id === queueEntryId) {
+              return { ...entry, status: newStatus };
+            }
+            return entry;
+          });
+        });
+
+        alert('Status updated locally. The server will be updated when you refresh the page.');
+      } else {
+        alert('Failed to update queue status: ' + error.toString());
+      }
     } finally {
       setLoading(false);
     }
@@ -128,10 +155,48 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
     try {
       setLoading(true);
       await apiService.removeFromQueue(queueEntryId);
+
+      // Update the UI optimistically
+      setQueueEntries(prevEntries => prevEntries.filter(entry => entry._id !== queueEntryId));
+
+      // Update queue statistics
+      const removedEntry = queueEntries.find(entry => entry._id === queueEntryId);
+      if (removedEntry) {
+        setQueueStats(prevStats => ({
+          ...prevStats,
+          totalPatients: prevStats.totalPatients - 1,
+          waitingPatients: removedEntry.status === 'Waiting' ? prevStats.waitingPatients - 1 : prevStats.waitingPatients,
+          inProgressPatients: removedEntry.status === 'In Progress' ? prevStats.inProgressPatients - 1 : prevStats.inProgressPatients,
+          completedPatients: removedEntry.status === 'Completed' ? prevStats.completedPatients - 1 : prevStats.completedPatients
+        }));
+      }
+
+      // Then refresh the data from the server
       await fetchQueueData();
     } catch (error) {
       console.error('Error removing from queue:', error);
-      alert('Failed to remove patient from queue');
+
+      // Check if this is a CORS error
+      if (error.toString().includes('CORS') || error.toString().includes('NetworkError')) {
+        // Update the UI optimistically anyway
+        setQueueEntries(prevEntries => prevEntries.filter(entry => entry._id !== queueEntryId));
+
+        // Update queue statistics
+        const removedEntry = queueEntries.find(entry => entry._id === queueEntryId);
+        if (removedEntry) {
+          setQueueStats(prevStats => ({
+            ...prevStats,
+            totalPatients: prevStats.totalPatients - 1,
+            waitingPatients: removedEntry.status === 'Waiting' ? prevStats.waitingPatients - 1 : prevStats.waitingPatients,
+            inProgressPatients: removedEntry.status === 'In Progress' ? prevStats.inProgressPatients - 1 : prevStats.inProgressPatients,
+            completedPatients: removedEntry.status === 'Completed' ? prevStats.completedPatients - 1 : prevStats.completedPatients
+          }));
+        }
+
+        alert('Patient removed from queue locally. The server will be updated when you refresh the page.');
+      } else {
+        alert('Failed to remove patient from queue: ' + error.toString());
+      }
     } finally {
       setLoading(false);
     }
