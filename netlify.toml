@@ -1,7 +1,7 @@
 [build]
   base = "/"
   publish = "frontend/dist"
-  command = "cd frontend && npm install --force && npm run build"
+  command = "chmod +x netlify-build.sh && ./netlify-build.sh"
 
 [[redirects]]
   from = "/*"
