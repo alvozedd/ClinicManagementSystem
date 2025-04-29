@@ -153,8 +153,7 @@ function HomePage() {
       const appointmentData = {
         patient_id: newPatient._id,
         appointment_date: new Date(formData.appointmentDate),
-        optional_time: '09:00', // Default time set to 9:00 AM
-        notes: `Booked online by patient. Time to be confirmed by secretary.`,
+        notes: `Booked online by patient. Will be added to queue when patient arrives.`,
         status: 'Scheduled',
         type: formData.appointmentType,
         reason: formData.appointmentReason || 'Not specified',

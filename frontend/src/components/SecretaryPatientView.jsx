@@ -343,7 +343,7 @@ function SecretaryPatientView({ patient, patients, appointments, onClose, onUpda
                   >
                     <div className="flex justify-between items-start">
                       <div>
-                        <p className="font-medium">{appointment.date} at {appointment.time}</p>
+                        <p className="font-medium">{appointment.date}</p>
                         <p className="text-gray-600">{appointment.type}</p>
                         {appointment.reason && <p className="text-gray-600 text-sm mt-1">Reason: {appointment.reason}</p>}
                       </div>
@@ -402,7 +402,7 @@ function SecretaryPatientView({ patient, patients, appointments, onClose, onUpda
                   >
                     <div className="flex justify-between items-start">
                       <div>
-                        <p className="font-medium">{appointment.date} at {appointment.time}</p>
+                        <p className="font-medium">{appointment.date}</p>
                         <p className="text-gray-600">{appointment.type}</p>
                         {appointment.reason && <p className="text-gray-600 text-sm mt-1">Reason: {appointment.reason}</p>}
                       </div>

@@ -65,7 +65,7 @@ function WelcomePage() {
       const appointmentData = {
         patient_id: newPatient._id,
         appointment_date: new Date(formData.appointmentDate),
-        optional_time: '09:00', // Default time set to 9:00 AM
+        // No time needed
         notes: `Type: ${formData.appointmentType}\nStatus: Scheduled\nBooked online by patient.`,
         reason: formData.appointmentReason || 'General consultation', // Use a default reason if not specified
         type: formData.appointmentType,
@@ -457,7 +457,7 @@ function WelcomePage() {
                         className="w-full px-3 py-2 border border-blue-200 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 shadow-sm"
                         required
                       />
-                      <p className="text-xs text-gray-500 mt-1">Our clinic hours are 8:00 AM to 5:00 PM.</p>
+                      <p className="text-xs text-gray-500 mt-1">Please select your preferred date for the appointment.</p>
                     </div>
 
                     <div className="mt-4">

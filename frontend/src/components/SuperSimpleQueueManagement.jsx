@@ -396,7 +396,7 @@ function SuperSimpleQueueManagement({ patients, appointments, userRole }) {
                      })()}
                   </div>
                   <div className="text-sm text-gray-600">
-                    {appointment.optional_time || appointment.time || 'No time'} - {appointment.type || 'Consultation'}
+                    {appointment.type || 'Consultation'}
                   </div>
                   <button
                     onClick={() => handleCheckInAppointment(appointment)}

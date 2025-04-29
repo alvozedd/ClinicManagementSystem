@@ -452,11 +452,8 @@ function SimplifiedSecretaryDashboard({
                   {filteredAppointments
                     .filter(appointment => statusFilter === 'all' || appointment.status === statusFilter)
                     .sort((a, b) => {
-                      // Sort by date first
-                      const dateCompare = new Date(a.date) - new Date(b.date);
-                      if (dateCompare !== 0) return dateCompare;
-                      // If same date, sort by time
-                      return a.time.localeCompare(b.time);
+                      // Sort by date only
+                      return new Date(a.date) - new Date(b.date);
                     })
                     .map(appointment => (
                       <AppointmentCard

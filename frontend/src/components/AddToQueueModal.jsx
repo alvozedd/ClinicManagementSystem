@@ -27,18 +27,18 @@ function AddToQueueModal({ patients, appointments, onClose, onSave }) {
   // Get today's appointments for the selected patient
   const getTodaysAppointments = () => {
     if (!selectedPatient) return [];
-    
+
     const today = new Date().toISOString().split('T')[0];
-    
+
     return appointments.filter(appointment => {
       // Check if the appointment is for today and for the selected patient
       const appointmentDate = new Date(appointment.appointment_date || appointment.date).toISOString().split('T')[0];
-      const patientMatches = 
-        appointment.patient_id === selectedPatient._id || 
+      const patientMatches =
+        appointment.patient_id === selectedPatient._id ||
         appointment.patient_id === selectedPatient.id ||
         appointment.patientId === selectedPatient._id ||
         appointment.patientId === selectedPatient.id;
-      
+
       return appointmentDate === today && patientMatches && appointment.status !== 'Completed' && appointment.status !== 'Cancelled';
     });
   };
@@ -46,17 +46,17 @@ function AddToQueueModal({ patients, appointments, onClose, onSave }) {
   // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
     const queueData = {
       patient_id: selectedPatient._id || selectedPatient.id,
       is_walk_in: isWalkIn,
       notes,
     };
-    
+
     if (selectedAppointment && !isWalkIn) {
       queueData.appointment_id = selectedAppointment._id || selectedAppointment.id;
     }
-    
+
     onSave(queueData);
   };
 
@@ -76,7 +76,7 @@ function AddToQueueModal({ patients, appointments, onClose, onSave }) {
           New Patient
         </button>
       </div>
-      
+
       {showAddPatientForm ? (
         <AddPatientForm
           onSave={handleAddPatient}
@@ -95,7 +95,7 @@ function AddToQueueModal({ patients, appointments, onClose, onSave }) {
   // Render appointment selection step
   const renderAppointmentSelection = () => {
     const todaysAppointments = getTodaysAppointments();
-    
+
     return (
       <div>
         <div className="mb-6">
@@ -106,7 +106,7 @@ function AddToQueueModal({ patients, appointments, onClose, onSave }) {
             Does this patient have an appointment today or is this a walk-in?
           </p>
         </div>
-        
+
         <div className="flex flex-col space-y-4">
           <div className="flex items-center">
             <input
@@ -125,7 +125,7 @@ function AddToQueueModal({ patients, appointments, onClose, onSave }) {
               Walk-in (No appointment)
             </label>
           </div>
-          
+
           <div className="flex items-center">
             <input
               type="radio"
@@ -141,7 +141,7 @@ function AddToQueueModal({ patients, appointments, onClose, onSave }) {
               Scheduled Appointment
             </label>
           </div>
-          
+
           {!isWalkIn && todaysAppointments.length > 0 && (
             <div className="ml-6 mt-2">
               <p className="text-sm text-gray-600 mb-2">Select an appointment:</p>
@@ -157,7 +157,7 @@ function AddToQueueModal({ patients, appointments, onClose, onSave }) {
                     onClick={() => setSelectedAppointment(appointment)}
                   >
                     <div className="font-medium">
-                      {appointment.optional_time || appointment.time} - {appointment.type || 'Consultation'}
+                      {appointment.type || 'Consultation'}
                     </div>
                     <div className="text-sm text-gray-600">
                       {appointment.reason || 'No reason specified'}
@@ -167,14 +167,14 @@ function AddToQueueModal({ patients, appointments, onClose, onSave }) {
               </div>
             </div>
           )}
-          
+
           {!isWalkIn && todaysAppointments.length === 0 && (
             <div className="ml-6 mt-2 text-sm text-red-600">
               No appointments found for today. Please select walk-in or create a new appointment.
             </div>
           )}
         </div>
-        
+
         <div className="mt-6">
           <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
             <FaRegStickyNote className="text-blue-600 mr-2" />
@@ -189,7 +189,7 @@ function AddToQueueModal({ patients, appointments, onClose, onSave }) {
             onChange={(e) => setNotes(e.target.value)}
           ></textarea>
         </div>
-        
+
         <div className="flex justify-between mt-6">
           <button
             type="button"
@@ -222,7 +222,7 @@ function AddToQueueModal({ patients, appointments, onClose, onSave }) {
           Please review the information below before adding to the queue.
         </p>
       </div>
-      
+
       <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 mb-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
@@ -257,7 +257,7 @@ function AddToQueueModal({ patients, appointments, onClose, onSave }) {
           )}
         </div>
       </div>
-      
+
       <div className="flex justify-between">
         <button
           type="button"

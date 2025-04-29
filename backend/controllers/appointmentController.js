@@ -21,12 +21,16 @@ const createAppointment = asyncHandler(async (req, res) => {
   const appointmentData = {
     patient_id,
     appointment_date,
-    optional_time: optional_time || '09:00', // Default time set to 9:00 AM
     notes,
     status: status || 'Scheduled',
     type: type || 'Consultation',
     reason
   };
+
+  // Only add optional_time if it's explicitly provided
+  if (optional_time) {
+    appointmentData.optional_time = optional_time;
+  }
 
   // Add created_by_user_id only if user is authenticated
   if (req.user) {

@@ -64,33 +64,33 @@ function IntegratedAppointmentQueue({ patients, appointments, userRole, onUpdate
   useEffect(() => {
     // Get today's date in YYYY-MM-DD format
     const today = new Date().toISOString().split('T')[0];
-    
+
     // Filter appointments for today
     const todaysAppts = appointments.filter(appointment => {
       const appointmentDate = new Date(appointment.appointment_date || appointment.date).toISOString().split('T')[0];
       return appointmentDate === today;
     });
-    
+
     setTodaysAppointments(todaysAppts);
-    
+
     // Get IDs of appointments already in the queue
     const queueAppointmentIds = queueEntries
       .filter(entry => entry.appointment_id)
       .map(entry => {
         // Handle both populated and non-populated appointment_id
-        return typeof entry.appointment_id === 'object' ? 
-          (entry.appointment_id._id || entry.appointment_id.id) : 
+        return typeof entry.appointment_id === 'object' ?
+          (entry.appointment_id._id || entry.appointment_id.id) :
           entry.appointment_id;
       });
-    
+
     // Filter appointments that are already in the queue
     const queuedAppts = todaysAppts.filter(appointment => {
       const appointmentId = appointment._id || appointment.id;
       return queueAppointmentIds.includes(appointmentId);
     });
-    
+
     setQueuedAppointments(queuedAppts);
-    
+
   }, [appointments, queueEntries]);
 
   // Handle updating a queue entry status
@@ -138,7 +138,6 @@ function IntegratedAppointmentQueue({ patients, appointments, userRole, onUpdate
       const appointmentData = {
         patient_id: patientData.patient_id,
         appointment_date: today,
-        optional_time: '09:00', // Default time set to 9:00 AM
         type: 'Walk-in',
         reason: patientData.reason || 'Walk-in visit',
         status: 'Scheduled',
@@ -197,46 +196,46 @@ function IntegratedAppointmentQueue({ patients, appointments, userRole, onUpdate
   // Handle drag and drop reordering
   const handleDragEnd = async (result) => {
     if (!result.destination) return;
-    
+
     const sourceIndex = result.source.index;
     const destinationIndex = result.destination.index;
-    
+
     if (sourceIndex === destinationIndex) return;
-    
+
     try {
       setLoading(true);
-      
+
       // Get only the waiting entries
       const waitingEntries = queueEntries.filter(entry => entry.status === 'Waiting');
-      
+
       // Create a new array with the reordered items
       const reorderedEntries = Array.from(waitingEntries);
       const [removed] = reorderedEntries.splice(sourceIndex, 1);
       reorderedEntries.splice(destinationIndex, 0, removed);
-      
+
       // Update the queue entries with the new order
       const updatedQueueEntries = queueEntries.filter(entry => entry.status !== 'Waiting');
       updatedQueueEntries.push(...reorderedEntries);
-      
+
       // Sort the updated entries
       const sortedEntries = [...updatedQueueEntries].sort((a, b) => {
         const statusPriority = { 'Waiting': 0, 'In Progress': 1, 'Completed': 2, 'No-show': 3, 'Cancelled': 4 };
         const statusDiff = statusPriority[a.status] - statusPriority[b.status];
-        
+
         if (statusDiff !== 0) return statusDiff;
-        
+
         return a.ticket_number - b.ticket_number;
       });
-      
+
       setQueueEntries(sortedEntries);
-      
+
       // Call the API to update the order in the database
       const queueOrder = reorderedEntries.map((entry, index) => ({
         id: entry._id,
         position: index
       }));
       await apiService.reorderQueue({ queueOrder });
-      
+
     } catch (error) {
       console.error('Error reordering queue:', error);
       alert('Failed to reorder queue');
@@ -250,23 +249,23 @@ function IntegratedAppointmentQueue({ patients, appointments, userRole, onUpdate
   // Get today's appointments that aren't in the queue yet
   const getAppointmentsToCheckIn = () => {
     const today = new Date().toISOString().split('T')[0];
-    
+
     // Get all appointments for today
     const todaysAppointments = appointments.filter(appointment => {
       const appointmentDate = new Date(appointment.appointment_date || appointment.date).toISOString().split('T')[0];
       return appointmentDate === today;
     });
-    
+
     // Get IDs of appointments already in the queue
     const queueAppointmentIds = queueEntries
       .filter(entry => entry.appointment_id)
       .map(entry => {
         // Handle both populated and non-populated appointment_id
-        return typeof entry.appointment_id === 'object' ? 
-          (entry.appointment_id._id || entry.appointment_id.id) : 
+        return typeof entry.appointment_id === 'object' ?
+          (entry.appointment_id._id || entry.appointment_id.id) :
           entry.appointment_id;
       });
-    
+
     // Filter out appointments already in the queue
     return todaysAppointments.filter(appointment => {
       const appointmentId = appointment._id || appointment.id;
@@ -387,14 +386,14 @@ function IntegratedAppointmentQueue({ patients, appointments, userRole, onUpdate
                 .filter(entry => entry.status === 'In Progress')
                 .map(entry => {
                   // Find the appointment for this queue entry
-                  const appointmentId = typeof entry.appointment_id === 'object' ? 
-                    (entry.appointment_id._id || entry.appointment_id.id) : 
+                  const appointmentId = typeof entry.appointment_id === 'object' ?
+                    (entry.appointment_id._id || entry.appointment_id.id) :
                     entry.appointment_id;
-                  
-                  const appointment = appointments.find(a => 
+
+                  const appointment = appointments.find(a =>
                     (a._id === appointmentId || a.id === appointmentId)
                   );
-                  
+
                   if (!appointment) {
                     return (
                       <div key={entry._id} className="p-4 rounded-lg border border-blue-200 bg-blue-50">
@@ -425,7 +424,7 @@ function IntegratedAppointmentQueue({ patients, appointments, userRole, onUpdate
                       </div>
                     );
                   }
-                  
+
                   return (
                     <div key={entry._id} className="p-4 rounded-lg border border-blue-200 bg-blue-50">
                       <div className="flex items-center">
@@ -434,7 +433,7 @@ function IntegratedAppointmentQueue({ patients, appointments, userRole, onUpdate
                         </div>
                         <div>
                           <div className="font-medium">
-                            {appointment.patientName || 
+                            {appointment.patientName ||
                              (entry.patient_id && typeof entry.patient_id === 'object' ? entry.patient_id.name : 'Unknown Patient')}
                           </div>
                           <div className="text-sm text-gray-600">
@@ -476,14 +475,14 @@ function IntegratedAppointmentQueue({ patients, appointments, userRole, onUpdate
                       .filter(entry => entry.status === 'Waiting')
                       .map((entry, index) => {
                         // Find the appointment for this queue entry
-                        const appointmentId = typeof entry.appointment_id === 'object' ? 
-                          (entry.appointment_id._id || entry.appointment_id.id) : 
+                        const appointmentId = typeof entry.appointment_id === 'object' ?
+                          (entry.appointment_id._id || entry.appointment_id.id) :
                           entry.appointment_id;
-                        
-                        const appointment = appointments.find(a => 
+
+                        const appointment = appointments.find(a =>
                           (a._id === appointmentId || a.id === appointmentId)
                         );
-                        
+
                         return (
                           <Draggable
                             key={entry._id}
@@ -504,12 +503,12 @@ function IntegratedAppointmentQueue({ patients, appointments, userRole, onUpdate
                                   </div>
                                   <div>
                                     <div className="font-medium">
-                                      {appointment ? appointment.patientName : 
+                                      {appointment ? appointment.patientName :
                                        (entry.patient_id && typeof entry.patient_id === 'object' ? entry.patient_id.name : 'Unknown Patient')}
                                     </div>
                                     <div className="text-sm text-gray-600">
-                                      {appointment ? 
-                                        `${appointment.type || 'Consultation'} - ${appointment.reason || 'No reason provided'}` : 
+                                      {appointment ?
+                                        `${appointment.type || 'Consultation'} - ${appointment.reason || 'No reason provided'}` :
                                         (entry.is_walk_in ? 'Walk-in' : 'Appointment')}
                                     </div>
                                   </div>
@@ -564,14 +563,14 @@ function IntegratedAppointmentQueue({ patients, appointments, userRole, onUpdate
                 .filter(entry => entry.status === 'Completed')
                 .map(entry => {
                   // Find the appointment for this queue entry
-                  const appointmentId = typeof entry.appointment_id === 'object' ? 
-                    (entry.appointment_id._id || entry.appointment_id.id) : 
+                  const appointmentId = typeof entry.appointment_id === 'object' ?
+                    (entry.appointment_id._id || entry.appointment_id.id) :
                     entry.appointment_id;
-                  
-                  const appointment = appointments.find(a => 
+
+                  const appointment = appointments.find(a =>
                     (a._id === appointmentId || a.id === appointmentId)
                   );
-                  
+
                   return (
                     <div key={entry._id} className="p-4 rounded-lg border border-green-200 bg-green-50">
                       <div className="flex items-center">
@@ -580,12 +579,12 @@ function IntegratedAppointmentQueue({ patients, appointments, userRole, onUpdate
                         </div>
                         <div>
                           <div className="font-medium">
-                            {appointment ? appointment.patientName : 
+                            {appointment ? appointment.patientName :
                              (entry.patient_id && typeof entry.patient_id === 'object' ? entry.patient_id.name : 'Unknown Patient')}
                           </div>
                           <div className="text-sm text-gray-600">
-                            {appointment ? 
-                              `${appointment.type || 'Consultation'} - ${appointment.reason || 'No reason provided'}` : 
+                            {appointment ?
+                              `${appointment.type || 'Consultation'} - ${appointment.reason || 'No reason provided'}` :
                               (entry.is_walk_in ? 'Walk-in' : 'Appointment')}
                           </div>
                         </div>

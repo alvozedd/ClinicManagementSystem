@@ -29,22 +29,14 @@ function DoctorCalendarView({ appointments, onDiagnoseAppointment, onViewPatient
         // Create proper date objects for start and end times
         let start, end;
 
-        // Handle time parsing safely
-        try {
-          const [hours, minutes] = (appointment.time || '09:00').split(':').map(Number);
-          start = new Date(appointment.date || new Date());
-          start.setHours(hours || 9, minutes || 0, 0, 0);
+        // We no longer use time for appointments
+        // Just set all appointments to 9:00 AM for display purposes
+        start = new Date(appointment.date || new Date());
+        start.setHours(9, 0, 0, 0);
 
-          // End time is 30 minutes after start time
-          end = new Date(start);
-          end.setMinutes(end.getMinutes() + 30);
-        } catch (error) {
-          console.warn('Error parsing date/time for appointment:', appointment.id, error);
-          // Fallback to current date/time
-          start = new Date();
-          end = new Date(start);
-          end.setMinutes(end.getMinutes() + 30);
-        }
+        // End time is 30 minutes after start time
+        end = new Date(start);
+        end.setMinutes(end.getMinutes() + 30);
 
         return {
           id: appointment.id,
@@ -105,7 +97,7 @@ function DoctorCalendarView({ appointments, onDiagnoseAppointment, onViewPatient
         className={`p-2 rounded ${statusStyles.container}`}
         style={{ overflow: 'visible' }}
       >
-        <div className="font-medium text-sm text-black">{appointment.time} - {appointment.patientName}</div>
+        <div className="font-medium text-sm text-black">{appointment.patientName}</div>
         <div className="text-sm text-black">{appointment.reason}</div>
         <div className="flex justify-between items-center mt-1">
           <span className={`text-xs px-1 py-0.5 rounded-full ${statusStyles.badge}`}>

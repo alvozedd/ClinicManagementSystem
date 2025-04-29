@@ -3,7 +3,7 @@ import { useState } from 'react';
 function RebookAppointmentModal({ appointment, onClose, onSave }) {
   const [formData, setFormData] = useState({
     date: '',
-    time: '',
+
     notes: appointment?.notes || ''
   });
 
@@ -17,24 +17,23 @@ function RebookAppointmentModal({ appointment, onClose, onSave }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
     // Generate a new appointment ID
     const newId = 'A' + Math.floor(Math.random() * 10000).toString().padStart(3, '0');
-    
+
     // Create a new appointment based on the old one
     const newAppointment = {
       id: newId,
       patientId: appointment.patientId,
       patientName: appointment.patientName,
       date: formData.date,
-      time: formData.time,
       duration: appointment.duration,
       type: 'Rebooked',
       reason: appointment.reason,
       status: 'Scheduled',
       notes: formData.notes
     };
-    
+
     onSave(newAppointment);
   };
 
@@ -43,7 +42,7 @@ function RebookAppointmentModal({ appointment, onClose, onSave }) {
       <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold text-gray-800">Rebook Appointment</h2>
-          <button 
+          <button
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700"
           >
@@ -52,16 +51,16 @@ function RebookAppointmentModal({ appointment, onClose, onSave }) {
             </svg>
           </button>
         </div>
-        
+
         <div className="mb-4">
           <p className="text-sm text-gray-600">
             Rebooking appointment for <strong>{appointment?.patientName}</strong>
           </p>
           <p className="text-sm text-gray-600">
-            Previous appointment: <strong>{appointment?.date}</strong> at <strong>{appointment?.time}</strong>
+            Previous appointment: <strong>{appointment?.date}</strong>
           </p>
         </div>
-        
+
         <form onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
@@ -76,19 +75,9 @@ function RebookAppointmentModal({ appointment, onClose, onSave }) {
                 required
               />
             </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">New Time</label>
-              <input
-                type="time"
-                name="time"
-                value={formData.time}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                required
-              />
-            </div>
-            
+
+
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
               <textarea
@@ -100,7 +89,7 @@ function RebookAppointmentModal({ appointment, onClose, onSave }) {
               ></textarea>
             </div>
           </div>
-          
+
           <div className="mt-6 flex justify-end space-x-3">
             <button
               type="button"

@@ -151,7 +151,7 @@ function DoctorPatientView({ patient, appointments, onClose, onUpdatePatient, on
       patientId: patient.id,
       patientName: `${patient.firstName} ${patient.lastName}`,
       date: formattedDate,
-      time: '09:00',
+
       type: appointment ? appointment.type : 'Follow-up',
       reason: appointment ? `Follow-up for: ${appointment.reason}` : 'Follow-up appointment',
       status: 'Scheduled',
@@ -159,7 +159,7 @@ function DoctorPatientView({ patient, appointments, onClose, onUpdatePatient, on
     };
 
     // Show confirmation dialog
-    if (window.confirm(`Book a follow-up appointment for ${patient.firstName} ${patient.lastName} on ${formattedDate} at 9:00 AM?`)) {
+    if (window.confirm(`Book a follow-up appointment for ${patient.firstName} ${patient.lastName} on ${formattedDate}?`)) {
       // Add the new appointment to the appointments list
       const updatedAppointments = [newAppointment, ...patientAppointments];
       setPatientAppointments(updatedAppointments);
@@ -528,7 +528,7 @@ function DoctorPatientView({ patient, appointments, onClose, onUpdatePatient, on
                     {patientAppointments.slice(0, 3).map(appointment => (
                       <div key={appointment.id} className="flex justify-between items-center p-4 hover:bg-gray-50 rounded-lg border mb-2 shadow-sm">
                         <div>
-                          <p className="font-medium text-base">{appointment.date} at {appointment.time}</p>
+                          <p className="font-medium text-base">{appointment.date}</p>
                           <p className="text-base text-gray-700 mt-1">{appointment.type} - {appointment.reason}</p>
                         </div>
                         <div>
@@ -627,7 +627,7 @@ function DoctorPatientView({ patient, appointments, onClose, onUpdatePatient, on
                     <div key={appointment.id} className="p-5 border rounded-lg hover:bg-gray-50 shadow-sm">
                       <div className="flex justify-between items-center">
                         <div>
-                          <p className="font-medium text-lg">{appointment.date} at {appointment.time}</p>
+                          <p className="font-medium text-lg">{appointment.date}</p>
                           <p className="text-base text-gray-700 mt-1">{appointment.type} - {appointment.reason}</p>
                         </div>
                         <div className="flex items-center space-x-3">

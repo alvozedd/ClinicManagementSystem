@@ -407,7 +407,7 @@ function SimplifiedQueueManagement({ patients, appointments, userRole }) {
       const appointmentData = {
         patient_id: patientData.patient_id,
         appointment_date: today,
-        optional_time: today.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+
         type: 'Walk-in',
         reason: patientData.reason || 'Walk-in visit',
         status: 'Scheduled',
@@ -617,11 +617,7 @@ function SimplifiedQueueManagement({ patients, appointments, userRole }) {
                                   <span className="inline-block mr-4">
                                     <span className="font-medium">Type:</span> {entry.appointment?.type || 'Consultation'}
                                   </span>
-                                  {entry.appointment?.optional_time && (
-                                    <span className="inline-block mr-4">
-                                      <span className="font-medium">Time:</span> {entry.appointment.optional_time}
-                                    </span>
-                                  )}
+
                                 </div>
                                 <div className="mt-2">
                                   <span className="px-2 py-1 rounded-full text-xs font-medium flex items-center w-fit bg-blue-100 text-blue-800">

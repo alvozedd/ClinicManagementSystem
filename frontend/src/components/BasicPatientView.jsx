@@ -261,7 +261,7 @@ function BasicPatientView({ patient, appointments, onClose, onUpdatePatient, onD
               <div key={index} className="border rounded-lg p-3 md:p-4 text-sm md:text-base shadow-sm hover:shadow-md transition-shadow">
                 <div className="flex justify-between mb-2">
                   <div>
-                    <span className="font-semibold">{appointment.date}</span> • {appointment.time}
+                    <span className="font-semibold">{appointment.date}</span>
                   </div>
                   <span className={`px-3 py-1 rounded-full text-xs md:text-sm font-medium ${
                     appointment.status === 'Scheduled' ? 'bg-green-100 text-green-800' :

@@ -310,9 +310,8 @@ function SimplifiedDoctorDashboard({
                   }}
                 >
                   <div className="font-medium text-xs">{appointment.patientName}</div>
-                  <div className="text-xs flex justify-between">
+                  <div className="text-xs">
                     <span className="font-semibold">{relativeDateLabel}</span>
-                    <span>{appointment.time}</span>
                   </div>
                   <div className="flex justify-between items-center text-xs mt-1">
                     <span className={`px-1.5 py-0.5 rounded-full text-xs ${
@@ -556,11 +555,8 @@ function SimplifiedDoctorDashboard({
                   {filteredAppointments
                     .filter(appointment => statusFilter === 'all' || appointment.status === statusFilter)
                     .sort((a, b) => {
-                      // Sort by date first
-                      const dateCompare = new Date(a.date) - new Date(b.date);
-                      if (dateCompare !== 0) return dateCompare;
-                      // If same date, sort by time
-                      return a.time.localeCompare(b.time);
+                      // Sort by date only
+                      return new Date(a.date) - new Date(b.date);
                     })
                     .map(appointment => (
                     <AppointmentCard

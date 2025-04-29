@@ -30,22 +30,14 @@ function SecretaryCalendarView({ appointments, onUpdateAppointment, onViewPatien
         // Create proper date objects for start and end times
         let start, end;
 
-        // Handle time parsing safely
-        try {
-          const [hours, minutes] = (appointment.time || '09:00').split(':').map(Number);
-          start = new Date(appointment.date || new Date());
-          start.setHours(hours || 9, minutes || 0, 0, 0);
+        // We no longer use time for appointments
+        // Just set all appointments to 9:00 AM for display purposes
+        start = new Date(appointment.date || new Date());
+        start.setHours(9, 0, 0, 0);
 
-          // End time is 30 minutes after start time
-          end = new Date(start);
-          end.setMinutes(end.getMinutes() + 30);
-        } catch (error) {
-          console.warn('Error parsing date/time for appointment:', appointment.id, error);
-          // Fallback to current date/time
-          start = new Date();
-          end = new Date(start);
-          end.setMinutes(end.getMinutes() + 30);
-        }
+        // End time is 30 minutes after start time
+        end = new Date(start);
+        end.setMinutes(end.getMinutes() + 30);
 
         return {
           id: appointment.id,
@@ -103,7 +95,7 @@ function SecretaryCalendarView({ appointments, onUpdateAppointment, onViewPatien
         className={`p-2 rounded ${statusStyles.container}`}
         style={{ overflow: 'visible' }}
       >
-        <div className="font-medium text-sm text-black">{appointment.time} - {appointment.patientName}</div>
+        <div className="font-medium text-sm text-black">{appointment.patientName}</div>
         <div className="text-sm text-black">{appointment.reason}</div>
         <div className="flex justify-between items-center mt-1">
           <span className={`text-xs px-1 py-0.5 rounded-full ${statusStyles.badge}`}>
@@ -141,19 +133,17 @@ function SecretaryCalendarView({ appointments, onUpdateAppointment, onViewPatien
       // Make sure we're working with a proper Date object
       const startDate = new Date(slotInfo.start);
 
-      // Format the time properly
-      const hours = startDate.getHours().toString().padStart(2, '0');
-      const minutes = startDate.getMinutes().toString().padStart(2, '0');
+      // We no longer use time for appointments
 
       // Format the date as YYYY-MM-DD
       const formattedDate = startDate.toISOString().split('T')[0];
 
-      console.log('Creating appointment for date:', formattedDate, 'time:', `${hours}:${minutes}`);
+      console.log('Creating appointment for date:', formattedDate);
 
       setManagingAppointment({
         id: 'new-' + Date.now(),
         date: formattedDate,
-        time: `${hours}:${minutes}`,
+
         type: 'Consultation',
         reason: '',
         status: 'Scheduled'
@@ -161,16 +151,14 @@ function SecretaryCalendarView({ appointments, onUpdateAppointment, onViewPatien
       setIsNewAppointment(true);
     } catch (error) {
       console.error('Error creating appointment from slot:', error);
-      // Fallback to current date/time
+      // Fallback to current date
       const now = new Date();
       const formattedDate = now.toISOString().split('T')[0];
-      const hours = now.getHours().toString().padStart(2, '0');
-      const minutes = now.getMinutes().toString().padStart(2, '0');
 
       setManagingAppointment({
         id: 'new-' + Date.now(),
         date: formattedDate,
-        time: `${hours}:${minutes}`,
+
         type: 'Consultation',
         reason: '',
         status: 'Scheduled'

@@ -5,7 +5,7 @@ function EditAppointmentModal({ appointment, onClose, onSave }) {
   const [formData, setFormData] = useState({
     patientId: '',
     date: '',
-    time: '',
+
     duration: '',
     type: '',
     reason: '',
@@ -18,7 +18,7 @@ function EditAppointmentModal({ appointment, onClose, onSave }) {
       setFormData({
         patientId: appointment.patientId || '',
         date: appointment.date || '',
-        time: appointment.time || '',
+
         duration: appointment.duration?.toString() || '30',
         type: appointment.type || '',
         reason: appointment.reason || '',
@@ -38,11 +38,11 @@ function EditAppointmentModal({ appointment, onClose, onSave }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
     // Find patient name based on ID
     const patient = patients.find(p => p.id === formData.patientId);
     const patientName = patient ? `${patient.firstName} ${patient.lastName}` : '';
-    
+
     onSave({
       ...appointment,
       ...formData,
@@ -56,7 +56,7 @@ function EditAppointmentModal({ appointment, onClose, onSave }) {
       <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold text-gray-800">Edit Appointment</h2>
-          <button 
+          <button
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700"
           >
@@ -65,7 +65,7 @@ function EditAppointmentModal({ appointment, onClose, onSave }) {
             </svg>
           </button>
         </div>
-        
+
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
@@ -85,7 +85,7 @@ function EditAppointmentModal({ appointment, onClose, onSave }) {
                 ))}
               </select>
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
               <input
@@ -97,19 +97,9 @@ function EditAppointmentModal({ appointment, onClose, onSave }) {
                 required
               />
             </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Time</label>
-              <input
-                type="time"
-                name="time"
-                value={formData.time}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                required
-              />
-            </div>
-            
+
+
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Duration (minutes)</label>
               <select
@@ -125,7 +115,7 @@ function EditAppointmentModal({ appointment, onClose, onSave }) {
                 <option value="60">60 minutes</option>
               </select>
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
               <select
@@ -143,7 +133,7 @@ function EditAppointmentModal({ appointment, onClose, onSave }) {
                 <option value="Consultation">Consultation</option>
               </select>
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
               <select
@@ -159,7 +149,7 @@ function EditAppointmentModal({ appointment, onClose, onSave }) {
                 <option value="No-show">No-show</option>
               </select>
             </div>
-            
+
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-1">Reason</label>
               <input
@@ -171,7 +161,7 @@ function EditAppointmentModal({ appointment, onClose, onSave }) {
                 required
               />
             </div>
-            
+
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
               <textarea
@@ -183,7 +173,7 @@ function EditAppointmentModal({ appointment, onClose, onSave }) {
               ></textarea>
             </div>
           </div>
-          
+
           <div className="flex justify-end space-x-3">
             <button
               type="button"

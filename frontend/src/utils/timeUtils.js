@@ -178,21 +178,8 @@ export const updateAppointmentStatuses = (appointments) => {
       };
     }
 
-    // Check if appointment is today but the time has passed
-    if (appointment.date === today && appointment.time) {
-      const [hours, minutes] = appointment.time.split(':').map(Number);
-      const appointmentTime = new Date(now);
-      appointmentTime.setHours(hours, minutes, 0, 0);
-
-      if (now > appointmentTime) {
-        // Today's appointment with passed time should be marked as completed
-        return {
-          ...appointment,
-          status: 'Completed',
-          needsDiagnosis: false
-        };
-      }
-    }
+    // We no longer use time to determine appointment status
+    // If it's today's appointment, leave it as is - it will be managed through the queue system
 
     return appointment;
   });

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FaCalendarAlt, FaClock, FaClipboardList, FaUserInjured, FaRegStickyNote } from 'react-icons/fa';
+import { FaCalendarAlt, FaClipboardList, FaUserInjured, FaRegStickyNote } from 'react-icons/fa';
 import { transformAppointmentFromBackend } from '../utils/dataTransformers';
 
 function AppointmentManagementModal({ appointment, onClose, onSave, isNew = false, isEmbedded = false }) {
@@ -51,7 +51,6 @@ function AppointmentManagementModal({ appointment, onClose, onSave, isNew = fals
       patientName: appointment?.patientName,
       // Use the form data for appointment details
       date: formData.date,
-      time: '09:00', // Default time set to 9:00 AM for all appointments
       type: formData.type,
       reason: formData.reason,
       status: formData.status, // This is the status we want to set
@@ -115,7 +114,7 @@ function AppointmentManagementModal({ appointment, onClose, onSave, isNew = fals
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-500 shadow-sm transition-all duration-200"
                 required
               />
-              <p className="text-xs text-gray-500 mt-1">All appointments are scheduled for 9:00 AM by default. Actual time will be determined when the patient arrives.</p>
+              <p className="text-xs text-gray-500 mt-1">Actual time will be determined when the patient arrives and is added to the queue.</p>
             </div>
 
             <div>

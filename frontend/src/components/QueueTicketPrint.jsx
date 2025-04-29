@@ -19,72 +19,72 @@ function QueueTicketPrint({ queueEntry, onClose }) {
     const uniqueName = new Date().getTime();
     const windowName = `Print_${uniqueName}`;
     const printWindow = window.open(windowUrl, windowName, 'height=600,width=400');
-    
+
     printWindow.document.write('<html><head><title>Patient Ticket</title>');
     printWindow.document.write('<style>');
     printWindow.document.write(`
-      body { 
-        font-family: Arial, sans-serif; 
-        margin: 0; 
-        padding: 20px; 
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
         width: 80mm; /* Standard thermal receipt width */
       }
-      .ticket { 
-        border: 1px solid #ccc; 
-        padding: 15px; 
-        width: 100%; 
+      .ticket {
+        border: 1px solid #ccc;
+        padding: 15px;
+        width: 100%;
         box-sizing: border-box;
       }
-      .ticket-header { 
-        text-align: center; 
-        margin-bottom: 15px; 
+      .ticket-header {
+        text-align: center;
+        margin-bottom: 15px;
         border-bottom: 1px dashed #ccc;
         padding-bottom: 10px;
       }
-      .clinic-name { 
-        font-size: 18px; 
-        font-weight: bold; 
+      .clinic-name {
+        font-size: 18px;
+        font-weight: bold;
         margin: 0;
       }
-      .ticket-date { 
-        font-size: 12px; 
-        color: #666; 
+      .ticket-date {
+        font-size: 12px;
+        color: #666;
         margin: 5px 0;
       }
-      .ticket-number { 
-        font-size: 36px; 
-        font-weight: bold; 
-        margin: 15px 0; 
+      .ticket-number {
+        font-size: 36px;
+        font-weight: bold;
+        margin: 15px 0;
         text-align: center;
       }
-      .patient-info { 
-        margin: 15px 0; 
+      .patient-info {
+        margin: 15px 0;
         font-size: 14px;
       }
-      .info-row { 
-        display: flex; 
-        justify-content: space-between; 
+      .info-row {
+        display: flex;
+        justify-content: space-between;
         margin-bottom: 5px;
       }
-      .info-label { 
-        font-weight: bold; 
+      .info-label {
+        font-weight: bold;
         color: #666;
       }
-      .ticket-footer { 
-        text-align: center; 
-        font-size: 12px; 
-        color: #666; 
+      .ticket-footer {
+        text-align: center;
+        font-size: 12px;
+        color: #666;
         margin-top: 15px;
         border-top: 1px dashed #ccc;
         padding-top: 10px;
       }
       @media print {
-        body { 
-          width: 100%; 
-          margin: 0; 
+        body {
+          width: 100%;
+          margin: 0;
           padding: 0;
         }
-        .ticket { 
+        .ticket {
           border: none;
         }
       }
@@ -92,10 +92,10 @@ function QueueTicketPrint({ queueEntry, onClose }) {
     printWindow.document.write('</style></head><body>');
     printWindow.document.write(printContent.innerHTML);
     printWindow.document.write('</body></html>');
-    
+
     printWindow.document.close();
     printWindow.focus();
-    
+
     // Print after a short delay to ensure content is loaded
     setTimeout(() => {
       printWindow.print();
@@ -108,7 +108,7 @@ function QueueTicketPrint({ queueEntry, onClose }) {
   // Format date for display
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return date.toLocaleDateString();
   };
 
   return (
@@ -144,11 +144,11 @@ function QueueTicketPrint({ queueEntry, onClose }) {
               <p className="clinic-name">UroHealth Central Ltd</p>
               <p className="ticket-date">{formatDate(queueEntry.check_in_time)}</p>
             </div>
-            
+
             <div className="ticket-number">
               #{queueEntry.ticket_number}
             </div>
-            
+
             <div className="patient-info">
               <div className="info-row">
                 <span className="info-label">Patient:</span>
@@ -169,7 +169,7 @@ function QueueTicketPrint({ queueEntry, onClose }) {
                 <span>{queueEntry.status}</span>
               </div>
             </div>
-            
+
             <div className="ticket-footer">
               <p>Please wait until your number is called.</p>
               <p>Thank you for choosing UroHealth Central Ltd.</p>

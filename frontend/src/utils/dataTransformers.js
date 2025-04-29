@@ -128,9 +128,8 @@ export const transformAppointmentFromBackend = (backendAppointment) => {
   const appointmentDate = new Date(backendAppointment.appointment_date);
   const date = appointmentDate.toISOString().split('T')[0];
 
-  // Use optional_time if available, otherwise format from the date
-  const time = backendAppointment.optional_time ||
-               `${appointmentDate.getHours().toString().padStart(2, '0')}:${appointmentDate.getMinutes().toString().padStart(2, '0')}`;
+  // We no longer use time for appointments
+  const time = '';
 
   // Use the status, type, and reason fields directly if available
   let status = backendAppointment.status || 'Scheduled';
@@ -175,7 +174,7 @@ export const transformAppointmentFromBackend = (backendAppointment) => {
     patientId: patientId,
     patientName: patientName,
     date: date,
-    time: time,
+
     type: type,
     reason: reason || 'General consultation',
     status: status,
@@ -235,7 +234,7 @@ export const transformAppointmentToBackend = (frontendAppointment, existingAppoi
   return {
     patient_id: frontendAppointment.patientId || frontendAppointment.patient_id,
     appointment_date: new Date(frontendAppointment.date),
-    optional_time: frontendAppointment.time || '',
+
     notes: notes, // Keep notes for backward compatibility
     status: frontendAppointment.status || 'Scheduled',
     type: frontendAppointment.type || 'Consultation',
