@@ -80,9 +80,9 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
       // Calculate queue statistics based on the entries with local status
       const stats = {
         totalPatients: entriesWithLocalStatus.length,
-        waitingPatients: entriesWithLocalStatus.filter(entry => entry.status === 'Waiting').length,
-        inProgressPatients: entriesWithLocalStatus.filter(entry => entry.status === 'In Progress').length,
-        completedPatients: entriesWithLocalStatus.filter(entry => entry.status === 'Completed').length
+        waitingPatients: entriesWithLocalStatus.filter(entry => entry && entry._id && entry.status === 'Waiting').length,
+        inProgressPatients: entriesWithLocalStatus.filter(entry => entry && entry._id && entry.status === 'In Progress').length,
+        completedPatients: entriesWithLocalStatus.filter(entry => entry && entry._id && entry.status === 'Completed').length
       };
 
       setQueueStats(stats);
@@ -156,7 +156,7 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
       // Update the UI immediately with the new entry
       setQueueEntries(prevEntries => {
         return prevEntries.map(entry => {
-          if (entry._id === queueEntryId) {
+          if (entry && entry._id === queueEntryId) {
             return newEntry;
           }
           return entry;
@@ -339,10 +339,12 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
       setQueueEntries(updatedQueueEntries);
 
       // Call the API to update the order in the database
-      const queueOrder = reorderedEntries.map((entry, idx) => ({
-        id: entry._id,
-        position: idx
-      }));
+      const queueOrder = reorderedEntries
+        .filter(entry => entry && entry._id) // Filter out any invalid entries
+        .map((entry, idx) => ({
+          id: entry._id,
+          position: idx
+        }));
       await apiService.reorderQueue({ queueOrder });
     } catch (error) {
       console.error('Error reordering queue:', error);
@@ -379,10 +381,12 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
       setQueueEntries(updatedQueueEntries);
 
       // Call the API to update the order in the database
-      const queueOrder = reorderedEntries.map((entry, idx) => ({
-        id: entry._id,
-        position: idx
-      }));
+      const queueOrder = reorderedEntries
+        .filter(entry => entry && entry._id) // Filter out any invalid entries
+        .map((entry, idx) => ({
+          id: entry._id,
+          position: idx
+        }));
       await apiService.reorderQueue({ queueOrder });
     } catch (error) {
       console.error('Error reordering queue:', error);
@@ -405,13 +409,25 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
 
     // Get IDs of appointments already in the queue
     const queueAppointmentIds = queueEntries
-      .filter(entry => entry.appointment_id)
+      .filter(entry => entry && entry.appointment_id) // Make sure entry exists and has appointment_id
       .map(entry => {
-        // Handle both populated and non-populated appointment_id
-        return typeof entry.appointment_id === 'object' ?
-          (entry.appointment_id._id || entry.appointment_id.id) :
-          entry.appointment_id;
-      });
+        try {
+          // Handle both populated and non-populated appointment_id
+          if (typeof entry.appointment_id === 'object') {
+            if (entry.appointment_id && (entry.appointment_id._id || entry.appointment_id.id)) {
+              return entry.appointment_id._id || entry.appointment_id.id;
+            }
+            // If we can't get an ID from the object, log and return null
+            console.error('Invalid appointment_id object:', entry.appointment_id);
+            return null;
+          }
+          return entry.appointment_id;
+        } catch (error) {
+          console.error('Error processing appointment_id:', error);
+          return null;
+        }
+      })
+      .filter(id => id !== null); // Filter out any null IDs
 
     // Filter out appointments already in the queue
     return todaysAppointments.filter(appointment => {
@@ -525,12 +541,12 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
       {/* Queue List */}
       <div className="space-y-6">
         {/* In Progress Patients */}
-        {queueEntries.filter(entry => entry.status === 'In Progress').length > 0 && (
+        {queueEntries.filter(entry => entry && entry._id && entry.status === 'In Progress').length > 0 && (
           <div>
             <h3 className="text-lg font-semibold text-blue-800 mb-2">With Doctor</h3>
             <div className="space-y-3">
               {queueEntries
-                .filter(entry => entry.status === 'In Progress')
+                .filter(entry => entry && entry._id && entry.status === 'In Progress')
                 .map(entry => {
                   // Find the appointment for this queue entry
                   const appointmentId = typeof entry.appointment_id === 'object' ?
@@ -578,12 +594,12 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
         )}
 
         {/* Waiting Patients */}
-        {queueEntries.filter(entry => entry.status === 'Waiting').length > 0 && (
+        {queueEntries.filter(entry => entry && entry._id && entry.status === 'Waiting').length > 0 && (
           <div>
             <h3 className="text-lg font-semibold text-blue-800 mb-2">Waiting</h3>
             <div className="space-y-3">
               {queueEntries
-                .filter(entry => entry.status === 'Waiting')
+                .filter(entry => entry && entry._id && entry.status === 'Waiting')
                 .map((entry, index) => {
                   // Find the appointment for this queue entry
                   const appointmentId = typeof entry.appointment_id === 'object' ?
@@ -668,14 +684,14 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
         )}
 
         {/* Completed Patients (collapsed by default) */}
-        {queueEntries.filter(entry => entry.status === 'Completed').length > 0 && (
+        {queueEntries.filter(entry => entry && entry._id && entry.status === 'Completed').length > 0 && (
           <details className="mt-4">
             <summary className="text-lg font-semibold text-blue-800 mb-2 cursor-pointer">
-              Completed ({queueEntries.filter(entry => entry.status === 'Completed').length})
+              Completed ({queueEntries.filter(entry => entry && entry._id && entry.status === 'Completed').length})
             </summary>
             <div className="space-y-3 mt-2">
               {queueEntries
-                .filter(entry => entry.status === 'Completed')
+                .filter(entry => entry && entry._id && entry.status === 'Completed')
                 .map(entry => {
                   // Find the appointment for this queue entry
                   const appointmentId = typeof entry.appointment_id === 'object' ?
