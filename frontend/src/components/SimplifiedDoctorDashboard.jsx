@@ -11,6 +11,7 @@ import DoctorPatientSearchAppointmentModal from './DoctorPatientSearchAppointmen
 import AppointmentManagementModal from './AppointmentManagementModal';
 import AppointmentCard from './AppointmentCard';
 import IntegratedAppointmentQueue from './IntegratedAppointmentQueue';
+import TodaysAppointments from './TodaysAppointments';
 import ActionButtons from './ActionButtons';
 import { FaCalendarAlt, FaUserMd, FaClipboardList, FaEye, FaArrowLeft, FaUser, FaFileMedical, FaUserClock } from 'react-icons/fa';
 import { getCreatorLabel } from '../utils/recordCreation';
@@ -438,178 +439,20 @@ function SimplifiedDoctorDashboard({
           <div>
             {/* Today's Appointments Section */}
             <div className="mb-8">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3">
-                <h2 className="text-xl font-semibold text-blue-800">Today's Appointments</h2>
-                <div className="flex items-center gap-3 w-full sm:w-auto">
-                  <button
-                    onClick={() => setShowAddAppointmentForm(true)}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded text-base font-medium flex items-center justify-center flex-1 sm:flex-none"
-                    aria-label="Add Appointment"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
-                    </svg>
-                    <span>Add</span>
-                  </button>
-                  <div className="bg-blue-100 text-blue-800 px-3 py-2 rounded-lg text-base font-medium flex-1 sm:flex-none text-center">
-                    <span>{todaysAppointments.length} Appts</span>
-                  </div>
-                </div>
+              <div className="flex justify-between items-center mb-4">
+                <button
+                  onClick={() => setShowAddAppointmentForm(true)}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded text-base font-medium flex items-center justify-center"
+                  aria-label="Add Appointment"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
+                  </svg>
+                  <span>Add Appointment</span>
+                </button>
               </div>
 
-              {/* Compact Filter Section */}
-              <div className="mb-4 border rounded-lg p-2 bg-gray-50">
-                <div className="mb-2">
-                  <h3 className="text-sm font-semibold text-gray-700 mb-1">Time Period:</h3>
-                  <div className="flex flex-wrap gap-1">
-                    <button
-                      onClick={() => setTimeFilter('all')}
-                      className={`px-2 py-1 rounded text-xs font-medium transition-all ${timeFilter === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'}`}
-                      aria-label="Show all appointments"
-                    >
-                      All
-                    </button>
-                    <button
-                      onClick={() => setTimeFilter('today')}
-                      className={`px-2 py-1 rounded text-xs font-medium transition-all ${timeFilter === 'today' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'}`}
-                      aria-label="Show today's appointments"
-                    >
-                      Today
-                    </button>
-                    <button
-                      onClick={() => setTimeFilter('tomorrow')}
-                      className={`px-2 py-1 rounded text-xs font-medium transition-all ${timeFilter === 'tomorrow' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'}`}
-                      aria-label="Show tomorrow's appointments"
-                    >
-                      Tmrw
-                    </button>
-                    <button
-                      onClick={() => setTimeFilter('thisWeek')}
-                      className={`px-2 py-1 rounded text-xs font-medium transition-all ${timeFilter === 'thisWeek' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'}`}
-                      aria-label="Show this week's appointments"
-                    >
-                      Week
-                    </button>
-                    <button
-                      onClick={() => setTimeFilter('nextWeek')}
-                      className={`px-2 py-1 rounded text-xs font-medium transition-all ${timeFilter === 'nextWeek' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'}`}
-                      aria-label="Show next week's appointments"
-                    >
-                      Next
-                    </button>
-                    <button
-                      onClick={() => setTimeFilter('thisMonth')}
-                      className={`px-2 py-1 rounded text-xs font-medium transition-all ${timeFilter === 'thisMonth' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'}`}
-                      aria-label="Show this month's appointments"
-                    >
-                      Month
-                    </button>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-700 mb-1">Status:</h3>
-                  <div className="flex flex-wrap gap-1">
-                    <button
-                      onClick={() => setStatusFilter('all')}
-                      className={`px-2 py-1 rounded text-xs font-medium transition-all ${statusFilter === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'}`}
-                      aria-label="Show all statuses"
-                    >
-                      All
-                    </button>
-                    <button
-                      onClick={() => setStatusFilter('Scheduled')}
-                      className={`px-2 py-1 rounded text-xs font-medium transition-all ${statusFilter === 'Scheduled' ? 'bg-green-600 text-white' : 'bg-green-100 text-green-800 hover:bg-green-200'}`}
-                      aria-label="Show scheduled appointments"
-                    >
-                      Scheduled
-                    </button>
-                    <button
-                      onClick={() => setStatusFilter('Completed')}
-                      className={`px-2 py-1 rounded text-xs font-medium transition-all ${statusFilter === 'Completed' ? 'bg-blue-600 text-white' : 'bg-blue-100 text-blue-800 hover:bg-blue-200'}`}
-                      aria-label="Show completed appointments"
-                    >
-                      Completed
-                    </button>
-                    <button
-                      onClick={() => setStatusFilter('Cancelled')}
-                      className={`px-2 py-1 rounded text-xs font-medium transition-all ${statusFilter === 'Cancelled' ? 'bg-red-600 text-white' : 'bg-red-100 text-red-800 hover:bg-red-200'}`}
-                      aria-label="Show cancelled appointments"
-                    >
-                      Cancelled
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Filter appointments based on selected time period and status */}
-              {(() => {
-                // First filter by time period, then by status
-                const filteredAppointments = timeFilter === 'all' ?
-                  appointments : filterAppointmentsByTimePeriod(appointments, timeFilter);
-
-                if (filteredAppointments.length > 0) {
-                  if (filteredAppointments.filter(appointment => statusFilter === 'all' || appointment.status === statusFilter).length > 0) {
-                    return (
-                <div className="space-y-3">
-                  {filteredAppointments
-                    .filter(appointment => statusFilter === 'all' || appointment.status === statusFilter)
-                    .sort((a, b) => {
-                      // Sort by date only
-                      return new Date(a.date) - new Date(b.date);
-                    })
-                    .map(appointment => (
-                    <AppointmentCard
-                      key={appointment.id}
-                      appointment={appointment}
-                      onViewPatient={handleViewPatient}
-                      onEditAppointment={setEditingAppointment}
-                      onDiagnoseAppointment={setDiagnosingAppointment}
-                      onDeleteAppointment={onDeleteAppointment}
-                      patients={patients}
-                      onUpdatePatient={onUpdatePatient}
-                      isDoctor={true}
-                    />
-                  ))}
-                </div>
-                    );
-                  } else {
-                    return (
-                  <div className="no-appointments">
-                    <p>
-                      No {statusFilter.toLowerCase()} appointments found for {timeFilter === 'all' ? 'any time period' :
-                        timeFilter === 'today' ? 'today' :
-                        timeFilter === 'tomorrow' ? 'tomorrow' :
-                        timeFilter === 'thisWeek' ? 'this week' :
-                        timeFilter === 'nextWeek' ? 'next week' :
-                        timeFilter === 'thisMonth' ? 'this month' : 'the selected time period'}.
-                    </p>
-                  </div>
-                    );
-                  }
-                } else if (timeFilter === 'all') {
-                  return (
-                <div className="no-appointments">
-                  <p>
-                    {statusFilter === 'all'
-                      ? `No appointments scheduled for ${timeFilter === 'all' ? 'any time period' :
-                          timeFilter === 'today' ? 'today' :
-                          timeFilter === 'tomorrow' ? 'tomorrow' :
-                          timeFilter === 'thisWeek' ? 'this week' :
-                          timeFilter === 'nextWeek' ? 'next week' :
-                          timeFilter === 'thisMonth' ? 'this month' : 'the selected time period'}.`
-                      : `No ${statusFilter.toLowerCase()} appointments for ${timeFilter === 'all' ? 'any time period' :
-                          timeFilter === 'today' ? 'today' :
-                          timeFilter === 'tomorrow' ? 'tomorrow' :
-                          timeFilter === 'thisWeek' ? 'this week' :
-                          timeFilter === 'nextWeek' ? 'next week' :
-                          timeFilter === 'thisMonth' ? 'this month' : 'the selected time period'}.`}
-                  </p>
-                </div>
-                  );
-                }
-                return null;
-              })()}
+              <TodaysAppointments onViewPatient={handleViewPatient} />
             </div>
 
 
