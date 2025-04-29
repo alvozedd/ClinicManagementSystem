@@ -10,7 +10,7 @@ import AppointmentManagementModal from './AppointmentManagementModal';
 import PatientSearchAppointmentModal from './PatientSearchAppointmentModal';
 import PatientNavigator from './PatientNavigator';
 import AppointmentCard from './AppointmentCard';
-import SuperSimpleQueueManagement from './SuperSimpleQueueManagement';
+import IntegratedAppointmentQueue from './IntegratedAppointmentQueue';
 import { FaCalendarAlt, FaUserTie, FaClipboardList, FaUser, FaUserClock } from 'react-icons/fa';
 import { getTimeBasedGreeting, getFormattedDate, identifyAppointmentsNeedingDiagnosis, getRelativeDateLabel } from '../utils/timeUtils';
 import { getCreatorLabel } from '../utils/recordCreation';
@@ -288,29 +288,13 @@ function SimplifiedSecretaryDashboard({
             <FaCalendarAlt className="h-6 w-6 mb-1" />
             <span className="text-sm font-medium text-center">Calendar</span>
           </button>
-          <button
-            onClick={() => setActiveTab('queue')}
-            className={`py-3 px-2 rounded-md flex flex-col justify-center items-center transition-all ${
-              activeTab === 'queue'
-                ? 'bg-blue-100 text-blue-700 shadow-sm'
-                : 'text-gray-600 hover:bg-gray-100'
-            }`}
-          >
-            <FaUserClock className="h-6 w-6 mb-1" />
-            <span className="text-sm font-medium text-center">Queue</span>
-          </button>
+
         </div>
       </div>
 
       {/* Content Area - Enhanced Styling */}
       <div className="bg-white rounded-md shadow-sm p-4">
-        {activeTab === 'queue' ? (
-          <SuperSimpleQueueManagement
-            patients={patients}
-            appointments={appointments}
-            userRole="secretary"
-          />
-        ) : activeTab === 'calendar' ? (
+        {activeTab === 'calendar' ? (
           <SecretaryCalendarView
             appointments={appointments}
             onUpdateAppointment={(updatedAppointment) => {
@@ -332,6 +316,19 @@ function SimplifiedSecretaryDashboard({
             }}
           />
         ) : activeTab === 'appointments' ? (
+          <>
+            <IntegratedAppointmentQueue
+              patients={patients}
+              appointments={appointments}
+              userRole="secretary"
+              onUpdateAppointment={onDiagnoseAppointment}
+              onViewPatient={handleViewPatient}
+              onEditAppointment={setEditingAppointment}
+              onDeleteAppointment={onDeleteAppointment}
+              onUpdatePatient={onUpdatePatient}
+            />
+            <div className="mt-6">
+
           <div>
             {/* Today's Appointments Section */}
             <div className="mb-8">
@@ -552,6 +549,8 @@ function SimplifiedSecretaryDashboard({
               )}
             </div>
           </div>
+            </div>
+          </>
         ) : (
           <div>
             {/* Patient Management Tab */}

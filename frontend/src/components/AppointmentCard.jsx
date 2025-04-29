@@ -63,7 +63,7 @@ const AppointmentCard = ({
       onClick={handleCardClick}
     >
       <div>
-        <div className="font-medium text-lg">{appointment.time} - {appointment.patientName}</div>
+        <div className="font-medium text-lg">{appointment.patientName}</div>
         <div className="text-gray-600">{appointment.type || ''}: {appointment.reason}</div>
         {appointment.date && (
           <div className="text-xs text-gray-500 mt-1">

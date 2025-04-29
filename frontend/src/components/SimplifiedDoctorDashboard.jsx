@@ -10,7 +10,7 @@ import GlobalDiagnosesView from './GlobalDiagnosesView';
 import DoctorPatientSearchAppointmentModal from './DoctorPatientSearchAppointmentModal';
 import AppointmentManagementModal from './AppointmentManagementModal';
 import AppointmentCard from './AppointmentCard';
-import SuperSimpleQueueManagement from './SuperSimpleQueueManagement';
+import IntegratedAppointmentQueue from './IntegratedAppointmentQueue';
 import ActionButtons from './ActionButtons';
 import { FaCalendarAlt, FaUserMd, FaClipboardList, FaEye, FaArrowLeft, FaUser, FaFileMedical, FaUserClock } from 'react-icons/fa';
 import { getCreatorLabel } from '../utils/recordCreation';
@@ -394,30 +394,14 @@ function SimplifiedDoctorDashboard({
             <FaCalendarAlt className="h-6 w-6 mb-1" />
             <span className="text-sm font-medium text-center">Calendar</span>
           </button>
-          <button
-            onClick={() => setActiveTab('queue')}
-            className={`py-3 px-2 rounded-md flex flex-col justify-center items-center transition-all ${
-              activeTab === 'queue'
-                ? 'bg-blue-100 text-blue-700 shadow-sm'
-                : 'text-gray-600 hover:bg-gray-100'
-            }`}
-          >
-            <FaUserClock className="h-6 w-6 mb-1" />
-            <span className="text-sm font-medium text-center">Queue</span>
-          </button>
+
 
         </div>
       </div>
 
       {/* Content Area - Enhanced Styling */}
       <div className="bg-white rounded-md shadow-sm p-4">
-        {activeTab === 'queue' ? (
-          <SuperSimpleQueueManagement
-            patients={patients}
-            appointments={appointments}
-            userRole="doctor"
-          />
-        ) : activeTab === 'diagnoses' ? (
+        {activeTab === 'diagnoses' ? (
           <GlobalDiagnosesView
             onViewPatient={(patientId) => {
               const patient = patients.find(p => p._id === patientId || p.id === patientId);
@@ -440,6 +424,18 @@ function SimplifiedDoctorDashboard({
             }}
           />
         ) : activeTab === 'appointments' ? (
+          <>
+            <IntegratedAppointmentQueue
+              patients={patients}
+              appointments={appointments}
+              userRole="doctor"
+              onUpdateAppointment={onDiagnoseAppointment}
+              onViewPatient={handleViewPatient}
+              onEditAppointment={setEditingAppointment}
+              onDeleteAppointment={onDeleteAppointment}
+              onUpdatePatient={onUpdatePatient}
+            />
+            <div className="mt-6">
           <div>
             {/* Today's Appointments Section */}
             <div className="mb-8">
@@ -649,6 +645,8 @@ function SimplifiedDoctorDashboard({
               )}
             </div>
           </div>
+            </div>
+          </>
         ) : (
           <div>
             {/* Patient Management Tab */}

@@ -6,7 +6,6 @@ function AppointmentManagementModal({ appointment, onClose, onSave, isNew = fals
   // Initialize with empty values, will be populated in useEffect
   const [formData, setFormData] = useState({
     date: '',
-    time: '',
     type: '',
     reason: '',
     status: '',
@@ -22,7 +21,6 @@ function AppointmentManagementModal({ appointment, onClose, onSave, isNew = fals
     setFormData({
       // For existing appointments, use their values; for new ones, use defaults
       date: appointment?.date || today,
-      time: appointment?.time || '09:00',
       type: appointment?.type || 'Consultation',
       reason: appointment?.reason || '',
       status: appointment?.status || 'Scheduled',
@@ -53,7 +51,7 @@ function AppointmentManagementModal({ appointment, onClose, onSave, isNew = fals
       patientName: appointment?.patientName,
       // Use the form data for appointment details
       date: formData.date,
-      time: formData.time,
+      time: '09:00', // Default time set to 9:00 AM for all appointments
       type: formData.type,
       reason: formData.reason,
       status: formData.status, // This is the status we want to set
@@ -104,35 +102,20 @@ function AppointmentManagementModal({ appointment, onClose, onSave, isNew = fals
 
         <form onSubmit={handleSubmit}>
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
-                  <FaCalendarAlt className="mr-2 text-blue-600" />
-                  Date
-                </label>
-                <input
-                  type="date"
-                  name="date"
-                  value={formData.date}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-500 shadow-sm transition-all duration-200"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
-                  <FaClock className="mr-2 text-blue-600" />
-                  Time
-                </label>
-                <input
-                  type="time"
-                  name="time"
-                  value={formData.time}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-500 shadow-sm transition-all duration-200"
-                  required
-                />
-              </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                <FaCalendarAlt className="mr-2 text-blue-600" />
+                Date
+              </label>
+              <input
+                type="date"
+                name="date"
+                value={formData.date}
+                onChange={handleChange}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-300 focus:border-blue-500 shadow-sm transition-all duration-200"
+                required
+              />
+              <p className="text-xs text-gray-500 mt-1">All appointments are scheduled for 9:00 AM by default. Actual time will be determined when the patient arrives.</p>
             </div>
 
             <div>
