@@ -413,14 +413,41 @@ const apiService = {
   },
 
   deleteAppointment: async (id) => {
-    const response = await fetch(`${API_URL}/appointments/${id}`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        ...authHeader(),
-      },
-    });
-    return handleResponse(response);
+    try {
+      console.log(`Deleting appointment with ID: ${id}`);
+
+      // Use the non-API endpoint to avoid CORS issues
+      const baseUrl = API_URL.replace('/api', '');
+      console.log('Using appointment endpoint for deletion:', `${baseUrl}/appointments/${id}`);
+
+      try {
+        // First attempt: with credentials
+        const response = await fetch(`${baseUrl}/appointments/${id}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            ...authHeader(),
+          },
+          credentials: 'include', // Include cookies for refresh token
+        });
+        return handleResponse(response);
+      } catch (firstError) {
+        console.warn('First deletion attempt failed, trying without credentials:', firstError);
+
+        // Second attempt: without credentials
+        const response2 = await fetch(`${baseUrl}/appointments/${id}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            ...authHeader(),
+          },
+        });
+        return handleResponse(response2);
+      }
+    } catch (error) {
+      console.error('Error deleting appointment:', error);
+      throw error;
+    }
   },
 
   // Diagnosis endpoints

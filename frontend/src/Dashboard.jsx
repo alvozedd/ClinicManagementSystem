@@ -613,6 +613,33 @@ function Dashboard() {
       setIsLoading(true); // Show loading state
       console.log('Deleting appointment with ID:', appointmentId);
 
+      // First, try to get queue entries to check if this appointment is in the queue
+      try {
+        const queueEntries = await apiService.getQueueEntries();
+        console.log('Queue entries:', queueEntries);
+
+        // Find any queue entry associated with this appointment
+        const queueEntry = queueEntries.find(entry =>
+          entry.appointment_id &&
+          (entry.appointment_id._id === appointmentId || entry.appointment_id === appointmentId)
+        );
+
+        // If found, remove from queue first
+        if (queueEntry) {
+          console.log('Found appointment in queue, removing queue entry first:', queueEntry._id);
+          try {
+            await apiService.removeFromQueue(queueEntry._id);
+            console.log('Successfully removed from queue');
+          } catch (queueError) {
+            console.warn('Error removing from queue, continuing with appointment deletion:', queueError);
+            // Continue with appointment deletion even if queue removal fails
+          }
+        }
+      } catch (queueFetchError) {
+        console.warn('Error fetching queue entries, continuing with appointment deletion:', queueFetchError);
+        // Continue with appointment deletion even if we can't check the queue
+      }
+
       // Delete appointment via API
       await apiService.deleteAppointment(appointmentId);
 
@@ -632,7 +659,7 @@ function Dashboard() {
     } catch (error) {
       console.error('Error deleting appointment:', error);
       setError('Failed to delete appointment. Please try again.');
-      alert('Failed to delete appointment. Please try again: ' + error.message);
+      alert('Failed to delete appointment. Please try again: ' + (error.message || 'Unknown error'));
     } finally {
       setIsLoading(false); // Hide loading state
     }
