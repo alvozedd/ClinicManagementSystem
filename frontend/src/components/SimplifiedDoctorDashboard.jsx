@@ -10,7 +10,7 @@ import GlobalDiagnosesView from './GlobalDiagnosesView';
 import DoctorPatientSearchAppointmentModal from './DoctorPatientSearchAppointmentModal';
 import AppointmentManagementModal from './AppointmentManagementModal';
 import AppointmentCard from './AppointmentCard';
-import IntegratedAppointmentQueue from './IntegratedAppointmentQueue';
+import AppointmentQueueWrapper from './AppointmentQueueWrapper';
 import TodaysAppointments from './TodaysAppointments';
 import ActionButtons from './ActionButtons';
 import { FaCalendarAlt, FaUserMd, FaClipboardList, FaEye, FaArrowLeft, FaUser, FaFileMedical, FaUserClock } from 'react-icons/fa';
@@ -425,7 +425,7 @@ function SimplifiedDoctorDashboard({
           />
         ) : activeTab === 'appointments' ? (
           <>
-            <IntegratedAppointmentQueue
+            <AppointmentQueueWrapper
               patients={patients}
               appointments={appointments}
               userRole="doctor"

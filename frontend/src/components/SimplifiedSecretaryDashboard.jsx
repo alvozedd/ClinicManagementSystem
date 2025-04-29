@@ -10,7 +10,7 @@ import AppointmentManagementModal from './AppointmentManagementModal';
 import PatientSearchAppointmentModal from './PatientSearchAppointmentModal';
 import PatientNavigator from './PatientNavigator';
 import AppointmentCard from './AppointmentCard';
-import IntegratedAppointmentQueue from './IntegratedAppointmentQueue';
+import AppointmentQueueWrapper from './AppointmentQueueWrapper';
 import TodaysAppointments from './TodaysAppointments';
 import { FaCalendarAlt, FaUserTie, FaClipboardList, FaUser, FaUserClock } from 'react-icons/fa';
 import { getTimeBasedGreeting, getFormattedDate, identifyAppointmentsNeedingDiagnosis, getRelativeDateLabel } from '../utils/timeUtils';
@@ -318,7 +318,7 @@ function SimplifiedSecretaryDashboard({
           />
         ) : activeTab === 'appointments' ? (
           <>
-            <IntegratedAppointmentQueue
+            <AppointmentQueueWrapper
               patients={patients}
               appointments={appointments}
               userRole="secretary"

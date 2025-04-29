@@ -5,71 +5,57 @@ import AppointmentCard from './AppointmentCard';
 import SuperSimpleAddToQueueModal from './SuperSimpleAddToQueueModal';
 import QueueTicketPrint from './QueueTicketPrint';
 
-// Try to import react-beautiful-dnd, but provide fallbacks if it fails
-let DragDropContext, Droppable, Draggable;
-try {
-  const dnd = require('react-beautiful-dnd');
-  DragDropContext = dnd.DragDropContext;
-  Droppable = dnd.Droppable;
-  Draggable = dnd.Draggable;
-} catch (error) {
-  // Provide mock components if the import fails
-  console.warn('react-beautiful-dnd failed to load, using fallback components');
-  // Mock DragDropContext
-  DragDropContext = ({ children }) => children;
-  // Mock Droppable
-  Droppable = ({ children }) => children({
-    droppableProps: {},
-    innerRef: () => {},
-    placeholder: null
-  });
-  // Mock Draggable
-  Draggable = ({ children }) => children({
-    draggableProps: {},
-    dragHandleProps: {},
-    innerRef: () => {}
-  });
-}
-
-function IntegratedAppointmentQueue({ patients, appointments, userRole, onUpdateAppointment, onViewPatient, onEditAppointment, onDeleteAppointment, onUpdatePatient }) {
+/**
+ * A simplified version of the appointment queue that doesn't use react-beautiful-dnd
+ * This component is used as a fallback when react-beautiful-dnd fails to load
+ */
+function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppointment, onViewPatient, onEditAppointment, onDeleteAppointment, onUpdatePatient }) {
   // State for queue management
   const [queueEntries, setQueueEntries] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [showAddToQueueModal, setShowAddToQueueModal] = useState(false);
+  const [ticketToPrint, setTicketToPrint] = useState(null);
+
+  // Queue statistics
   const [queueStats, setQueueStats] = useState({
     totalPatients: 0,
     waitingPatients: 0,
     inProgressPatients: 0,
-    completedPatients: 0,
-    nextTicketNumber: 1,
+    completedPatients: 0
   });
-  const [loading, setLoading] = useState(false);
-  const [showAddToQueueModal, setShowAddToQueueModal] = useState(false);
-  const [ticketToPrint, setTicketToPrint] = useState(null);
-  const [todaysAppointments, setTodaysAppointments] = useState([]);
-  const [queuedAppointments, setQueuedAppointments] = useState([]);
 
-  // Fetch queue entries and stats
+  // Fetch queue data on component mount
+  useEffect(() => {
+    fetchQueueData();
+  }, []);
+
+  // Fetch queue data from API
   const fetchQueueData = async () => {
-    setLoading(true);
     try {
-      const [entriesResponse, statsResponse] = await Promise.all([
-        apiService.getQueueEntries(),
-        apiService.getQueueStats(),
-      ]);
-
-      // Sort entries: Waiting first (by ticket number), then In Progress, then Completed
-      const sortedEntries = [...entriesResponse].sort((a, b) => {
-        // First sort by status priority
+      setLoading(true);
+      const data = await apiService.getQueue();
+      
+      // Sort queue entries by status and ticket number
+      const sortedEntries = [...data].sort((a, b) => {
         const statusPriority = { 'Waiting': 0, 'In Progress': 1, 'Completed': 2, 'No-show': 3, 'Cancelled': 4 };
         const statusDiff = statusPriority[a.status] - statusPriority[b.status];
-
+        
         if (statusDiff !== 0) return statusDiff;
-
-        // Then sort by ticket number within the same status
+        
         return a.ticket_number - b.ticket_number;
       });
-
+      
       setQueueEntries(sortedEntries);
-      setQueueStats(statsResponse);
+      
+      // Calculate queue statistics
+      const stats = {
+        totalPatients: data.length,
+        waitingPatients: data.filter(entry => entry.status === 'Waiting').length,
+        inProgressPatients: data.filter(entry => entry.status === 'In Progress').length,
+        completedPatients: data.filter(entry => entry.status === 'Completed').length
+      };
+      
+      setQueueStats(stats);
     } catch (error) {
       console.error('Error fetching queue data:', error);
     } finally {
@@ -77,68 +63,71 @@ function IntegratedAppointmentQueue({ patients, appointments, userRole, onUpdate
     }
   };
 
-  // Initial data fetch
-  useEffect(() => {
-    fetchQueueData();
-    // Set up polling to refresh queue data every 30 seconds
-    const interval = setInterval(fetchQueueData, 30000);
-    return () => clearInterval(interval);
-  }, []);
-
-  // Process appointments data
-  useEffect(() => {
-    // Get today's date in YYYY-MM-DD format
-    const today = new Date().toISOString().split('T')[0];
-
-    // Filter appointments for today
-    const todaysAppts = appointments.filter(appointment => {
-      const appointmentDate = new Date(appointment.appointment_date || appointment.date).toISOString().split('T')[0];
-      return appointmentDate === today;
-    });
-
-    setTodaysAppointments(todaysAppts);
-
-    // Get IDs of appointments already in the queue
-    const queueAppointmentIds = queueEntries
-      .filter(entry => entry.appointment_id)
-      .map(entry => {
-        // Handle both populated and non-populated appointment_id
-        return typeof entry.appointment_id === 'object' ?
-          (entry.appointment_id._id || entry.appointment_id.id) :
-          entry.appointment_id;
-      });
-
-    // Filter appointments that are already in the queue
-    const queuedAppts = todaysAppts.filter(appointment => {
-      const appointmentId = appointment._id || appointment.id;
-      return queueAppointmentIds.includes(appointmentId);
-    });
-
-    setQueuedAppointments(queuedAppts);
-
-  }, [appointments, queueEntries]);
-
-  // Handle updating a queue entry status
-  const handleUpdateQueueStatus = async (entryId, newStatus) => {
+  // Handle adding a walk-in patient to the queue
+  const handleAddWalkIn = async (patientData) => {
     try {
       setLoading(true);
-      await apiService.updateQueueEntry(entryId, { status: newStatus });
+      
+      // Create queue data
+      const queueData = {
+        patient_id: patientData.patient_id,
+        is_walk_in: true,
+        notes: patientData.notes || 'Walk-in patient'
+      };
+      
+      // Add to queue
+      const newQueueEntry = await apiService.addToQueue(queueData);
+      setTicketToPrint(newQueueEntry);
+      await fetchQueueData();
+      
+      // If this is a new patient, refresh the patients list
+      if (patientData.isNewPatient && onUpdatePatient) {
+        onUpdatePatient();
+      }
+    } catch (error) {
+      console.error('Error adding walk-in patient:', error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle updating queue entry status
+  const handleUpdateQueueStatus = async (queueEntryId, newStatus) => {
+    try {
+      setLoading(true);
+      await apiService.updateQueueStatus(queueEntryId, { status: newStatus });
+      
+      // If completing an appointment, update the appointment status
+      if (newStatus === 'Completed') {
+        const queueEntry = queueEntries.find(entry => entry._id === queueEntryId);
+        if (queueEntry && queueEntry.appointment_id && !queueEntry.is_walk_in) {
+          const appointmentId = typeof queueEntry.appointment_id === 'object' ?
+            (queueEntry.appointment_id._id || queueEntry.appointment_id.id) :
+            queueEntry.appointment_id;
+          
+          if (appointmentId && onUpdateAppointment) {
+            await onUpdateAppointment(appointmentId, { status: 'completed' });
+          }
+        }
+      }
+      
       await fetchQueueData();
     } catch (error) {
-      console.error('Error updating queue entry:', error);
+      console.error('Error updating queue status:', error);
       alert('Failed to update queue status');
     } finally {
       setLoading(false);
     }
   };
 
-  // Handle removing a queue entry
-  const handleRemoveFromQueue = async (entryId) => {
-    if (!window.confirm('Are you sure you want to remove this patient from the queue?')) return;
-
+  // Handle removing a patient from the queue
+  const handleRemoveFromQueue = async (queueEntryId) => {
+    if (!confirm('Are you sure you want to remove this patient from the queue?')) return;
+    
     try {
       setLoading(true);
-      await apiService.removeFromQueue(entryId);
+      await apiService.removeFromQueue(queueEntryId);
       await fetchQueueData();
     } catch (error) {
       console.error('Error removing from queue:', error);
@@ -153,53 +142,12 @@ function IntegratedAppointmentQueue({ patients, appointments, userRole, onUpdate
     setTicketToPrint(queueEntry);
   };
 
-  // Handle adding a walk-in patient
-  const handleAddWalkIn = async (patientData) => {
-    try {
-      setLoading(true);
-
-      // Create a new appointment for the walk-in patient
-      const today = new Date();
-      const appointmentData = {
-        patient_id: patientData.patient_id,
-        appointment_date: today,
-        type: 'Walk-in',
-        reason: patientData.reason || 'Walk-in visit',
-        status: 'Scheduled',
-        createdBy: 'secretary'
-      };
-
-      // Create the appointment in the database
-      const newAppointment = await apiService.createAppointment(appointmentData);
-      console.log('Created appointment for walk-in:', newAppointment);
-
-      // Add to queue
-      const queueData = {
-        patient_id: patientData.patient_id,
-        appointment_id: newAppointment._id,
-        is_walk_in: true,
-        notes: `Walk-in: ${patientData.reason || 'No reason provided'}`
-      };
-
-      const newQueueEntry = await apiService.addToQueue(queueData);
-      setTicketToPrint(newQueueEntry);
-      await fetchQueueData();
-
-      return newQueueEntry;
-    } catch (error) {
-      console.error('Error adding walk-in patient to queue:', error);
-      throw error;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Handle checking in a patient with an appointment
+  // Handle checking in an appointment
   const handleCheckInAppointment = async (appointment) => {
     try {
       // Find the patient for this appointment
       const patientId = appointment.patient_id || appointment.patientId;
-
+      
       // Create queue data
       const queueData = {
         patient_id: patientId,
@@ -207,7 +155,7 @@ function IntegratedAppointmentQueue({ patients, appointments, userRole, onUpdate
         is_walk_in: false,
         notes: `Checked in for ${appointment.type || 'appointment'}`
       };
-
+      
       // Add to queue
       const newQueueEntry = await apiService.addToQueue(queueData);
       setTicketToPrint(newQueueEntry);
@@ -218,86 +166,32 @@ function IntegratedAppointmentQueue({ patients, appointments, userRole, onUpdate
     }
   };
 
-  // Handle drag and drop reordering
-  const handleDragEnd = async (result) => {
-    // If react-beautiful-dnd failed to load, result might be undefined
-    if (!result || !result.destination) return;
-
-    const sourceIndex = result.source.index;
-    const destinationIndex = result.destination.index;
-
-    if (sourceIndex === destinationIndex) return;
-
-    try {
-      setLoading(true);
-
-      // Get only the waiting entries
-      const waitingEntries = queueEntries.filter(entry => entry.status === 'Waiting');
-
-      // Create a new array with the reordered items
-      const reorderedEntries = Array.from(waitingEntries);
-      const [removed] = reorderedEntries.splice(sourceIndex, 1);
-      reorderedEntries.splice(destinationIndex, 0, removed);
-
-      // Update the queue entries with the new order
-      const updatedQueueEntries = queueEntries.filter(entry => entry.status !== 'Waiting');
-      updatedQueueEntries.push(...reorderedEntries);
-
-      // Sort the updated entries
-      const sortedEntries = [...updatedQueueEntries].sort((a, b) => {
-        const statusPriority = { 'Waiting': 0, 'In Progress': 1, 'Completed': 2, 'No-show': 3, 'Cancelled': 4 };
-        const statusDiff = statusPriority[a.status] - statusPriority[b.status];
-
-        if (statusDiff !== 0) return statusDiff;
-
-        return a.ticket_number - b.ticket_number;
-      });
-
-      setQueueEntries(sortedEntries);
-
-      // Call the API to update the order in the database
-      const queueOrder = reorderedEntries.map((entry, index) => ({
-        id: entry._id,
-        position: index
-      }));
-      await apiService.reorderQueue({ queueOrder });
-
-    } catch (error) {
-      console.error('Error reordering queue:', error);
-      alert('Failed to reorder queue');
-      // Refresh to get the original order
-      await fetchQueueData();
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Manual reordering functions for when drag-and-drop isn't available
+  // Manual reordering functions
   const handleMoveUp = async (entryId) => {
     try {
       setLoading(true);
-
+      
       // Get only the waiting entries
       const waitingEntries = queueEntries.filter(entry => entry.status === 'Waiting');
-
+      
       // Find the index of the entry to move
       const index = waitingEntries.findIndex(entry => entry._id === entryId);
-
+      
       // Can't move up if already at the top
       if (index <= 0) return;
-
+      
       // Create a new array with the reordered items
       const reorderedEntries = Array.from(waitingEntries);
       const temp = reorderedEntries[index];
       reorderedEntries[index] = reorderedEntries[index - 1];
       reorderedEntries[index - 1] = temp;
-
+      
       // Update the queue entries with the new order
       const updatedQueueEntries = queueEntries.filter(entry => entry.status !== 'Waiting');
       updatedQueueEntries.push(...reorderedEntries);
-
+      
       setQueueEntries(updatedQueueEntries);
-
+      
       // Call the API to update the order in the database
       const queueOrder = reorderedEntries.map((entry, idx) => ({
         id: entry._id,
@@ -312,32 +206,32 @@ function IntegratedAppointmentQueue({ patients, appointments, userRole, onUpdate
       setLoading(false);
     }
   };
-
+  
   const handleMoveDown = async (entryId) => {
     try {
       setLoading(true);
-
+      
       // Get only the waiting entries
       const waitingEntries = queueEntries.filter(entry => entry.status === 'Waiting');
-
+      
       // Find the index of the entry to move
       const index = waitingEntries.findIndex(entry => entry._id === entryId);
-
+      
       // Can't move down if already at the bottom
       if (index === -1 || index >= waitingEntries.length - 1) return;
-
+      
       // Create a new array with the reordered items
       const reorderedEntries = Array.from(waitingEntries);
       const temp = reorderedEntries[index];
       reorderedEntries[index] = reorderedEntries[index + 1];
       reorderedEntries[index + 1] = temp;
-
+      
       // Update the queue entries with the new order
       const updatedQueueEntries = queueEntries.filter(entry => entry.status !== 'Waiting');
       updatedQueueEntries.push(...reorderedEntries);
-
+      
       setQueueEntries(updatedQueueEntries);
-
+      
       // Call the API to update the order in the database
       const queueOrder = reorderedEntries.map((entry, idx) => ({
         id: entry._id,
@@ -356,13 +250,13 @@ function IntegratedAppointmentQueue({ patients, appointments, userRole, onUpdate
   // Get today's appointments that aren't in the queue yet
   const getAppointmentsToCheckIn = () => {
     const today = new Date().toISOString().split('T')[0];
-
+    
     // Get all appointments for today
     const todaysAppointments = appointments.filter(appointment => {
       const appointmentDate = new Date(appointment.appointment_date || appointment.date).toISOString().split('T')[0];
       return appointmentDate === today;
     });
-
+    
     // Get IDs of appointments already in the queue
     const queueAppointmentIds = queueEntries
       .filter(entry => entry.appointment_id)
@@ -372,7 +266,7 @@ function IntegratedAppointmentQueue({ patients, appointments, userRole, onUpdate
           (entry.appointment_id._id || entry.appointment_id.id) :
           entry.appointment_id;
       });
-
+    
     // Filter out appointments already in the queue
     return todaysAppointments.filter(appointment => {
       const appointmentId = appointment._id || appointment.id;
@@ -397,7 +291,7 @@ function IntegratedAppointmentQueue({ patients, appointments, userRole, onUpdate
               Add Walk-in
             </button>
           )}
-
+          
           {appointmentsToCheckIn.length > 0 && (userRole === 'secretary' || userRole === 'admin') && (
             <button
               onClick={() => {
@@ -412,7 +306,7 @@ function IntegratedAppointmentQueue({ patients, appointments, userRole, onUpdate
               Check In All ({appointmentsToCheckIn.length})
             </button>
           )}
-
+          
           <button
             onClick={fetchQueueData}
             className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-md text-sm font-medium flex items-center"
@@ -482,7 +376,7 @@ function IntegratedAppointmentQueue({ patients, appointments, userRole, onUpdate
         </div>
       )}
 
-      {/* Queue List with Drag and Drop for Waiting Patients */}
+      {/* Queue List */}
       <div className="space-y-6">
         {/* In Progress Patients */}
         {queueEntries.filter(entry => entry.status === 'In Progress').length > 0 && (
@@ -496,42 +390,11 @@ function IntegratedAppointmentQueue({ patients, appointments, userRole, onUpdate
                   const appointmentId = typeof entry.appointment_id === 'object' ?
                     (entry.appointment_id._id || entry.appointment_id.id) :
                     entry.appointment_id;
-
+                  
                   const appointment = appointments.find(a =>
                     (a._id === appointmentId || a.id === appointmentId)
                   );
-
-                  if (!appointment) {
-                    return (
-                      <div key={entry._id} className="p-4 rounded-lg border border-blue-200 bg-blue-50">
-                        <div className="flex items-center">
-                          <div className="bg-blue-600 text-white font-bold text-xl rounded-full w-10 h-10 flex items-center justify-center mr-4">
-                            {entry.ticket_number}
-                          </div>
-                          <div>
-                            <div className="font-medium">
-                              {entry.patient_id && typeof entry.patient_id === 'object' ? entry.patient_id.name : 'Unknown Patient'}
-                            </div>
-                            <div className="text-sm text-gray-600">
-                              {entry.is_walk_in ? 'Walk-in' : 'Appointment'}
-                            </div>
-                          </div>
-                          <div className="ml-auto">
-                            {userRole === 'doctor' && (
-                              <button
-                                onClick={() => handleUpdateQueueStatus(entry._id, 'Completed')}
-                                className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm font-medium flex items-center"
-                              >
-                                <FaUserCheck className="mr-1" />
-                                Complete
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  }
-
+                  
                   return (
                     <div key={entry._id} className="p-4 rounded-lg border border-blue-200 bg-blue-50">
                       <div className="flex items-center">
@@ -540,11 +403,13 @@ function IntegratedAppointmentQueue({ patients, appointments, userRole, onUpdate
                         </div>
                         <div>
                           <div className="font-medium">
-                            {appointment.patientName ||
+                            {appointment ? appointment.patientName :
                              (entry.patient_id && typeof entry.patient_id === 'object' ? entry.patient_id.name : 'Unknown Patient')}
                           </div>
                           <div className="text-sm text-gray-600">
-                            {appointment.type || 'Consultation'} - {appointment.reason || 'No reason provided'}
+                            {appointment ?
+                              `${appointment.type || 'Consultation'} - ${appointment.reason || 'No reason provided'}` :
+                              (entry.is_walk_in ? 'Walk-in' : 'Appointment')}
                           </div>
                         </div>
                         <div className="ml-auto">
@@ -566,115 +431,93 @@ function IntegratedAppointmentQueue({ patients, appointments, userRole, onUpdate
           </div>
         )}
 
-        {/* Waiting Patients with Drag and Drop */}
+        {/* Waiting Patients */}
         {queueEntries.filter(entry => entry.status === 'Waiting').length > 0 && (
           <div>
             <h3 className="text-lg font-semibold text-blue-800 mb-2">Waiting</h3>
-            <DragDropContext onDragEnd={handleDragEnd}>
-              <Droppable droppableId="waiting-queue">
-                {(provided) => (
-                  <div
-                    {...provided.droppableProps}
-                    ref={provided.innerRef}
-                    className="space-y-3"
-                  >
-                    {queueEntries
-                      .filter(entry => entry.status === 'Waiting')
-                      .map((entry, index) => {
-                        // Find the appointment for this queue entry
-                        const appointmentId = typeof entry.appointment_id === 'object' ?
-                          (entry.appointment_id._id || entry.appointment_id.id) :
-                          entry.appointment_id;
-
-                        const appointment = appointments.find(a =>
-                          (a._id === appointmentId || a.id === appointmentId)
-                        );
-
-                        return (
-                          <Draggable
-                            key={entry._id}
-                            draggableId={entry._id}
-                            index={index}
-                            isDragDisabled={userRole !== 'secretary' && userRole !== 'admin'}
-                          >
-                            {(provided) => (
-                              <div
-                                ref={provided.innerRef}
-                                {...provided.draggableProps}
-                                {...provided.dragHandleProps}
-                                className="p-4 rounded-lg border border-yellow-200 bg-yellow-50 hover:shadow-md transition-all duration-300"
+            <div className="space-y-3">
+              {queueEntries
+                .filter(entry => entry.status === 'Waiting')
+                .map((entry, index) => {
+                  // Find the appointment for this queue entry
+                  const appointmentId = typeof entry.appointment_id === 'object' ?
+                    (entry.appointment_id._id || entry.appointment_id.id) :
+                    entry.appointment_id;
+                  
+                  const appointment = appointments.find(a =>
+                    (a._id === appointmentId || a.id === appointmentId)
+                  );
+                  
+                  return (
+                    <div 
+                      key={entry._id} 
+                      className="p-4 rounded-lg border border-yellow-200 bg-yellow-50 hover:shadow-md transition-all duration-300"
+                    >
+                      <div className="flex items-center">
+                        <div className="bg-yellow-600 text-white font-bold text-xl rounded-full w-10 h-10 flex items-center justify-center mr-4">
+                          {entry.ticket_number}
+                        </div>
+                        <div>
+                          <div className="font-medium">
+                            {appointment ? appointment.patientName :
+                             (entry.patient_id && typeof entry.patient_id === 'object' ? entry.patient_id.name : 'Unknown Patient')}
+                          </div>
+                          <div className="text-sm text-gray-600">
+                            {appointment ?
+                              `${appointment.type || 'Consultation'} - ${appointment.reason || 'No reason provided'}` :
+                              (entry.is_walk_in ? 'Walk-in' : 'Appointment')}
+                          </div>
+                        </div>
+                        <div className="ml-auto flex space-x-2">
+                          {/* Manual reordering buttons */}
+                          {(userRole === 'secretary' || userRole === 'admin') && (
+                            <div className="flex flex-col mr-2">
+                              <button
+                                onClick={() => handleMoveUp(entry._id)}
+                                className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-2 py-1 rounded-t text-sm font-medium flex items-center"
+                                disabled={index === 0}
                               >
-                                <div className="flex items-center">
-                                  <div className="bg-yellow-600 text-white font-bold text-xl rounded-full w-10 h-10 flex items-center justify-center mr-4">
-                                    {entry.ticket_number}
-                                  </div>
-                                  <div>
-                                    <div className="font-medium">
-                                      {appointment ? appointment.patientName :
-                                       (entry.patient_id && typeof entry.patient_id === 'object' ? entry.patient_id.name : 'Unknown Patient')}
-                                    </div>
-                                    <div className="text-sm text-gray-600">
-                                      {appointment ?
-                                        `${appointment.type || 'Consultation'} - ${appointment.reason || 'No reason provided'}` :
-                                        (entry.is_walk_in ? 'Walk-in' : 'Appointment')}
-                                    </div>
-                                  </div>
-                                  <div className="ml-auto flex space-x-2">
-                                    {/* Manual reordering buttons (visible when drag-and-drop might not work) */}
-                                    {(userRole === 'secretary' || userRole === 'admin') && (
-                                      <div className="flex flex-col mr-2">
-                                        <button
-                                          onClick={() => handleMoveUp(entry._id)}
-                                          className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-2 py-1 rounded-t text-sm font-medium flex items-center"
-                                          disabled={index === 0}
-                                        >
-                                          <FaArrowUp className="text-xs" />
-                                        </button>
-                                        <button
-                                          onClick={() => handleMoveDown(entry._id)}
-                                          className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-2 py-1 rounded-b text-sm font-medium flex items-center"
-                                          disabled={index === queueEntries.filter(e => e.status === 'Waiting').length - 1}
-                                        >
-                                          <FaArrowDown className="text-xs" />
-                                        </button>
-                                      </div>
-                                    )}
-                                    {userRole === 'doctor' && (
-                                      <button
-                                        onClick={() => handleUpdateQueueStatus(entry._id, 'In Progress')}
-                                        className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm font-medium flex items-center"
-                                      >
-                                        <FaUserCheck className="mr-1" />
-                                        Start
-                                      </button>
-                                    )}
-                                    <button
-                                      onClick={() => handlePrintTicket(entry)}
-                                      className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-1 rounded text-sm font-medium flex items-center"
-                                    >
-                                      <FaPrint className="mr-1" />
-                                      Print
-                                    </button>
-                                    {(userRole === 'secretary' || userRole === 'admin') && (
-                                      <button
-                                        onClick={() => handleRemoveFromQueue(entry._id)}
-                                        className="bg-gray-200 hover:bg-gray-300 text-red-600 px-3 py-1 rounded text-sm font-medium"
-                                      >
-                                        Remove
-                                      </button>
-                                    )}
-                                  </div>
-                                </div>
-                              </div>
-                            )}
-                          </Draggable>
-                        );
-                      })}
-                    {provided.placeholder}
-                  </div>
-                )}
-              </Droppable>
-            </DragDropContext>
+                                <FaArrowUp className="text-xs" />
+                              </button>
+                              <button
+                                onClick={() => handleMoveDown(entry._id)}
+                                className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-2 py-1 rounded-b text-sm font-medium flex items-center"
+                                disabled={index === queueEntries.filter(e => e.status === 'Waiting').length - 1}
+                              >
+                                <FaArrowDown className="text-xs" />
+                              </button>
+                            </div>
+                          )}
+                          {userRole === 'doctor' && (
+                            <button
+                              onClick={() => handleUpdateQueueStatus(entry._id, 'In Progress')}
+                              className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm font-medium flex items-center"
+                            >
+                              <FaUserCheck className="mr-1" />
+                              Start
+                            </button>
+                          )}
+                          <button
+                            onClick={() => handlePrintTicket(entry)}
+                            className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-1 rounded text-sm font-medium flex items-center"
+                          >
+                            <FaPrint className="mr-1" />
+                            Print
+                          </button>
+                          {(userRole === 'secretary' || userRole === 'admin') && (
+                            <button
+                              onClick={() => handleRemoveFromQueue(entry._id)}
+                              className="bg-gray-200 hover:bg-gray-300 text-red-600 px-3 py-1 rounded text-sm font-medium"
+                            >
+                              Remove
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+            </div>
           </div>
         )}
 
@@ -692,11 +535,11 @@ function IntegratedAppointmentQueue({ patients, appointments, userRole, onUpdate
                   const appointmentId = typeof entry.appointment_id === 'object' ?
                     (entry.appointment_id._id || entry.appointment_id.id) :
                     entry.appointment_id;
-
+                  
                   const appointment = appointments.find(a =>
                     (a._id === appointmentId || a.id === appointmentId)
                   );
-
+                  
                   return (
                     <div key={entry._id} className="p-4 rounded-lg border border-green-200 bg-green-50">
                       <div className="flex items-center">
@@ -776,4 +619,4 @@ function IntegratedAppointmentQueue({ patients, appointments, userRole, onUpdate
   );
 }
 
-export default IntegratedAppointmentQueue;
+export default SimpleAppointmentQueue;
