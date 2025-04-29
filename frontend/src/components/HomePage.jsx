@@ -221,7 +221,9 @@ function HomePage() {
           position: "relative", /* For overlay positioning */
           WebkitBackgroundSize: "cover", /* Safari/Chrome */
           MozBackgroundSize: "cover", /* Firefox */
-          OBackgroundSize: "cover" /* Opera */
+          OBackgroundSize: "cover", /* Opera */
+          marginBottom: 0, /* Ensure no bottom margin */
+          paddingBottom: 0 /* Ensure no bottom padding */
         }}>
       {/* Header with background image */}
       <div className="text-white fixed top-0 left-0 right-0 z-50 backdrop-blur-[1px]">
@@ -780,7 +782,7 @@ function HomePage() {
         </main>
 
         {/* Footer */}
-        <footer className="py-12 bg-blue-600 text-white relative overflow-hidden">
+        <footer className="py-8 bg-blue-600 text-white relative overflow-hidden">
           <div className="max-w-5xl mx-auto px-4">
             <div className="flex flex-col md:flex-row justify-between mb-8 fade-in-element">
               <div className="mb-8 md:mb-0 md:w-1/3">

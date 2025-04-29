@@ -98,25 +98,14 @@ function SuperSimpleQueueManagement({ patients, appointments, userRole }) {
       setLoading(true);
       console.log('Adding walk-in patient:', patientData);
 
-      // Create a temporary local queue entry to show immediately
-      const tempTicketNumber = queueStats.nextTicketNumber || Math.floor(Math.random() * 1000) + 1;
-      const tempQueueEntry = {
-        _id: `temp_${Date.now()}`,
-        patient_id: {
-          _id: patientData.patient_id,
-          name: patientData.patientName
-        },
-        ticket_number: tempTicketNumber,
-        status: 'Waiting',
-        check_in_time: new Date().toISOString(),
-        is_walk_in: true,
-        notes: `Walk-in: ${patientData.reason || 'No reason provided'}`
-      };
+      // Step 1: Verify patient exists
+      if (!patientData.patient_id) {
+        console.error('No patient ID provided for walk-in');
+        alert('Please select a valid patient');
+        return false;
+      }
 
-      // Show the ticket immediately
-      setTicketToPrint(tempQueueEntry);
-
-      // Create a new appointment for the walk-in patient
+      // Step 2: Create a new appointment for the walk-in patient
       const today = new Date();
       const appointmentData = {
         patient_id: patientData.patient_id,
@@ -128,42 +117,52 @@ function SuperSimpleQueueManagement({ patients, appointments, userRole }) {
         createdBy: 'secretary'
       };
 
+      console.log('Creating appointment for walk-in patient with data:', appointmentData);
+
       // Create the appointment in the database
       let newAppointment;
       try {
         newAppointment = await apiService.createAppointment(appointmentData);
         console.log('Created appointment for walk-in:', newAppointment);
+
+        if (!newAppointment || !newAppointment._id) {
+          throw new Error('Failed to create appointment - no ID returned');
+        }
       } catch (appointmentError) {
         console.error('Error creating appointment:', appointmentError);
-        // Continue anyway - we'll try to add to queue without an appointment
+        alert('Failed to create appointment for walk-in patient');
+        return false;
       }
 
-      // Add to queue
+      // Step 3: Add to queue with the appointment ID
       const queueData = {
         patient_id: patientData.patient_id,
-        appointment_id: newAppointment?._id, // Optional chaining in case appointment creation failed
+        appointment_id: newAppointment._id,
         is_walk_in: true,
         notes: `Walk-in: ${patientData.reason || 'No reason provided'}`
       };
+
+      console.log('Adding walk-in patient to queue with data:', queueData);
 
       try {
         const newQueueEntry = await apiService.addToQueue(queueData);
         console.log('Added to queue successfully:', newQueueEntry);
 
-        // Replace the temporary ticket with the real one
+        // Show the ticket for printing
         setTicketToPrint(newQueueEntry);
+
+        // Refresh queue data
+        await fetchQueueData();
+
+        return true;
       } catch (queueError) {
         console.error('Error adding to queue:', queueError);
-        // Keep the temporary ticket visible so the user can still print something
+        alert('Failed to add patient to queue. Please try again.');
+        return false;
       }
-
-      // Refresh queue data regardless of success/failure
-      await fetchQueueData();
-
-      return true; // Return success even if there were partial failures
     } catch (error) {
       console.error('Error in walk-in patient workflow:', error);
-      // Don't throw - we want to keep the UI working
+      alert('An error occurred while processing the walk-in patient');
       return false;
     } finally {
       setLoading(false);
@@ -173,10 +172,23 @@ function SuperSimpleQueueManagement({ patients, appointments, userRole }) {
   // Handle checking in a patient with an appointment
   const handleCheckInAppointment = async (appointment) => {
     try {
-      // Find the patient for this appointment
-      const patientId = appointment.patient_id || appointment.patientId;
+      console.log('Checking in appointment:', appointment);
 
-      // Create queue data
+      // Step 1: Verify appointment and patient exist
+      if (!appointment || (!appointment._id && !appointment.id)) {
+        console.error('Invalid appointment data');
+        alert('Invalid appointment data');
+        return false;
+      }
+
+      const patientId = appointment.patient_id || appointment.patientId;
+      if (!patientId) {
+        console.error('No patient ID found for appointment');
+        alert('No patient associated with this appointment');
+        return false;
+      }
+
+      // Step 2: Create queue data
       const queueData = {
         patient_id: patientId,
         appointment_id: appointment._id || appointment.id,
@@ -184,13 +196,35 @@ function SuperSimpleQueueManagement({ patients, appointments, userRole }) {
         notes: `Checked in for ${appointment.type || 'appointment'}`
       };
 
-      // Add to queue
-      const newQueueEntry = await apiService.addToQueue(queueData);
-      setTicketToPrint(newQueueEntry);
-      await fetchQueueData();
+      console.log('Adding appointment to queue with data:', queueData);
+
+      // Step 3: Add to queue
+      try {
+        const newQueueEntry = await apiService.addToQueue(queueData);
+        console.log('Added appointment to queue successfully:', newQueueEntry);
+
+        // Show the ticket for printing
+        setTicketToPrint(newQueueEntry);
+
+        // Refresh queue data
+        await fetchQueueData();
+
+        return true;
+      } catch (queueError) {
+        console.error('Error adding appointment to queue:', queueError);
+
+        // Check if this is a duplicate entry error
+        if (queueError.includes && queueError.includes('already in the queue')) {
+          alert('This patient is already in the queue');
+        } else {
+          alert('Failed to check in patient. Please try again.');
+        }
+        return false;
+      }
     } catch (error) {
-      console.error('Error checking in appointment:', error);
-      alert('Failed to check in patient');
+      console.error('Error in appointment check-in workflow:', error);
+      alert('An error occurred while checking in the patient');
+      return false;
     }
   };
 
@@ -304,40 +338,57 @@ function SuperSimpleQueueManagement({ patients, appointments, userRole }) {
 
   // Get today's appointments that aren't in the queue yet
   const getTodaysAppointments = () => {
+    if (!appointments || !Array.isArray(appointments) || appointments.length === 0) {
+      console.log('No appointments available');
+      return [];
+    }
+
     const today = new Date().toISOString().split('T')[0];
     console.log('Today is:', today);
-    console.log('All appointments:', appointments);
+    console.log('All appointments:', appointments.length);
 
-    // Get all appointments for today
+    // Get all appointments for today with status 'Scheduled'
     const todaysAppointments = appointments.filter(appointment => {
+      if (!appointment || !appointment.appointment_date) return false;
+
       const appointmentDate = new Date(appointment.appointment_date || appointment.date).toISOString().split('T')[0];
-      console.log('Appointment date:', appointmentDate, 'for appointment:', appointment);
-      return appointmentDate === today;
+      const isToday = appointmentDate === today;
+      const isScheduled = appointment.status === 'Scheduled';
+
+      return isToday && isScheduled;
     });
 
-    console.log('Today\'s appointments:', todaysAppointments);
+    console.log('Today\'s scheduled appointments:', todaysAppointments.length);
 
-    // Get IDs of appointments already in the queue
-    const queueAppointmentIds = queueEntries
-      .filter(entry => entry.appointment_id)
-      .map(entry => {
-        // Handle both populated and non-populated appointment_id
-        return typeof entry.appointment_id === 'object' ?
-          (entry.appointment_id._id || entry.appointment_id.id) :
-          entry.appointment_id;
+    // Safely get IDs of appointments already in the queue
+    const queueAppointmentIds = [];
+    if (queueEntries && Array.isArray(queueEntries)) {
+      queueEntries.forEach(entry => {
+        if (entry && entry.appointment_id) {
+          // Handle both populated and non-populated appointment_id
+          const appointmentId = typeof entry.appointment_id === 'object' ?
+            (entry.appointment_id?._id || entry.appointment_id?.id) :
+            entry.appointment_id;
+
+          if (appointmentId) queueAppointmentIds.push(appointmentId);
+        }
       });
+    }
 
-    console.log('Queue appointment IDs:', queueAppointmentIds);
+    console.log('Queue appointment IDs:', queueAppointmentIds.length);
 
     // Filter out appointments already in the queue
     const appointmentsNotInQueue = todaysAppointments.filter(appointment => {
+      if (!appointment) return false;
+
       const appointmentId = appointment._id || appointment.id;
+      if (!appointmentId) return false;
+
       const isInQueue = queueAppointmentIds.includes(appointmentId);
-      console.log('Appointment ID:', appointmentId, 'is in queue:', isInQueue);
       return !isInQueue;
     });
 
-    console.log('Appointments not in queue:', appointmentsNotInQueue);
+    console.log('Appointments not in queue:', appointmentsNotInQueue.length);
     return appointmentsNotInQueue;
   };
 
@@ -394,19 +445,24 @@ function SuperSimpleQueueManagement({ patients, appointments, userRole }) {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <div className="bg-blue-50 p-3 rounded-lg border border-blue-100">
           <div className="text-sm text-blue-700">Total Patients</div>
-          <div className="text-2xl font-bold">{queueStats.totalPatients}</div>
+          <div className="text-2xl font-bold">{queueStats.totalPatients || 0}</div>
         </div>
         <div className="bg-yellow-50 p-3 rounded-lg border border-yellow-100">
           <div className="text-sm text-yellow-700">Waiting</div>
-          <div className="text-2xl font-bold">{queueStats.waitingPatients}</div>
+          <div className="text-2xl font-bold">{queueStats.waitingPatients || 0}</div>
+          {queueStats.todayAppointments > 0 && (
+            <div className="text-xs text-yellow-600 mt-1">
+              +{queueStats.todayAppointments} scheduled today
+            </div>
+          )}
         </div>
         <div className="bg-indigo-50 p-3 rounded-lg border border-indigo-100">
           <div className="text-sm text-indigo-700">With Doctor</div>
-          <div className="text-2xl font-bold">{queueStats.inProgressPatients}</div>
+          <div className="text-2xl font-bold">{queueStats.inProgressPatients || 0}</div>
         </div>
         <div className="bg-green-50 p-3 rounded-lg border border-green-100">
           <div className="text-sm text-green-700">Completed</div>
-          <div className="text-2xl font-bold">{queueStats.completedPatients}</div>
+          <div className="text-2xl font-bold">{queueStats.completedPatients || 0}</div>
         </div>
       </div>
 

@@ -8,25 +8,41 @@ const Appointment = require('../models/appointmentModel');
 // @access  Private/Secretary
 const addToQueue = asyncHandler(async (req, res) => {
   const { patient_id, appointment_id, is_walk_in, notes } = req.body;
+  console.log('Adding to queue:', { patient_id, appointment_id, is_walk_in });
 
-  // Verify patient exists
+  // Step 1: Verify patient exists
+  if (!patient_id) {
+    console.error('No patient ID provided');
+    res.status(400);
+    throw new Error('Patient ID is required');
+  }
+
   const patient = await Patient.findById(patient_id);
   if (!patient) {
+    console.error(`Patient not found with ID: ${patient_id}`);
     res.status(404);
     throw new Error('Patient not found');
   }
 
-  // Check if appointment exists if provided
+  // Step 2: Check if appointment exists if provided
   let appointment = null;
   if (appointment_id) {
     appointment = await Appointment.findById(appointment_id);
     if (!appointment) {
+      console.error(`Appointment not found with ID: ${appointment_id}`);
       res.status(404);
       throw new Error('Appointment not found');
     }
+
+    // Verify the appointment belongs to this patient
+    if (appointment.patient_id.toString() !== patient_id.toString()) {
+      console.error(`Appointment ${appointment_id} does not belong to patient ${patient_id}`);
+      res.status(400);
+      throw new Error('Appointment does not belong to this patient');
+    }
   }
 
-  // Check if patient is already in today's queue
+  // Step 3: Check if patient is already in today's queue
   const today = new Date();
   const startOfDay = new Date(today.setHours(0, 0, 0, 0));
   const endOfDay = new Date(today.setHours(23, 59, 59, 999));
@@ -38,17 +54,20 @@ const addToQueue = asyncHandler(async (req, res) => {
   });
 
   if (existingQueueEntry) {
+    console.error(`Patient ${patient_id} is already in the queue with entry ${existingQueueEntry._id}`);
     res.status(400);
     throw new Error('Patient is already in the queue');
   }
 
-  // Get the next ticket number for today
+  // Step 4: Get the next ticket number for today
   const lastTicket = await Queue.findOne({
     check_in_time: { $gte: startOfDay, $lte: endOfDay },
   }).sort({ ticket_number: -1 });
 
   const ticketNumber = lastTicket ? lastTicket.ticket_number + 1 : 1;
+  console.log(`Assigning ticket number ${ticketNumber} (last ticket: ${lastTicket ? lastTicket.ticket_number : 'none'})`);
 
+  // Step 5: Create the queue entry
   const queueEntry = await Queue.create({
     patient_id,
     appointment_id: appointment_id || null,
@@ -59,19 +78,23 @@ const addToQueue = asyncHandler(async (req, res) => {
   });
 
   if (queueEntry) {
-    // If this is for an appointment, update the appointment status to 'Checked In'
+    console.log(`Created queue entry ${queueEntry._id} with ticket number ${ticketNumber}`);
+
+    // Step 6: If this is for an appointment, update the appointment status to 'Checked In'
     if (appointment) {
       appointment.status = 'Checked In';
       await appointment.save();
+      console.log(`Updated appointment ${appointment_id} status to 'Checked In'`);
     }
 
-    // Populate patient information
+    // Step 7: Populate patient information
     const populatedEntry = await Queue.findById(queueEntry._id)
       .populate('patient_id', 'name gender phone year_of_birth')
       .populate('appointment_id', 'appointment_date optional_time type reason status');
 
     res.status(201).json(populatedEntry);
   } else {
+    console.error('Failed to create queue entry');
     res.status(400);
     throw new Error('Invalid queue data');
   }
@@ -81,19 +104,42 @@ const addToQueue = asyncHandler(async (req, res) => {
 // @route   GET /api/queue
 // @access  Private/Doctor/Secretary
 const getQueueEntries = asyncHandler(async (req, res) => {
+  console.log('Getting queue entries');
+
   // Get today's queue entries
   const today = new Date();
   const startOfDay = new Date(today.setHours(0, 0, 0, 0));
   const endOfDay = new Date(today.setHours(23, 59, 59, 999));
 
-  const queueEntries = await Queue.find({
-    check_in_time: { $gte: startOfDay, $lte: endOfDay },
-  })
-    .populate('patient_id', 'name gender phone year_of_birth')
-    .populate('appointment_id', 'appointment_date optional_time type reason status')
-    .sort({ status: 1, queue_position: 1, ticket_number: 1 });
+  console.log(`Fetching queue entries between ${startOfDay.toISOString()} and ${endOfDay.toISOString()}`);
 
-  res.json(queueEntries);
+  try {
+    // First count how many entries we expect to find
+    const entryCount = await Queue.countDocuments({
+      check_in_time: { $gte: startOfDay, $lte: endOfDay },
+    });
+
+    console.log(`Found ${entryCount} queue entries for today`);
+
+    // Get the entries with populated fields
+    const queueEntries = await Queue.find({
+      check_in_time: { $gte: startOfDay, $lte: endOfDay },
+    })
+      .populate('patient_id', 'name gender phone year_of_birth')
+      .populate('appointment_id', 'appointment_date optional_time type reason status')
+      .sort({ status: 1, queue_position: 1, ticket_number: 1 });
+
+    console.log(`Returning ${queueEntries.length} queue entries`);
+
+    // Log the ticket numbers for debugging
+    const ticketNumbers = queueEntries.map(entry => entry.ticket_number).sort((a, b) => a - b);
+    console.log('Ticket numbers in order:', ticketNumbers);
+
+    res.json(queueEntries);
+  } catch (error) {
+    console.error('Error fetching queue entries:', error);
+    res.status(500).json({ message: 'Failed to fetch queue entries', error: error.message });
+  }
 });
 
 // @desc    Update queue entry status
@@ -178,75 +224,86 @@ const removeFromQueue = asyncHandler(async (req, res) => {
 // @route   GET /api/queue/stats
 // @access  Private/Doctor/Secretary
 const getQueueStats = asyncHandler(async (req, res) => {
+  console.log('Getting queue statistics');
+
   const today = new Date();
   const startOfDay = new Date(today.setHours(0, 0, 0, 0));
   const endOfDay = new Date(today.setHours(23, 59, 59, 999));
 
-  const totalPatients = await Queue.countDocuments({
-    check_in_time: { $gte: startOfDay, $lte: endOfDay },
-  });
+  console.log(`Calculating stats for queue entries between ${startOfDay.toISOString()} and ${endOfDay.toISOString()}`);
 
-  const waitingPatients = await Queue.countDocuments({
-    check_in_time: { $gte: startOfDay, $lte: endOfDay },
-    status: 'Waiting',
-  });
-
-  const inProgressPatients = await Queue.countDocuments({
-    check_in_time: { $gte: startOfDay, $lte: endOfDay },
-    status: 'In Progress',
-  });
-
-  const completedPatients = await Queue.countDocuments({
-    check_in_time: { $gte: startOfDay, $lte: endOfDay },
-    status: 'Completed',
-  });
-
-  const walkInPatients = await Queue.countDocuments({
-    check_in_time: { $gte: startOfDay, $lte: endOfDay },
-    is_walk_in: true,
-  });
-
-  const appointmentPatients = await Queue.countDocuments({
-    check_in_time: { $gte: startOfDay, $lte: endOfDay },
-    is_walk_in: false,
-  });
-
-  // Calculate average service time for completed patients
-  const completedEntries = await Queue.find({
-    check_in_time: { $gte: startOfDay, $lte: endOfDay },
-    status: 'Completed',
-    start_time: { $exists: true },
-    end_time: { $exists: true },
-  });
-
-  let avgServiceTime = 0;
-
-  if (completedEntries.length > 0) {
-    let totalServiceTime = 0;
-    completedEntries.forEach(entry => {
-      const serviceTime = (new Date(entry.end_time) - new Date(entry.start_time)) / (1000 * 60); // in minutes
-      totalServiceTime += serviceTime;
+  try {
+    // Get all queue entries for today in a single query to reduce database load
+    const allQueueEntries = await Queue.find({
+      check_in_time: { $gte: startOfDay, $lte: endOfDay },
     });
-    avgServiceTime = Math.round(totalServiceTime / completedEntries.length);
+
+    console.log(`Found ${allQueueEntries.length} total queue entries for today`);
+
+    // Calculate statistics from the fetched entries
+    const totalPatients = allQueueEntries.length;
+
+    const waitingPatients = allQueueEntries.filter(entry => entry.status === 'Waiting').length;
+    const inProgressPatients = allQueueEntries.filter(entry => entry.status === 'In Progress').length;
+    const completedPatients = allQueueEntries.filter(entry => entry.status === 'Completed').length;
+
+    const walkInPatients = allQueueEntries.filter(entry => entry.is_walk_in === true).length;
+    const appointmentPatients = allQueueEntries.filter(entry => entry.is_walk_in === false).length;
+
+    // Calculate average service time for completed patients
+    const completedEntries = allQueueEntries.filter(entry =>
+      entry.status === 'Completed' && entry.start_time && entry.end_time
+    );
+
+    let avgServiceTime = 0;
+    if (completedEntries.length > 0) {
+      let totalServiceTime = 0;
+      completedEntries.forEach(entry => {
+        const serviceTime = (new Date(entry.end_time) - new Date(entry.start_time)) / (1000 * 60); // in minutes
+        totalServiceTime += serviceTime;
+      });
+      avgServiceTime = Math.round(totalServiceTime / completedEntries.length);
+    }
+
+    // Get next ticket number
+    const ticketNumbers = allQueueEntries.map(entry => entry.ticket_number);
+    const highestTicket = ticketNumbers.length > 0 ? Math.max(...ticketNumbers) : 0;
+    const nextTicketNumber = highestTicket + 1;
+
+    console.log('Queue statistics:', {
+      totalPatients,
+      waitingPatients,
+      inProgressPatients,
+      completedPatients,
+      walkInPatients,
+      appointmentPatients,
+      nextTicketNumber
+    });
+
+    // Get today's scheduled appointments that aren't in the queue yet
+    const todayAppointments = await Appointment.countDocuments({
+      appointment_date: { $gte: startOfDay, $lte: endOfDay },
+      status: 'Scheduled'
+    });
+
+    console.log(`Found ${todayAppointments} scheduled appointments for today`);
+
+    // Return the statistics
+    res.json({
+      totalPatients,
+      waitingPatients,
+      inProgressPatients,
+      completedPatients,
+      walkInPatients,
+      appointmentPatients,
+      avgServiceTime,
+      nextTicketNumber,
+      todayAppointments
+    });
+  } catch (error) {
+    console.error('Error calculating queue statistics:', error);
+    res.status(500).json({ message: 'Failed to calculate queue statistics', error: error.message });
   }
-
-  // Get next ticket number
-  const lastTicket = await Queue.findOne({
-    check_in_time: { $gte: startOfDay, $lte: endOfDay },
-  }).sort({ ticket_number: -1 });
-
-  const nextTicketNumber = lastTicket ? lastTicket.ticket_number + 1 : 1;
-
-  res.json({
-    totalPatients,
-    waitingPatients,
-    inProgressPatients,
-    completedPatients,
-    walkInPatients,
-    appointmentPatients,
-    avgServiceTime,
-    nextTicketNumber,
-  });
 });
 
 // @desc    Get next patient in queue

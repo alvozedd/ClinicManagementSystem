@@ -146,10 +146,9 @@ const PageLoader = ({ children, backgroundImage }) => {
         animate={{ opacity: loading ? 0 : 1 }}
         transition={{ duration: 0.5 }}
         className="relative"
+        style={{ margin: 0, padding: 0 }}
       >
         {children}
-
-        {/* Scroll Indicator removed */}
       </motion.div>
     </>
   );

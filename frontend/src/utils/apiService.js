@@ -866,17 +866,22 @@ const apiService = {
     try {
       console.log('Adding to queue with data:', queueData);
 
-      // Generate a consistent ticket number based on timestamp
-      // This ensures we don't get random high numbers that disappear
-      const timestamp = Date.now();
-      const ticketNumber = Math.floor((timestamp % 1000000) / 100); // Will be between 0-10000
+      // Get the next ticket number from the server instead of generating locally
+      let nextTicketNumber = 1;
+      try {
+        const statsResponse = await apiService.getQueueStats();
+        nextTicketNumber = statsResponse.nextTicketNumber || 1;
+        console.log('Got next ticket number from server:', nextTicketNumber);
+      } catch (statsError) {
+        console.warn('Could not get next ticket number from server, using default 1:', statsError);
+      }
 
       // Create a temporary queue entry that will be shown immediately
       const tempQueueEntry = {
-        _id: `temp_${timestamp}`,
+        _id: `temp_${Date.now()}`,
         patient_id: queueData.patient_id,
         appointment_id: queueData.appointment_id,
-        ticket_number: ticketNumber,
+        ticket_number: nextTicketNumber,
         status: 'Waiting',
         notes: queueData.notes || '',
         is_walk_in: queueData.is_walk_in || false,
@@ -886,7 +891,7 @@ const apiService = {
       };
 
       // Store in localStorage as a backup
-      const localStorageKey = 'temp_queue_entry_' + timestamp;
+      const localStorageKey = 'temp_queue_entry_' + Date.now();
       localStorage.setItem(localStorageKey, JSON.stringify(tempQueueEntry));
 
       // Try multiple approaches to add to queue
@@ -936,11 +941,23 @@ const apiService = {
       console.error('Error adding to queue:', error);
 
       // Create a fallback entry that can still be displayed
+      // Try to get the ticket number from the temp entry we created earlier
+      let ticketNumber = 1;
+      try {
+        const localStorageKey = 'temp_queue_entry_' + Date.now();
+        const tempEntry = JSON.parse(localStorage.getItem(localStorageKey));
+        if (tempEntry && tempEntry.ticket_number) {
+          ticketNumber = tempEntry.ticket_number;
+        }
+      } catch (e) {
+        console.error('Error getting ticket number from localStorage:', e);
+      }
+
       const fallbackEntry = {
         _id: `fallback_${Date.now()}`,
         patient_id: queueData.patient_id,
         appointment_id: queueData.appointment_id,
-        ticket_number: Math.floor(Date.now() % 1000),
+        ticket_number: ticketNumber,
         status: 'Waiting',
         notes: queueData.notes || '',
         is_walk_in: queueData.is_walk_in || false,

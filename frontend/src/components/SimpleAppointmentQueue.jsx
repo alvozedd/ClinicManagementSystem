@@ -25,7 +25,9 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
     totalPatients: 0,
     waitingPatients: 0,
     inProgressPatients: 0,
-    completedPatients: 0
+    completedPatients: 0,
+    todayAppointments: 0,
+    nextTicketNumber: 1
   });
 
   // Fetch queue data on component mount and set up polling
@@ -134,15 +136,33 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
 
       setQueueEntries(sortedEntries);
 
-      // Calculate queue statistics based on the entries with local status
-      const stats = {
-        totalPatients: entriesWithLocalStatus.length,
-        waitingPatients: entriesWithLocalStatus.filter(entry => entry && entry._id && entry.status === 'Waiting').length,
-        inProgressPatients: entriesWithLocalStatus.filter(entry => entry && entry._id && entry.status === 'In Progress').length,
-        completedPatients: entriesWithLocalStatus.filter(entry => entry && entry._id && entry.status === 'Completed').length
-      };
-
-      setQueueStats(stats);
+      // Fetch queue statistics from the server
+      try {
+        // Add timestamp to prevent caching
+        const timestamp = new Date().getTime();
+        // Add cache control headers to the request
+        const options = {
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+          }
+        };
+        const statsResponse = await apiService.getQueueStats(options);
+        console.log('Queue stats fetched successfully:', statsResponse);
+        setQueueStats(statsResponse);
+      } catch (statsError) {
+        console.error('Error fetching queue stats:', statsError);
+        // Calculate queue statistics locally as a fallback
+        const stats = {
+          totalPatients: entriesWithLocalStatus.length,
+          waitingPatients: entriesWithLocalStatus.filter(entry => entry && entry._id && entry.status === 'Waiting').length,
+          inProgressPatients: entriesWithLocalStatus.filter(entry => entry && entry._id && entry.status === 'In Progress').length,
+          completedPatients: entriesWithLocalStatus.filter(entry => entry && entry._id && entry.status === 'Completed').length,
+          nextTicketNumber: 1
+        };
+        setQueueStats(stats);
+      }
     } catch (error) {
       console.error('Error in fetchQueueData:', error);
       // Initialize with empty data if there's an error
@@ -151,7 +171,9 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
         totalPatients: 0,
         waitingPatients: 0,
         inProgressPatients: 0,
-        completedPatients: 0
+        completedPatients: 0,
+        todayAppointments: 0,
+        nextTicketNumber: 1
       });
     } finally {
       setLoading(false);
@@ -162,44 +184,64 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
   const handleAddWalkIn = async (patientData) => {
     try {
       setLoading(true);
+      console.log('Adding walk-in patient:', patientData);
 
-      // Create queue data
+      // Step 1: Verify patient exists
+      if (!patientData.patient_id) {
+        console.error('No patient ID provided for walk-in');
+        alert('Please select a valid patient');
+        return false;
+      }
+
+      // Step 2: Create a new appointment for the walk-in patient
+      const today = new Date();
+      const appointmentData = {
+        patient_id: patientData.patient_id,
+        appointment_date: today,
+        optional_time: today.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        type: 'Walk-in',
+        reason: patientData.reason || 'Walk-in visit',
+        status: 'Scheduled',
+        createdBy: 'secretary'
+      };
+
+      console.log('Creating appointment for walk-in patient with data:', appointmentData);
+
+      // Create the appointment in the database
+      let newAppointment;
+      try {
+        newAppointment = await apiService.createAppointment(appointmentData);
+        console.log('Created appointment for walk-in:', newAppointment);
+
+        if (!newAppointment || !newAppointment._id) {
+          throw new Error('Failed to create appointment - no ID returned');
+        }
+
+        // If we have an onUpdateAppointment callback, call it to refresh appointments
+        if (onUpdateAppointment) {
+          onUpdateAppointment();
+        }
+      } catch (appointmentError) {
+        console.error('Error creating appointment:', appointmentError);
+        alert('Failed to create appointment for walk-in patient');
+        return false;
+      }
+
+      // Step 3: Add to queue with the appointment ID
       const queueData = {
         patient_id: patientData.patient_id,
+        appointment_id: newAppointment._id,
         is_walk_in: true,
         notes: patientData.notes || 'Walk-in patient'
       };
 
+      console.log('Adding walk-in patient to queue with data:', queueData);
+
       // Add to queue
       const newQueueEntry = await apiService.addToQueue(queueData);
+      console.log('Added to queue successfully:', newQueueEntry);
 
-      // Update the UI immediately
-      if (newQueueEntry) {
-        // Add the new entry to the queue entries
-        setQueueEntries(prevEntries => {
-          // Create a new array with the new entry
-          const updatedEntries = [...prevEntries, newQueueEntry];
-
-          // Sort the entries by status and ticket number
-          return updatedEntries.sort((a, b) => {
-            const statusPriority = { 'Waiting': 0, 'In Progress': 1, 'Completed': 2, 'No-show': 3, 'Cancelled': 4 };
-            const statusDiff = statusPriority[a.status] - statusPriority[b.status];
-
-            if (statusDiff !== 0) return statusDiff;
-
-            return (a.ticket_number || 0) - (b.ticket_number || 0);
-          });
-        });
-
-        // Update queue statistics
-        setQueueStats(prevStats => ({
-          ...prevStats,
-          totalPatients: prevStats.totalPatients + 1,
-          waitingPatients: prevStats.waitingPatients + 1
-        }));
-      }
-
-      // Show the ticket to print
+      // Show the ticket for printing
       setTicketToPrint(newQueueEntry);
 
       // If this is a new patient, refresh the patients list
@@ -207,13 +249,14 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
         onUpdatePatient();
       }
 
-      // Refresh the queue data after a short delay
-      setTimeout(() => {
-        fetchQueueData();
-      }, 500);
+      // Refresh the queue data
+      fetchQueueData();
+
+      return true;
     } catch (error) {
-      console.error('Error adding walk-in patient:', error);
-      throw error;
+      console.error('Error in walk-in patient workflow:', error);
+      alert('An error occurred while processing the walk-in patient');
+      return false;
     } finally {
       setLoading(false);
     }
@@ -405,10 +448,23 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
   // Handle checking in an appointment
   const handleCheckInAppointment = async (appointment) => {
     try {
-      // Find the patient for this appointment
-      const patientId = appointment.patient_id || appointment.patientId;
+      console.log('Checking in appointment:', appointment);
 
-      // Create queue data
+      // Step 1: Verify appointment and patient exist
+      if (!appointment || (!appointment._id && !appointment.id)) {
+        console.error('Invalid appointment data');
+        alert('Invalid appointment data');
+        return false;
+      }
+
+      const patientId = appointment.patient_id || appointment.patientId;
+      if (!patientId) {
+        console.error('No patient ID found for appointment');
+        alert('No patient associated with this appointment');
+        return false;
+      }
+
+      // Step 2: Create queue data
       const queueData = {
         patient_id: patientId,
         appointment_id: appointment._id || appointment.id,
@@ -416,56 +472,41 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
         notes: `Checked in for ${appointment.type || 'appointment'}`
       };
 
-      // Add to queue
-      const newQueueEntry = await apiService.addToQueue(queueData);
+      console.log('Adding appointment to queue with data:', queueData);
 
-      // Update the UI immediately
-      if (newQueueEntry) {
-        // Add the new entry to the queue entries
-        setQueueEntries(prevEntries => {
-          // Create a new array with the new entry
-          const updatedEntries = [...prevEntries, newQueueEntry];
+      // Step 3: Add to queue
+      try {
+        const newQueueEntry = await apiService.addToQueue(queueData);
+        console.log('Added appointment to queue successfully:', newQueueEntry);
 
-          // Sort the entries by status and ticket number
-          return updatedEntries.sort((a, b) => {
-            const statusPriority = { 'Waiting': 0, 'In Progress': 1, 'Completed': 2, 'No-show': 3, 'Cancelled': 4 };
-            const statusDiff = statusPriority[a.status] - statusPriority[b.status];
+        // Show the ticket for printing
+        setTicketToPrint(newQueueEntry);
 
-            if (statusDiff !== 0) return statusDiff;
-
-            return (a.ticket_number || 0) - (b.ticket_number || 0);
-          });
-        });
-
-        // Update queue statistics
-        setQueueStats(prevStats => ({
-          ...prevStats,
-          totalPatients: prevStats.totalPatients + 1,
-          waitingPatients: prevStats.waitingPatients + 1
-        }));
-      }
-
-      // Show the ticket to print
-      setTicketToPrint(newQueueEntry);
-
-      // Refresh the queue data after a short delay
-      setTimeout(() => {
+        // Refresh queue data
         fetchQueueData();
-      }, 500);
 
-      return true;
-    } catch (error) {
-      console.error('Error checking in appointment:', error);
+        return true;
+      } catch (queueError) {
+        console.error('Error adding appointment to queue:', queueError);
 
-      // Check if this is a CORS error
-      if (error.toString().includes('CORS') || error.toString().includes('NetworkError')) {
-        // Show a more helpful message for CORS errors
-        alert('Patient added to queue, but there was a network issue. The queue will update when you refresh the page.');
-        return true; // Consider it a success for the user
-      } else {
-        alert('Failed to check in patient: ' + error.toString());
+        // Check if this is a duplicate entry error
+        if (queueError.toString().includes('already in the queue')) {
+          alert('This patient is already in the queue');
+        }
+        // Check if this is a CORS error
+        else if (queueError.toString().includes('CORS') || queueError.toString().includes('NetworkError')) {
+          // Show a more helpful message for CORS errors
+          alert('Patient added to queue, but there was a network issue. The queue will update when you refresh the page.');
+          return true; // Consider it a success for the user
+        } else {
+          alert('Failed to check in patient. Please try again.');
+        }
         return false;
       }
+    } catch (error) {
+      console.error('Error in appointment check-in workflow:', error);
+      alert('An error occurred while checking in the patient');
+      return false;
     }
   };
 
@@ -744,19 +785,24 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <div className="bg-blue-50 p-3 rounded-lg border border-blue-100">
           <div className="text-sm text-blue-700">Total Patients</div>
-          <div className="text-2xl font-bold">{queueStats.totalPatients}</div>
+          <div className="text-2xl font-bold">{queueStats.totalPatients || 0}</div>
         </div>
         <div className="bg-yellow-50 p-3 rounded-lg border border-yellow-100">
           <div className="text-sm text-yellow-700">Waiting</div>
-          <div className="text-2xl font-bold">{queueStats.waitingPatients}</div>
+          <div className="text-2xl font-bold">{queueStats.waitingPatients || 0}</div>
+          {queueStats.todayAppointments > 0 && (
+            <div className="text-xs text-yellow-600 mt-1">
+              +{queueStats.todayAppointments} scheduled today
+            </div>
+          )}
         </div>
         <div className="bg-indigo-50 p-3 rounded-lg border border-indigo-100">
           <div className="text-sm text-indigo-700">With Doctor</div>
-          <div className="text-2xl font-bold">{queueStats.inProgressPatients}</div>
+          <div className="text-2xl font-bold">{queueStats.inProgressPatients || 0}</div>
         </div>
         <div className="bg-green-50 p-3 rounded-lg border border-green-100">
           <div className="text-sm text-green-700">Completed</div>
-          <div className="text-2xl font-bold">{queueStats.completedPatients}</div>
+          <div className="text-2xl font-bold">{queueStats.completedPatients || 0}</div>
         </div>
       </div>
 

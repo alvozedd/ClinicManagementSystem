@@ -5,6 +5,16 @@
   background-size: cover !important;
   background-position: center center !important;
   background-repeat: no-repeat !important;
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+/* Fix for white space at bottom */
+html, body, #root {
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow-x: hidden;
+  min-height: 100vh;
 }
 
 /* Fix for iOS devices */
