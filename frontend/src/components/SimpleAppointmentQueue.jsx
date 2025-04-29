@@ -35,8 +35,21 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
       setLoading(true);
       const data = await apiService.getQueueEntries();
 
+      // Apply any locally stored status changes
+      const entriesWithLocalStatus = data.map(entry => {
+        const localStorageKey = `queue_status_${entry._id}`;
+        const localStatus = localStorage.getItem(localStorageKey);
+
+        if (localStatus) {
+          console.log(`Applying locally stored status for entry ${entry._id}: ${localStatus}`);
+          return { ...entry, status: localStatus };
+        }
+
+        return entry;
+      });
+
       // Sort queue entries by status and ticket number
-      const sortedEntries = [...data].sort((a, b) => {
+      const sortedEntries = [...entriesWithLocalStatus].sort((a, b) => {
         const statusPriority = { 'Waiting': 0, 'In Progress': 1, 'Completed': 2, 'No-show': 3, 'Cancelled': 4 };
         const statusDiff = statusPriority[a.status] - statusPriority[b.status];
 
@@ -47,17 +60,23 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
 
       setQueueEntries(sortedEntries);
 
-      // Calculate queue statistics
+      // Calculate queue statistics based on the entries with local status
       const stats = {
-        totalPatients: data.length,
-        waitingPatients: data.filter(entry => entry.status === 'Waiting').length,
-        inProgressPatients: data.filter(entry => entry.status === 'In Progress').length,
-        completedPatients: data.filter(entry => entry.status === 'Completed').length
+        totalPatients: entriesWithLocalStatus.length,
+        waitingPatients: entriesWithLocalStatus.filter(entry => entry.status === 'Waiting').length,
+        inProgressPatients: entriesWithLocalStatus.filter(entry => entry.status === 'In Progress').length,
+        completedPatients: entriesWithLocalStatus.filter(entry => entry.status === 'Completed').length
       };
 
       setQueueStats(stats);
     } catch (error) {
       console.error('Error fetching queue data:', error);
+
+      // If we can't fetch data, use the existing queue entries
+      if (queueEntries.length > 0) {
+        console.log('Using existing queue entries as fallback');
+        // No need to update the state since we're keeping the existing entries
+      }
     } finally {
       setLoading(false);
     }
@@ -96,23 +115,13 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
   const handleUpdateQueueStatus = async (queueEntryId, newStatus) => {
     try {
       setLoading(true);
-      await apiService.updateQueueStatus(queueEntryId, { status: newStatus });
 
-      // If completing an appointment, update the appointment status
-      if (newStatus === 'Completed') {
-        const queueEntry = queueEntries.find(entry => entry._id === queueEntryId);
-        if (queueEntry && queueEntry.appointment_id && !queueEntry.is_walk_in) {
-          const appointmentId = typeof queueEntry.appointment_id === 'object' ?
-            (queueEntry.appointment_id._id || queueEntry.appointment_id.id) :
-            queueEntry.appointment_id;
+      // Store the status change in localStorage to make it persistent
+      // This ensures the status doesn't revert even if the server request fails
+      const localStorageKey = `queue_status_${queueEntryId}`;
+      localStorage.setItem(localStorageKey, newStatus);
 
-          if (appointmentId && onUpdateAppointment) {
-            await onUpdateAppointment(appointmentId, { status: 'completed' });
-          }
-        }
-      }
-
-      // Update the UI optimistically
+      // Update the UI immediately
       setQueueEntries(prevEntries => {
         return prevEntries.map(entry => {
           if (entry._id === queueEntryId) {
@@ -122,27 +131,54 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
         });
       });
 
-      // Then refresh the data from the server
-      await fetchQueueData();
-    } catch (error) {
-      console.error('Error updating queue status:', error);
+      // Update queue statistics immediately
+      const updatedEntry = queueEntries.find(entry => entry._id === queueEntryId);
+      if (updatedEntry) {
+        const oldStatus = updatedEntry.status;
+        setQueueStats(prevStats => {
+          const newStats = { ...prevStats };
 
-      // Check if this is a CORS error
-      if (error.toString().includes('CORS') || error.toString().includes('NetworkError')) {
-        // Update the UI optimistically anyway
-        setQueueEntries(prevEntries => {
-          return prevEntries.map(entry => {
-            if (entry._id === queueEntryId) {
-              return { ...entry, status: newStatus };
-            }
-            return entry;
-          });
+          // Decrement count for old status
+          if (oldStatus === 'Waiting') newStats.waitingPatients--;
+          else if (oldStatus === 'In Progress') newStats.inProgressPatients--;
+          else if (oldStatus === 'Completed') newStats.completedPatients--;
+
+          // Increment count for new status
+          if (newStatus === 'Waiting') newStats.waitingPatients++;
+          else if (newStatus === 'In Progress') newStats.inProgressPatients++;
+          else if (newStatus === 'Completed') newStats.completedPatients++;
+
+          return newStats;
         });
-
-        alert('Status updated locally. The server will be updated when you refresh the page.');
-      } else {
-        alert('Failed to update queue status: ' + error.toString());
       }
+
+      // Try to update the server (but don't wait for it)
+      apiService.updateQueueStatus(queueEntryId, { status: newStatus })
+        .then(() => {
+          console.log('Queue status updated on server successfully');
+
+          // If completing an appointment, update the appointment status
+          if (newStatus === 'Completed') {
+            const queueEntry = queueEntries.find(entry => entry._id === queueEntryId);
+            if (queueEntry && queueEntry.appointment_id && !queueEntry.is_walk_in) {
+              const appointmentId = typeof queueEntry.appointment_id === 'object' ?
+                (queueEntry.appointment_id._id || queueEntry.appointment_id.id) :
+                queueEntry.appointment_id;
+
+              if (appointmentId && onUpdateAppointment) {
+                onUpdateAppointment(appointmentId, { status: 'completed' })
+                  .catch(err => console.error('Error updating appointment status:', err));
+              }
+            }
+          }
+        })
+        .catch(error => {
+          console.error('Error updating queue status on server:', error);
+          // The UI is already updated, so we don't need to do anything here
+        });
+    } catch (error) {
+      console.error('Error in handleUpdateQueueStatus:', error);
+      alert('An unexpected error occurred. Please try again.');
     } finally {
       setLoading(false);
     }
