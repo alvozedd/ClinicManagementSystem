@@ -38,7 +38,17 @@ function SuperSimpleQueueManagement({ patients, appointments, userRole }) {
       // If we got fallback data and the database is empty, clear the queue entries
       if (!isRealData && entriesResponse.length > 0) {
         console.log('Detected fallback queue data. Database may be empty.');
-        // We'll keep the entries for now, but we could clear them here if needed
+
+        // Check if we should automatically clear fallback entries
+        const autoClearFallbacks = localStorage.getItem('auto_clear_fallbacks') === 'true';
+
+        if (autoClearFallbacks) {
+          console.log('Auto-clearing fallback queue entries');
+          clearQueueStorage();
+          return []; // Return empty array instead of fallbacks
+        } else {
+          console.log('Keeping fallback entries. Use Clear Cache button to remove them.');
+        }
       }
 
       // Sort entries: Waiting first (by ticket number), then In Progress, then Completed
@@ -127,6 +137,11 @@ function SuperSimpleQueueManagement({ patients, appointments, userRole }) {
         return false;
       }
 
+      // Clear any existing queue entries from localStorage before adding new ones
+      // This prevents phantom entries from reappearing
+      clearQueueStorage();
+      console.log('Cleared existing queue entries before adding walk-in');
+
       // Step 2: Create a new appointment for the walk-in patient
       const today = new Date();
       const appointmentData = {
@@ -152,7 +167,7 @@ function SuperSimpleQueueManagement({ patients, appointments, userRole }) {
         }
       } catch (appointmentError) {
         console.error('Error creating appointment:', appointmentError);
-        alert('Failed to create appointment for walk-in patient');
+        alert('Failed to create appointment for walk-in patient. Please check your network connection and try again.');
         return false;
       }
 
@@ -179,12 +194,12 @@ function SuperSimpleQueueManagement({ patients, appointments, userRole }) {
         return true;
       } catch (queueError) {
         console.error('Error adding to queue:', queueError);
-        alert('Failed to add patient to queue. Please try again.');
+        alert('Failed to add patient to queue. The appointment was created but could not be added to the queue. Please try again or check your network connection.');
         return false;
       }
     } catch (error) {
       console.error('Error in walk-in patient workflow:', error);
-      alert('An error occurred while processing the walk-in patient');
+      alert('An error occurred while processing the walk-in patient. Please try again or check your network connection.');
       return false;
     } finally {
       setLoading(false);
@@ -209,6 +224,11 @@ function SuperSimpleQueueManagement({ patients, appointments, userRole }) {
         alert('No patient associated with this appointment');
         return false;
       }
+
+      // Clear any existing queue entries from localStorage before adding new ones
+      // This prevents phantom entries from reappearing
+      clearQueueStorage();
+      console.log('Cleared existing queue entries before checking in appointment');
 
       // Step 2: Create queue data
       const queueData = {
@@ -239,13 +259,13 @@ function SuperSimpleQueueManagement({ patients, appointments, userRole }) {
         if (queueError.includes && queueError.includes('already in the queue')) {
           alert('This patient is already in the queue');
         } else {
-          alert('Failed to check in patient. Please try again.');
+          alert('Failed to check in patient. Please check your network connection and try again.');
         }
         return false;
       }
     } catch (error) {
       console.error('Error in appointment check-in workflow:', error);
-      alert('An error occurred while checking in the patient');
+      alert('An error occurred while checking in the patient. Please check your network connection and try again.');
       return false;
     }
   };
@@ -440,6 +460,10 @@ function SuperSimpleQueueManagement({ patients, appointments, userRole }) {
           {appointmentsToCheckIn.length > 0 && (userRole === 'secretary' || userRole === 'admin') && (
             <button
               onClick={() => {
+                // Clear any existing queue entries from localStorage before checking in all
+                clearQueueStorage();
+                console.log('Cleared existing queue entries before checking in all appointments');
+
                 const promises = appointmentsToCheckIn.map(appointment =>
                   handleCheckInAppointment(appointment)
                 );

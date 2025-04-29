@@ -31,6 +31,10 @@ export const clearQueueStorage = () => {
   localStorage.setItem('use_queue_fallbacks', 'false');
   console.log('Disabled queue fallbacks to prevent phantom entries');
 
+  // Enable auto-clearing of fallbacks
+  localStorage.setItem('auto_clear_fallbacks', 'true');
+  console.log('Enabled auto-clearing of fallback entries');
+
   console.log(`Cleared ${keysToRemove.length} queue-related localStorage entries`);
   return keysToRemove.length;
 };

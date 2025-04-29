@@ -898,10 +898,11 @@ const apiService = {
         __v: 0
       };
 
-      // Enable queue fallbacks by default when adding to queue
-      localStorage.setItem('use_queue_fallbacks', 'true');
+      // Only store in localStorage if we successfully create the entry on the server
+      // We'll set this flag only after a successful API call
+      // localStorage.setItem('use_queue_fallbacks', 'true');
 
-      // Store in localStorage as a backup
+      // Store in localStorage as a backup, but don't enable fallbacks yet
       const localStorageKey = 'temp_queue_entry_' + Date.now();
       localStorage.setItem(localStorageKey, JSON.stringify(tempQueueEntry));
 
@@ -925,6 +926,12 @@ const apiService = {
         });
         serverQueueEntry = await handleResponse(response);
         console.log('Successfully added to queue with credentials:', serverQueueEntry);
+
+        // Only enable fallbacks if we successfully created the entry on the server
+        if (serverQueueEntry && serverQueueEntry._id) {
+          localStorage.setItem('use_queue_fallbacks', 'true');
+          console.log('Enabled queue fallbacks after successful API call');
+        }
       } catch (firstError) {
         console.warn('First attempt failed, trying without credentials:', firstError);
 
@@ -940,6 +947,12 @@ const apiService = {
           });
           serverQueueEntry = await handleResponse(response2);
           console.log('Successfully added to queue without credentials:', serverQueueEntry);
+
+          // Only enable fallbacks if we successfully created the entry on the server
+          if (serverQueueEntry && serverQueueEntry._id) {
+            localStorage.setItem('use_queue_fallbacks', 'true');
+            console.log('Enabled queue fallbacks after successful API call');
+          }
         } catch (secondError) {
           console.warn('Second attempt failed, using fallback:', secondError);
           // Continue with the temporary entry
