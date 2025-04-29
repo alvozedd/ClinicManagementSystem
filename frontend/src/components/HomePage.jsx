@@ -9,11 +9,21 @@ import './GlassEffects.css';
 import '../styles/animations.css';
 import '../styles/fallbackAnimations.css';
 import '../styles/textAnimations.css';
+import '../styles/backgroundFixes.css'; // Import background fixes for mobile
 import PageLoader from './PageLoader';
 // Removed framer-motion import as animations are no longer needed
 
 // Add custom CSS for responsive background image
 const responsiveBackgroundStyles = `
+  /* Base styles for all devices */
+  .responsive-bg {
+    background-size: cover !important;
+    background-position: center center !important;
+    background-repeat: no-repeat !important;
+    background-attachment: fixed !important;
+  }
+
+  /* Tablet styles */
   @media (max-width: 768px) {
     .responsive-bg {
       background-position: center center !important;
@@ -21,9 +31,20 @@ const responsiveBackgroundStyles = `
     }
   }
 
+  /* Mobile styles */
   @media (max-width: 480px) {
     .responsive-bg {
       background-position: center center !important;
+      background-attachment: scroll !important; /* Use scroll instead of fixed for mobile */
+      height: 100% !important;
+      min-height: 100vh !important;
+    }
+  }
+
+  /* Fix for iOS devices */
+  @supports (-webkit-touch-callout: none) {
+    .responsive-bg {
+      background-attachment: scroll !important; /* Safari fix */
     }
   }
 
@@ -186,10 +207,15 @@ function HomePage() {
           backgroundImage: "url('/backgroundimg/Theone.jpeg')",
           backgroundSize: "cover",
           backgroundPosition: "center center", /* Center position for all screen sizes */
-          backgroundAttachment: "fixed", /* Use fixed for both mobile and desktop for consistent appearance */
+          backgroundAttachment: "fixed", /* Will be overridden by media queries for mobile */
+          backgroundRepeat: "no-repeat",
           minHeight: "100vh",
+          width: "100%",
           overflowX: "hidden", /* Prevent horizontal scrolling on mobile */
-          position: "relative" /* For overlay positioning */
+          position: "relative", /* For overlay positioning */
+          WebkitBackgroundSize: "cover", /* Safari/Chrome */
+          MozBackgroundSize: "cover", /* Firefox */
+          OBackgroundSize: "cover" /* Opera */
         }}>
       {/* Header with background image */}
       <div className="text-white fixed top-0 left-0 right-0 z-50 backdrop-blur-[1px]">

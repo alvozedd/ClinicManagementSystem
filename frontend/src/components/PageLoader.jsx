@@ -11,7 +11,10 @@ const PageLoader = ({ children, backgroundImage }) => {
   useEffect(() => {
     const img = new Image();
     img.src = backgroundImage || '/backgroundimg/Theone.jpeg';
+
+    // Add event listener for image load
     img.onload = () => {
+      console.log('Background image loaded successfully');
       setImageLoaded(true);
       // After image is loaded, wait a bit before removing the loader
       setTimeout(() => {
@@ -20,16 +23,24 @@ const PageLoader = ({ children, backgroundImage }) => {
       }, 500);
     };
 
+    // Add error handler
+    img.onerror = (err) => {
+      console.error('Error loading background image:', err);
+      setImageLoaded(true); // Still set as loaded to remove loader
+      setLoading(false);
+    };
+
     // Fallback in case image fails to load
     const timeout = setTimeout(() => {
       if (!imageLoaded) {
+        console.warn('Background image load timeout - forcing continue');
         setImageLoaded(true);
         setLoading(false);
       }
     }, 3000);
 
     return () => clearTimeout(timeout);
-  }, [backgroundImage]);
+  }, [backgroundImage, imageLoaded]);
 
   return (
     <>

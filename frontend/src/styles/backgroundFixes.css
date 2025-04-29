@@ -1,0 +1,48 @@
+/* Background image fixes for mobile devices */
+
+/* Base styles for all devices */
+.bg-image {
+  background-size: cover !important;
+  background-position: center center !important;
+  background-repeat: no-repeat !important;
+}
+
+/* Fix for iOS devices */
+@supports (-webkit-touch-callout: none) {
+  .bg-image {
+    background-attachment: scroll !important;
+  }
+}
+
+/* Mobile styles */
+@media (max-width: 767px) {
+  .bg-image {
+    background-attachment: scroll !important;
+    min-height: 100vh !important;
+  }
+}
+
+/* Small mobile styles */
+@media (max-width: 480px) {
+  .bg-image {
+    background-position: center center !important;
+    background-size: cover !important;
+  }
+}
+
+/* Fix for landscape orientation on mobile */
+@media (max-width: 767px) and (orientation: landscape) {
+  .bg-image {
+    background-position: center center !important;
+    min-height: 100vh !important;
+  }
+}
+
+/* Fix for high-resolution mobile devices */
+@media 
+(-webkit-min-device-pixel-ratio: 2), 
+(min-resolution: 192dpi) {
+  .bg-image {
+    background-size: cover !important;
+  }
+}
