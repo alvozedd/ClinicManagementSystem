@@ -346,7 +346,11 @@ function SimplifiedSecretaryDashboard({
                 </button>
               </div>
 
-              <TodaysAppointments onViewPatient={handleViewPatient} />
+              <TodaysAppointments
+                onViewPatient={handleViewPatient}
+                onEditAppointment={setEditingAppointment}
+                onDeleteAppointment={onDeleteAppointment}
+              />
             </div>
 
             {/* Upcoming Appointments Section */}

@@ -452,7 +452,11 @@ function SimplifiedDoctorDashboard({
                 </button>
               </div>
 
-              <TodaysAppointments onViewPatient={handleViewPatient} />
+              <TodaysAppointments
+                onViewPatient={handleViewPatient}
+                onEditAppointment={setEditingAppointment}
+                onDeleteAppointment={onDeleteAppointment}
+              />
             </div>
 
 

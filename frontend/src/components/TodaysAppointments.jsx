@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { getTodaysAppointments } from '../data/mockData';
-import { FaCalendarAlt, FaPhone } from 'react-icons/fa';
+import { FaCalendarAlt, FaPhone, FaUserPlus, FaEdit, FaTrash } from 'react-icons/fa';
+import apiService from '../utils/apiService';
 
-function TodaysAppointments({ onViewPatient }) {
+function TodaysAppointments({ onViewPatient, onEditAppointment, onDeleteAppointment }) {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -31,12 +32,12 @@ function TodaysAppointments({ onViewPatient }) {
   // Function to get patient initials
   const getPatientInitials = (name) => {
     if (!name) return '';
-    
+
     const nameParts = name.split(' ');
     if (nameParts.length === 1) {
       return nameParts[0].charAt(0);
     }
-    
+
     return `${nameParts[0].charAt(0)}${nameParts[nameParts.length - 1].charAt(0)}`;
   };
 
@@ -44,6 +45,30 @@ function TodaysAppointments({ onViewPatient }) {
   const handleAppointmentClick = (appointment) => {
     if (onViewPatient && appointment.patientId) {
       onViewPatient(appointment.patientId);
+    }
+  };
+
+  // Handle adding an appointment to the queue
+  const handleAddToQueue = async (appointment) => {
+    try {
+      // Create queue data
+      const queueData = {
+        patient_id: appointment.patientId,
+        appointment_id: appointment._id || appointment.id,
+        is_walk_in: false,
+        notes: `Checked in for ${appointment.type || 'appointment'}`
+      };
+
+      // Add to queue
+      const newQueueEntry = await apiService.addToQueue(queueData);
+      alert(`Patient ${appointment.patientName} added to queue with ticket #${newQueueEntry.ticket_number}`);
+
+      // Refresh the appointments list
+      const todaysAppointments = await getTodaysAppointments();
+      setAppointments(todaysAppointments);
+    } catch (error) {
+      console.error('Error adding to queue:', error);
+      alert('Failed to add patient to queue');
     }
   };
 
@@ -63,7 +88,7 @@ function TodaysAppointments({ onViewPatient }) {
           {appointments.map((appointment) => (
             <div
               key={appointment._id || appointment.id}
-              className="flex items-center p-2 hover:bg-gray-50 rounded-md cursor-pointer transition-colors"
+              className="flex items-center p-3 hover:bg-gray-50 rounded-md cursor-pointer transition-colors border border-gray-100 mb-2"
               onClick={() => handleAppointmentClick(appointment)}
             >
               <div className="w-16 text-sm font-medium text-gray-700">
@@ -73,20 +98,59 @@ function TodaysAppointments({ onViewPatient }) {
                 <div className="font-medium">{appointment.patientName}</div>
                 <div className="text-xs text-gray-500">{appointment.reason || 'Consultation'}</div>
               </div>
-              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-700 font-medium">
+              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-700 font-medium mr-3">
                 {getPatientInitials(appointment.patientName)}
               </div>
-              {appointment.phone && (
-                <button 
-                  className="ml-2 p-2 text-gray-500 hover:text-blue-600"
+              <div className="flex space-x-2">
+                {appointment.phone && (
+                  <button
+                    className="p-2 text-gray-500 hover:text-blue-600 bg-gray-100 rounded-full"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      window.location.href = `tel:${appointment.phone}`;
+                    }}
+                    title="Call Patient"
+                  >
+                    <FaPhone size={14} />
+                  </button>
+                )}
+                <button
+                  className="p-2 text-green-600 hover:text-green-800 bg-green-50 rounded-full"
                   onClick={(e) => {
                     e.stopPropagation();
-                    window.location.href = `tel:${appointment.phone}`;
+                    handleAddToQueue(appointment);
                   }}
+                  title="Add to Queue"
                 >
-                  <FaPhone size={14} />
+                  <FaUserPlus size={14} />
                 </button>
-              )}
+                {onEditAppointment && (
+                  <button
+                    className="p-2 text-blue-600 hover:text-blue-800 bg-blue-50 rounded-full"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onEditAppointment(appointment);
+                    }}
+                    title="Edit Appointment"
+                  >
+                    <FaEdit size={14} />
+                  </button>
+                )}
+                {onDeleteAppointment && (
+                  <button
+                    className="p-2 text-red-600 hover:text-red-800 bg-red-50 rounded-full"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (confirm('Are you sure you want to delete this appointment?')) {
+                        onDeleteAppointment(appointment._id || appointment.id);
+                      }
+                    }}
+                    title="Delete Appointment"
+                  >
+                    <FaTrash size={14} />
+                  </button>
+                )}
+              </div>
             </div>
           ))}
         </div>
