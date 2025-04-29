@@ -9,8 +9,9 @@ const {
   getNextPatient,
   reorderQueue,
   clearCompletedQueue,
+  resetQueue,
 } = require('../controllers/queueController');
-const { protect, doctor, secretary, doctorOrSecretary } = require('../middleware/authMiddleware');
+const { protect, doctor, secretary, doctorOrSecretary, admin } = require('../middleware/authMiddleware');
 const { apiLimiter } = require('../middleware/rateLimitMiddleware');
 
 // Apply protection middleware to all routes
@@ -26,6 +27,7 @@ router.route('/stats').get(doctorOrSecretary, getQueueStats);
 router.route('/next').get(doctor, getNextPatient);
 router.route('/reorder').put(secretary, reorderQueue);
 router.route('/clear-completed').delete(secretary, clearCompletedQueue);
+router.route('/reset').delete(admin, resetQueue);
 
 router.route('/:id')
   .put(doctorOrSecretary, updateQueueEntry)

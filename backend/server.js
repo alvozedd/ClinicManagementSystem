@@ -3,6 +3,7 @@ const dotenv = require('dotenv');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const helmet = require('helmet');
+const cron = require('node-cron');
 const connectDB = require('./config/db');
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 const { enforceHttps, addSecurityHeaders, secureCoookieSettings } = require('./middleware/securityMiddleware');
@@ -665,6 +666,16 @@ app.delete('/queue/:id', addCorsHeaders, (req, res) => {
   protect(req, res, () => secretary(req, res, () => removeFromQueue(req, res)));
 });
 
+app.delete('/queue/reset', addCorsHeaders, (req, res) => {
+  console.log('Received DELETE request at /queue/reset, forwarding to controller directly');
+  // Import the controller directly
+  const { resetQueue } = require('./controllers/queueController');
+  // Add authentication middleware manually
+  const { protect, admin } = require('./middleware/authMiddleware');
+  // Call middleware then controller
+  protect(req, res, () => admin(req, res, () => resetQueue(req, res)));
+});
+
 // Root route
 app.get('/', (req, res) => {
   res.send('API is running...');
@@ -676,6 +687,33 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+});
+
+// Schedule queue reset at midnight
+cron.schedule('0 0 * * *', async () => {
+  try {
+    console.log('Running scheduled queue reset at midnight');
+    // Reset the queue by calling the resetQueue endpoint
+    const { resetQueue } = require('./controllers/queueController');
+
+    // Create a mock request and response
+    const req = {};
+    const res = {
+      json: (data) => {
+        console.log('Queue reset result:', data);
+      },
+      status: (code) => {
+        console.log('Queue reset status code:', code);
+        return res;
+      }
+    };
+
+    // Call the resetQueue function directly
+    await resetQueue(req, res);
+    console.log('Queue reset completed successfully');
+  } catch (error) {
+    console.error('Error resetting queue:', error);
+  }
 });

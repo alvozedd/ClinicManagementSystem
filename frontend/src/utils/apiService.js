@@ -762,23 +762,26 @@ const apiService = {
   },
 
   // Queue Management endpoints
-  getQueueEntries: async () => {
+  getQueueEntries: async (queryParams = '') => {
     try {
       console.log('Fetching queue entries');
 
       // Use the non-API endpoint for queue to avoid CORS issues
       const baseUrl = API_URL.replace('/api', '');
-      console.log('Using queue endpoint:', `${baseUrl}/queue`);
+      console.log('Using queue endpoint:', `${baseUrl}/queue${queryParams}`);
 
       // Try multiple approaches to fetch queue entries
 
       // First try: with credentials
       try {
-        const response = await fetch(`${baseUrl}/queue`, {
+        const response = await fetch(`${baseUrl}/queue${queryParams}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
             ...authHeader(),
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
           },
           credentials: 'include', // Include cookies for refresh token
         });

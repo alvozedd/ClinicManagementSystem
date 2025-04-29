@@ -17,6 +17,8 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
   const [ticketToPrint, setTicketToPrint] = useState(null);
   const [draggedEntryId, setDraggedEntryId] = useState(null);
   const [dragOverEntryId, setDragOverEntryId] = useState(null);
+  const [draggedAppointment, setDraggedAppointment] = useState(null);
+  const [dragOverSection, setDragOverSection] = useState(null);
 
   // Queue statistics
   const [queueStats, setQueueStats] = useState({
@@ -26,19 +28,50 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
     completedPatients: 0
   });
 
-  // Fetch queue data on component mount
+  // Fetch queue data on component mount and set up polling
   useEffect(() => {
     fetchQueueData();
+
+    // Set up polling to refresh queue data every 15 seconds
+    const interval = setInterval(fetchQueueData, 15000);
+
+    // Set up a check for midnight to reset the queue
+    const checkMidnight = () => {
+      const now = new Date();
+      const hours = now.getHours();
+      const minutes = now.getMinutes();
+
+      // If it's midnight (00:00-00:01), refresh the queue data
+      if (hours === 0 && minutes <= 1) {
+        console.log('Midnight detected, refreshing queue data');
+        fetchQueueData();
+      }
+    };
+
+    // Check for midnight every minute
+    const midnightInterval = setInterval(checkMidnight, 60000);
+
+    // Clean up intervals on component unmount
+    return () => {
+      clearInterval(interval);
+      clearInterval(midnightInterval);
+    };
   }, []);
 
-  // Fetch queue data from API
+  // Fetch queue data from API with improved error handling and caching
   const fetchQueueData = async () => {
     try {
-      setLoading(true);
+      // Only show loading indicator on initial load, not during refresh
+      if (queueEntries.length === 0) {
+        setLoading(true);
+      }
+
       let data = [];
 
       try {
-        data = await apiService.getQueueEntries();
+        // Add timestamp to prevent caching
+        const timestamp = new Date().getTime();
+        data = await apiService.getQueueEntries(`?_t=${timestamp}`);
         console.log('Queue data fetched successfully:', data);
       } catch (fetchError) {
         console.error('Error fetching queue entries:', fetchError);
@@ -614,6 +647,38 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
   // Get appointments that can be checked in
   const appointmentsToCheckIn = getAppointmentsToCheckIn();
 
+  // Handle dragging an appointment to the queue
+  const handleAppointmentDragStart = (appointment) => {
+    setDraggedAppointment(appointment);
+  };
+
+  const handleAppointmentDragOver = (e, section) => {
+    e.preventDefault();
+    setDragOverSection(section);
+  };
+
+  const handleAppointmentDrop = async (e, section) => {
+    e.preventDefault();
+
+    if (!draggedAppointment || section !== 'queue') {
+      setDraggedAppointment(null);
+      setDragOverSection(null);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await handleCheckInAppointment(draggedAppointment);
+    } catch (error) {
+      console.error('Error adding appointment to queue:', error);
+      alert('Failed to add appointment to queue');
+    } finally {
+      setDraggedAppointment(null);
+      setDragOverSection(null);
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-sm p-4">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
@@ -627,7 +692,7 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
             Add Walk-in
           </button>
 
-          {appointmentsToCheckIn.length > 0 && (userRole === 'secretary' || userRole === 'admin') && (
+          {appointmentsToCheckIn.length > 0 && (userRole === 'secretary' || userRole === 'admin' || userRole === 'doctor') && (
             <button
               onClick={() => {
                 const promises = appointmentsToCheckIn.map(appointment =>
@@ -674,7 +739,7 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
       </div>
 
       {/* Appointments to Check In */}
-      {appointmentsToCheckIn.length > 0 && (userRole === 'secretary' || userRole === 'admin') && (
+      {appointmentsToCheckIn.length > 0 && (userRole === 'secretary' || userRole === 'admin' || userRole === 'doctor') && (
         <div className="mb-6">
           <h3 className="text-lg font-semibold text-blue-800 mb-2">Patients to Check In</h3>
           <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
@@ -683,7 +748,16 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
             </p>
             <div className="flex flex-wrap gap-2">
               {appointmentsToCheckIn.map(appointment => (
-                <div key={appointment._id || appointment.id} className="bg-white p-2 rounded border border-gray-200 flex-1 min-w-[200px]">
+                <div
+                  key={appointment._id || appointment.id}
+                  className={`bg-white p-2 rounded border ${draggedAppointment === appointment ? 'border-blue-500 shadow-lg' : 'border-gray-200'} flex-1 min-w-[200px] cursor-grab`}
+                  draggable
+                  onDragStart={() => handleAppointmentDragStart(appointment)}
+                  onDragEnd={() => {
+                    setDraggedAppointment(null);
+                    setDragOverSection(null);
+                  }}
+                >
                   <div className="font-medium">
                     {appointment.patientName ||
                      (appointment.patient_id && typeof appointment.patient_id === 'object' ? appointment.patient_id.name : null) ||
@@ -697,13 +771,19 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
                   <div className="text-sm text-gray-600">
                     {appointment.type || 'Consultation'} - {appointment.reason || 'No reason provided'}
                   </div>
-                  <button
-                    onClick={() => handleCheckInAppointment(appointment)}
-                    className="mt-2 bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded text-xs font-medium flex items-center w-full justify-center"
-                  >
-                    <FaUserCheck className="mr-1" />
-                    Check In
-                  </button>
+                  <div className="flex items-center justify-between mt-2">
+                    <button
+                      onClick={() => handleCheckInAppointment(appointment)}
+                      className="bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded text-xs font-medium flex items-center justify-center flex-1 mr-1"
+                    >
+                      <FaUserCheck className="mr-1" />
+                      Check In
+                    </button>
+                    <div className="text-gray-400 text-xs flex items-center">
+                      <FaGripVertical className="mr-1" />
+                      Drag
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
@@ -712,7 +792,11 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
       )}
 
       {/* Queue List */}
-      <div className="space-y-6">
+      <div
+        className={`space-y-6 ${dragOverSection === 'queue' ? 'bg-blue-50 border-2 border-dashed border-blue-300 p-4 rounded-lg' : ''}`}
+        onDragOver={(e) => handleAppointmentDragOver(e, 'queue')}
+        onDrop={(e) => handleAppointmentDrop(e, 'queue')}
+      >
         {/* In Progress Patients */}
         {queueEntries.filter(entry => entry && entry._id && entry.status === 'In Progress').length > 0 && (
           <div>
@@ -803,7 +887,7 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
                     <div
                       key={entry._id}
                       className={`p-4 rounded-lg border ${dragOverEntryId === entry._id ? 'border-blue-400 bg-blue-50' : 'border-yellow-200 bg-yellow-50'} hover:shadow-md transition-all duration-300 cursor-grab`}
-                      draggable={userRole === 'secretary' || userRole === 'admin'}
+                      draggable={userRole === 'secretary' || userRole === 'admin' || userRole === 'doctor'}
                       onDragStart={() => handleDragStart(entry._id)}
                       onDragOver={(e) => handleDragOver(e, entry._id)}
                       onDrop={(e) => handleDrop(e, entry._id)}
@@ -813,7 +897,7 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
                       }}
                     >
                       <div className="flex items-center">
-                        {(userRole === 'secretary' || userRole === 'admin') && (
+                        {(userRole === 'secretary' || userRole === 'admin' || userRole === 'doctor') && (
                           <div className="mr-2 text-gray-400 cursor-grab">
                             <FaGripVertical />
                           </div>
@@ -834,7 +918,7 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
                         </div>
                         <div className="ml-auto flex space-x-2">
                           {/* Manual reordering buttons */}
-                          {(userRole === 'secretary' || userRole === 'admin') && (
+                          {(userRole === 'secretary' || userRole === 'admin' || userRole === 'doctor') && (
                             <div className="flex flex-col mr-2">
                               <button
                                 onClick={() => handleMoveUp(entry._id)}
@@ -868,7 +952,7 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
                             <FaPrint className="mr-1" />
                             Print
                           </button>
-                          {(userRole === 'secretary' || userRole === 'admin') && (
+                          {(userRole === 'secretary' || userRole === 'admin' || userRole === 'doctor') && (
                             <button
                               onClick={() => handleRemoveFromQueue(entry._id)}
                               className="bg-gray-200 hover:bg-gray-300 text-red-600 px-3 py-1 rounded text-sm font-medium"
@@ -890,7 +974,7 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
           <details className="mt-4">
             <summary className="flex justify-between items-center text-lg font-semibold text-blue-800 mb-2 cursor-pointer">
               <span>Completed ({queueEntries.filter(entry => entry && entry._id && entry.status === 'Completed').length})</span>
-              {(userRole === 'secretary' || userRole === 'admin') && (
+              {(userRole === 'secretary' || userRole === 'admin' || userRole === 'doctor') && (
                 <button
                   onClick={(e) => {
                     e.preventDefault(); // Prevent the details from toggling
@@ -984,7 +1068,7 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
                             <FaPrint className="mr-1" />
                             Print
                           </button>
-                          {(userRole === 'secretary' || userRole === 'admin') && (
+                          {(userRole === 'secretary' || userRole === 'admin' || userRole === 'doctor') && (
                             <button
                               onClick={() => handleRemoveFromQueue(entry._id)}
                               className="bg-gray-200 hover:bg-gray-300 text-red-600 px-3 py-1 rounded text-sm font-medium flex items-center"

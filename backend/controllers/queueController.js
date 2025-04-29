@@ -323,6 +323,19 @@ const clearCompletedQueue = asyncHandler(async (req, res) => {
   });
 });
 
+// @desc    Reset the entire queue (clear all entries)
+// @route   DELETE /api/queue/reset
+// @access  Private/Admin
+const resetQueue = asyncHandler(async (req, res) => {
+  // Delete all queue entries
+  const result = await Queue.deleteMany({});
+
+  res.json({
+    message: `Queue has been reset. ${result.deletedCount} entries removed.`,
+    deletedCount: result.deletedCount
+  });
+});
+
 module.exports = {
   addToQueue,
   getQueueEntries,
@@ -332,4 +345,5 @@ module.exports = {
   getNextPatient,
   reorderQueue,
   clearCompletedQueue,
+  resetQueue,
 };

@@ -37,10 +37,13 @@ const responsiveBackgroundStyles = `
   @media (max-width: 480px) {
     .responsive-bg {
       background-image: url('/backgroundimg/mobile.jpeg') !important;
-      background-position: center center !important;
+      background-position: top center !important;
       background-attachment: scroll !important; /* Use scroll instead of fixed for mobile */
       height: 100% !important;
       min-height: 100vh !important;
+      background-size: 100% auto !important; /* Prevent zooming/pixelation */
+      max-width: 100% !important;
+      overflow-x: hidden !important;
     }
   }
 
@@ -208,8 +211,8 @@ function HomePage() {
         <div className="text-gray-800 responsive-bg bg-image" style={{
           scrollBehavior: 'smooth',
           backgroundImage: window.innerWidth <= 768 ? "url('/backgroundimg/mobile.jpeg')" : "url('/backgroundimg/Theone.jpeg')",
-          backgroundSize: "cover",
-          backgroundPosition: "center center", /* Center position for all screen sizes */
+          backgroundSize: window.innerWidth <= 768 ? "100% auto" : "cover",
+          backgroundPosition: window.innerWidth <= 768 ? "top center" : "center center", /* Top position for mobile */
           backgroundAttachment: window.innerWidth <= 768 ? "scroll" : "fixed", /* Use scroll for mobile */
           backgroundRepeat: "no-repeat",
           minHeight: "100vh",

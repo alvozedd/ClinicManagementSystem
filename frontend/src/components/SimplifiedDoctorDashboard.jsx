@@ -242,6 +242,12 @@ function SimplifiedDoctorDashboard({
     setActiveTab('patient-management');
     // Trigger a local refresh to update the UI
     setLocalRefreshTrigger(prev => prev + 1);
+
+    // Force a refresh of the appointments data
+    setTimeout(() => {
+      console.log('Forcing refresh after adding patient');
+      setLocalRefreshTrigger(prev => prev + 1);
+    }, 1000);
   };
 
   // Get current date and greeting
@@ -617,6 +623,12 @@ function SimplifiedDoctorDashboard({
             // Add the new appointment to the global state
             onDiagnoseAppointment(newAppointment);
             setShowAddAppointmentForm(false);
+
+            // Force a refresh of the appointments data
+            setTimeout(() => {
+              console.log('Forcing refresh after adding appointment');
+              setLocalRefreshTrigger(prev => prev + 1);
+            }, 1000);
           }}
           onAddPatient={(newPatient) => {
             // Add the new patient to the global state
@@ -634,6 +646,12 @@ function SimplifiedDoctorDashboard({
             // Update the appointment in the global state
             onDiagnoseAppointment(updatedAppointment);
             setEditingAppointment(null);
+
+            // Force a refresh of the appointments data
+            setTimeout(() => {
+              console.log('Forcing refresh after updating appointment');
+              setLocalRefreshTrigger(prev => prev + 1);
+            }, 1000);
           }}
         />
       )}

@@ -27,6 +27,16 @@ function BackgroundImageLoader() {
     const handleScreenSizeChange = () => {
       if (window.matchMedia('(max-width: 768px)').matches) {
         console.log('Using mobile background image');
+        // Ensure mobile image is properly loaded
+        const mobileImg = new Image();
+        mobileImg.onload = () => {
+          console.log('Mobile background image loaded successfully');
+          document.documentElement.style.setProperty(
+            '--mobile-background-image',
+            `url(${mobileImageWithCacheBusting})`
+          );
+        };
+        mobileImg.src = mobileImageWithCacheBusting;
       } else {
         console.log('Using desktop background image');
       }

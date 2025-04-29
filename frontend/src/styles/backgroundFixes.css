@@ -20,6 +20,8 @@
     background-image: var(--mobile-background-image) !important;
     background-attachment: scroll !important;
     min-height: 100vh !important;
+    background-size: 100% auto !important; /* Ensure image fits width without zooming */
+    background-position: top center !important; /* Position from top */
   }
 }
 
@@ -27,8 +29,10 @@
 @media (max-width: 480px) {
   .bg-image {
     background-image: var(--mobile-background-image) !important;
-    background-position: center center !important;
-    background-size: cover !important;
+    background-position: top center !important;
+    background-size: 100% auto !important; /* Prevent zooming/pixelation */
+    max-width: 100% !important;
+    overflow-x: hidden !important;
   }
 }
 
