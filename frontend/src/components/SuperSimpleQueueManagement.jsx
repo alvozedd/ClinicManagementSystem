@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { FaUserPlus, FaSync, FaUserCheck, FaUserTimes, FaPrint, FaPhone, FaArrowUp, FaArrowDown } from 'react-icons/fa';
+import { FaUserPlus, FaSync, FaUserCheck, FaUserTimes, FaPrint, FaPhone, FaArrowUp, FaArrowDown, FaTrash } from 'react-icons/fa';
 import apiService from '../utils/apiService';
 import SuperSimpleQueueCard from './SuperSimpleQueueCard';
 import SuperSimpleAddToQueueModal from './SuperSimpleAddToQueueModal';
 import QueueTicketPrint from './QueueTicketPrint';
+import { clearQueueStorage } from '../utils/clearQueueStorage';
 
 function SuperSimpleQueueManagement({ patients, appointments, userRole }) {
   // State for queue management
@@ -28,6 +29,18 @@ function SuperSimpleQueueManagement({ patients, appointments, userRole }) {
         apiService.getQueueStats(),
       ]);
 
+      // Check if we got real data from the server or just fallback data
+      const isRealData = Array.isArray(entriesResponse) &&
+                         entriesResponse.length > 0 &&
+                         !entriesResponse[0]._id?.startsWith('temp_') &&
+                         !entriesResponse[0]._id?.startsWith('fallback_');
+
+      // If we got fallback data and the database is empty, clear the queue entries
+      if (!isRealData && entriesResponse.length > 0) {
+        console.log('Detected fallback queue data. Database may be empty.');
+        // We'll keep the entries for now, but we could clear them here if needed
+      }
+
       // Sort entries: Waiting first (by ticket number), then In Progress, then Completed
       const sortedEntries = [...entriesResponse].sort((a, b) => {
         // First sort by status priority
@@ -46,6 +59,15 @@ function SuperSimpleQueueManagement({ patients, appointments, userRole }) {
       console.error('Error fetching queue data:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Clear all queue storage and refresh
+  const handleClearQueueStorage = () => {
+    if (window.confirm('This will clear all temporary queue data. Continue?')) {
+      const clearedCount = clearQueueStorage();
+      alert(`Cleared ${clearedCount} temporary queue entries. Refreshing data...`);
+      fetchQueueData();
     }
   };
 
@@ -437,6 +459,16 @@ function SuperSimpleQueueManagement({ patients, appointments, userRole }) {
           >
             <FaSync className={`mr-2 ${loading ? 'animate-spin' : ''}`} />
             Refresh
+          </button>
+
+          {/* Clear Queue Storage Button */}
+          <button
+            onClick={handleClearQueueStorage}
+            className="bg-red-100 hover:bg-red-200 text-red-700 px-3 py-2 rounded-md text-sm font-medium flex items-center"
+            title="Clear temporary queue data"
+          >
+            <FaTrash className="mr-2" />
+            Clear Cache
           </button>
         </div>
       </div>

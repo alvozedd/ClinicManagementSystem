@@ -813,6 +813,14 @@ const apiService = {
         } catch (secondError) {
           console.warn('Second attempt failed, checking localStorage for fallbacks:', secondError);
 
+          // Check if we should use localStorage fallbacks
+          const useLocalStorageFallbacks = localStorage.getItem('use_queue_fallbacks') === 'true';
+
+          if (!useLocalStorageFallbacks) {
+            console.log('Queue fallbacks disabled, returning empty array');
+            return [];
+          }
+
           // Look for any temporary queue entries in localStorage
           const tempEntries = [];
           for (let i = 0; i < localStorage.length; i++) {
@@ -889,6 +897,9 @@ const apiService = {
         created_at: new Date().toISOString(),
         __v: 0
       };
+
+      // Enable queue fallbacks by default when adding to queue
+      localStorage.setItem('use_queue_fallbacks', 'true');
 
       // Store in localStorage as a backup
       const localStorageKey = 'temp_queue_entry_' + Date.now();
