@@ -549,13 +549,21 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
                 .filter(entry => entry && entry._id && entry.status === 'In Progress')
                 .map(entry => {
                   // Find the appointment for this queue entry
-                  const appointmentId = typeof entry.appointment_id === 'object' ?
-                    (entry.appointment_id._id || entry.appointment_id.id) :
-                    entry.appointment_id;
+                  let appointment = null;
+                  try {
+                    const appointmentId = typeof entry.appointment_id === 'object' ?
+                      (entry.appointment_id._id || entry.appointment_id.id) :
+                      entry.appointment_id;
 
-                  const appointment = appointments.find(a =>
-                    (a._id === appointmentId || a.id === appointmentId)
-                  );
+                    if (appointmentId) {
+                      appointment = appointments.find(a =>
+                        (a && (a._id === appointmentId || a.id === appointmentId))
+                      );
+                    }
+                  } catch (error) {
+                    console.error('Error finding appointment for queue entry:', error);
+                    // Continue with appointment as null
+                  }
 
                   return (
                     <div key={entry._id} className="p-4 rounded-lg border border-blue-200 bg-blue-50">
@@ -602,13 +610,21 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
                 .filter(entry => entry && entry._id && entry.status === 'Waiting')
                 .map((entry, index) => {
                   // Find the appointment for this queue entry
-                  const appointmentId = typeof entry.appointment_id === 'object' ?
-                    (entry.appointment_id._id || entry.appointment_id.id) :
-                    entry.appointment_id;
+                  let appointment = null;
+                  try {
+                    const appointmentId = typeof entry.appointment_id === 'object' ?
+                      (entry.appointment_id._id || entry.appointment_id.id) :
+                      entry.appointment_id;
 
-                  const appointment = appointments.find(a =>
-                    (a._id === appointmentId || a.id === appointmentId)
-                  );
+                    if (appointmentId) {
+                      appointment = appointments.find(a =>
+                        (a && (a._id === appointmentId || a.id === appointmentId))
+                      );
+                    }
+                  } catch (error) {
+                    console.error('Error finding appointment for queue entry:', error);
+                    // Continue with appointment as null
+                  }
 
                   return (
                     <div
@@ -694,13 +710,21 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
                 .filter(entry => entry && entry._id && entry.status === 'Completed')
                 .map(entry => {
                   // Find the appointment for this queue entry
-                  const appointmentId = typeof entry.appointment_id === 'object' ?
-                    (entry.appointment_id._id || entry.appointment_id.id) :
-                    entry.appointment_id;
+                  let appointment = null;
+                  try {
+                    const appointmentId = typeof entry.appointment_id === 'object' ?
+                      (entry.appointment_id._id || entry.appointment_id.id) :
+                      entry.appointment_id;
 
-                  const appointment = appointments.find(a =>
-                    (a._id === appointmentId || a.id === appointmentId)
-                  );
+                    if (appointmentId) {
+                      appointment = appointments.find(a =>
+                        (a && (a._id === appointmentId || a.id === appointmentId))
+                      );
+                    }
+                  } catch (error) {
+                    console.error('Error finding appointment for queue entry:', error);
+                    // Continue with appointment as null
+                  }
 
                   return (
                     <div key={entry._id} className="p-4 rounded-lg border border-green-200 bg-green-50">
@@ -723,19 +747,30 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
                           {userRole === 'doctor' && onAddDiagnosis && (
                             <button
                               onClick={() => {
-                                // Find the appointment for this queue entry
-                                const appointmentId = typeof entry.appointment_id === 'object' ?
-                                  (entry.appointment_id._id || entry.appointment_id.id) :
-                                  entry.appointment_id;
+                                try {
+                                  // Find the appointment for this queue entry
+                                  const appointmentId = typeof entry.appointment_id === 'object' ?
+                                    (entry.appointment_id._id || entry.appointment_id.id) :
+                                    entry.appointment_id;
 
-                                const appointment = appointments.find(a =>
-                                  (a._id === appointmentId || a.id === appointmentId)
-                                );
+                                  if (!appointmentId) {
+                                    alert('This queue entry has no associated appointment. Please create a new appointment for this patient.');
+                                    return;
+                                  }
 
-                                if (appointment) {
-                                  onAddDiagnosis(appointment);
-                                } else {
-                                  alert('Could not find appointment details. Please try again.');
+                                  const appointment = appointments.find(a =>
+                                    (a && (a._id === appointmentId || a.id === appointmentId))
+                                  );
+
+                                  if (appointment) {
+                                    onAddDiagnosis(appointment);
+                                  } else {
+                                    // Handle the case where the appointment was deleted
+                                    alert('The appointment associated with this queue entry has been deleted. Please create a new appointment for this patient.');
+                                  }
+                                } catch (error) {
+                                  console.error('Error handling Add Notes click:', error);
+                                  alert('An error occurred while trying to add notes. Please try again.');
                                 }
                               }}
                               className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm font-medium flex items-center"
