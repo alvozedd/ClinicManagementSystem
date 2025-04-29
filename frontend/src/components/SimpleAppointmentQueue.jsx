@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FaUserPlus, FaSync, FaUserCheck, FaUserTimes, FaPrint, FaPhone, FaArrowUp, FaArrowDown } from 'react-icons/fa';
+import { FaUserPlus, FaSync, FaUserCheck, FaUserTimes, FaPrint, FaPhone, FaArrowUp, FaArrowDown, FaNotesMedical, FaFileMedical } from 'react-icons/fa';
 import apiService from '../utils/apiService';
 import AppointmentCard from './AppointmentCard';
 import SuperSimpleAddToQueueModal from './SuperSimpleAddToQueueModal';
@@ -9,7 +9,7 @@ import QueueTicketPrint from './QueueTicketPrint';
  * A simplified version of the appointment queue that doesn't use react-beautiful-dnd
  * This component is used as a fallback when react-beautiful-dnd fails to load
  */
-function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppointment, onViewPatient, onEditAppointment, onDeleteAppointment, onUpdatePatient }) {
+function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppointment, onViewPatient, onEditAppointment, onDeleteAppointment, onUpdatePatient, onAddDiagnosis }) {
   // State for queue management
   const [queueEntries, setQueueEntries] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -33,10 +33,27 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
   const fetchQueueData = async () => {
     try {
       setLoading(true);
-      const data = await apiService.getQueueEntries();
+      let data = [];
+
+      try {
+        data = await apiService.getQueueEntries();
+        console.log('Queue data fetched successfully:', data);
+      } catch (fetchError) {
+        console.error('Error fetching queue entries:', fetchError);
+        // If we can't fetch data, use the existing queue entries
+        if (queueEntries.length > 0) {
+          console.log('Using existing queue entries as fallback');
+          data = [...queueEntries];
+        }
+      }
 
       // Apply any locally stored status changes
       const entriesWithLocalStatus = data.map(entry => {
+        if (!entry || !entry._id) {
+          console.error('Invalid queue entry:', entry);
+          return entry;
+        }
+
         const localStorageKey = `queue_status_${entry._id}`;
         const localStatus = localStorage.getItem(localStorageKey);
 
@@ -46,7 +63,7 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
         }
 
         return entry;
-      });
+      }).filter(entry => entry && entry._id); // Filter out any invalid entries
 
       // Sort queue entries by status and ticket number
       const sortedEntries = [...entriesWithLocalStatus].sort((a, b) => {
@@ -55,7 +72,7 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
 
         if (statusDiff !== 0) return statusDiff;
 
-        return a.ticket_number - b.ticket_number;
+        return (a.ticket_number || 0) - (b.ticket_number || 0);
       });
 
       setQueueEntries(sortedEntries);
@@ -70,13 +87,15 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
 
       setQueueStats(stats);
     } catch (error) {
-      console.error('Error fetching queue data:', error);
-
-      // If we can't fetch data, use the existing queue entries
-      if (queueEntries.length > 0) {
-        console.log('Using existing queue entries as fallback');
-        // No need to update the state since we're keeping the existing entries
-      }
+      console.error('Error in fetchQueueData:', error);
+      // Initialize with empty data if there's an error
+      setQueueEntries([]);
+      setQueueStats({
+        totalPatients: 0,
+        waitingPatients: 0,
+        inProgressPatients: 0,
+        completedPatients: 0
+      });
     } finally {
       setLoading(false);
     }
@@ -121,36 +140,45 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
       const localStorageKey = `queue_status_${queueEntryId}`;
       localStorage.setItem(localStorageKey, newStatus);
 
-      // Update the UI immediately
+      // Find the entry being updated
+      const updatedEntry = queueEntries.find(entry => entry._id === queueEntryId);
+      if (!updatedEntry) {
+        console.error('Could not find queue entry with ID:', queueEntryId);
+        setLoading(false);
+        return;
+      }
+
+      const oldStatus = updatedEntry.status;
+
+      // Create a new entry with updated status
+      const newEntry = { ...updatedEntry, status: newStatus };
+
+      // Update the UI immediately with the new entry
       setQueueEntries(prevEntries => {
         return prevEntries.map(entry => {
           if (entry._id === queueEntryId) {
-            return { ...entry, status: newStatus };
+            return newEntry;
           }
           return entry;
         });
       });
 
       // Update queue statistics immediately
-      const updatedEntry = queueEntries.find(entry => entry._id === queueEntryId);
-      if (updatedEntry) {
-        const oldStatus = updatedEntry.status;
-        setQueueStats(prevStats => {
-          const newStats = { ...prevStats };
+      setQueueStats(prevStats => {
+        const newStats = { ...prevStats };
 
-          // Decrement count for old status
-          if (oldStatus === 'Waiting') newStats.waitingPatients--;
-          else if (oldStatus === 'In Progress') newStats.inProgressPatients--;
-          else if (oldStatus === 'Completed') newStats.completedPatients--;
+        // Decrement count for old status
+        if (oldStatus === 'Waiting') newStats.waitingPatients--;
+        else if (oldStatus === 'In Progress') newStats.inProgressPatients--;
+        else if (oldStatus === 'Completed') newStats.completedPatients--;
 
-          // Increment count for new status
-          if (newStatus === 'Waiting') newStats.waitingPatients++;
-          else if (newStatus === 'In Progress') newStats.inProgressPatients++;
-          else if (newStatus === 'Completed') newStats.completedPatients++;
+        // Increment count for new status
+        if (newStatus === 'Waiting') newStats.waitingPatients++;
+        else if (newStatus === 'In Progress') newStats.inProgressPatients++;
+        else if (newStatus === 'Completed') newStats.completedPatients++;
 
-          return newStats;
-        });
-      }
+        return newStats;
+      });
 
       // Try to update the server (but don't wait for it)
       apiService.updateQueueStatus(queueEntryId, { status: newStatus })
@@ -159,11 +187,10 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
 
           // If completing an appointment, update the appointment status
           if (newStatus === 'Completed') {
-            const queueEntry = queueEntries.find(entry => entry._id === queueEntryId);
-            if (queueEntry && queueEntry.appointment_id && !queueEntry.is_walk_in) {
-              const appointmentId = typeof queueEntry.appointment_id === 'object' ?
-                (queueEntry.appointment_id._id || queueEntry.appointment_id.id) :
-                queueEntry.appointment_id;
+            if (updatedEntry && updatedEntry.appointment_id && !updatedEntry.is_walk_in) {
+              const appointmentId = typeof updatedEntry.appointment_id === 'object' ?
+                (updatedEntry.appointment_id._id || updatedEntry.appointment_id.id) :
+                updatedEntry.appointment_id;
 
               if (appointmentId && onUpdateAppointment) {
                 onUpdateAppointment(appointmentId, { status: 'completed' })
@@ -171,10 +198,19 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
               }
             }
           }
+
+          // Force a refresh of the queue data after a short delay
+          setTimeout(() => {
+            fetchQueueData();
+          }, 500);
         })
         .catch(error => {
           console.error('Error updating queue status on server:', error);
           // The UI is already updated, so we don't need to do anything here
+          // But we should still try to refresh the data
+          setTimeout(() => {
+            fetchQueueData();
+          }, 1000);
         });
     } catch (error) {
       console.error('Error in handleUpdateQueueStatus:', error);
@@ -190,49 +226,48 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
 
     try {
       setLoading(true);
-      await apiService.removeFromQueue(queueEntryId);
+
+      // Find the entry to remove before we remove it from state
+      const entryToRemove = queueEntries.find(entry => entry._id === queueEntryId);
+      if (!entryToRemove) {
+        console.error('Could not find queue entry with ID:', queueEntryId);
+        alert('Could not find the queue entry to remove. Please refresh the page and try again.');
+        setLoading(false);
+        return;
+      }
+
+      // Store the status for statistics update
+      const statusToUpdate = entryToRemove.status;
 
       // Update the UI optimistically
       setQueueEntries(prevEntries => prevEntries.filter(entry => entry._id !== queueEntryId));
 
-      // Update queue statistics
-      const removedEntry = queueEntries.find(entry => entry._id === queueEntryId);
-      if (removedEntry) {
-        setQueueStats(prevStats => ({
-          ...prevStats,
-          totalPatients: prevStats.totalPatients - 1,
-          waitingPatients: removedEntry.status === 'Waiting' ? prevStats.waitingPatients - 1 : prevStats.waitingPatients,
-          inProgressPatients: removedEntry.status === 'In Progress' ? prevStats.inProgressPatients - 1 : prevStats.inProgressPatients,
-          completedPatients: removedEntry.status === 'Completed' ? prevStats.completedPatients - 1 : prevStats.completedPatients
-        }));
+      // Update queue statistics based on the stored status
+      setQueueStats(prevStats => ({
+        ...prevStats,
+        totalPatients: prevStats.totalPatients - 1,
+        waitingPatients: statusToUpdate === 'Waiting' ? prevStats.waitingPatients - 1 : prevStats.waitingPatients,
+        inProgressPatients: statusToUpdate === 'In Progress' ? prevStats.inProgressPatients - 1 : prevStats.inProgressPatients,
+        completedPatients: statusToUpdate === 'Completed' ? prevStats.completedPatients - 1 : prevStats.completedPatients
+      }));
+
+      // Try to update the server
+      try {
+        await apiService.removeFromQueue(queueEntryId);
+        console.log('Queue entry removed from server successfully');
+      } catch (serverError) {
+        console.error('Error removing from queue on server:', serverError);
+        // The UI is already updated, so we don't need to do anything here
+        // Just log the error and continue
       }
 
-      // Then refresh the data from the server
-      await fetchQueueData();
+      // Refresh the data from the server after a short delay
+      setTimeout(() => {
+        fetchQueueData();
+      }, 500);
     } catch (error) {
-      console.error('Error removing from queue:', error);
-
-      // Check if this is a CORS error
-      if (error.toString().includes('CORS') || error.toString().includes('NetworkError')) {
-        // Update the UI optimistically anyway
-        setQueueEntries(prevEntries => prevEntries.filter(entry => entry._id !== queueEntryId));
-
-        // Update queue statistics
-        const removedEntry = queueEntries.find(entry => entry._id === queueEntryId);
-        if (removedEntry) {
-          setQueueStats(prevStats => ({
-            ...prevStats,
-            totalPatients: prevStats.totalPatients - 1,
-            waitingPatients: removedEntry.status === 'Waiting' ? prevStats.waitingPatients - 1 : prevStats.waitingPatients,
-            inProgressPatients: removedEntry.status === 'In Progress' ? prevStats.inProgressPatients - 1 : prevStats.inProgressPatients,
-            completedPatients: removedEntry.status === 'Completed' ? prevStats.completedPatients - 1 : prevStats.completedPatients
-          }));
-        }
-
-        alert('Patient removed from queue locally. The server will be updated when you refresh the page.');
-      } else {
-        alert('Failed to remove patient from queue: ' + error.toString());
-      }
+      console.error('Error in handleRemoveFromQueue:', error);
+      alert('An unexpected error occurred. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -668,7 +703,31 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
                               (entry.is_walk_in ? 'Walk-in' : 'Appointment')}
                           </div>
                         </div>
-                        <div className="ml-auto">
+                        <div className="ml-auto flex space-x-2">
+                          {userRole === 'doctor' && onAddDiagnosis && (
+                            <button
+                              onClick={() => {
+                                // Find the appointment for this queue entry
+                                const appointmentId = typeof entry.appointment_id === 'object' ?
+                                  (entry.appointment_id._id || entry.appointment_id.id) :
+                                  entry.appointment_id;
+
+                                const appointment = appointments.find(a =>
+                                  (a._id === appointmentId || a.id === appointmentId)
+                                );
+
+                                if (appointment) {
+                                  onAddDiagnosis(appointment);
+                                } else {
+                                  alert('Could not find appointment details. Please try again.');
+                                }
+                              }}
+                              className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm font-medium flex items-center"
+                            >
+                              <FaNotesMedical className="mr-1" />
+                              Add Notes
+                            </button>
+                          )}
                           <button
                             onClick={() => handlePrintTicket(entry)}
                             className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-1 rounded text-sm font-medium flex items-center"
@@ -676,6 +735,15 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
                             <FaPrint className="mr-1" />
                             Print
                           </button>
+                          {(userRole === 'secretary' || userRole === 'admin') && (
+                            <button
+                              onClick={() => handleRemoveFromQueue(entry._id)}
+                              className="bg-gray-200 hover:bg-gray-300 text-red-600 px-3 py-1 rounded text-sm font-medium flex items-center"
+                            >
+                              <FaUserTimes className="mr-1" />
+                              Remove
+                            </button>
+                          )}
                         </div>
                       </div>
                     </div>

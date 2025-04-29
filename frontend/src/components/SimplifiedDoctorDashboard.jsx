@@ -434,6 +434,7 @@ function SimplifiedDoctorDashboard({
               onEditAppointment={setEditingAppointment}
               onDeleteAppointment={onDeleteAppointment}
               onUpdatePatient={onUpdatePatient}
+              onAddDiagnosis={setDiagnosingAppointment}
             />
             <div className="mt-6">
           <div>

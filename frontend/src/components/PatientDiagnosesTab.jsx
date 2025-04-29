@@ -29,9 +29,17 @@ function PatientDiagnosesTab({ patient, appointments, onEditDiagnosis, onDeleteD
   // Effect to fetch diagnoses
   useEffect(() => {
     const fetchDiagnoses = async () => {
-      if (!patient || !patient._id) return;
+      if (!patient) {
+        setLoading(false);
+        return;
+      }
 
       const patientId = patient._id || patient.id;
+      if (!patientId) {
+        console.log('No patient ID available');
+        setLoading(false);
+        return;
+      }
 
       // Double-check we're fetching for the current patient
       if (currentPatientId.current !== patientId) {
@@ -180,7 +188,20 @@ function PatientDiagnosesTab({ patient, appointments, onEditDiagnosis, onDeleteD
     };
 
     fetchDiagnoses();
-  }, [patient, appointments, refreshKey]);
+
+    // Set a timeout to stop loading after 10 seconds to prevent infinite loading
+    const timeoutId = setTimeout(() => {
+      if (loading) {
+        console.log('Loading timeout reached, stopping loading spinner');
+        setLoading(false);
+        if (allDiagnoses.length === 0) {
+          setError('Could not load notes. Please try refreshing.');
+        }
+      }
+    }, 10000);
+
+    return () => clearTimeout(timeoutId);
+  }, [patient, appointments, refreshKey, loading]);
 
   // Sort diagnoses based on current sort order
   const sortedDiagnoses = [...allDiagnoses].sort((a, b) => {
