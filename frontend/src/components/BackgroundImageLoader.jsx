@@ -3,17 +3,45 @@ import apiService from '../utils/apiService';
 
 function BackgroundImageLoader() {
   const [backgroundImage, setBackgroundImage] = useState('/backgroundimg/Theone.jpeg');
+  const [mobileBackgroundImage, setMobileBackgroundImage] = useState('/backgroundimg/mobile.jpeg');
 
   useEffect(() => {
     // Force a cache-busting parameter to ensure the image is refreshed
     const timestamp = new Date().getTime();
     const imageWithCacheBusting = `${backgroundImage}?t=${timestamp}`;
+    const mobileImageWithCacheBusting = `${mobileBackgroundImage}?t=${timestamp}`;
 
     // Set the initial background image
     document.documentElement.style.setProperty(
       '--dynamic-background-image',
       `url(${imageWithCacheBusting})`
     );
+
+    // Set the mobile background image
+    document.documentElement.style.setProperty(
+      '--mobile-background-image',
+      `url(${mobileImageWithCacheBusting})`
+    );
+
+    // Add media query listener for responsive background
+    const handleScreenSizeChange = () => {
+      if (window.matchMedia('(max-width: 768px)').matches) {
+        console.log('Using mobile background image');
+      } else {
+        console.log('Using desktop background image');
+      }
+    };
+
+    // Call once on load
+    handleScreenSizeChange();
+
+    // Add resize listener
+    window.addEventListener('resize', handleScreenSizeChange);
+
+    // Clean up resize listener
+    return () => {
+      window.removeEventListener('resize', handleScreenSizeChange);
+    };
 
     // Function to load images from the backgroundimg folder
     const loadBackgroundImages = async () => {

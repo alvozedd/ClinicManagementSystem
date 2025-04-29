@@ -619,15 +619,13 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
         <h2 className="text-xl font-bold text-blue-800 mb-3 md:mb-0">Today's Appointments & Queue</h2>
         <div className="flex flex-wrap gap-2">
-          {(userRole === 'secretary' || userRole === 'admin') && (
-            <button
-              onClick={() => setShowAddToQueueModal(true)}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-md text-sm font-medium flex items-center shadow-sm hover:shadow-md transition-all duration-200"
-            >
-              <FaUserPlus className="mr-2" />
-              Add Walk-in
-            </button>
-          )}
+          <button
+            onClick={() => setShowAddToQueueModal(true)}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-md text-sm font-medium flex items-center shadow-sm hover:shadow-md transition-all duration-200"
+          >
+            <FaUserPlus className="mr-2" />
+            Add Walk-in
+          </button>
 
           {appointmentsToCheckIn.length > 0 && (userRole === 'secretary' || userRole === 'admin') && (
             <button
@@ -1008,15 +1006,13 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
         {queueEntries.length === 0 && (
           <div className="text-center py-8 bg-gray-50 rounded-lg">
             <p className="text-gray-500 mb-4">No patients in the queue today</p>
-            {(userRole === 'secretary' || userRole === 'admin') && (
-              <button
-                onClick={() => setShowAddToQueueModal(true)}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-medium flex items-center mx-auto"
-              >
-                <FaUserPlus className="mr-2" />
-                Add Walk-in Patient
-              </button>
-            )}
+            <button
+              onClick={() => setShowAddToQueueModal(true)}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-medium flex items-center mx-auto"
+            >
+              <FaUserPlus className="mr-2" />
+              Add Walk-in Patient
+            </button>
           </div>
         )}
       </div>

@@ -137,9 +137,10 @@ function SimplifiedNotesModal({ appointment, onClose, onSave }) {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-lg shadow-xl p-4 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <div className="text-xs text-gray-500 mb-2">Complete patient notes with smaller, space-efficient layout</div>
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-bold text-gray-800">
+          <h2 className="text-base font-bold text-gray-800">
             {appointment && appointment.diagnosis ? 'Edit Notes' : 'Add New Notes'}
           </h2>
           <button
@@ -153,68 +154,69 @@ function SimplifiedNotesModal({ appointment, onClose, onSave }) {
         </div>
 
         <form onSubmit={handleSubmit}>
-          <div className="space-y-4">
+          <div className="space-y-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Notes</label>
               <textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                rows="4"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
+                rows="3"
+                className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-xs"
                 required
                 placeholder="Enter your clinical notes..."
               ></textarea>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Diagnosis</label>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Diagnosis</label>
               <textarea
                 value={diagnosis}
                 onChange={(e) => setDiagnosis(e.target.value)}
-                rows="3"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
+                rows="2"
+                className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-xs"
                 placeholder="Enter diagnosis..."
               ></textarea>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Treatment Plan</label>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Treatment Plan</label>
               <textarea
                 value={treatment}
                 onChange={(e) => setTreatment(e.target.value)}
-                rows="3"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
+                rows="2"
+                className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-xs"
                 placeholder="Enter treatment plan..."
               ></textarea>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Follow-up Instructions</label>
+              <label className="block text-xs font-medium text-gray-700 mb-1">Follow-up Instructions</label>
               <textarea
                 value={followUp}
                 onChange={(e) => setFollowUp(e.target.value)}
-                rows="2"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
+                rows="1"
+                className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-xs"
                 placeholder="Enter follow-up instructions..."
               ></textarea>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Upload Files</label>
-              <input
-                type="file"
-                onChange={handleFileChange}
-                multiple
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-sm"
-                ref={fileInputRef}
-              />
-              <p className="mt-1 text-xs text-gray-500">Upload patient documents, test results, or other relevant files.</p>
+              <div className="flex items-center">
+                <label className="block text-xs font-medium text-gray-700 mr-2">Upload Files</label>
+                <input
+                  type="file"
+                  onChange={handleFileChange}
+                  multiple
+                  className="w-full px-2 py-1 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 text-xs"
+                  ref={fileInputRef}
+                />
+              </div>
             </div>
 
             {/* Display existing files */}
             {existingFiles && existingFiles.length > 0 && (
               <div>
-                <h4 className="text-sm font-medium text-gray-700 mb-1">Existing Files</h4>
+                <h4 className="text-xs font-medium text-gray-700 mb-1">Existing Files</h4>
                 <ul className="divide-y divide-gray-200">
                   {existingFiles.map((file, index) => (
                     <li key={index} className="py-2 flex justify-between items-center">
@@ -222,9 +224,9 @@ function SimplifiedNotesModal({ appointment, onClose, onSave }) {
                         <svg className="h-5 w-5 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                         </svg>
-                        <span className="text-sm text-gray-700">{file.name}</span>
+                        <span className="text-xs text-gray-700">{file.name}</span>
                       </div>
-                      <div className="flex space-x-2 text-sm">
+                      <div className="flex space-x-2 text-xs">
                         <a
                           href={file.url}
                           target="_blank"
@@ -251,13 +253,13 @@ function SimplifiedNotesModal({ appointment, onClose, onSave }) {
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50"
+                className="px-3 py-1 border border-gray-300 rounded-md text-xs font-medium text-gray-700 hover:bg-gray-50"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 bg-green-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-green-700"
+                className="px-3 py-1 bg-green-600 border border-transparent rounded-md text-xs font-medium text-white hover:bg-green-700"
               >
                 {appointment && appointment.diagnosis ? 'Update Notes' : 'Save Notes'}
               </button>

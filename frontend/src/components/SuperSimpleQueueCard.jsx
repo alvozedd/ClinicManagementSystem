@@ -190,14 +190,13 @@ function SuperSimpleQueueCard({ queueEntry, onUpdateStatus, onRemove, onPrintTic
           Print
         </button>
 
-        {(userRole === 'secretary' || userRole === 'admin') && (
-          <button
-            onClick={onRemove}
-            className="bg-gray-200 hover:bg-gray-300 text-red-600 px-3 py-1 rounded text-sm font-medium"
-          >
-            Remove
-          </button>
-        )}
+        <button
+          onClick={onRemove}
+          className="bg-gray-200 hover:bg-gray-300 text-red-600 px-3 py-1 rounded text-sm font-medium flex items-center"
+        >
+          <FaUserTimes className="mr-1" />
+          Remove
+        </button>
       </div>
     </div>
   );

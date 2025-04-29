@@ -1,24 +1,68 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { FaPrint } from 'react-icons/fa';
 
 function QueueTicketPrint({ queueEntry, onClose }) {
   const printRef = useRef();
+  const [isPrinting, setIsPrinting] = useState(false);
+  const [printAttempted, setPrintAttempted] = useState(false);
+
+  // Handle close with proper cleanup
+  const handleClose = (e) => {
+    // Stop event propagation to prevent issues
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    // Call the onClose function provided by parent
+    if (onClose) onClose();
+  };
 
   useEffect(() => {
-    // Auto-print when component mounts
-    if (queueEntry) {
+    // Auto-print when component mounts, but only once
+    if (queueEntry && !printAttempted) {
+      setPrintAttempted(true);
       setTimeout(() => {
         handlePrint();
       }, 500);
     }
-  }, [queueEntry]);
+
+    // Add event listener for escape key
+    const handleEscKey = (e) => {
+      if (e.key === 'Escape') handleClose();
+    };
+
+    window.addEventListener('keydown', handleEscKey);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('keydown', handleEscKey);
+    };
+  }, [queueEntry, printAttempted]);
 
   const handlePrint = () => {
-    const printContent = printRef.current;
-    const windowUrl = 'about:blank';
-    const uniqueName = new Date().getTime();
-    const windowName = `Print_${uniqueName}`;
-    const printWindow = window.open(windowUrl, windowName, 'height=600,width=400');
+    if (isPrinting) return; // Prevent multiple print attempts
+
+    setIsPrinting(true);
+
+    try {
+      const printContent = printRef.current;
+      if (!printContent) {
+        console.error('Print content reference is not available');
+        setIsPrinting(false);
+        return;
+      }
+
+      const windowUrl = 'about:blank';
+      const uniqueName = new Date().getTime();
+      const windowName = `Print_${uniqueName}`;
+      const printWindow = window.open(windowUrl, windowName, 'height=600,width=400');
+
+      if (!printWindow) {
+        console.error('Failed to open print window - popup might be blocked');
+        setIsPrinting(false);
+        return;
+      }
 
     printWindow.document.write('<html><head><title>Patient Ticket</title>');
     printWindow.document.write('<style>');
@@ -98,9 +142,23 @@ function QueueTicketPrint({ queueEntry, onClose }) {
 
     // Print after a short delay to ensure content is loaded
     setTimeout(() => {
-      printWindow.print();
-      printWindow.close();
+      try {
+        printWindow.print();
+      } catch (error) {
+        console.error('Error during printing:', error);
+      } finally {
+        try {
+          printWindow.close();
+        } catch (closeError) {
+          console.error('Error closing print window:', closeError);
+        }
+        setIsPrinting(false);
+      }
     }, 500);
+    } catch (error) {
+      console.error('Error in print process:', error);
+      setIsPrinting(false);
+    }
   };
 
   if (!queueEntry) return null;
@@ -112,15 +170,22 @@ function QueueTicketPrint({ queueEntry, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 backdrop-blur-sm">
-      <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md border border-gray-200">
+    <div
+      className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 backdrop-blur-sm"
+      onClick={handleClose} // Close when clicking the backdrop
+    >
+      <div
+        className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md border border-gray-200"
+        onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside the modal
+      >
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold text-blue-700">
             Patient Ticket
           </h2>
           <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 transition-colors p-1 rounded-full hover:bg-gray-100"
+            onClick={handleClose}
+            className="text-gray-500 hover:text-gray-700 transition-colors p-1 rounded-full hover:bg-gray-100 z-50"
+            aria-label="Close"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
               <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
@@ -131,10 +196,11 @@ function QueueTicketPrint({ queueEntry, onClose }) {
         <div className="mb-4">
           <button
             onClick={handlePrint}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium flex items-center justify-center w-full"
+            disabled={isPrinting}
+            className={`${isPrinting ? 'bg-blue-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'} text-white px-4 py-2 rounded-md text-sm font-medium flex items-center justify-center w-full`}
           >
             <FaPrint className="mr-2" />
-            Print Ticket
+            {isPrinting ? 'Printing...' : 'Print Ticket'}
           </button>
         </div>
 

@@ -17,6 +17,7 @@
 /* Mobile styles */
 @media (max-width: 767px) {
   .bg-image {
+    background-image: var(--mobile-background-image) !important;
     background-attachment: scroll !important;
     min-height: 100vh !important;
   }
@@ -25,6 +26,7 @@
 /* Small mobile styles */
 @media (max-width: 480px) {
   .bg-image {
+    background-image: var(--mobile-background-image) !important;
     background-position: center center !important;
     background-size: cover !important;
   }
@@ -39,8 +41,8 @@
 }
 
 /* Fix for high-resolution mobile devices */
-@media 
-(-webkit-min-device-pixel-ratio: 2), 
+@media
+(-webkit-min-device-pixel-ratio: 2),
 (min-resolution: 192dpi) {
   .bg-image {
     background-size: cover !important;

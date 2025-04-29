@@ -1,5 +1,6 @@
 :root {
   --dynamic-background-image: url('/backgroundimg/Theone.jpeg'); /* Default fallback */
+  --mobile-background-image: url('/backgroundimg/mobile.jpeg'); /* Mobile fallback */
 }
 
 .bg-image {
@@ -9,6 +10,14 @@
   background-repeat: no-repeat;
   background-attachment: fixed;
   transition: background-image 0.5s ease-in-out;
+}
+
+/* Mobile background image */
+@media (max-width: 768px) {
+  .bg-image {
+    background-image: var(--mobile-background-image);
+    background-attachment: scroll;
+  }
 }
 
 /* Fix for iOS devices which don't handle background-attachment: fixed well */

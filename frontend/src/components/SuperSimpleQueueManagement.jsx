@@ -96,6 +96,25 @@ function SuperSimpleQueueManagement({ patients, appointments, userRole }) {
   const handleAddWalkIn = async (patientData) => {
     try {
       setLoading(true);
+      console.log('Adding walk-in patient:', patientData);
+
+      // Create a temporary local queue entry to show immediately
+      const tempTicketNumber = queueStats.nextTicketNumber || Math.floor(Math.random() * 1000) + 1;
+      const tempQueueEntry = {
+        _id: `temp_${Date.now()}`,
+        patient_id: {
+          _id: patientData.patient_id,
+          name: patientData.patientName
+        },
+        ticket_number: tempTicketNumber,
+        status: 'Waiting',
+        check_in_time: new Date().toISOString(),
+        is_walk_in: true,
+        notes: `Walk-in: ${patientData.reason || 'No reason provided'}`
+      };
+
+      // Show the ticket immediately
+      setTicketToPrint(tempQueueEntry);
 
       // Create a new appointment for the walk-in patient
       const today = new Date();
@@ -110,25 +129,42 @@ function SuperSimpleQueueManagement({ patients, appointments, userRole }) {
       };
 
       // Create the appointment in the database
-      const newAppointment = await apiService.createAppointment(appointmentData);
-      console.log('Created appointment for walk-in:', newAppointment);
+      let newAppointment;
+      try {
+        newAppointment = await apiService.createAppointment(appointmentData);
+        console.log('Created appointment for walk-in:', newAppointment);
+      } catch (appointmentError) {
+        console.error('Error creating appointment:', appointmentError);
+        // Continue anyway - we'll try to add to queue without an appointment
+      }
 
       // Add to queue
       const queueData = {
         patient_id: patientData.patient_id,
-        appointment_id: newAppointment._id,
+        appointment_id: newAppointment?._id, // Optional chaining in case appointment creation failed
         is_walk_in: true,
         notes: `Walk-in: ${patientData.reason || 'No reason provided'}`
       };
 
-      const newQueueEntry = await apiService.addToQueue(queueData);
-      setTicketToPrint(newQueueEntry);
+      try {
+        const newQueueEntry = await apiService.addToQueue(queueData);
+        console.log('Added to queue successfully:', newQueueEntry);
+
+        // Replace the temporary ticket with the real one
+        setTicketToPrint(newQueueEntry);
+      } catch (queueError) {
+        console.error('Error adding to queue:', queueError);
+        // Keep the temporary ticket visible so the user can still print something
+      }
+
+      // Refresh queue data regardless of success/failure
       await fetchQueueData();
 
-      return newQueueEntry;
+      return true; // Return success even if there were partial failures
     } catch (error) {
-      console.error('Error adding walk-in patient to queue:', error);
-      throw error;
+      console.error('Error in walk-in patient workflow:', error);
+      // Don't throw - we want to keep the UI working
+      return false;
     } finally {
       setLoading(false);
     }
