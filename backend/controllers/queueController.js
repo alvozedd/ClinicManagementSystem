@@ -303,6 +303,26 @@ const reorderQueue = asyncHandler(async (req, res) => {
   res.json(queueEntries);
 });
 
+// @desc    Clear all completed queue entries
+// @route   DELETE /api/queue/clear-completed
+// @access  Private/Secretary
+const clearCompletedQueue = asyncHandler(async (req, res) => {
+  const today = new Date();
+  const startOfDay = new Date(today.setHours(0, 0, 0, 0));
+  const endOfDay = new Date(today.setHours(23, 59, 59, 999));
+
+  // Find all completed entries for today
+  const result = await Queue.deleteMany({
+    check_in_time: { $gte: startOfDay, $lte: endOfDay },
+    status: 'Completed'
+  });
+
+  res.json({
+    message: `${result.deletedCount} completed queue entries removed`,
+    deletedCount: result.deletedCount
+  });
+});
+
 module.exports = {
   addToQueue,
   getQueueEntries,
@@ -311,4 +331,5 @@ module.exports = {
   getQueueStats,
   getNextPatient,
   reorderQueue,
+  clearCompletedQueue,
 };

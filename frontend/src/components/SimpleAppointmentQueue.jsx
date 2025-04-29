@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { FaUserPlus, FaSync, FaUserCheck, FaUserTimes, FaPrint, FaPhone, FaArrowUp, FaArrowDown, FaNotesMedical, FaFileMedical } from 'react-icons/fa';
+import { useState, useEffect, useRef } from 'react';
+import { FaUserPlus, FaSync, FaUserCheck, FaUserTimes, FaPrint, FaPhone, FaArrowUp, FaArrowDown, FaNotesMedical, FaFileMedical, FaTrash, FaGripVertical } from 'react-icons/fa';
 import apiService from '../utils/apiService';
 import AppointmentCard from './AppointmentCard';
 import SuperSimpleAddToQueueModal from './SuperSimpleAddToQueueModal';
@@ -15,6 +15,8 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
   const [loading, setLoading] = useState(false);
   const [showAddToQueueModal, setShowAddToQueueModal] = useState(false);
   const [ticketToPrint, setTicketToPrint] = useState(null);
+  const [draggedEntryId, setDraggedEntryId] = useState(null);
+  const [dragOverEntryId, setDragOverEntryId] = useState(null);
 
   // Queue statistics
   const [queueStats, setQueueStats] = useState({
@@ -115,13 +117,45 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
 
       // Add to queue
       const newQueueEntry = await apiService.addToQueue(queueData);
+
+      // Update the UI immediately
+      if (newQueueEntry) {
+        // Add the new entry to the queue entries
+        setQueueEntries(prevEntries => {
+          // Create a new array with the new entry
+          const updatedEntries = [...prevEntries, newQueueEntry];
+
+          // Sort the entries by status and ticket number
+          return updatedEntries.sort((a, b) => {
+            const statusPriority = { 'Waiting': 0, 'In Progress': 1, 'Completed': 2, 'No-show': 3, 'Cancelled': 4 };
+            const statusDiff = statusPriority[a.status] - statusPriority[b.status];
+
+            if (statusDiff !== 0) return statusDiff;
+
+            return (a.ticket_number || 0) - (b.ticket_number || 0);
+          });
+        });
+
+        // Update queue statistics
+        setQueueStats(prevStats => ({
+          ...prevStats,
+          totalPatients: prevStats.totalPatients + 1,
+          waitingPatients: prevStats.waitingPatients + 1
+        }));
+      }
+
+      // Show the ticket to print
       setTicketToPrint(newQueueEntry);
-      await fetchQueueData();
 
       // If this is a new patient, refresh the patients list
       if (patientData.isNewPatient && onUpdatePatient) {
         onUpdatePatient();
       }
+
+      // Refresh the queue data after a short delay
+      setTimeout(() => {
+        fetchQueueData();
+      }, 500);
     } catch (error) {
       console.error('Error adding walk-in patient:', error);
       throw error;
@@ -278,6 +312,41 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
     setTicketToPrint(queueEntry);
   };
 
+  // Handle clearing completed queue entries
+  const handleClearCompletedQueue = async () => {
+    if (!confirm('Are you sure you want to remove all completed patients from the queue? This cannot be undone.')) return;
+
+    try {
+      setLoading(true);
+
+      // Get the count of completed entries before clearing
+      const completedCount = queueEntries.filter(entry => entry && entry._id && entry.status === 'Completed').length;
+
+      // Update the UI optimistically
+      setQueueEntries(prevEntries => prevEntries.filter(entry => entry.status !== 'Completed'));
+
+      // Update queue statistics
+      setQueueStats(prevStats => ({
+        ...prevStats,
+        totalPatients: prevStats.totalPatients - completedCount,
+        completedPatients: 0
+      }));
+
+      // Call the API to clear completed entries
+      await apiService.clearCompletedQueue();
+
+      // Refresh the queue data after a short delay
+      setTimeout(() => {
+        fetchQueueData();
+      }, 500);
+    } catch (error) {
+      console.error('Error clearing completed queue:', error);
+      alert('Failed to clear completed queue. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Handle checking in an appointment
   const handleCheckInAppointment = async (appointment) => {
     try {
@@ -294,8 +363,41 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
 
       // Add to queue
       const newQueueEntry = await apiService.addToQueue(queueData);
+
+      // Update the UI immediately
+      if (newQueueEntry) {
+        // Add the new entry to the queue entries
+        setQueueEntries(prevEntries => {
+          // Create a new array with the new entry
+          const updatedEntries = [...prevEntries, newQueueEntry];
+
+          // Sort the entries by status and ticket number
+          return updatedEntries.sort((a, b) => {
+            const statusPriority = { 'Waiting': 0, 'In Progress': 1, 'Completed': 2, 'No-show': 3, 'Cancelled': 4 };
+            const statusDiff = statusPriority[a.status] - statusPriority[b.status];
+
+            if (statusDiff !== 0) return statusDiff;
+
+            return (a.ticket_number || 0) - (b.ticket_number || 0);
+          });
+        });
+
+        // Update queue statistics
+        setQueueStats(prevStats => ({
+          ...prevStats,
+          totalPatients: prevStats.totalPatients + 1,
+          waitingPatients: prevStats.waitingPatients + 1
+        }));
+      }
+
+      // Show the ticket to print
       setTicketToPrint(newQueueEntry);
-      await fetchQueueData();
+
+      // Refresh the queue data after a short delay
+      setTimeout(() => {
+        fetchQueueData();
+      }, 500);
+
       return true;
     } catch (error) {
       console.error('Error checking in appointment:', error);
@@ -309,6 +411,79 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
         alert('Failed to check in patient: ' + error.toString());
         return false;
       }
+    }
+  };
+
+  // Drag and drop handlers
+  const handleDragStart = (entryId) => {
+    setDraggedEntryId(entryId);
+  };
+
+  const handleDragOver = (e, entryId) => {
+    e.preventDefault();
+    if (draggedEntryId !== entryId) {
+      setDragOverEntryId(entryId);
+    }
+  };
+
+  const handleDrop = async (e, targetEntryId) => {
+    e.preventDefault();
+
+    if (!draggedEntryId || draggedEntryId === targetEntryId) {
+      // Reset drag state
+      setDraggedEntryId(null);
+      setDragOverEntryId(null);
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      // Get only the waiting entries
+      const waitingEntries = queueEntries.filter(entry => entry && entry.status === 'Waiting');
+
+      // Find the indices of the dragged and target entries
+      const draggedIndex = waitingEntries.findIndex(entry => entry._id === draggedEntryId);
+      const targetIndex = waitingEntries.findIndex(entry => entry._id === targetEntryId);
+
+      if (draggedIndex === -1 || targetIndex === -1) {
+        console.error('Could not find dragged or target entry');
+        return;
+      }
+
+      // Create a new array with the reordered items
+      const reorderedEntries = Array.from(waitingEntries);
+      const [removed] = reorderedEntries.splice(draggedIndex, 1);
+      reorderedEntries.splice(targetIndex, 0, removed);
+
+      // Update the queue entries with the new order
+      const updatedQueueEntries = queueEntries.filter(entry => entry.status !== 'Waiting');
+      updatedQueueEntries.push(...reorderedEntries);
+
+      setQueueEntries(updatedQueueEntries);
+
+      // Call the API to update the order in the database
+      const queueOrder = reorderedEntries
+        .filter(entry => entry && entry._id) // Filter out any invalid entries
+        .map((entry, idx) => ({
+          id: entry._id,
+          position: idx
+        }));
+      await apiService.reorderQueue({ queueOrder });
+
+      // Refresh the queue data after a short delay
+      setTimeout(() => {
+        fetchQueueData();
+      }, 500);
+    } catch (error) {
+      console.error('Error reordering queue:', error);
+      alert('Failed to reorder queue');
+      await fetchQueueData();
+    } finally {
+      // Reset drag state
+      setDraggedEntryId(null);
+      setDragOverEntryId(null);
+      setLoading(false);
     }
   };
 
@@ -629,9 +804,22 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
                   return (
                     <div
                       key={entry._id}
-                      className="p-4 rounded-lg border border-yellow-200 bg-yellow-50 hover:shadow-md transition-all duration-300"
+                      className={`p-4 rounded-lg border ${dragOverEntryId === entry._id ? 'border-blue-400 bg-blue-50' : 'border-yellow-200 bg-yellow-50'} hover:shadow-md transition-all duration-300 cursor-grab`}
+                      draggable={userRole === 'secretary' || userRole === 'admin'}
+                      onDragStart={() => handleDragStart(entry._id)}
+                      onDragOver={(e) => handleDragOver(e, entry._id)}
+                      onDrop={(e) => handleDrop(e, entry._id)}
+                      onDragEnd={() => {
+                        setDraggedEntryId(null);
+                        setDragOverEntryId(null);
+                      }}
                     >
                       <div className="flex items-center">
+                        {(userRole === 'secretary' || userRole === 'admin') && (
+                          <div className="mr-2 text-gray-400 cursor-grab">
+                            <FaGripVertical />
+                          </div>
+                        )}
                         <div className="bg-yellow-600 text-white font-bold text-xl rounded-full w-10 h-10 flex items-center justify-center mr-4">
                           {entry.ticket_number}
                         </div>
@@ -702,8 +890,20 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
         {/* Completed Patients (collapsed by default) */}
         {queueEntries.filter(entry => entry && entry._id && entry.status === 'Completed').length > 0 && (
           <details className="mt-4">
-            <summary className="text-lg font-semibold text-blue-800 mb-2 cursor-pointer">
-              Completed ({queueEntries.filter(entry => entry && entry._id && entry.status === 'Completed').length})
+            <summary className="flex justify-between items-center text-lg font-semibold text-blue-800 mb-2 cursor-pointer">
+              <span>Completed ({queueEntries.filter(entry => entry && entry._id && entry.status === 'Completed').length})</span>
+              {(userRole === 'secretary' || userRole === 'admin') && (
+                <button
+                  onClick={(e) => {
+                    e.preventDefault(); // Prevent the details from toggling
+                    handleClearCompletedQueue();
+                  }}
+                  className="bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1 rounded text-sm font-medium flex items-center"
+                >
+                  <FaTrash className="mr-1" />
+                  Clear All
+                </button>
+              )}
             </summary>
             <div className="space-y-3 mt-2">
               {queueEntries
