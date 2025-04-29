@@ -28,12 +28,13 @@ function PatientDiagnosesTab({ patient, appointments, onEditDiagnosis, onDeleteD
 
   // Effect to fetch diagnoses
   useEffect(() => {
-    const fetchDiagnoses = async () => {
-      if (!patient) {
-        setLoading(false);
-        return;
-      }
+    // Skip if we're already loading or there's no patient
+    if (!patient) {
+      setLoading(false);
+      return;
+    }
 
+    const fetchDiagnoses = async () => {
       const patientId = patient._id || patient.id;
       if (!patientId) {
         console.log('No patient ID available');
@@ -71,11 +72,19 @@ function PatientDiagnosesTab({ patient, appointments, onEditDiagnosis, onDeleteD
               const appointment = diagnosis.appointment_id;
 
               // Parse the diagnosis_text if it's a JSON string
-              let parsedDiagnosis = diagnosis.diagnosis_text;
+              let parsedDiagnosis = diagnosis.diagnosis_text || '';
               try {
-                parsedDiagnosis = JSON.parse(diagnosis.diagnosis_text);
+                if (typeof diagnosis.diagnosis_text === 'string' && diagnosis.diagnosis_text.trim() !== '') {
+                  parsedDiagnosis = JSON.parse(diagnosis.diagnosis_text);
+                }
               } catch (e) {
                 // If it's not valid JSON, keep the original text
+                console.warn('Failed to parse diagnosis text, using as-is');
+              }
+
+              // Ensure parsedDiagnosis is an object
+              if (typeof parsedDiagnosis !== 'object' || parsedDiagnosis === null) {
+                parsedDiagnosis = { notes: parsedDiagnosis };
               }
 
               return {
@@ -144,13 +153,20 @@ function PatientDiagnosesTab({ patient, appointments, onEditDiagnosis, onDeleteD
               if (diagnoses && diagnoses.length > 0) {
                 diagnoses.forEach(diagnosis => {
                   // Parse the diagnosis_text if it's a JSON string
-                  let parsedDiagnosis = diagnosis.diagnosis_text;
+                  let parsedDiagnosis = diagnosis.diagnosis_text || '';
                   try {
-                    parsedDiagnosis = JSON.parse(diagnosis.diagnosis_text);
-                    console.log('Successfully parsed diagnosis:', parsedDiagnosis);
+                    if (typeof diagnosis.diagnosis_text === 'string' && diagnosis.diagnosis_text.trim() !== '') {
+                      parsedDiagnosis = JSON.parse(diagnosis.diagnosis_text);
+                    }
+                    console.log('Successfully parsed diagnosis');
                   } catch (e) {
-                    console.error('Error parsing diagnosis_text:', e);
+                    console.warn('Error parsing diagnosis_text, using as-is');
                     // If it's not valid JSON, keep the original text
+                  }
+
+                  // Ensure parsedDiagnosis is an object
+                  if (typeof parsedDiagnosis !== 'object' || parsedDiagnosis === null) {
+                    parsedDiagnosis = { notes: parsedDiagnosis };
                   }
 
                   diagnosesArray.push({
@@ -205,7 +221,7 @@ function PatientDiagnosesTab({ patient, appointments, onEditDiagnosis, onDeleteD
     }, 10000);
 
     return () => clearTimeout(timeoutId);
-  }, [patient, appointments, refreshKey, loading]);
+  }, [patient, appointments, refreshKey]); // Removed 'loading' from dependency array to prevent infinite loop
 
   // Sort diagnoses based on current sort order
   const sortedDiagnoses = [...allDiagnoses].sort((a, b) => {
@@ -237,8 +253,10 @@ function PatientDiagnosesTab({ patient, appointments, onEditDiagnosis, onDeleteD
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      <div className="flex flex-col justify-center items-center h-64 bg-white rounded-lg shadow-sm border border-gray-100 p-6">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mb-4"></div>
+        <p className="text-gray-600 text-center">Loading patient notes...</p>
+        <p className="text-gray-400 text-sm mt-2">This may take a moment</p>
       </div>
     );
   }
@@ -246,7 +264,20 @@ function PatientDiagnosesTab({ patient, appointments, onEditDiagnosis, onDeleteD
   if (error) {
     return (
       <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-        <p>{error}</p>
+        <p className="font-medium">{error}</p>
+        <div className="mt-3 flex justify-center">
+          <button
+            onClick={() => {
+              setError(null);
+              setLoading(true);
+              setRefreshKey(prev => prev + 1);
+            }}
+            className="inline-flex items-center bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition-colors"
+          >
+            <FaSync className="mr-2" />
+            Try Again
+          </button>
+        </div>
       </div>
     );
   }
