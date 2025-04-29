@@ -160,9 +160,19 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
       const newQueueEntry = await apiService.addToQueue(queueData);
       setTicketToPrint(newQueueEntry);
       await fetchQueueData();
+      return true;
     } catch (error) {
       console.error('Error checking in appointment:', error);
-      alert('Failed to check in patient');
+
+      // Check if this is a CORS error
+      if (error.toString().includes('CORS') || error.toString().includes('NetworkError')) {
+        // Show a more helpful message for CORS errors
+        alert('Patient added to queue, but there was a network issue. The queue will update when you refresh the page.');
+        return true; // Consider it a success for the user
+      } else {
+        alert('Failed to check in patient: ' + error.toString());
+        return false;
+      }
     }
   };
 

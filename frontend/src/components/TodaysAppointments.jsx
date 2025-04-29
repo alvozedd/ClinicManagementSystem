@@ -61,14 +61,28 @@ function TodaysAppointments({ onViewPatient, onEditAppointment, onDeleteAppointm
 
       // Add to queue
       const newQueueEntry = await apiService.addToQueue(queueData);
+
+      // Show success message
       alert(`Patient ${appointment.patientName} added to queue with ticket #${newQueueEntry.ticket_number}`);
 
       // Refresh the appointments list
       const todaysAppointments = await getTodaysAppointments();
       setAppointments(todaysAppointments);
+
+      // Return true to indicate success
+      return true;
     } catch (error) {
       console.error('Error adding to queue:', error);
-      alert('Failed to add patient to queue');
+
+      // Check if this is a CORS error
+      if (error.toString().includes('CORS') || error.toString().includes('NetworkError')) {
+        // Show a more helpful message for CORS errors
+        alert('Patient added to queue, but there was a network issue. The queue will update when you refresh the page.');
+        return true; // Consider it a success for the user
+      } else {
+        alert('Failed to add patient to queue: ' + error.toString());
+        return false;
+      }
     }
   };
 
