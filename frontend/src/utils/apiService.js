@@ -713,15 +713,24 @@ const apiService = {
     try {
       console.log('Fetching queue entries');
 
-      // Use the non-API endpoint for queue to avoid CORS issues
-      const baseUrl = API_URL.replace('/api', '');
-      console.log('Using queue endpoint:', `${baseUrl}/queue${queryParams}`);
+      // Get user info and token
+      const userInfo = secureStorage.getItem('userInfo') || {};
+      const token = userInfo.token;
 
-      // Try multiple approaches to fetch queue entries
+      if (!token) {
+        console.error('No authentication token found');
+        return []; // Return empty array if not authenticated
+      }
 
-      // First try: with credentials
+      // Add timestamp to prevent caching
+      const timestamp = new Date().getTime();
+      const separator = queryParams.includes('?') ? '&' : '?';
+      const timeParam = `${separator}_t=${timestamp}`;
+
+      // Try secureFetch first
       try {
-        const response = await fetch(`${baseUrl}/queue${queryParams}`, {
+        console.log('Attempt 1: Using secureFetch');
+        const data = await secureFetch(`${API_URL}/queue${queryParams}${timeParam}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -731,38 +740,84 @@ const apiService = {
             'Expires': '0',
             ...(options.headers || {})
           },
-          credentials: 'include', // Include cookies for refresh token
+          credentials: 'include',
           ...options
         });
-        const data = await handleResponse(response);
-        console.log('Successfully fetched queue entries with credentials:', data.length);
-        return data;
-      } catch (firstError) {
-        console.warn('First attempt failed, trying without credentials:', firstError);
 
+        if (Array.isArray(data)) {
+          console.log('Successfully fetched queue entries with secureFetch:', data.length);
+          return data;
+        } else {
+          console.warn('Invalid response format from secureFetch, expected array but got:', typeof data);
+          throw new Error('Invalid response format');
+        }
+      } catch (firstError) {
+        console.warn('First attempt failed, trying direct API call:', firstError);
+
+        // Try direct API call with explicit headers
         try {
-          // Second try: without credentials
-          const response2 = await fetch(`${baseUrl}/queue${queryParams}`, {
+          console.log('Attempt 2: Direct API call with explicit headers');
+          const response = await fetch(`${API_URL}/queue${queryParams}${timeParam}`, {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',
-              ...authHeader(),
+              'Authorization': `Bearer ${token}`,
               'Cache-Control': 'no-cache, no-store, must-revalidate',
               'Pragma': 'no-cache',
-              'Expires': '0',
-              ...(options.headers || {})
+              'Expires': '0'
             },
-            ...options
+            credentials: 'include',
+            mode: 'cors'
           });
-          const data = await handleResponse(response2);
-          console.log('Successfully fetched queue entries without credentials:', data.length);
-          return data;
-        } catch (secondError) {
-          console.warn('Second attempt failed, checking localStorage for fallbacks:', secondError);
 
-          // No fallbacks - only use database data
-          console.log('Queue fallbacks completely disabled, returning empty array');
-          return [];
+          if (response.ok) {
+            const data = await response.json();
+            if (Array.isArray(data)) {
+              console.log('Successfully fetched queue entries with direct API call:', data.length);
+              return data;
+            } else {
+              console.warn('Invalid response format from direct API call, expected array but got:', typeof data);
+              throw new Error('Invalid response format');
+            }
+          } else {
+            const errorText = await response.text();
+            console.warn(`API call failed with status ${response.status}: ${errorText}`);
+            throw new Error(`API call failed: ${response.status} ${response.statusText}`);
+          }
+        } catch (secondError) {
+          console.warn('Second attempt failed, trying non-API endpoint:', secondError);
+
+          // Try the non-API endpoint as final fallback
+          const baseUrl = API_URL.replace('/api', '');
+          console.log('Attempt 3: Using non-API endpoint:', `${baseUrl}/queue${queryParams}${timeParam}`);
+
+          const response = await fetch(`${baseUrl}/queue${queryParams}${timeParam}`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+              'Cache-Control': 'no-cache, no-store, must-revalidate',
+              'Pragma': 'no-cache',
+              'Expires': '0'
+            },
+            credentials: 'include',
+            mode: 'cors'
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            if (Array.isArray(data)) {
+              console.log('Successfully fetched queue entries with non-API endpoint:', data.length);
+              return data;
+            } else {
+              console.warn('Invalid response format from non-API endpoint, expected array but got:', typeof data);
+              return [];
+            }
+          } else {
+            const errorText = await response.text();
+            console.error(`All attempts failed. Last error: ${response.status} ${response.statusText} - ${errorText}`);
+            return [];
+          }
         }
       }
     } catch (error) {
@@ -772,21 +827,118 @@ const apiService = {
   },
 
   getQueueStats: async (options = {}) => {
-    // Add timestamp to prevent caching
-    const timestamp = new Date().getTime();
-    return secureFetch(`${API_URL}/queue/stats?_t=${timestamp}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        ...authHeader(),
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0',
-        ...(options.headers || {})
-      },
-      credentials: 'include', // Include cookies for refresh token
-      ...options
-    });
+    try {
+      console.log('Fetching queue stats');
+
+      // Get user info and token
+      const userInfo = secureStorage.getItem('userInfo') || {};
+      const token = userInfo.token;
+
+      if (!token) {
+        console.error('No authentication token found');
+        return {
+          totalPatients: 0,
+          waitingPatients: 0,
+          inProgressPatients: 0,
+          completedPatients: 0,
+          nextTicketNumber: 1,
+        }; // Return default stats if not authenticated
+      }
+
+      // Add timestamp to prevent caching
+      const timestamp = new Date().getTime();
+
+      // Try secureFetch first
+      try {
+        console.log('Attempt 1: Using secureFetch for queue stats');
+        return await secureFetch(`${API_URL}/queue/stats?_t=${timestamp}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            ...authHeader(),
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0',
+            ...(options.headers || {})
+          },
+          credentials: 'include',
+          ...options
+        });
+      } catch (firstError) {
+        console.warn('First attempt failed, trying direct API call for queue stats:', firstError);
+
+        // Try direct API call with explicit headers
+        try {
+          console.log('Attempt 2: Direct API call with explicit headers for queue stats');
+          const response = await fetch(`${API_URL}/queue/stats?_t=${timestamp}`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+              'Cache-Control': 'no-cache, no-store, must-revalidate',
+              'Pragma': 'no-cache',
+              'Expires': '0'
+            },
+            credentials: 'include',
+            mode: 'cors'
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            console.log('Successfully fetched queue stats with direct API call:', data);
+            return data;
+          } else {
+            const errorText = await response.text();
+            console.warn(`API call failed with status ${response.status}: ${errorText}`);
+            throw new Error(`API call failed: ${response.status} ${response.statusText}`);
+          }
+        } catch (secondError) {
+          console.warn('Second attempt failed, trying non-API endpoint for queue stats:', secondError);
+
+          // Try the non-API endpoint as final fallback
+          const baseUrl = API_URL.replace('/api', '');
+          console.log('Attempt 3: Using non-API endpoint for queue stats:', `${baseUrl}/queue/stats?_t=${timestamp}`);
+
+          const response = await fetch(`${baseUrl}/queue/stats?_t=${timestamp}`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+              'Cache-Control': 'no-cache, no-store, must-revalidate',
+              'Pragma': 'no-cache',
+              'Expires': '0'
+            },
+            credentials: 'include',
+            mode: 'cors'
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            console.log('Successfully fetched queue stats with non-API endpoint:', data);
+            return data;
+          } else {
+            const errorText = await response.text();
+            console.error(`All attempts failed. Last error: ${response.status} ${response.statusText} - ${errorText}`);
+            return {
+              totalPatients: 0,
+              waitingPatients: 0,
+              inProgressPatients: 0,
+              completedPatients: 0,
+              nextTicketNumber: 1,
+            };
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching queue stats:', error);
+      return {
+        totalPatients: 0,
+        waitingPatients: 0,
+        inProgressPatients: 0,
+        completedPatients: 0,
+        nextTicketNumber: 1,
+      }; // Return default stats on error
+    }
   },
 
   addToQueue: async (queueData) => {

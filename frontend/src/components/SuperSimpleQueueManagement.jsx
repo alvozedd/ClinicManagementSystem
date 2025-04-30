@@ -24,13 +24,49 @@ function SuperSimpleQueueManagement({ patients, userRole }) {
   const fetchQueueData = async () => {
     setLoading(true);
     try {
+      console.log('Fetching queue data...');
+
       // Clear any localStorage data before fetching
       clearQueueStorage();
 
-      const [entriesResponse, statsResponse] = await Promise.all([
-        apiService.getQueueEntries(),
-        apiService.getQueueStats(),
-      ]);
+      // Fetch queue entries and stats with retry logic
+      let entriesResponse = [];
+      let statsResponse = {
+        totalPatients: 0,
+        waitingPatients: 0,
+        inProgressPatients: 0,
+        completedPatients: 0,
+        nextTicketNumber: 1,
+      };
+
+      // Try up to 3 times to fetch queue data
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        try {
+          console.log(`Attempt ${attempt} to fetch queue data`);
+
+          // Add timestamp to prevent caching
+          const timestamp = new Date().getTime();
+
+          [entriesResponse, statsResponse] = await Promise.all([
+            apiService.getQueueEntries(`?_t=${timestamp}`),
+            apiService.getQueueStats(),
+          ]);
+
+          // If we got valid data, break out of the retry loop
+          if (Array.isArray(entriesResponse) && entriesResponse.length > 0) {
+            console.log(`Successfully fetched queue data on attempt ${attempt}`);
+            break;
+          } else {
+            console.warn(`Attempt ${attempt}: Invalid or empty queue entries response`);
+            // Wait a bit before retrying
+            if (attempt < 3) await new Promise(resolve => setTimeout(resolve, 1000));
+          }
+        } catch (retryError) {
+          console.error(`Error on attempt ${attempt}:`, retryError);
+          // Wait a bit before retrying
+          if (attempt < 3) await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+      }
 
       // Validate that we have real data from the database
       if (!Array.isArray(entriesResponse)) {
@@ -46,6 +82,9 @@ function SuperSimpleQueueManagement({ patients, userRole }) {
         setLoading(false);
         return;
       }
+
+      console.log('Queue entries response:', entriesResponse);
+      console.log('Queue stats response:', statsResponse);
 
       // Filter out any entries that might not be from the database
       const validEntries = entriesResponse.filter(entry =>
@@ -71,6 +110,7 @@ function SuperSimpleQueueManagement({ patients, userRole }) {
         return a.ticket_number - b.ticket_number;
       });
 
+      console.log('Setting queue entries:', sortedEntries.length);
       setQueueEntries(sortedEntries);
       setQueueStats(statsResponse);
 
