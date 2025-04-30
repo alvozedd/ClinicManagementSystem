@@ -44,12 +44,7 @@ router.route('/')
 router.route('/')
   .get(protect, apiLimiter, getAppointments);
 
-router.route('/:id')
-  .get(protect, getAppointmentById)
-  .put(protect, doctorOrSecretary, updateAppointment)
-  .delete(protect, doctorOrSecretary, deleteAppointment);
-
-// Queue management routes
+// Queue management routes - these must come before the /:id routes
 router.route('/queue')
   .get(protect, doctorOrSecretary, getTodaysQueue);
 
@@ -64,6 +59,12 @@ router.route('/queue/reorder')
 
 router.route('/queue/reset')
   .delete(protect, admin, resetQueue);
+
+// Individual appointment routes
+router.route('/:id')
+  .get(protect, getAppointmentById)
+  .put(protect, doctorOrSecretary, updateAppointment)
+  .delete(protect, doctorOrSecretary, deleteAppointment);
 
 // Appointment status change routes
 router.route('/:id/check-in')

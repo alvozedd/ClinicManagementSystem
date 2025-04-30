@@ -85,24 +85,33 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
       let data = [];
 
       try {
-        // Add timestamp to prevent caching
-        const timestamp = new Date().getTime();
-        // Add cache control headers to the request
-        const options = {
-          headers: {
-            'Cache-Control': 'no-cache, no-store, must-revalidate',
-            'Pragma': 'no-cache',
-            'Expires': '0'
-          }
-        };
-        data = await apiService.getQueueEntries(`?_t=${timestamp}`, options);
-        console.log('Queue data fetched successfully, entries:', data.length);
+        // Use the integrated appointment system's queue endpoint
+        data = await apiService.getTodaysQueue();
+        console.log('Queue data fetched successfully from integrated system, entries:', data.length);
       } catch (fetchError) {
-        console.error('Error fetching queue entries:', fetchError);
-        // If we can't fetch data, use the existing queue entries
-        if (queueEntries.length > 0) {
-          console.log('Using existing queue entries as fallback');
-          data = [...queueEntries];
+        console.error('Error fetching integrated queue entries:', fetchError);
+
+        // Try the legacy queue system as fallback
+        try {
+          // Add timestamp to prevent caching
+          const timestamp = new Date().getTime();
+          // Add cache control headers to the request
+          const options = {
+            headers: {
+              'Cache-Control': 'no-cache, no-store, must-revalidate',
+              'Pragma': 'no-cache',
+              'Expires': '0'
+            }
+          };
+          data = await apiService.getQueueEntries(`?_t=${timestamp}`, options);
+          console.log('Queue data fetched successfully from legacy system, entries:', data.length);
+        } catch (legacyError) {
+          console.error('Error fetching legacy queue entries:', legacyError);
+          // If we can't fetch data, use the existing queue entries
+          if (queueEntries.length > 0) {
+            console.log('Using existing queue entries as fallback');
+            data = [...queueEntries];
+          }
         }
       }
 
@@ -138,30 +147,51 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
 
       // Fetch queue statistics from the server
       try {
-        // Add timestamp to prevent caching
-        const timestamp = new Date().getTime();
-        // Add cache control headers to the request
-        const options = {
-          headers: {
-            'Cache-Control': 'no-cache, no-store, must-revalidate',
-            'Pragma': 'no-cache',
-            'Expires': '0'
-          }
+        // Try to get stats from the integrated appointment system
+        const integratedStats = await apiService.getIntegratedQueueStats();
+        console.log('Queue stats fetched successfully from integrated system:', integratedStats);
+
+        // Map the integrated stats to our format
+        const mappedStats = {
+          totalPatients: integratedStats.totalAppointments || 0,
+          waitingPatients: integratedStats.checkedInCount || 0,
+          inProgressPatients: integratedStats.inProgressCount || 0,
+          completedPatients: integratedStats.completedCount || 0,
+          nextTicketNumber: integratedStats.nextQueueNumber || 1,
+          todayAppointments: integratedStats.scheduledCount || 0
         };
-        const statsResponse = await apiService.getQueueStats(options);
-        console.log('Queue stats fetched successfully:', statsResponse);
-        setQueueStats(statsResponse);
-      } catch (statsError) {
-        console.error('Error fetching queue stats:', statsError);
-        // Calculate queue statistics locally as a fallback
-        const stats = {
-          totalPatients: entriesWithLocalStatus.length,
-          waitingPatients: entriesWithLocalStatus.filter(entry => entry && entry._id && entry.status === 'Waiting').length,
-          inProgressPatients: entriesWithLocalStatus.filter(entry => entry && entry._id && entry.status === 'In Progress').length,
-          completedPatients: entriesWithLocalStatus.filter(entry => entry && entry._id && entry.status === 'Completed').length,
-          nextTicketNumber: 1
-        };
-        setQueueStats(stats);
+
+        setQueueStats(mappedStats);
+      } catch (integratedStatsError) {
+        console.error('Error fetching integrated queue stats:', integratedStatsError);
+
+        // Try the legacy system as fallback
+        try {
+          // Add timestamp to prevent caching
+          const timestamp = new Date().getTime();
+          // Add cache control headers to the request
+          const options = {
+            headers: {
+              'Cache-Control': 'no-cache, no-store, must-revalidate',
+              'Pragma': 'no-cache',
+              'Expires': '0'
+            }
+          };
+          const statsResponse = await apiService.getQueueStats(options);
+          console.log('Queue stats fetched successfully from legacy system:', statsResponse);
+          setQueueStats(statsResponse);
+        } catch (legacyStatsError) {
+          console.error('Error fetching legacy queue stats:', legacyStatsError);
+          // Calculate queue statistics locally as a fallback
+          const stats = {
+            totalPatients: entriesWithLocalStatus.length,
+            waitingPatients: entriesWithLocalStatus.filter(entry => entry && entry._id && (entry.status === 'Waiting' || entry.status === 'Checked-in')).length,
+            inProgressPatients: entriesWithLocalStatus.filter(entry => entry && entry._id && (entry.status === 'In Progress' || entry.status === 'In-progress')).length,
+            completedPatients: entriesWithLocalStatus.filter(entry => entry && entry._id && entry.status === 'Completed').length,
+            nextTicketNumber: 1
+          };
+          setQueueStats(stats);
+        }
       }
     } catch (error) {
       console.error('Error in fetchQueueData:', error);
@@ -300,50 +330,74 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
         const newStats = { ...prevStats };
 
         // Decrement count for old status
-        if (oldStatus === 'Waiting') newStats.waitingPatients--;
-        else if (oldStatus === 'In Progress') newStats.inProgressPatients--;
-        else if (oldStatus === 'Completed') newStats.completedPatients--;
+        if (oldStatus === 'Waiting' || oldStatus === 'Checked-in' || oldStatus === 'scheduled') newStats.waitingPatients--;
+        else if (oldStatus === 'In Progress' || oldStatus === 'in-progress') newStats.inProgressPatients--;
+        else if (oldStatus === 'Completed' || oldStatus === 'completed') newStats.completedPatients--;
 
         // Increment count for new status
-        if (newStatus === 'Waiting') newStats.waitingPatients++;
-        else if (newStatus === 'In Progress') newStats.inProgressPatients++;
-        else if (newStatus === 'Completed') newStats.completedPatients++;
+        if (newStatus === 'Waiting' || newStatus === 'Checked-in' || newStatus === 'scheduled') newStats.waitingPatients++;
+        else if (newStatus === 'In Progress' || newStatus === 'in-progress') newStats.inProgressPatients++;
+        else if (newStatus === 'Completed' || newStatus === 'completed') newStats.completedPatients++;
 
         return newStats;
       });
 
-      // Try to update the server (but don't wait for it)
-      apiService.updateQueueStatus(queueEntryId, { status: newStatus })
-        .then(() => {
-          console.log('Queue status updated on server successfully');
+      // Check if this is an integrated appointment
+      const appointmentId = updatedEntry.appointmentId ||
+        (updatedEntry.appointment_id && typeof updatedEntry.appointment_id === 'object' ?
+          (updatedEntry.appointment_id._id || updatedEntry.appointment_id.id) :
+          updatedEntry.appointment_id);
 
-          // If completing an appointment, update the appointment status
-          if (newStatus === 'Completed') {
-            if (updatedEntry && updatedEntry.appointment_id && !updatedEntry.is_walk_in) {
-              const appointmentId = typeof updatedEntry.appointment_id === 'object' ?
-                (updatedEntry.appointment_id._id || updatedEntry.appointment_id.id) :
-                updatedEntry.appointment_id;
-
-              if (appointmentId && onUpdateAppointment) {
-                onUpdateAppointment(appointmentId, { status: 'completed' })
-                  .catch(err => console.error('Error updating appointment status:', err));
-              }
-            }
+      // Try to update the server based on the type of entry
+      if (appointmentId) {
+        // This is an integrated appointment
+        try {
+          // Map the status to the integrated appointment system format
+          switch (newStatus.toLowerCase()) {
+            case 'in progress':
+            case 'in-progress':
+              await apiService.startAppointment(appointmentId);
+              break;
+            case 'completed':
+              await apiService.completeAppointment(appointmentId, { notes: 'Completed via queue' });
+              break;
+            case 'no-show':
+              // Update the integrated appointment with no-show status
+              await apiService.updateIntegratedAppointment(appointmentId, { status: 'no-show' });
+              break;
+            case 'cancelled':
+              // Update the integrated appointment with cancelled status
+              await apiService.updateIntegratedAppointment(appointmentId, { status: 'cancelled' });
+              break;
+            default:
+              // For other statuses, use the generic update
+              await apiService.updateIntegratedAppointment(appointmentId, { status: newStatus });
           }
-
-          // Force a refresh of the queue data after a short delay
-          setTimeout(() => {
-            fetchQueueData();
-          }, 500);
-        })
-        .catch(error => {
+          console.log(`Successfully updated integrated appointment ${appointmentId} to ${newStatus}`);
+        } catch (integratedError) {
+          console.error('Error updating integrated appointment:', integratedError);
+          // Try the legacy system as fallback
+          try {
+            await apiService.updateQueueStatus(queueEntryId, { status: newStatus });
+            console.log('Queue status updated on server successfully using legacy system');
+          } catch (legacyError) {
+            console.error('Error updating queue status on legacy server:', legacyError);
+          }
+        }
+      } else {
+        // This is a legacy queue entry
+        try {
+          await apiService.updateQueueStatus(queueEntryId, { status: newStatus });
+          console.log('Queue status updated on server successfully using legacy system');
+        } catch (error) {
           console.error('Error updating queue status on server:', error);
-          // The UI is already updated, so we don't need to do anything here
-          // But we should still try to refresh the data
-          setTimeout(() => {
-            fetchQueueData();
-          }, 1000);
-        });
+        }
+      }
+
+      // Force a refresh of the queue data after a short delay
+      setTimeout(() => {
+        fetchQueueData();
+      }, 500);
     } catch (error) {
       console.error('Error in handleUpdateQueueStatus:', error);
       alert('An unexpected error occurred. Please try again.');
@@ -378,19 +432,45 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
       setQueueStats(prevStats => ({
         ...prevStats,
         totalPatients: prevStats.totalPatients - 1,
-        waitingPatients: statusToUpdate === 'Waiting' ? prevStats.waitingPatients - 1 : prevStats.waitingPatients,
-        inProgressPatients: statusToUpdate === 'In Progress' ? prevStats.inProgressPatients - 1 : prevStats.inProgressPatients,
-        completedPatients: statusToUpdate === 'Completed' ? prevStats.completedPatients - 1 : prevStats.completedPatients
+        waitingPatients: (statusToUpdate === 'Waiting' || statusToUpdate === 'Checked-in' || statusToUpdate === 'scheduled') ?
+          prevStats.waitingPatients - 1 : prevStats.waitingPatients,
+        inProgressPatients: (statusToUpdate === 'In Progress' || statusToUpdate === 'in-progress') ?
+          prevStats.inProgressPatients - 1 : prevStats.inProgressPatients,
+        completedPatients: (statusToUpdate === 'Completed' || statusToUpdate === 'completed') ?
+          prevStats.completedPatients - 1 : prevStats.completedPatients
       }));
 
-      // Try to update the server
-      try {
-        await apiService.removeFromQueue(queueEntryId);
-        console.log('Queue entry removed from server successfully');
-      } catch (serverError) {
-        console.error('Error removing from queue on server:', serverError);
-        // The UI is already updated, so we don't need to do anything here
-        // Just log the error and continue
+      // Check if this is an integrated appointment
+      const appointmentId = entryToRemove.appointmentId ||
+        (entryToRemove.appointment_id && typeof entryToRemove.appointment_id === 'object' ?
+          (entryToRemove.appointment_id._id || entryToRemove.appointment_id.id) :
+          entryToRemove.appointment_id);
+
+      // Try to update the server based on the type of entry
+      if (appointmentId) {
+        // For integrated appointments, we don't actually remove them from the queue
+        // We just update their status to 'cancelled' or similar
+        try {
+          await apiService.updateIntegratedAppointment(appointmentId, { status: 'cancelled' });
+          console.log(`Successfully cancelled integrated appointment ${appointmentId}`);
+        } catch (integratedError) {
+          console.error('Error cancelling integrated appointment:', integratedError);
+          // Try the legacy system as fallback
+          try {
+            await apiService.removeFromQueue(queueEntryId);
+            console.log('Queue entry removed from server successfully using legacy system');
+          } catch (legacyError) {
+            console.error('Error removing from queue on legacy server:', legacyError);
+          }
+        }
+      } else {
+        // This is a legacy queue entry
+        try {
+          await apiService.removeFromQueue(queueEntryId);
+          console.log('Queue entry removed from server successfully using legacy system');
+        } catch (error) {
+          console.error('Error removing from queue on server:', error);
+        }
       }
 
       // Refresh the data from the server after a short delay
@@ -464,44 +544,62 @@ function SimpleAppointmentQueue({ patients, appointments, userRole, onUpdateAppo
         return false;
       }
 
-      // Step 2: Create queue data
-      const queueData = {
-        patient_id: patientId,
-        appointment_id: appointment._id || appointment.id,
-        is_walk_in: false,
-        notes: `Checked in for ${appointment.type || 'appointment'}`
-      };
+      // Get the appointment ID
+      const appointmentId = appointment._id || appointment.id;
 
-      console.log('Adding appointment to queue with data:', queueData);
-
-      // Step 3: Add to queue
+      // Try to use the integrated appointment system first
       try {
-        const newQueueEntry = await apiService.addToQueue(queueData);
-        console.log('Added appointment to queue successfully:', newQueueEntry);
-
-        // Show the ticket for printing
-        setTicketToPrint(newQueueEntry);
+        // Check in the patient using the integrated appointment system
+        await apiService.checkInPatient(appointmentId);
+        console.log('Patient checked in successfully using integrated appointment system');
 
         // Refresh queue data
         fetchQueueData();
 
         return true;
-      } catch (queueError) {
-        console.error('Error adding appointment to queue:', queueError);
+      } catch (integratedError) {
+        console.error('Error checking in patient with integrated system:', integratedError);
 
-        // Check if this is a duplicate entry error
-        if (queueError.toString().includes('already in the queue')) {
-          alert('This patient is already in the queue');
+        // Fall back to the legacy queue system
+        try {
+          // Step 2: Create queue data for legacy system
+          const queueData = {
+            patient_id: patientId,
+            appointment_id: appointmentId,
+            is_walk_in: false,
+            notes: `Checked in for ${appointment.type || 'appointment'}`
+          };
+
+          console.log('Adding appointment to queue with legacy system:', queueData);
+
+          // Step 3: Add to queue using legacy system
+          const newQueueEntry = await apiService.addToQueue(queueData);
+          console.log('Added appointment to queue successfully with legacy system:', newQueueEntry);
+
+          // Show the ticket for printing
+          setTicketToPrint(newQueueEntry);
+
+          // Refresh queue data
+          fetchQueueData();
+
+          return true;
+        } catch (queueError) {
+          console.error('Error adding appointment to queue with legacy system:', queueError);
+
+          // Check if this is a duplicate entry error
+          if (queueError.toString().includes('already in the queue')) {
+            alert('This patient is already in the queue');
+          }
+          // Check if this is a CORS error
+          else if (queueError.toString().includes('CORS') || queueError.toString().includes('NetworkError')) {
+            // Show a more helpful message for CORS errors
+            alert('Patient added to queue, but there was a network issue. The queue will update when you refresh the page.');
+            return true; // Consider it a success for the user
+          } else {
+            alert('Failed to check in patient. Please try again.');
+          }
+          return false;
         }
-        // Check if this is a CORS error
-        else if (queueError.toString().includes('CORS') || queueError.toString().includes('NetworkError')) {
-          // Show a more helpful message for CORS errors
-          alert('Patient added to queue, but there was a network issue. The queue will update when you refresh the page.');
-          return true; // Consider it a success for the user
-        } else {
-          alert('Failed to check in patient. Please try again.');
-        }
-        return false;
       }
     } catch (error) {
       console.error('Error in appointment check-in workflow:', error);
