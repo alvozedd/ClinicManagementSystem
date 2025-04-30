@@ -708,7 +708,272 @@ const apiService = {
     });
   },
 
-  // Queue Management endpoints
+  // Integrated Appointment System endpoints
+  getIntegratedAppointments: async (params = {}) => {
+    try {
+      // Build query string from params
+      const queryParams = Object.entries(params)
+        .filter(([_, value]) => value !== undefined && value !== null && value !== '')
+        .map(([key, value]) => `${key}=${encodeURIComponent(value)}`)
+        .join('&');
+
+      const queryString = queryParams ? `?${queryParams}` : '';
+
+      // Add timestamp to prevent caching
+      const timestamp = new Date().getTime();
+      const separator = queryString ? '&' : '?';
+      const timeParam = `${separator}_t=${timestamp}`;
+
+      console.log('Fetching integrated appointments with query:', queryString + timeParam);
+
+      return await secureFetch(`${API_URL}/integrated-appointments${queryString}${timeParam}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeader(),
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        },
+        credentials: 'include'
+      });
+    } catch (error) {
+      console.error('Error fetching integrated appointments:', error);
+      return []; // Return empty array instead of throwing
+    }
+  },
+
+  getIntegratedAppointmentById: async (id) => {
+    try {
+      return await secureFetch(`${API_URL}/integrated-appointments/${id}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeader(),
+          'Cache-Control': 'no-cache, no-store, must-revalidate'
+        },
+        credentials: 'include'
+      });
+    } catch (error) {
+      console.error(`Error fetching integrated appointment ${id}:`, error);
+      throw error;
+    }
+  },
+
+  createIntegratedAppointment: async (appointmentData) => {
+    try {
+      console.log('Creating integrated appointment with data:', appointmentData);
+
+      // Check if this is a visitor booking (no auth token needed)
+      const isVisitorBooking = appointmentData.createdBy === 'visitor';
+
+      const headers = {
+        'Content-Type': 'application/json',
+        ...(isVisitorBooking ? {} : authHeader()),
+        'Cache-Control': 'no-cache, no-store, must-revalidate'
+      };
+
+      console.log('Creating integrated appointment with headers:', headers, 'isVisitorBooking:', isVisitorBooking);
+
+      // Use the API endpoint
+      const endpoint = `${API_URL}/integrated-appointments`;
+      console.log('Using integrated appointment endpoint:', endpoint);
+
+      // Make the request
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(appointmentData),
+        credentials: 'include'
+      });
+
+      const data = await handleResponse(response);
+      console.log('Successfully created integrated appointment:', data);
+      return data;
+    } catch (error) {
+      console.error('Error creating integrated appointment:', error);
+      throw error;
+    }
+  },
+
+  updateIntegratedAppointment: async (id, appointmentData) => {
+    try {
+      console.log('Updating integrated appointment with ID:', id);
+
+      return await secureFetch(`${API_URL}/integrated-appointments/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeader(),
+          'Cache-Control': 'no-cache, no-store, must-revalidate'
+        },
+        body: JSON.stringify(appointmentData),
+        credentials: 'include'
+      });
+    } catch (error) {
+      console.error('Error updating integrated appointment:', error);
+      throw error;
+    }
+  },
+
+  deleteIntegratedAppointment: async (id) => {
+    try {
+      console.log('Deleting integrated appointment with ID:', id);
+
+      return await secureFetch(`${API_URL}/integrated-appointments/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeader(),
+          'Cache-Control': 'no-cache, no-store, must-revalidate'
+        },
+        credentials: 'include'
+      });
+    } catch (error) {
+      console.error('Error deleting integrated appointment:', error);
+      throw error;
+    }
+  },
+
+  // Queue Management with Integrated Appointments
+  getTodaysQueue: async () => {
+    try {
+      console.log('Fetching today\'s queue');
+
+      // Add timestamp to prevent caching
+      const timestamp = new Date().getTime();
+
+      return await secureFetch(`${API_URL}/integrated-appointments/queue?_t=${timestamp}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeader(),
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        },
+        credentials: 'include'
+      });
+    } catch (error) {
+      console.error('Error fetching today\'s queue:', error);
+      return []; // Return empty array instead of throwing
+    }
+  },
+
+  getIntegratedQueueStats: async () => {
+    try {
+      console.log('Fetching integrated queue stats');
+
+      // Add timestamp to prevent caching
+      const timestamp = new Date().getTime();
+
+      return await secureFetch(`${API_URL}/integrated-appointments/queue/stats?_t=${timestamp}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeader(),
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        },
+        credentials: 'include'
+      });
+    } catch (error) {
+      console.error('Error fetching integrated queue stats:', error);
+      return {
+        totalAppointments: 0,
+        checkedInCount: 0,
+        inProgressCount: 0,
+        completedCount: 0,
+        cancelledCount: 0,
+        noShowCount: 0,
+        walkInCount: 0,
+        scheduledCount: 0,
+        nextQueueNumber: 1,
+        avgServiceTime: 0
+      };
+    }
+  },
+
+  checkInPatient: async (id) => {
+    try {
+      console.log('Checking in patient with appointment ID:', id);
+
+      return await secureFetch(`${API_URL}/integrated-appointments/${id}/check-in`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeader(),
+          'Cache-Control': 'no-cache, no-store, must-revalidate'
+        },
+        credentials: 'include'
+      });
+    } catch (error) {
+      console.error('Error checking in patient:', error);
+      throw error;
+    }
+  },
+
+  startAppointment: async (id) => {
+    try {
+      console.log('Starting appointment with ID:', id);
+
+      return await secureFetch(`${API_URL}/integrated-appointments/${id}/start`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeader(),
+          'Cache-Control': 'no-cache, no-store, must-revalidate'
+        },
+        credentials: 'include'
+      });
+    } catch (error) {
+      console.error('Error starting appointment:', error);
+      throw error;
+    }
+  },
+
+  completeAppointment: async (id, diagnosisData) => {
+    try {
+      console.log('Completing appointment with ID:', id);
+
+      return await secureFetch(`${API_URL}/integrated-appointments/${id}/complete`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeader(),
+          'Cache-Control': 'no-cache, no-store, must-revalidate'
+        },
+        body: JSON.stringify({ diagnosis: diagnosisData }),
+        credentials: 'include'
+      });
+    } catch (error) {
+      console.error('Error completing appointment:', error);
+      throw error;
+    }
+  },
+
+  reorderIntegratedQueue: async (queueOrder) => {
+    try {
+      console.log('Reordering queue with data:', queueOrder);
+
+      return await secureFetch(`${API_URL}/integrated-appointments/queue/reorder`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeader(),
+          'Cache-Control': 'no-cache, no-store, must-revalidate'
+        },
+        body: JSON.stringify({ queueOrder }),
+        credentials: 'include'
+      });
+    } catch (error) {
+      console.error('Error reordering queue:', error);
+      throw error;
+    }
+  },
+
+  // Queue Management endpoints (legacy)
   getQueueEntries: async (queryParams = '', options = {}) => {
     try {
       console.log('Fetching queue entries');

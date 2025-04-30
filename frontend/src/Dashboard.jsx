@@ -4,6 +4,8 @@ import AuthContext from './context/AuthContext'
 import apiService from './utils/apiService'
 import SimplifiedDoctorDashboard from './components/SimplifiedDoctorDashboard'
 import SimplifiedSecretaryDashboard from './components/SimplifiedSecretaryDashboard'
+import IntegratedDoctorDashboard from './components/IntegratedDoctorDashboard'
+import IntegratedSecretaryDashboard from './components/IntegratedSecretaryDashboard'
 import AdminDashboard from './components/AdminDashboard'
 import { FaSignOutAlt, FaSync, FaUserMd, FaUserTie } from 'react-icons/fa'
 import {
@@ -694,10 +696,10 @@ function Dashboard() {
       );
     }
 
-    // For doctors, use the simplified doctor dashboard
+    // For doctors, use the integrated doctor dashboard
     if (userInfo.role === 'doctor') {
       return (
-        <SimplifiedDoctorDashboard
+        <IntegratedDoctorDashboard
           patients={patientsData}
           appointments={appointmentsData}
           onUpdatePatient={handleUpdatePatient}
@@ -711,10 +713,10 @@ function Dashboard() {
       );
     }
 
-    // For secretaries, use the simplified secretary dashboard
+    // For secretaries, use the integrated secretary dashboard
     if (userInfo.role === 'secretary') {
       return (
-        <SimplifiedSecretaryDashboard
+        <IntegratedSecretaryDashboard
           patients={patientsData}
           appointments={appointmentsData}
           onUpdatePatient={handleUpdatePatient}
