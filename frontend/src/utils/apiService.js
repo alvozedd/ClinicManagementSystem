@@ -791,7 +791,14 @@ const apiService = {
 
   addToQueue: async (queueData) => {
     try {
+      // Ensure patient_id is properly formatted
+      if (typeof queueData.patient_id === 'object' && queueData.patient_id._id) {
+        queueData.patient_id = queueData.patient_id._id;
+      }
+
       console.log('Adding to queue with data:', queueData);
+      console.log('Patient ID type:', typeof queueData.patient_id);
+      console.log('Patient ID value:', queueData.patient_id);
 
       // Get the next ticket number from the server
       let nextTicketNumber = 1;
@@ -803,48 +810,68 @@ const apiService = {
         console.warn('Could not get next ticket number from server, using default 1:', statsError);
       }
 
-      // Use the API endpoint directly
-      console.log('Using queue endpoint for adding:', `${API_URL}/queue`);
+      // Prepare the request data
+      const requestData = {
+        ...queueData,
+        ticket_number: nextTicketNumber
+      };
 
-      // Try with secureFetch first
+      // Get user info and token
+      const userInfo = secureStorage.getItem('userInfo') || {};
+      const token = userInfo.token;
+
+      if (!token) {
+        console.error('No authentication token found');
+        throw new Error('Authentication required. Please log in again.');
+      }
+
+      // Try direct API call first with explicit headers
       try {
-        const serverQueueEntry = await secureFetch(`${API_URL}/queue`, {
+        console.log('Attempt 1: Direct API call with explicit headers');
+        const response = await fetch(`${API_URL}/queue`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            ...authHeader(),
+            'Authorization': `Bearer ${token}`,
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache'
           },
-          body: JSON.stringify(queueData),
-          credentials: 'include', // Include cookies for refresh token
+          body: JSON.stringify(requestData),
+          credentials: 'include',
+          mode: 'cors'
         });
 
-        console.log('Successfully added to queue with secureFetch:', serverQueueEntry);
+        if (response.ok) {
+          const serverQueueEntry = await response.json();
+          console.log('Successfully added to queue with direct API call:', serverQueueEntry);
 
-        if (!serverQueueEntry || !serverQueueEntry._id) {
-          throw new Error('Invalid server response - no queue entry ID');
+          if (!serverQueueEntry || !serverQueueEntry._id) {
+            throw new Error('Invalid server response - no queue entry ID');
+          }
+
+          return serverQueueEntry;
+        } else {
+          const errorText = await response.text();
+          console.warn(`API call failed with status ${response.status}: ${errorText}`);
+          throw new Error(`API call failed: ${response.status} ${response.statusText}`);
         }
-
-        return serverQueueEntry;
       } catch (firstError) {
-        console.warn('First attempt failed with secureFetch, trying direct API call:', firstError);
+        console.warn('First attempt failed, trying with secureFetch:', firstError);
 
-        // Try the non-API endpoint as fallback
-        const baseUrl = API_URL.replace('/api', '');
-        console.log('Using fallback queue endpoint:', `${baseUrl}/queue`);
-
-        // Try with credentials
+        // Try with secureFetch as second attempt
         try {
-          const response = await fetch(`${baseUrl}/queue`, {
+          console.log('Attempt 2: Using secureFetch');
+          const serverQueueEntry = await secureFetch(`${API_URL}/queue`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
               ...authHeader(),
             },
-            body: JSON.stringify(queueData),
-            credentials: 'include', // Include cookies for refresh token
+            body: JSON.stringify(requestData),
+            credentials: 'include'
           });
-          const serverQueueEntry = await handleResponse(response);
-          console.log('Successfully added to queue with credentials:', serverQueueEntry);
+
+          console.log('Successfully added to queue with secureFetch:', serverQueueEntry);
 
           if (!serverQueueEntry || !serverQueueEntry._id) {
             throw new Error('Invalid server response - no queue entry ID');
@@ -852,30 +879,44 @@ const apiService = {
 
           return serverQueueEntry;
         } catch (secondError) {
-          console.warn('Second attempt failed, trying without credentials:', secondError);
+          console.warn('Second attempt failed, trying non-API endpoint:', secondError);
 
-          // Last try: without credentials
-          const response2 = await fetch(`${baseUrl}/queue`, {
+          // Try the non-API endpoint as final fallback
+          const baseUrl = API_URL.replace('/api', '');
+          console.log('Attempt 3: Using non-API endpoint:', `${baseUrl}/queue`);
+
+          const response = await fetch(`${baseUrl}/queue`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              ...authHeader(),
+              'Authorization': `Bearer ${token}`,
+              'Cache-Control': 'no-cache',
+              'Pragma': 'no-cache'
             },
-            body: JSON.stringify(queueData),
+            body: JSON.stringify(requestData),
+            credentials: 'include',
+            mode: 'cors'
           });
-          const serverQueueEntry = await handleResponse(response2);
-          console.log('Successfully added to queue without credentials:', serverQueueEntry);
 
-          if (!serverQueueEntry || !serverQueueEntry._id) {
-            throw new Error('Invalid server response - no queue entry ID');
+          if (response.ok) {
+            const serverQueueEntry = await response.json();
+            console.log('Successfully added to queue with non-API endpoint:', serverQueueEntry);
+
+            if (!serverQueueEntry || !serverQueueEntry._id) {
+              throw new Error('Invalid server response - no queue entry ID');
+            }
+
+            return serverQueueEntry;
+          } else {
+            const errorText = await response.text();
+            console.error(`All attempts failed. Last error: ${response.status} ${response.statusText} - ${errorText}`);
+            throw new Error('All attempts to add to queue failed. Please try again later.');
           }
-
-          return serverQueueEntry;
         }
       }
     } catch (error) {
       console.error('Error adding to queue:', error);
-      throw new Error('Failed to add to queue. Please check your network connection and try again.');
+      throw new Error(`Failed to add to queue: ${error.message}`);
     }
   },
 
@@ -904,39 +945,91 @@ const apiService = {
   // Alias for updateQueueEntry with status-only updates
   updateQueueStatus: async (id, statusData) => {
     try {
-      // Use the non-API endpoint for queue to avoid CORS issues
-      const baseUrl = API_URL.replace('/api', '');
-      console.log('Using queue endpoint for status update:', `${baseUrl}/queue/${id}`);
+      // Get user info and token
+      const userInfo = secureStorage.getItem('userInfo') || {};
+      const token = userInfo.token;
 
-      // First try: Standard fetch with credentials
+      if (!token) {
+        console.error('No authentication token found');
+        throw new Error('Authentication required. Please log in again.');
+      }
+
+      console.log(`Updating queue entry ${id} with status:`, statusData);
+
+      // Try secureFetch first
       try {
-        const response = await fetch(`${baseUrl}/queue/${id}`, {
+        console.log('Attempt 1: Using secureFetch');
+        return await secureFetch(`${API_URL}/queue/${id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
             ...authHeader(),
           },
           body: JSON.stringify(statusData),
-          credentials: 'include', // Include cookies for refresh token
+          credentials: 'include'
         });
-        return handleResponse(response);
-      } catch (error) {
-        console.warn('First attempt failed, trying without credentials:', error);
+      } catch (firstError) {
+        console.warn('First attempt failed, trying direct API call:', firstError);
 
-        // Second try: Without credentials
-        const response2 = await fetch(`${baseUrl}/queue/${id}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            ...authHeader(),
-          },
-          body: JSON.stringify(statusData),
-        });
-        return handleResponse(response2);
+        // Try direct API call with explicit headers
+        try {
+          console.log('Attempt 2: Direct API call with explicit headers');
+          const response = await fetch(`${API_URL}/queue/${id}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+              'Cache-Control': 'no-cache',
+              'Pragma': 'no-cache'
+            },
+            body: JSON.stringify(statusData),
+            credentials: 'include',
+            mode: 'cors'
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            console.log('Successfully updated queue status with direct API call:', data);
+            return data;
+          } else {
+            const errorText = await response.text();
+            console.warn(`API call failed with status ${response.status}: ${errorText}`);
+            throw new Error(`API call failed: ${response.status} ${response.statusText}`);
+          }
+        } catch (secondError) {
+          console.warn('Second attempt failed, trying non-API endpoint:', secondError);
+
+          // Try the non-API endpoint as final fallback
+          const baseUrl = API_URL.replace('/api', '');
+          console.log('Attempt 3: Using non-API endpoint:', `${baseUrl}/queue/${id}`);
+
+          const response = await fetch(`${baseUrl}/queue/${id}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+              'Cache-Control': 'no-cache',
+              'Pragma': 'no-cache'
+            },
+            body: JSON.stringify(statusData),
+            credentials: 'include',
+            mode: 'cors'
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            console.log('Successfully updated queue status with non-API endpoint:', data);
+            return data;
+          } else {
+            const errorText = await response.text();
+            console.error(`All attempts failed. Last error: ${response.status} ${response.statusText} - ${errorText}`);
+            throw new Error('All attempts to update queue status failed. Please try again later.');
+          }
+        }
       }
     } catch (error) {
       console.error('Error updating queue status:', error);
-      throw new Error('Failed to update queue status. Please check your network connection and try again.');
+      throw new Error(`Failed to update queue status: ${error.message}`);
     }
   },
 

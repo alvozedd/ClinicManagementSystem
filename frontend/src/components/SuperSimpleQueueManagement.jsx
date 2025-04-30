@@ -191,17 +191,40 @@ function SuperSimpleQueueManagement({ patients, userRole }) {
       console.log('Cleared existing queue entries before checking in appointment');
 
       // Step 2: Create queue data
+      // Ensure patientId is properly formatted
+      let formattedPatientId = patientId;
+
+      // Handle case where patientId is an object
+      if (typeof patientId === 'object') {
+        formattedPatientId = patientId._id || patientId.id || null;
+        console.log('Formatted patient ID from object:', formattedPatientId);
+      }
+
+      // Handle case where appointment has patient_id as object
+      if (!formattedPatientId && appointment.patient_id && typeof appointment.patient_id === 'object') {
+        formattedPatientId = appointment.patient_id._id || appointment.patient_id.id;
+        console.log('Using patient_id from appointment object:', formattedPatientId);
+      }
+
+      // Final fallback to string ID
+      if (!formattedPatientId && appointment.patient_id && typeof appointment.patient_id === 'string') {
+        formattedPatientId = appointment.patient_id;
+        console.log('Using patient_id string from appointment:', formattedPatientId);
+      }
+
+      if (!formattedPatientId) {
+        console.error('Could not determine patient ID from:', { patientId, appointment });
+        throw new Error('Invalid patient ID');
+      }
+
       const queueData = {
-        patient_id: patientId,
+        patient_id: formattedPatientId,
         appointment_id: appointment._id || appointment.id,
         is_walk_in: false,
         notes: `Checked in for ${appointment.type || 'appointment'}`
       };
 
-      // Ensure patient_id is a string
-      if (typeof queueData.patient_id === 'object' && queueData.patient_id._id) {
-        queueData.patient_id = queueData.patient_id._id;
-      }
+      console.log('Final queue data:', queueData);
 
       console.log('Adding appointment to queue with data:', queueData);
 

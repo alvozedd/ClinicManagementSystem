@@ -80,15 +80,37 @@ function TodaysAppointments({ onViewPatient, onEditAppointment, onDeleteAppointm
   // Handle adding an appointment to the queue
   const handleAddToQueue = async (appointment) => {
     try {
+      // Format patient ID correctly
+      let patientId = null;
+
+      // Try to get patient ID from different possible sources
+      if (appointment.patientId) {
+        patientId = appointment.patientId;
+      } else if (appointment.patient_id) {
+        patientId = appointment.patient_id;
+      } else if (appointment.patient && appointment.patient._id) {
+        patientId = appointment.patient._id;
+      }
+
+      // Handle case where patient ID is an object
+      if (typeof patientId === 'object' && patientId !== null) {
+        patientId = patientId._id || patientId.id;
+      }
+
+      if (!patientId) {
+        console.error('Could not determine patient ID from appointment:', appointment);
+        throw new Error('No patient ID found for this appointment');
+      }
+
       // Create queue data
       const queueData = {
-        patient_id: appointment.patientId || appointment.patient_id,
+        patient_id: patientId,
         appointment_id: appointment._id || appointment.id,
         is_walk_in: false,
         notes: `Checked in for ${appointment.type || 'appointment'}`
       };
 
-      console.log('Adding to queue with patient_id:', queueData.patient_id);
+      console.log('Adding to queue with patient_id:', queueData.patient_id, 'type:', typeof queueData.patient_id);
 
       // Add to queue
       const newQueueEntry = await apiService.addToQueue(queueData);
