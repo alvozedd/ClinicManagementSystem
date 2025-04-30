@@ -68,24 +68,30 @@ app.use((req, res, next) => {
   // Ensure the Vary header is set
   res.setHeader('Vary', 'Origin');
 
-  // Ensure the response includes the CORS headers
-  const oldSend = res.send;
-  res.send = function(data) {
-    // Check if CORS headers are already set
-    if (!res.get('Access-Control-Allow-Origin')) {
-      const origin = req.headers.origin;
-      if (origin) {
-        // Always allow the origin that sent the request
-        res.header('Access-Control-Allow-Origin', origin);
-        res.header('Access-Control-Allow-Credentials', 'true');
-        console.log(`Setting CORS headers for origin: ${origin}`);
-      } else {
-        res.header('Access-Control-Allow-Origin', '*');
-        console.log('Setting CORS headers with wildcard origin');
-      }
-    }
-    return oldSend.apply(res, arguments);
-  };
+  // Always set CORS headers for all responses
+  const origin = req.headers.origin;
+
+  // If there's an origin header, use it
+  if (origin) {
+    res.header('Access-Control-Allow-Origin', origin);
+    res.header('Access-Control-Allow-Credentials', 'true');
+    console.log(`Setting CORS headers for origin: ${origin}`);
+  } else {
+    // For requests without origin, use wildcard
+    res.header('Access-Control-Allow-Origin', '*');
+    console.log('Setting CORS headers with wildcard origin');
+  }
+
+  // Set other CORS headers
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+
+  // Handle preflight requests
+  if (req.method === 'OPTIONS') {
+    console.log('Handling OPTIONS preflight request');
+    return res.status(200).end();
+  }
+
   next();
 });
 

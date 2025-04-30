@@ -15,8 +15,8 @@ const allowedOrigins = [
   'https://clinicmanagementsystem-production-081b.up.railway.app'
 ];
 
-// For development or production, you can enable this to allow all origins
-const ALLOW_ALL_ORIGINS = process.env.NODE_ENV === 'development' || process.env.ALLOW_ALL_ORIGINS === 'true' || true; // Temporarily set to true to fix CORS issues
+// Always allow all origins to fix CORS issues
+const ALLOW_ALL_ORIGINS = true;
 
 // Comprehensive list of headers to allow
 const allowedHeaders = [
