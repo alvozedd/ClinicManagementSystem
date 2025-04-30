@@ -10,7 +10,7 @@ const { enforceHttps, addSecurityHeaders, secureCoookieSettings } = require('./m
 // CSRF middleware completely removed
 const { addRequestId } = require('./middleware/requestIdMiddleware');
 const { conditionalRequestLogger } = require('./middleware/requestLoggingMiddleware');
-const corsMiddleware = require('./middleware/corsMiddleware');
+const { corsMiddleware, allowedHeaders, allowedMethods } = require('./middleware/corsMiddleware');
 const { checkRequiredEnvVars } = require('./utils/checkEnv');
 const userRoutes = require('./routes/userRoutes');
 const patientRoutes = require('./routes/patientRoutes');
@@ -62,37 +62,38 @@ app.use(secureCoookieSettings); // Ensure cookies are secure
 // Apply custom CORS middleware (must be before other middleware)
 app.use(corsMiddleware);
 
-// Also apply the cors package for good measure
-app.use(cors({
-  origin: function(origin, callback) {
-    // Allow requests with no origin (like mobile apps, curl, etc)
-    if (!origin) return callback(null, true);
-
-    // Check if origin is in allowed list
-    const allowedOrigins = ['https://urohealthltd.netlify.app', 'https://www.urohealthltd.netlify.app', 'http://localhost:3000', 'http://localhost:5173'];
-
-    // If ALLOW_ALL_ORIGINS is true, allow all origins
-    if (process.env.NODE_ENV === 'development' || process.env.ALLOW_ALL_ORIGINS === 'true') {
-      return callback(null, true);
-    }
-
-    if (allowedOrigins.indexOf(origin) !== -1) {
-      return callback(null, true);
-    } else {
-      console.log('Origin not allowed by CORS:', origin);
-      return callback(null, true); // Allow anyway for now to fix CORS issues
-    }
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization', 'Cache-Control', 'Pragma', 'Expires'],
-  optionsSuccessStatus: 200 // Some legacy browsers (IE11) choke on 204
-}));
+// We're using our custom CORS middleware instead of the cors package
+// This gives us more control over the CORS headers
 
 // Handle preflight requests at the application level
 app.options('*', (req, res) => {
+  // Set CORS headers for OPTIONS requests
+  const origin = req.headers.origin;
+
+  // Use the imported allowedHeaders and allowedMethods
+
+  // Set the Vary header
+  res.header('Vary', 'Origin');
+
+  // Set allowed origin
+  if (origin) {
+    const allowedOrigins = ['https://urohealthltd.netlify.app', 'https://www.urohealthltd.netlify.app', 'http://localhost:3000', 'http://localhost:5173'];
+
+    if (allowedOrigins.includes(origin) || process.env.NODE_ENV === 'development' || process.env.ALLOW_ALL_ORIGINS === 'true') {
+      res.header('Access-Control-Allow-Origin', origin);
+      res.header('Access-Control-Allow-Credentials', 'true');
+    }
+  } else {
+    res.header('Access-Control-Allow-Origin', '*');
+  }
+
+  // Set other CORS headers
+  res.header('Access-Control-Allow-Methods', allowedMethods.join(', '));
+  res.header('Access-Control-Allow-Headers', allowedHeaders.join(', '));
+  res.header('Access-Control-Max-Age', '86400'); // 24 hours
+
   res.status(200).end();
-  console.log('Responded to OPTIONS request');
+  console.log(`Responded to OPTIONS request from ${origin || 'unknown origin'}`);
 });
 
 // Parse JSON bodies
@@ -107,22 +108,39 @@ console.log('CSRF middleware completely removed');
 // Helper function to add CORS headers to non-API routes
 const addCorsHeaders = (req, res, next) => {
   const origin = req.headers.origin;
-  const allowedOrigins = [
-    'https://urohealthltd.netlify.app',
-    'https://www.urohealthltd.netlify.app',
-    'http://localhost:3000',
-    'http://localhost:5173'
-  ];
 
-  if (allowedOrigins.includes(origin)) {
-    res.header('Access-Control-Allow-Origin', origin);
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, Cache-Control, Pragma, Expires');
-    res.header('Access-Control-Allow-Credentials', 'true');
-    console.log(`CORS headers set for non-API route: ${req.path} from origin: ${origin}`);
+  // Log the request for debugging
+  console.log(`CORS headers for non-API route: ${req.method} ${req.path} from origin: ${origin || 'unknown'}`);
+
+  // Set the Vary header
+  res.header('Vary', 'Origin');
+
+  // Set allowed origin
+  if (origin) {
+    const allowedOrigins = [
+      'https://urohealthltd.netlify.app',
+      'https://www.urohealthltd.netlify.app',
+      'http://localhost:3000',
+      'http://localhost:5173'
+    ];
+
+    if (allowedOrigins.includes(origin) || process.env.NODE_ENV === 'development' || process.env.ALLOW_ALL_ORIGINS === 'true') {
+      res.header('Access-Control-Allow-Origin', origin);
+      res.header('Access-Control-Allow-Credentials', 'true');
+      console.log(`CORS headers set for non-API route: ${req.path} from origin: ${origin}`);
+    } else {
+      console.log(`Non-API route ${req.path} accessed from non-allowed origin: ${origin}`);
+    }
   } else {
-    console.log(`Non-API route ${req.path} accessed from non-allowed origin: ${origin || 'unknown'}`);
+    // For requests without origin, use wildcard
+    res.header('Access-Control-Allow-Origin', '*');
+    console.log(`CORS headers set for non-API route without origin: ${req.path}`);
   }
+
+  // Set other CORS headers
+  res.header('Access-Control-Allow-Methods', allowedMethods.join(', '));
+  res.header('Access-Control-Allow-Headers', allowedHeaders.join(', '));
+  res.header('Access-Control-Max-Age', '86400'); // 24 hours
 
   // Handle preflight requests
   if (req.method === 'OPTIONS') {
@@ -587,10 +605,27 @@ app.delete('/content/:id', (req, res) => {
 app.get('/queue', (req, res) => {
   console.log('Received GET request at /queue, forwarding to controller directly');
   // Set CORS headers explicitly for this route
-  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, Cache-Control, Pragma, Expires');
-  res.header('Access-Control-Allow-Credentials', 'true');
+  const origin = req.headers.origin;
+
+  // Set the Vary header
+  res.header('Vary', 'Origin');
+
+  // Set allowed origin
+  if (origin) {
+    const allowedOrigins = ['https://urohealthltd.netlify.app', 'https://www.urohealthltd.netlify.app', 'http://localhost:3000', 'http://localhost:5173'];
+
+    if (allowedOrigins.includes(origin) || process.env.NODE_ENV === 'development' || process.env.ALLOW_ALL_ORIGINS === 'true') {
+      res.header('Access-Control-Allow-Origin', origin);
+      res.header('Access-Control-Allow-Credentials', 'true');
+    }
+  } else {
+    res.header('Access-Control-Allow-Origin', '*');
+  }
+
+  // Set other CORS headers
+  res.header('Access-Control-Allow-Methods', allowedMethods.join(', '));
+  res.header('Access-Control-Allow-Headers', allowedHeaders.join(', '));
+  res.header('Access-Control-Max-Age', '86400'); // 24 hours
 
   // Import the controller directly
   const { getQueueEntries } = require('./controllers/queueController');
@@ -603,10 +638,27 @@ app.get('/queue', (req, res) => {
 app.post('/queue', (req, res) => {
   console.log('Received POST request at /queue, forwarding to controller directly');
   // Set CORS headers explicitly for this route
-  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, Cache-Control, Pragma, Expires');
-  res.header('Access-Control-Allow-Credentials', 'true');
+  const origin = req.headers.origin;
+
+  // Set the Vary header
+  res.header('Vary', 'Origin');
+
+  // Set allowed origin
+  if (origin) {
+    const allowedOrigins = ['https://urohealthltd.netlify.app', 'https://www.urohealthltd.netlify.app', 'http://localhost:3000', 'http://localhost:5173'];
+
+    if (allowedOrigins.includes(origin) || process.env.NODE_ENV === 'development' || process.env.ALLOW_ALL_ORIGINS === 'true') {
+      res.header('Access-Control-Allow-Origin', origin);
+      res.header('Access-Control-Allow-Credentials', 'true');
+    }
+  } else {
+    res.header('Access-Control-Allow-Origin', '*');
+  }
+
+  // Set other CORS headers
+  res.header('Access-Control-Allow-Methods', allowedMethods.join(', '));
+  res.header('Access-Control-Allow-Headers', allowedHeaders.join(', '));
+  res.header('Access-Control-Max-Age', '86400'); // 24 hours
 
   // Import the controller directly
   const { addToQueue } = require('./controllers/queueController');
@@ -685,7 +737,7 @@ app.get('/', (req, res) => {
 app.use(notFound);
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 
 const server = app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
