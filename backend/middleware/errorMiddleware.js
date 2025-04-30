@@ -15,8 +15,12 @@ const notFound = (req, res, next) => {
   const origin = req.headers.origin;
   const allowedOrigins = [
     'https://urohealthltd.netlify.app',
+    'https://www.urohealthltd.netlify.app',
     'http://localhost:3000',
-    'http://localhost:5173'
+    'http://localhost:5173',
+    'https://urohealthcentral.netlify.app',
+    'https://www.urohealthcentral.netlify.app',
+    'https://clinicmanagementsystem-production-081b.up.railway.app'
   ];
 
   if (allowedOrigins.includes(origin) || !origin) {
@@ -93,8 +97,12 @@ const errorHandler = (err, req, res, next) => {
   const origin = req.headers.origin;
   const allowedOrigins = [
     'https://urohealthltd.netlify.app',
+    'https://www.urohealthltd.netlify.app',
     'http://localhost:3000',
-    'http://localhost:5173'
+    'http://localhost:5173',
+    'https://urohealthcentral.netlify.app',
+    'https://www.urohealthcentral.netlify.app',
+    'https://clinicmanagementsystem-production-081b.up.railway.app'
   ];
 
   if (allowedOrigins.includes(origin) || !origin) {

@@ -63,6 +63,29 @@ app.use(secureCoookieSettings); // Ensure cookies are secure
 // Apply custom CORS middleware (must be before other middleware)
 app.use(corsMiddleware);
 
+// Set CORS headers for all responses
+app.use((req, res, next) => {
+  // Ensure the Vary header is set
+  res.setHeader('Vary', 'Origin');
+
+  // Ensure the response includes the CORS headers
+  const oldSend = res.send;
+  res.send = function(data) {
+    // Check if CORS headers are already set
+    if (!res.get('Access-Control-Allow-Origin')) {
+      const origin = req.headers.origin;
+      if (origin) {
+        res.header('Access-Control-Allow-Origin', origin);
+        res.header('Access-Control-Allow-Credentials', 'true');
+      } else {
+        res.header('Access-Control-Allow-Origin', '*');
+      }
+    }
+    return oldSend.apply(res, arguments);
+  };
+  next();
+});
+
 // We're using our custom CORS middleware instead of the cors package
 // This gives us more control over the CORS headers
 

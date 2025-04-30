@@ -9,7 +9,9 @@ const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:5173',
   'https://urohealthcentral.netlify.app',
-  'https://www.urohealthcentral.netlify.app'
+  'https://www.urohealthcentral.netlify.app',
+  // Add the Railway domain to allow server-to-server communication
+  'https://clinicmanagementsystem-production-081b.up.railway.app'
 ];
 
 // For development, you can enable this to allow all origins
@@ -60,46 +62,49 @@ const corsMiddleware = (req, res, next) => {
   // Set the Vary header to inform caches that the response varies by Origin
   res.header('Vary', 'Origin');
 
+  // Always set these headers for all responses
+  res.header('Access-Control-Allow-Methods', allowedMethods.join(', '));
+  res.header('Access-Control-Allow-Headers', allowedHeaders.join(', '));
+  res.header('Access-Control-Max-Age', '86400'); // 24 hours
+
   // In development or if ALLOW_ALL_ORIGINS is true, allow all origins
   if (ALLOW_ALL_ORIGINS) {
     // For requests with credentials, we must specify the exact origin
     if (origin) {
       res.header('Access-Control-Allow-Origin', origin);
+      res.header('Access-Control-Allow-Credentials', 'true');
     } else {
       // For requests without origin, use wildcard
       res.header('Access-Control-Allow-Origin', '*');
     }
-    res.header('Access-Control-Allow-Methods', allowedMethods.join(', '));
-    res.header('Access-Control-Allow-Headers', allowedHeaders.join(', '));
-    res.header('Access-Control-Allow-Credentials', 'true');
-    res.header('Access-Control-Max-Age', '86400'); // 24 hours
-
     console.log('CORS: Development mode - allowing all origins');
   }
   // Check if the origin is in our allowed list
-  else if (allowedOrigins.includes(origin)) {
+  else if (origin && allowedOrigins.includes(origin)) {
     // Set CORS headers - never use wildcard with credentials
     res.header('Access-Control-Allow-Origin', origin);
-    res.header('Access-Control-Allow-Methods', allowedMethods.join(', '));
-    res.header('Access-Control-Allow-Headers', allowedHeaders.join(', '));
     res.header('Access-Control-Allow-Credentials', 'true');
-    res.header('Access-Control-Max-Age', '86400'); // 24 hours
 
     // Log CORS headers for debugging
     console.log(`CORS headers set for allowed origin: ${origin}`);
   } else {
     // For requests without origin (like curl) or non-allowed origins
-    // We still need to set some CORS headers for OPTIONS requests to work
-    res.header('Access-Control-Allow-Methods', allowedMethods.join(', '));
-    res.header('Access-Control-Allow-Headers', allowedHeaders.join(', '));
-
-    // For API testing tools and server-to-server requests
     if (!origin) {
       console.log('No origin in request, setting minimal CORS headers');
       // For requests without origin, use wildcard
       res.header('Access-Control-Allow-Origin', '*');
     } else {
-      console.log(`Origin not allowed: ${origin}, but setting headers for OPTIONS requests`);
+      // For non-allowed origins, we'll still set the origin for OPTIONS requests
+      // This helps with browser preflight requests
+      console.log(`Origin not in allowed list: ${origin}, setting CORS headers for OPTIONS requests`);
+      // For better security, we'll only set the origin for OPTIONS requests
+      if (req.method === 'OPTIONS') {
+        res.header('Access-Control-Allow-Origin', origin);
+      } else {
+        // For actual requests, we'll use a wildcard
+        // This allows the preflight to succeed but actual requests will be blocked
+        res.header('Access-Control-Allow-Origin', '*');
+      }
     }
   }
 
