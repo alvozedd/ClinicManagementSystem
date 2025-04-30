@@ -177,30 +177,69 @@ const refreshAccessToken = async () => {
     // Get the session ID from secure storage
     const sessionId = secureStorage.getItem('sessionId');
 
-    const response = await fetch(`${API_URL}/users/refresh-token`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include', // Include cookies
-      body: sessionId ? JSON.stringify({ sessionId }) : undefined,
-    });
+    // First try with the API prefix (standard path)
+    console.log(`Sending refresh token request to: ${API_URL}/users/refresh-token`);
+    try {
+      const response = await fetch(`${API_URL}/users/refresh-token`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include', // Include cookies
+        body: sessionId ? JSON.stringify({ sessionId }) : undefined,
+        mode: 'cors'
+      });
 
-    const data = await handleResponse(response);
+      const data = await handleResponse(response);
+      console.log('Refresh token successful with API path');
 
-    // Update the token in secure storage
-    let userInfo = secureStorage.getItem('userInfo') || {};
-    userInfo.token = data.token;
+      // Update the token in secure storage
+      let userInfo = secureStorage.getItem('userInfo') || {};
+      userInfo.token = data.token;
 
-    // Update session ID if it was returned
-    if (data.sessionId) {
-      secureStorage.setItem('sessionId', data.sessionId);
+      // Update session ID if it was returned
+      if (data.sessionId) {
+        secureStorage.setItem('sessionId', data.sessionId);
+      }
+
+      secureStorage.setItem('userInfo', userInfo);
+
+      // Also remove any legacy data in localStorage
+      localStorage.removeItem('userInfo');
+
+      return data.token;
+    } catch (apiPathError) {
+      console.warn('Refresh token failed with API path, trying without /api prefix:', apiPathError);
+
+      // If that fails, try without the API prefix (fallback path)
+      const baseUrl = API_URL.replace('/api', '');
+      console.log(`Sending refresh token request to fallback path: ${baseUrl}/users/refresh-token`);
+
+      const response = await fetch(`${baseUrl}/users/refresh-token`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include', // Include cookies
+        body: sessionId ? JSON.stringify({ sessionId }) : undefined,
+        mode: 'cors'
+      });
+
+      const data = await handleResponse(response);
+      console.log('Refresh token successful with fallback path');
+
+      // Update the token in secure storage
+      let userInfo = secureStorage.getItem('userInfo') || {};
+      userInfo.token = data.token;
+
+      // Update session ID if it was returned
+      if (data.sessionId) {
+        secureStorage.setItem('sessionId', data.sessionId);
+      }
+
+      secureStorage.setItem('userInfo', userInfo);
+
+      // Also remove any legacy data in localStorage
+      localStorage.removeItem('userInfo');
+
+      return data.token;
     }
-
-    secureStorage.setItem('userInfo', userInfo);
-
-    // Also remove any legacy data in localStorage
-    localStorage.removeItem('userInfo');
-
-    return data.token;
   } catch (error) {
     console.error('Error refreshing token:', error);
     // If refresh fails, log the user out
@@ -216,16 +255,37 @@ const refreshAccessToken = async () => {
 const apiService = {
   // Auth endpoints
   login: async (username, password) => {
-    console.log(`Sending login request to: ${API_URL}/users/login`);
+    console.log(`Attempting login with username: ${username}`);
     try {
-      const response = await fetch(`${API_URL}/users/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include', // Include cookies for refresh token
-        body: JSON.stringify({ username, password }),
-      });
-      console.log('Login response status:', response.status, response.statusText);
-      return handleResponse(response);
+      // First try with the API prefix (standard path)
+      console.log(`Sending login request to: ${API_URL}/users/login`);
+      try {
+        const response = await fetch(`${API_URL}/users/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include', // Include cookies for refresh token
+          body: JSON.stringify({ username, password }),
+          mode: 'cors'
+        });
+        console.log('Login response status (API path):', response.status, response.statusText);
+        return handleResponse(response);
+      } catch (apiPathError) {
+        console.warn('Login failed with API path, trying without /api prefix:', apiPathError);
+
+        // If that fails, try without the API prefix (fallback path)
+        const baseUrl = API_URL.replace('/api', '');
+        console.log(`Sending login request to fallback path: ${baseUrl}/users/login`);
+
+        const response = await fetch(`${baseUrl}/users/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include', // Include cookies for refresh token
+          body: JSON.stringify({ username, password }),
+          mode: 'cors'
+        });
+        console.log('Login response status (fallback path):', response.status, response.statusText);
+        return handleResponse(response);
+      }
     } catch (error) {
       console.error('Network error during login:', error);
       throw error;
@@ -250,23 +310,37 @@ const apiService = {
 
       console.log('Local storage cleared, now calling logout API');
 
-      // Then call the API to logout (revoke refresh token)
-      const response = await fetch(`${API_URL}/users/logout`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include', // Include cookies for refresh token
-        body: sessionId ? JSON.stringify({ sessionId }) : undefined,
-      });
+      // Try with the API prefix (standard path)
+      try {
+        console.log(`Sending logout request to: ${API_URL}/users/logout`);
+        const response = await fetch(`${API_URL}/users/logout`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include', // Include cookies for refresh token
+          body: sessionId ? JSON.stringify({ sessionId }) : undefined,
+          mode: 'cors'
+        });
 
-      console.log('Logout API response status:', response.status);
+        console.log('Logout API response status (API path):', response.status);
+        return handleResponse(response);
+      } catch (apiPathError) {
+        console.warn('Logout failed with API path, trying without /api prefix:', apiPathError);
 
-      // Double-check that everything is cleared
-      if (secureStorage.getItem('userInfo')) {
-        console.warn('userInfo still exists in secureStorage after logout, clearing again');
-        secureStorage.clear();
+        // If that fails, try without the API prefix (fallback path)
+        const baseUrl = API_URL.replace('/api', '');
+        console.log(`Sending logout request to fallback path: ${baseUrl}/users/logout`);
+
+        const response = await fetch(`${baseUrl}/users/logout`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include', // Include cookies for refresh token
+          body: sessionId ? JSON.stringify({ sessionId }) : undefined,
+          mode: 'cors'
+        });
+
+        console.log('Logout API response status (fallback path):', response.status);
+        return handleResponse(response);
       }
-
-      return handleResponse(response);
     } catch (error) {
       console.error('Error during logout API call:', error);
       // Even if the server-side logout fails, we've already cleared local storage
