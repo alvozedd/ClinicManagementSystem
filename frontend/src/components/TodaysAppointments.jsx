@@ -82,11 +82,13 @@ function TodaysAppointments({ onViewPatient, onEditAppointment, onDeleteAppointm
     try {
       // Create queue data
       const queueData = {
-        patient_id: appointment.patientId,
+        patient_id: appointment.patientId || appointment.patient_id,
         appointment_id: appointment._id || appointment.id,
         is_walk_in: false,
         notes: `Checked in for ${appointment.type || 'appointment'}`
       };
+
+      console.log('Adding to queue with patient_id:', queueData.patient_id);
 
       // Add to queue
       const newQueueEntry = await apiService.addToQueue(queueData);

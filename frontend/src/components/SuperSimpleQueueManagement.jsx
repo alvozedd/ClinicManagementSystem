@@ -198,6 +198,11 @@ function SuperSimpleQueueManagement({ patients, userRole }) {
         notes: `Checked in for ${appointment.type || 'appointment'}`
       };
 
+      // Ensure patient_id is a string
+      if (typeof queueData.patient_id === 'object' && queueData.patient_id._id) {
+        queueData.patient_id = queueData.patient_id._id;
+      }
+
       console.log('Adding appointment to queue with data:', queueData);
 
       // Step 3: Add to queue

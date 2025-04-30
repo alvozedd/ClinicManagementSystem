@@ -803,13 +803,12 @@ const apiService = {
         console.warn('Could not get next ticket number from server, using default 1:', statsError);
       }
 
-      // Use the non-API endpoint for queue to avoid CORS issues
-      const baseUrl = API_URL.replace('/api', '');
-      console.log('Using queue endpoint for adding:', `${baseUrl}/queue`);
+      // Use the API endpoint directly
+      console.log('Using queue endpoint for adding:', `${API_URL}/queue`);
 
-      // First try: with credentials
+      // Try with secureFetch first
       try {
-        const response = await fetch(`${baseUrl}/queue`, {
+        const serverQueueEntry = await secureFetch(`${API_URL}/queue`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -818,8 +817,8 @@ const apiService = {
           body: JSON.stringify(queueData),
           credentials: 'include', // Include cookies for refresh token
         });
-        const serverQueueEntry = await handleResponse(response);
-        console.log('Successfully added to queue with credentials:', serverQueueEntry);
+
+        console.log('Successfully added to queue with secureFetch:', serverQueueEntry);
 
         if (!serverQueueEntry || !serverQueueEntry._id) {
           throw new Error('Invalid server response - no queue entry ID');
@@ -827,25 +826,52 @@ const apiService = {
 
         return serverQueueEntry;
       } catch (firstError) {
-        console.warn('First attempt failed, trying without credentials:', firstError);
+        console.warn('First attempt failed with secureFetch, trying direct API call:', firstError);
 
-        // Second try: without credentials
-        const response2 = await fetch(`${baseUrl}/queue`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            ...authHeader(),
-          },
-          body: JSON.stringify(queueData),
-        });
-        const serverQueueEntry = await handleResponse(response2);
-        console.log('Successfully added to queue without credentials:', serverQueueEntry);
+        // Try the non-API endpoint as fallback
+        const baseUrl = API_URL.replace('/api', '');
+        console.log('Using fallback queue endpoint:', `${baseUrl}/queue`);
 
-        if (!serverQueueEntry || !serverQueueEntry._id) {
-          throw new Error('Invalid server response - no queue entry ID');
+        // Try with credentials
+        try {
+          const response = await fetch(`${baseUrl}/queue`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              ...authHeader(),
+            },
+            body: JSON.stringify(queueData),
+            credentials: 'include', // Include cookies for refresh token
+          });
+          const serverQueueEntry = await handleResponse(response);
+          console.log('Successfully added to queue with credentials:', serverQueueEntry);
+
+          if (!serverQueueEntry || !serverQueueEntry._id) {
+            throw new Error('Invalid server response - no queue entry ID');
+          }
+
+          return serverQueueEntry;
+        } catch (secondError) {
+          console.warn('Second attempt failed, trying without credentials:', secondError);
+
+          // Last try: without credentials
+          const response2 = await fetch(`${baseUrl}/queue`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              ...authHeader(),
+            },
+            body: JSON.stringify(queueData),
+          });
+          const serverQueueEntry = await handleResponse(response2);
+          console.log('Successfully added to queue without credentials:', serverQueueEntry);
+
+          if (!serverQueueEntry || !serverQueueEntry._id) {
+            throw new Error('Invalid server response - no queue entry ID');
+          }
+
+          return serverQueueEntry;
         }
-
-        return serverQueueEntry;
       }
     } catch (error) {
       console.error('Error adding to queue:', error);
