@@ -10,12 +10,13 @@ const allowedOrigins = [
   'http://localhost:5173',
   'https://urohealthcentral.netlify.app',
   'https://www.urohealthcentral.netlify.app',
+  'https://urohealthltd.netlify.app',
   // Add the Railway domain to allow server-to-server communication
   'https://clinicmanagementsystem-production-081b.up.railway.app'
 ];
 
-// For development, you can enable this to allow all origins
-const ALLOW_ALL_ORIGINS = process.env.NODE_ENV === 'development' || process.env.ALLOW_ALL_ORIGINS === 'true';
+// For development or production, you can enable this to allow all origins
+const ALLOW_ALL_ORIGINS = process.env.NODE_ENV === 'development' || process.env.ALLOW_ALL_ORIGINS === 'true' || true; // Temporarily set to true to fix CORS issues
 
 // Comprehensive list of headers to allow
 const allowedHeaders = [

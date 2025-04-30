@@ -75,10 +75,13 @@ app.use((req, res, next) => {
     if (!res.get('Access-Control-Allow-Origin')) {
       const origin = req.headers.origin;
       if (origin) {
+        // Always allow the origin that sent the request
         res.header('Access-Control-Allow-Origin', origin);
         res.header('Access-Control-Allow-Credentials', 'true');
+        console.log(`Setting CORS headers for origin: ${origin}`);
       } else {
         res.header('Access-Control-Allow-Origin', '*');
+        console.log('Setting CORS headers with wildcard origin');
       }
     }
     return oldSend.apply(res, arguments);
@@ -289,25 +292,11 @@ app.options('/users/login', (req, res) => {
   // Set the Vary header
   res.header('Vary', 'Origin');
 
-  // Set allowed origin with a more permissive approach for login
+  // Always allow the origin that sent the request for login
   if (origin) {
-    const allowedOrigins = [
-      'https://urohealthltd.netlify.app',
-      'https://www.urohealthltd.netlify.app',
-      'http://localhost:3000',
-      'http://localhost:5173',
-      'https://urohealthcentral.netlify.app',
-      'https://www.urohealthcentral.netlify.app'
-    ];
-
-    // For login, we'll be more permissive in development/testing
-    if (allowedOrigins.includes(origin) || process.env.NODE_ENV === 'development' || process.env.ALLOW_ALL_ORIGINS === 'true') {
-      res.header('Access-Control-Allow-Origin', origin);
-      res.header('Access-Control-Allow-Credentials', 'true');
-      console.log('CORS headers set for login OPTIONS from origin:', origin);
-    } else {
-      console.log('Login OPTIONS request from non-allowed origin:', origin);
-    }
+    res.header('Access-Control-Allow-Origin', origin);
+    res.header('Access-Control-Allow-Credentials', 'true');
+    console.log('CORS headers set for login OPTIONS from origin:', origin);
   } else {
     // For requests without origin (like server-to-server), use wildcard
     res.header('Access-Control-Allow-Origin', '*');
@@ -334,25 +323,11 @@ app.post('/users/login', (req, res) => {
   // Set the Vary header
   res.header('Vary', 'Origin');
 
-  // Set allowed origin with a more permissive approach for login
+  // Always allow the origin that sent the request for login
   if (origin) {
-    const allowedOrigins = [
-      'https://urohealthltd.netlify.app',
-      'https://www.urohealthltd.netlify.app',
-      'http://localhost:3000',
-      'http://localhost:5173',
-      'https://urohealthcentral.netlify.app',
-      'https://www.urohealthcentral.netlify.app'
-    ];
-
-    // For login, we'll be more permissive in development/testing
-    if (allowedOrigins.includes(origin) || process.env.NODE_ENV === 'development' || process.env.ALLOW_ALL_ORIGINS === 'true') {
-      res.header('Access-Control-Allow-Origin', origin);
-      res.header('Access-Control-Allow-Credentials', 'true');
-      console.log('CORS headers set for login route from origin:', origin);
-    } else {
-      console.log('Login request from non-allowed origin:', origin);
-    }
+    res.header('Access-Control-Allow-Origin', origin);
+    res.header('Access-Control-Allow-Credentials', 'true');
+    console.log('CORS headers set for login route from origin:', origin);
   } else {
     // For requests without origin (like server-to-server), use wildcard
     res.header('Access-Control-Allow-Origin', '*');
@@ -380,25 +355,11 @@ app.options('/users/refresh-token', (req, res) => {
   // Set the Vary header
   res.header('Vary', 'Origin');
 
-  // Set allowed origin with a more permissive approach for refresh token
+  // Always allow the origin that sent the request for refresh token
   if (origin) {
-    const allowedOrigins = [
-      'https://urohealthltd.netlify.app',
-      'https://www.urohealthltd.netlify.app',
-      'http://localhost:3000',
-      'http://localhost:5173',
-      'https://urohealthcentral.netlify.app',
-      'https://www.urohealthcentral.netlify.app'
-    ];
-
-    // For refresh token, we'll be more permissive in development/testing
-    if (allowedOrigins.includes(origin) || process.env.NODE_ENV === 'development' || process.env.ALLOW_ALL_ORIGINS === 'true') {
-      res.header('Access-Control-Allow-Origin', origin);
-      res.header('Access-Control-Allow-Credentials', 'true');
-      console.log('CORS headers set for refresh token OPTIONS from origin:', origin);
-    } else {
-      console.log('Refresh token OPTIONS request from non-allowed origin:', origin);
-    }
+    res.header('Access-Control-Allow-Origin', origin);
+    res.header('Access-Control-Allow-Credentials', 'true');
+    console.log('CORS headers set for refresh token OPTIONS from origin:', origin);
   } else {
     // For requests without origin (like server-to-server), use wildcard
     res.header('Access-Control-Allow-Origin', '*');
@@ -425,25 +386,11 @@ app.post('/users/refresh-token', (req, res) => {
   // Set the Vary header
   res.header('Vary', 'Origin');
 
-  // Set allowed origin with a more permissive approach for refresh token
+  // Always allow the origin that sent the request for refresh token
   if (origin) {
-    const allowedOrigins = [
-      'https://urohealthltd.netlify.app',
-      'https://www.urohealthltd.netlify.app',
-      'http://localhost:3000',
-      'http://localhost:5173',
-      'https://urohealthcentral.netlify.app',
-      'https://www.urohealthcentral.netlify.app'
-    ];
-
-    // For refresh token, we'll be more permissive in development/testing
-    if (allowedOrigins.includes(origin) || process.env.NODE_ENV === 'development' || process.env.ALLOW_ALL_ORIGINS === 'true') {
-      res.header('Access-Control-Allow-Origin', origin);
-      res.header('Access-Control-Allow-Credentials', 'true');
-      console.log('CORS headers set for refresh token route from origin:', origin);
-    } else {
-      console.log('Refresh token request from non-allowed origin:', origin);
-    }
+    res.header('Access-Control-Allow-Origin', origin);
+    res.header('Access-Control-Allow-Credentials', 'true');
+    console.log('CORS headers set for refresh token route from origin:', origin);
   } else {
     // For requests without origin (like server-to-server), use wildcard
     res.header('Access-Control-Allow-Origin', '*');
