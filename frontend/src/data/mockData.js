@@ -54,14 +54,25 @@ export const getTodaysAppointments = async () => {
       .filter(appointment => {
         try {
           // Skip invalid appointments
-          if (!appointment || !appointment.date) {
+          if (!appointment) {
             console.warn('Skipping invalid appointment in today\'s filter:', appointment);
             return false;
           }
 
-          // Use the date field which is already in YYYY-MM-DD format in our transformed data
-          console.log(`Comparing appointment date: ${appointment.date} with today: ${formattedDate}`);
-          return appointment.date === formattedDate;
+          // Check for both date and appointment_date fields
+          let appointmentDate;
+          if (appointment.date) {
+            appointmentDate = appointment.date;
+          } else if (appointment.appointment_date) {
+            appointmentDate = new Date(appointment.appointment_date).toISOString().split('T')[0];
+          } else {
+            console.warn('Appointment has no date field:', appointment);
+            return false;
+          }
+
+          // Compare with today's date
+          console.log(`Comparing appointment date: ${appointmentDate} with today: ${formattedDate}`);
+          return appointmentDate === formattedDate;
         } catch (err) {
           console.error('Error filtering appointment:', err, appointment);
           return false;

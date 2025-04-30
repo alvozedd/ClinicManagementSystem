@@ -4,6 +4,7 @@ import apiService from '../utils/apiService';
 import SuperSimpleQueueCard from './SuperSimpleQueueCard';
 import QueueTicketPrint from './QueueTicketPrint';
 import { clearQueueStorage } from '../utils/clearQueueStorage';
+import { clearCache } from '../data/mockData';
 
 function SuperSimpleQueueManagement({ patients, userRole }) {
   // State for queue management
@@ -211,7 +212,8 @@ function SuperSimpleQueueManagement({ patients, userRole }) {
         // Show the ticket for printing
         setTicketToPrint(newQueueEntry);
 
-        // Refresh queue data
+        // Clear the appointments cache and refresh queue data
+        clearCache('appointments');
         await fetchQueueData();
 
         return true;
@@ -354,9 +356,19 @@ function SuperSimpleQueueManagement({ patients, userRole }) {
 
     // Get all appointments for today with status 'Scheduled'
     const todaysAppointments = appointments.filter(appointment => {
-      if (!appointment || !appointment.appointment_date) return false;
+      if (!appointment) return false;
 
-      const appointmentDate = new Date(appointment.appointment_date || appointment.date).toISOString().split('T')[0];
+      // Check for both date formats
+      let appointmentDate;
+      if (appointment.date) {
+        appointmentDate = appointment.date;
+      } else if (appointment.appointment_date) {
+        appointmentDate = new Date(appointment.appointment_date).toISOString().split('T')[0];
+      } else {
+        console.warn('Appointment has no date field:', appointment);
+        return false;
+      }
+
       const isToday = appointmentDate === today;
       const isScheduled = appointment.status === 'Scheduled';
 
@@ -439,6 +451,9 @@ function SuperSimpleQueueManagement({ patients, userRole }) {
                 // Clear any existing queue entries from localStorage before checking in all
                 clearQueueStorage();
                 console.log('Cleared existing queue entries before checking in all appointments');
+
+                // Clear the appointments cache
+                clearCache('appointments');
 
                 const promises = appointmentsToCheckIn.map(appointment =>
                   handleCheckInAppointment(appointment)

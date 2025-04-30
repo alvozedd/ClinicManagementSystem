@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { getTodaysAppointments } from '../data/mockData';
+import { getTodaysAppointments, clearCache } from '../data/mockData';
 import { FaCalendarAlt, FaPhone, FaUserPlus, FaEdit, FaTrash } from 'react-icons/fa';
 import apiService from '../utils/apiService';
 
@@ -7,41 +7,49 @@ function TodaysAppointments({ onViewPatient, onEditAppointment, onDeleteAppointm
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchAppointments = async () => {
-      try {
-        setLoading(true);
-        const todaysAppointments = await getTodaysAppointments();
+  // Function to fetch appointments
+  const fetchAppointments = async () => {
+    try {
+      setLoading(true);
+      // Clear the appointments cache to get fresh data
+      clearCache('appointments');
+      const todaysAppointments = await getTodaysAppointments();
 
-        // Validate appointments data before setting state
-        if (Array.isArray(todaysAppointments)) {
-          // Filter out any invalid appointments
-          const validAppointments = todaysAppointments.filter(appointment => {
-            if (!appointment) {
-              console.warn('Found null or undefined appointment');
-              return false;
-            }
-            if (!appointment._id && !appointment.id) {
-              console.warn('Found appointment without ID:', appointment);
-              return false;
-            }
-            return true;
-          });
+      // Validate appointments data before setting state
+      if (Array.isArray(todaysAppointments)) {
+        // Filter out any invalid appointments
+        const validAppointments = todaysAppointments.filter(appointment => {
+          if (!appointment) {
+            console.warn('Found null or undefined appointment');
+            return false;
+          }
+          if (!appointment._id && !appointment.id) {
+            console.warn('Found appointment without ID:', appointment);
+            return false;
+          }
+          return true;
+        });
 
-          setAppointments(validAppointments);
-        } else {
-          console.error('Invalid appointments data received:', todaysAppointments);
-          setAppointments([]);
-        }
-      } catch (error) {
-        console.error('Error fetching today\'s appointments:', error);
-        setAppointments([]); // Set empty array on error
-      } finally {
-        setLoading(false);
+        setAppointments(validAppointments);
+      } else {
+        console.error('Invalid appointments data received:', todaysAppointments);
+        setAppointments([]);
       }
-    };
+    } catch (error) {
+      console.error('Error fetching today\'s appointments:', error);
+      setAppointments([]); // Set empty array on error
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  // Fetch appointments on component mount
+  useEffect(() => {
     fetchAppointments();
+
+    // Set up polling to refresh appointments every 30 seconds
+    const interval = setInterval(fetchAppointments, 30000);
+    return () => clearInterval(interval);
   }, []);
 
   // Function to format time for display (e.g., "09:00")
@@ -86,9 +94,9 @@ function TodaysAppointments({ onViewPatient, onEditAppointment, onDeleteAppointm
       // Show success message
       alert(`Patient ${appointment.patientName} added to queue with ticket #${newQueueEntry.ticket_number}`);
 
-      // Refresh the appointments list
-      const todaysAppointments = await getTodaysAppointments();
-      setAppointments(todaysAppointments);
+      // Clear the cache and refresh the appointments list
+      clearCache('appointments');
+      await fetchAppointments();
 
       // Return true to indicate success
       return true;
@@ -99,6 +107,8 @@ function TodaysAppointments({ onViewPatient, onEditAppointment, onDeleteAppointm
       if (error.toString().includes('CORS') || error.toString().includes('NetworkError')) {
         // Show a more helpful message for CORS errors
         alert('Patient added to queue, but there was a network issue. The queue will update when you refresh the page.');
+        // Try to refresh anyway
+        fetchAppointments().catch(e => console.error('Failed to refresh appointments after queue add:', e));
         return true; // Consider it a success for the user
       } else {
         alert('Failed to add patient to queue: ' + error.toString());
