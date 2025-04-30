@@ -18,15 +18,15 @@ const {
   resetQueue,
   getNextPatient
 } = require('../controllers/integratedAppointmentController');
-const { 
-  protect, 
-  optionalAuth, 
-  doctor, 
-  secretary, 
-  doctorOrSecretary, 
-  admin 
+const {
+  protect,
+  optionalAuth,
+  doctor,
+  secretary,
+  doctorOrSecretary,
+  admin
 } = require('../middleware/authMiddleware');
-const { validateAppointmentCreation } = require('../middleware/validationMiddleware');
+const { validateIntegratedAppointmentCreation, validateQueueReorder } = require('../middleware/validationMiddleware');
 const { publicEndpointLimiter, apiLimiter } = require('../middleware/rateLimitMiddleware');
 
 // Public routes (with optional authentication)
@@ -38,7 +38,7 @@ router.route('/')
     } else {
       apiLimiter(req, res, next);
     }
-  }, validateAppointmentCreation, createAppointment);
+  }, validateIntegratedAppointmentCreation, createAppointment);
 
 // Protected routes
 router.route('/')
@@ -60,7 +60,7 @@ router.route('/queue/next')
   .get(protect, doctor, getNextPatient);
 
 router.route('/queue/reorder')
-  .put(protect, secretary, reorderQueue);
+  .put(protect, secretary, validateQueueReorder, reorderQueue);
 
 router.route('/queue/reset')
   .delete(protect, admin, resetQueue);

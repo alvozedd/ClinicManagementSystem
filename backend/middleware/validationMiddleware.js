@@ -274,10 +274,101 @@ const validateDiagnosisCreation = (req, res, next) => {
   next();
 };
 
+// Validation middleware for integrated appointment creation
+const validateIntegratedAppointmentCreation = (req, res, next) => {
+  const {
+    patient_id,
+    scheduled_date,
+    type,
+    reason,
+    status,
+    is_walk_in,
+    notes
+  } = req.body;
+
+  const errors = [];
+
+  // Validate patient_id
+  if (!patient_id) {
+    errors.push('Patient ID is required');
+  } else if (!patient_id.match(/^[0-9a-fA-F]{24}$/)) {
+    errors.push('Invalid patient ID format');
+  }
+
+  // Validate scheduled_date
+  if (!scheduled_date) {
+    errors.push('Scheduled date is required');
+  } else {
+    try {
+      const date = new Date(scheduled_date);
+      if (isNaN(date.getTime())) {
+        errors.push('Invalid scheduled date');
+      }
+    } catch (error) {
+      errors.push('Invalid scheduled date format');
+    }
+  }
+
+  // Validate type if provided
+  if (type && !['Consultation', 'Follow-up', 'Procedure', 'Test', 'Emergency', 'Walk-in'].includes(type)) {
+    errors.push('Type must be Consultation, Follow-up, Procedure, Test, Emergency, or Walk-in');
+  }
+
+  // Validate status if provided
+  if (status && !['Scheduled', 'Checked-in', 'In-progress', 'Completed', 'Cancelled', 'No-show', 'Rescheduled'].includes(status)) {
+    errors.push('Status must be Scheduled, Checked-in, In-progress, Completed, Cancelled, No-show, or Rescheduled');
+  }
+
+  // Validate is_walk_in if provided
+  if (is_walk_in !== undefined && typeof is_walk_in !== 'boolean') {
+    errors.push('is_walk_in must be a boolean');
+  }
+
+  // If there are validation errors, return them
+  if (errors.length > 0) {
+    return res.status(400).json({ errors });
+  }
+
+  // Sanitize inputs
+  if (notes) req.body.notes = sanitizeString(notes);
+  if (reason) req.body.reason = sanitizeString(reason);
+
+  next();
+};
+
+// Validation middleware for queue reordering
+const validateQueueReorder = (req, res, next) => {
+  const { queueOrder } = req.body;
+  const errors = [];
+
+  // Validate queueOrder
+  if (!queueOrder || !Array.isArray(queueOrder)) {
+    errors.push('Queue order must be an array');
+  } else {
+    // Validate each entry in the queue order
+    queueOrder.forEach((entry, index) => {
+      if (!entry.id) {
+        errors.push(`Queue entry at index ${index} is missing an ID`);
+      } else if (!entry.id.match(/^[0-9a-fA-F]{24}$/)) {
+        errors.push(`Queue entry at index ${index} has an invalid ID format`);
+      }
+    });
+  }
+
+  // If there are validation errors, return them
+  if (errors.length > 0) {
+    return res.status(400).json({ errors });
+  }
+
+  next();
+};
+
 module.exports = {
   validateUserRegistration,
   validateUserLogin,
   validatePatientCreation,
   validateAppointmentCreation,
   validateDiagnosisCreation,
+  validateIntegratedAppointmentCreation,
+  validateQueueReorder
 };
