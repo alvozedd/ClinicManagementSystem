@@ -813,40 +813,8 @@ const apiService = {
         } catch (secondError) {
           console.warn('Second attempt failed, checking localStorage for fallbacks:', secondError);
 
-          // By default, disable localStorage fallbacks completely
-          // Only use fallbacks if explicitly enabled AND we're in offline mode
-          const useLocalStorageFallbacks = localStorage.getItem('use_queue_fallbacks') === 'true' &&
-                                          localStorage.getItem('offline_mode') === 'true';
-
-          if (!useLocalStorageFallbacks) {
-            console.log('Queue fallbacks disabled, returning empty array');
-            return [];
-          }
-
-          console.warn('USING OFFLINE MODE WITH FALLBACKS - data may not be from database');
-
-          // Look for any temporary queue entries in localStorage
-          const tempEntries = [];
-          for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i);
-            if (key && key.startsWith('temp_queue_entry_')) {
-              try {
-                const entry = JSON.parse(localStorage.getItem(key));
-                if (entry && entry._id) {
-                  tempEntries.push(entry);
-                }
-              } catch (parseError) {
-                console.error('Error parsing temp queue entry:', parseError);
-              }
-            }
-          }
-
-          if (tempEntries.length > 0) {
-            console.log('Found temporary queue entries in localStorage:', tempEntries.length);
-            return tempEntries;
-          }
-
-          console.warn('No queue entries found, returning empty array');
+          // No fallbacks - only use database data
+          console.log('Queue fallbacks completely disabled, returning empty array');
           return [];
         }
       }
@@ -878,7 +846,7 @@ const apiService = {
     try {
       console.log('Adding to queue with data:', queueData);
 
-      // Get the next ticket number from the server instead of generating locally
+      // Get the next ticket number from the server
       let nextTicketNumber = 1;
       try {
         const statsResponse = await apiService.getQueueStats();
@@ -887,31 +855,6 @@ const apiService = {
       } catch (statsError) {
         console.warn('Could not get next ticket number from server, using default 1:', statsError);
       }
-
-      // Create a temporary queue entry that will be shown immediately
-      const tempQueueEntry = {
-        _id: `temp_${Date.now()}`,
-        patient_id: queueData.patient_id,
-        appointment_id: queueData.appointment_id,
-        ticket_number: nextTicketNumber,
-        status: 'Waiting',
-        notes: queueData.notes || '',
-        is_walk_in: queueData.is_walk_in || false,
-        check_in_time: new Date().toISOString(),
-        created_at: new Date().toISOString(),
-        __v: 0
-      };
-
-      // Only store in localStorage if we successfully create the entry on the server
-      // We'll set this flag only after a successful API call
-      // localStorage.setItem('use_queue_fallbacks', 'true');
-
-      // Store in localStorage as a backup, but don't enable fallbacks yet
-      const localStorageKey = 'temp_queue_entry_' + Date.now();
-      localStorage.setItem(localStorageKey, JSON.stringify(tempQueueEntry));
-
-      // Try multiple approaches to add to queue
-      let serverQueueEntry = null;
 
       // Use the non-API endpoint for queue to avoid CORS issues
       const baseUrl = API_URL.replace('/api', '');
@@ -928,74 +871,38 @@ const apiService = {
           body: JSON.stringify(queueData),
           credentials: 'include', // Include cookies for refresh token
         });
-        serverQueueEntry = await handleResponse(response);
+        const serverQueueEntry = await handleResponse(response);
         console.log('Successfully added to queue with credentials:', serverQueueEntry);
 
-        // Only enable fallbacks if we successfully created the entry on the server
-        if (serverQueueEntry && serverQueueEntry._id) {
-          localStorage.setItem('use_queue_fallbacks', 'true');
-          console.log('Enabled queue fallbacks after successful API call');
+        if (!serverQueueEntry || !serverQueueEntry._id) {
+          throw new Error('Invalid server response - no queue entry ID');
         }
+
+        return serverQueueEntry;
       } catch (firstError) {
         console.warn('First attempt failed, trying without credentials:', firstError);
 
-        try {
-          // Second try: without credentials
-          const response2 = await fetch(`${baseUrl}/queue`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              ...authHeader(),
-            },
-            body: JSON.stringify(queueData),
-          });
-          serverQueueEntry = await handleResponse(response2);
-          console.log('Successfully added to queue without credentials:', serverQueueEntry);
+        // Second try: without credentials
+        const response2 = await fetch(`${baseUrl}/queue`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...authHeader(),
+          },
+          body: JSON.stringify(queueData),
+        });
+        const serverQueueEntry = await handleResponse(response2);
+        console.log('Successfully added to queue without credentials:', serverQueueEntry);
 
-          // Only enable fallbacks if we successfully created the entry on the server
-          if (serverQueueEntry && serverQueueEntry._id) {
-            localStorage.setItem('use_queue_fallbacks', 'true');
-            console.log('Enabled queue fallbacks after successful API call');
-          }
-        } catch (secondError) {
-          console.warn('Second attempt failed, using fallback:', secondError);
-          // Continue with the temporary entry
+        if (!serverQueueEntry || !serverQueueEntry._id) {
+          throw new Error('Invalid server response - no queue entry ID');
         }
-      }
 
-      // Return the server entry if we got one, otherwise return the temp entry
-      return serverQueueEntry || tempQueueEntry;
+        return serverQueueEntry;
+      }
     } catch (error) {
       console.error('Error adding to queue:', error);
-
-      // Create a fallback entry that can still be displayed
-      // Try to get the ticket number from the temp entry we created earlier
-      let ticketNumber = 1;
-      try {
-        const localStorageKey = 'temp_queue_entry_' + Date.now();
-        const tempEntry = JSON.parse(localStorage.getItem(localStorageKey));
-        if (tempEntry && tempEntry.ticket_number) {
-          ticketNumber = tempEntry.ticket_number;
-        }
-      } catch (e) {
-        console.error('Error getting ticket number from localStorage:', e);
-      }
-
-      const fallbackEntry = {
-        _id: `fallback_${Date.now()}`,
-        patient_id: queueData.patient_id,
-        appointment_id: queueData.appointment_id,
-        ticket_number: ticketNumber,
-        status: 'Waiting',
-        notes: queueData.notes || '',
-        is_walk_in: queueData.is_walk_in || false,
-        check_in_time: new Date().toISOString(),
-        created_at: new Date().toISOString(),
-        __v: 0,
-        _isFallback: true
-      };
-
-      return fallbackEntry;
+      throw new Error('Failed to add to queue. Please check your network connection and try again.');
     }
   },
 
@@ -1024,53 +931,39 @@ const apiService = {
   // Alias for updateQueueEntry with status-only updates
   updateQueueStatus: async (id, statusData) => {
     try {
-      // Store the status update in localStorage as a backup
-      const localStorageKey = `queue_status_${id}`;
-      localStorage.setItem(localStorageKey, statusData.status);
-
       // Use the non-API endpoint for queue to avoid CORS issues
       const baseUrl = API_URL.replace('/api', '');
       console.log('Using queue endpoint for status update:', `${baseUrl}/queue/${id}`);
 
-      // Try multiple approaches to update the status
+      // First try: Standard fetch with credentials
       try {
-        // First try: Standard fetch with credentials
-        try {
-          const response = await fetch(`${baseUrl}/queue/${id}`, {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-              ...authHeader(),
-            },
-            body: JSON.stringify(statusData),
-            credentials: 'include', // Include cookies for refresh token
-          });
-          return handleResponse(response);
-        } catch (error) {
-          console.warn('First attempt failed, trying without credentials:', error);
+        const response = await fetch(`${baseUrl}/queue/${id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            ...authHeader(),
+          },
+          body: JSON.stringify(statusData),
+          credentials: 'include', // Include cookies for refresh token
+        });
+        return handleResponse(response);
+      } catch (error) {
+        console.warn('First attempt failed, trying without credentials:', error);
 
-          // Second try: Without credentials
-          const response2 = await fetch(`${baseUrl}/queue/${id}`, {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-              ...authHeader(),
-            },
-            body: JSON.stringify(statusData),
-          });
-          return handleResponse(response2);
-        }
-      } catch (corsError) {
-        console.warn('All fetch attempts failed, using fallback for status update:', corsError);
-
-        // Return a mock success response
-        return { success: true, message: 'Status updated (offline mode)' };
+        // Second try: Without credentials
+        const response2 = await fetch(`${baseUrl}/queue/${id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            ...authHeader(),
+          },
+          body: JSON.stringify(statusData),
+        });
+        return handleResponse(response2);
       }
     } catch (error) {
       console.error('Error updating queue status:', error);
-      // Don't throw the error, just return a mock success
-      // This ensures the UI flow isn't interrupted
-      return { success: true, message: 'Status updated (offline mode)' };
+      throw new Error('Failed to update queue status. Please check your network connection and try again.');
     }
   },
 
@@ -1091,14 +984,21 @@ const apiService = {
         });
         return handleResponse(response);
       } catch (corsError) {
-        console.warn('CORS error with normal mode, using fallback for queue removal:', corsError);
+        console.warn('CORS error with normal mode, trying alternative approach:', corsError);
 
-        // Return a mock success response
-        return { success: true, message: 'Removed from queue (offline mode)' };
+        // Try without credentials
+        const response2 = await fetch(`${baseUrl}/queue/${id}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            ...authHeader(),
+          },
+        });
+        return handleResponse(response2);
       }
     } catch (error) {
       console.error('Error removing from queue:', error);
-      throw error;
+      throw new Error('Failed to remove from queue. Please check your network connection and try again.');
     }
   },
 
@@ -1142,14 +1042,21 @@ const apiService = {
         });
         return handleResponse(response);
       } catch (corsError) {
-        console.warn('CORS error with normal mode, using fallback for clearing queue:', corsError);
+        console.warn('CORS error with normal mode, trying alternative approach:', corsError);
 
-        // Return a mock success response
-        return { success: true, message: 'Cleared completed queue entries (offline mode)' };
+        // Try without credentials
+        const response2 = await fetch(`${baseUrl}/queue/clear-completed`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            ...authHeader(),
+          },
+        });
+        return handleResponse(response2);
       }
     } catch (error) {
       console.error('Error clearing completed queue entries:', error);
-      throw error;
+      throw new Error('Failed to clear completed queue entries. Please check your network connection and try again.');
     }
   },
 };

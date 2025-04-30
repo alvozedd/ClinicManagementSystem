@@ -15,6 +15,19 @@ html, body, #root {
   padding: 0 !important;
   overflow-x: hidden;
   min-height: 100vh;
+  background-color: #1e3a8a !important; /* Match the blue background color */
+}
+
+/* Ensure footer extends to bottom */
+footer {
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+/* Fix for white space after footer */
+.bg-white {
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
 }
 
 /* Fix for iOS devices */

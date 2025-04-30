@@ -6,7 +6,7 @@ import SuperSimpleAddToQueueModal from './SuperSimpleAddToQueueModal';
 import QueueTicketPrint from './QueueTicketPrint';
 import { clearQueueStorage } from '../utils/clearQueueStorage';
 
-function SuperSimpleQueueManagement({ patients, appointments, userRole }) {
+function SuperSimpleQueueManagement({ patients, userRole }) {
   // State for queue management
   const [queueEntries, setQueueEntries] = useState([]);
   const [queueStats, setQueueStats] = useState({
@@ -16,6 +16,7 @@ function SuperSimpleQueueManagement({ patients, appointments, userRole }) {
     completedPatients: 0,
     nextTicketNumber: 1,
   });
+  const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showAddToQueueModal, setShowAddToQueueModal] = useState(false);
   const [ticketToPrint, setTicketToPrint] = useState(null);
@@ -24,28 +25,17 @@ function SuperSimpleQueueManagement({ patients, appointments, userRole }) {
   const fetchQueueData = async () => {
     setLoading(true);
     try {
-      // Ensure we're not in offline mode to get real database data
-      localStorage.setItem('offline_mode', 'false');
+      // Clear any localStorage data before fetching
+      clearQueueStorage();
 
       const [entriesResponse, statsResponse] = await Promise.all([
         apiService.getQueueEntries(),
         apiService.getQueueStats(),
       ]);
 
-      // Check if we got real data from the server or just fallback data
-      const isRealData = Array.isArray(entriesResponse) &&
-                         entriesResponse.length > 0 &&
-                         !entriesResponse[0]._id?.startsWith('temp_') &&
-                         !entriesResponse[0]._id?.startsWith('fallback_');
-
-      // If we got fallback data and the database is empty, clear the queue entries
-      if (!isRealData && entriesResponse.length > 0) {
-        console.log('Detected fallback queue data. Database may be empty.');
-        console.warn('SHOWING FALLBACK DATA - NOT FROM DATABASE');
-
-        // Always clear fallback entries to ensure we only show database data
-        console.log('Auto-clearing fallback queue entries to ensure database-only data');
-        clearQueueStorage();
+      // Validate that we have real data from the database
+      if (!Array.isArray(entriesResponse)) {
+        console.error('Invalid response from server - not an array');
         setQueueEntries([]);
         setQueueStats({
           totalPatients: 0,
@@ -55,11 +45,23 @@ function SuperSimpleQueueManagement({ patients, appointments, userRole }) {
           nextTicketNumber: 1,
         });
         setLoading(false);
-        return; // Exit early after clearing
+        return;
+      }
+
+      // Filter out any entries that might not be from the database
+      const validEntries = entriesResponse.filter(entry =>
+        entry && entry._id &&
+        !entry._id.startsWith('temp_') &&
+        !entry._id.startsWith('fallback_')
+      );
+
+      if (validEntries.length !== entriesResponse.length) {
+        console.warn(`Filtered out ${entriesResponse.length - validEntries.length} invalid entries`);
       }
 
       // Sort entries: Waiting first (by ticket number), then In Progress, then Completed
-      const sortedEntries = [...entriesResponse].sort((a, b) => {
+      // Use validEntries instead of entriesResponse to ensure we only use database data
+      const sortedEntries = [...validEntries].sort((a, b) => {
         // First sort by status priority
         const statusPriority = { 'Waiting': 0, 'In Progress': 1, 'Completed': 2, 'No-show': 3, 'Cancelled': 4 };
         const statusDiff = statusPriority[a.status] - statusPriority[b.status];
@@ -72,8 +74,41 @@ function SuperSimpleQueueManagement({ patients, appointments, userRole }) {
 
       setQueueEntries(sortedEntries);
       setQueueStats(statsResponse);
+
+      // Fetch today's appointments that aren't in the queue yet
+      try {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+
+        const appointmentsResponse = await apiService.getAppointmentsByDateRange(today, tomorrow);
+
+        if (!Array.isArray(appointmentsResponse)) {
+          console.error('Invalid appointments response from server - not an array');
+          setAppointments([]);
+        } else {
+          // Filter out any invalid appointments
+          const validAppointments = appointmentsResponse.filter(appointment =>
+            appointment && appointment._id && appointment.patient_id
+          );
+
+          setAppointments(validAppointments);
+        }
+      } catch (appointmentError) {
+        console.error('Error fetching appointments:', appointmentError);
+        setAppointments([]);
+      }
     } catch (error) {
       console.error('Error fetching queue data:', error);
+      setQueueEntries([]);
+      setQueueStats({
+        totalPatients: 0,
+        waitingPatients: 0,
+        inProgressPatients: 0,
+        completedPatients: 0,
+        nextTicketNumber: 1,
+      });
     } finally {
       setLoading(false);
     }
@@ -144,8 +179,7 @@ function SuperSimpleQueueManagement({ patients, appointments, userRole }) {
         return false;
       }
 
-      // Clear any existing queue entries from localStorage before adding new ones
-      // This prevents phantom entries from reappearing
+      // Clear any existing queue entries from localStorage
       clearQueueStorage();
       console.log('Cleared existing queue entries before adding walk-in');
 
@@ -192,6 +226,10 @@ function SuperSimpleQueueManagement({ patients, appointments, userRole }) {
         const newQueueEntry = await apiService.addToQueue(queueData);
         console.log('Added to queue successfully:', newQueueEntry);
 
+        if (!newQueueEntry || !newQueueEntry._id) {
+          throw new Error('Invalid queue entry returned from server');
+        }
+
         // Show the ticket for printing
         setTicketToPrint(newQueueEntry);
 
@@ -232,8 +270,7 @@ function SuperSimpleQueueManagement({ patients, appointments, userRole }) {
         return false;
       }
 
-      // Clear any existing queue entries from localStorage before adding new ones
-      // This prevents phantom entries from reappearing
+      // Clear any existing queue entries from localStorage
       clearQueueStorage();
       console.log('Cleared existing queue entries before checking in appointment');
 
@@ -252,6 +289,10 @@ function SuperSimpleQueueManagement({ patients, appointments, userRole }) {
         const newQueueEntry = await apiService.addToQueue(queueData);
         console.log('Added appointment to queue successfully:', newQueueEntry);
 
+        if (!newQueueEntry || !newQueueEntry._id) {
+          throw new Error('Invalid queue entry returned from server');
+        }
+
         // Show the ticket for printing
         setTicketToPrint(newQueueEntry);
 
@@ -263,7 +304,7 @@ function SuperSimpleQueueManagement({ patients, appointments, userRole }) {
         console.error('Error adding appointment to queue:', queueError);
 
         // Check if this is a duplicate entry error
-        if (queueError.includes && queueError.includes('already in the queue')) {
+        if (queueError.message && queueError.message.includes && queueError.message.includes('already in the queue')) {
           alert('This patient is already in the queue');
         } else {
           alert('Failed to check in patient. Please check your network connection and try again.');
