@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useContext } from 'react';
 import { useSelector } from 'react-redux';
+import AuthContext from '../context/AuthContext';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { FaCalendarAlt, FaUserClock, FaUserMd, FaCheck, FaTrash, FaEdit, FaPlus, FaArrowRight, FaArrowLeft, FaSearch, FaChartBar } from 'react-icons/fa';
 import apiService from '../utils/apiService';
@@ -39,7 +40,15 @@ const IntegratedAppointmentSystem = () => {
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
-  const { userInfo } = useSelector((state) => state.auth);
+  // Get user info from context as primary source
+  const { userInfo: contextUserInfo } = useContext(AuthContext);
+
+  // Also try to get from Redux as fallback
+  const reduxUserInfo = useSelector((state) => state.auth?.userInfo);
+
+  // Use context user info if available, otherwise use Redux
+  const userInfo = contextUserInfo || reduxUserInfo;
+
   const isDoctor = userInfo?.role === 'doctor';
   const isSecretary = userInfo?.role === 'secretary';
 
