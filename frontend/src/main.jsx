@@ -4,6 +4,7 @@ import { Provider } from 'react-redux'
 import './index.css'
 import './styles/mobileResponsive.css'
 import './styles/buttonFixes.css' // Import button fixes
+import './styles/buttonStyleFixes.css' // Import specific button style fixes
 import App from './App.jsx'
 import { AuthProvider } from './context/AuthContext'
 import store from './store/store'

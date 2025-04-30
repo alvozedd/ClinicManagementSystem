@@ -1,0 +1,129 @@
+/* Button Style Fixes for Homepage and Navigation */
+
+/* Fix for the Book Now button */
+.bg-white.text-blue-700.rounded-full,
+button.bg-white.text-blue-700.rounded-full,
+.book-now-button {
+  /* Ensure proper border */
+  border: 1px solid rgba(59, 130, 246, 0.3) !important;
+  /* Ensure proper shadow */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+  /* Ensure proper text contrast */
+  color: #1d4ed8 !important;
+  /* Ensure proper background */
+  background-color: #ffffff !important;
+  /* Ensure proper padding */
+  padding: 0.75rem 1.5rem !important;
+  /* Ensure proper height */
+  min-height: 48px !important;
+  /* Ensure proper display */
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  /* Ensure proper font */
+  font-weight: 600 !important;
+  /* Ensure proper transitions */
+  transition: all 0.2s ease-in-out !important;
+}
+
+/* Hover state for Book Now button */
+.bg-white.text-blue-700.rounded-full:hover,
+button.bg-white.text-blue-700.rounded-full:hover,
+.book-now-button:hover {
+  background-color: #f0f7ff !important;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15), 0 3px 6px rgba(0, 0, 0, 0.1) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Fix for the user icon button in navigation */
+.bg-white.text-blue-800.rounded-lg,
+a.bg-white.text-blue-800.rounded-lg,
+.user-icon-button {
+  /* Ensure proper border */
+  border: 1px solid rgba(59, 130, 246, 0.2) !important;
+  /* Ensure proper shadow */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+  /* Ensure proper background */
+  background-color: #ffffff !important;
+  /* Ensure proper text color */
+  color: #1e40af !important;
+  /* Ensure proper padding */
+  padding: 0.5rem !important;
+  /* Ensure proper height and width */
+  min-height: 40px !important;
+  min-width: 40px !important;
+  /* Ensure proper display */
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  /* Ensure proper border radius */
+  border-radius: 0.5rem !important;
+  /* Ensure proper transitions */
+  transition: all 0.2s ease-in-out !important;
+}
+
+/* Hover state for user icon button */
+.bg-white.text-blue-800.rounded-lg:hover,
+a.bg-white.text-blue-800.rounded-lg:hover,
+.user-icon-button:hover {
+  background-color: #f0f7ff !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Fix for Call Us button */
+.bg-blue-700.text-white.rounded-full,
+button.bg-blue-700.text-white.rounded-full,
+.call-us-button {
+  /* Ensure proper border */
+  border: 1px solid rgba(29, 78, 216, 0.2) !important;
+  /* Ensure proper shadow */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+  /* Ensure proper background */
+  background-color: #1d4ed8 !important;
+  /* Ensure proper text color */
+  color: #ffffff !important;
+  /* Ensure proper padding */
+  padding: 0.75rem 1.5rem !important;
+  /* Ensure proper height */
+  min-height: 48px !important;
+  /* Ensure proper display */
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  /* Ensure proper font */
+  font-weight: 600 !important;
+  /* Ensure proper transitions */
+  transition: all 0.2s ease-in-out !important;
+}
+
+/* Hover state for Call Us button */
+.bg-blue-700.text-white.rounded-full:hover,
+button.bg-blue-700.text-white.rounded-full:hover,
+.call-us-button:hover {
+  background-color: #1e3a8a !important;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15), 0 3px 6px rgba(0, 0, 0, 0.1) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Fix for all buttons to ensure proper rendering */
+button,
+.btn,
+a.btn,
+input[type="submit"],
+input[type="button"] {
+  /* Ensure proper overflow */
+  overflow: visible !important;
+  /* Ensure proper box-sizing */
+  box-sizing: border-box !important;
+  /* Ensure proper position */
+  position: relative !important;
+  /* Ensure proper z-index */
+  z-index: 1 !important;
+  /* Ensure proper border */
+  border-style: solid !important;
+  /* Ensure proper border width */
+  border-width: 1px !important;
+  /* Ensure proper border color */
+  border-color: transparent !important;
+}
