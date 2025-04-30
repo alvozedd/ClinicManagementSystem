@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
-import { FaUserPlus, FaSync, FaUserCheck, FaUserTimes, FaPrint, FaPhone, FaArrowUp, FaArrowDown, FaTrash } from 'react-icons/fa';
+import { FaSync, FaUserCheck, FaUserTimes, FaPrint, FaPhone, FaArrowUp, FaArrowDown, FaTrash } from 'react-icons/fa';
 import apiService from '../utils/apiService';
 import SuperSimpleQueueCard from './SuperSimpleQueueCard';
-import SuperSimpleAddToQueueModal from './SuperSimpleAddToQueueModal';
 import QueueTicketPrint from './QueueTicketPrint';
 import { clearQueueStorage } from '../utils/clearQueueStorage';
 
@@ -18,7 +17,6 @@ function SuperSimpleQueueManagement({ patients, userRole }) {
   });
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [showAddToQueueModal, setShowAddToQueueModal] = useState(false);
   const [ticketToPrint, setTicketToPrint] = useState(null);
 
   // Fetch queue entries and stats
@@ -166,90 +164,7 @@ function SuperSimpleQueueManagement({ patients, userRole }) {
     setTicketToPrint(queueEntry);
   };
 
-  // Handle adding a walk-in patient
-  const handleAddWalkIn = async (patientData) => {
-    try {
-      setLoading(true);
-      console.log('Adding walk-in patient:', patientData);
 
-      // Step 1: Verify patient exists
-      if (!patientData.patient_id) {
-        console.error('No patient ID provided for walk-in');
-        alert('Please select a valid patient');
-        return false;
-      }
-
-      // Clear any existing queue entries from localStorage
-      clearQueueStorage();
-      console.log('Cleared existing queue entries before adding walk-in');
-
-      // Step 2: Create a new appointment for the walk-in patient
-      const today = new Date();
-      const appointmentData = {
-        patient_id: patientData.patient_id,
-        appointment_date: today,
-        optional_time: today.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        type: 'Walk-in',
-        reason: patientData.reason || 'Walk-in visit',
-        status: 'Scheduled',
-        createdBy: 'secretary'
-      };
-
-      console.log('Creating appointment for walk-in patient with data:', appointmentData);
-
-      // Create the appointment in the database
-      let newAppointment;
-      try {
-        newAppointment = await apiService.createAppointment(appointmentData);
-        console.log('Created appointment for walk-in:', newAppointment);
-
-        if (!newAppointment || !newAppointment._id) {
-          throw new Error('Failed to create appointment - no ID returned');
-        }
-      } catch (appointmentError) {
-        console.error('Error creating appointment:', appointmentError);
-        alert('Failed to create appointment for walk-in patient. Please check your network connection and try again.');
-        return false;
-      }
-
-      // Step 3: Add to queue with the appointment ID
-      const queueData = {
-        patient_id: patientData.patient_id,
-        appointment_id: newAppointment._id,
-        is_walk_in: true,
-        notes: `Walk-in: ${patientData.reason || 'No reason provided'}`
-      };
-
-      console.log('Adding walk-in patient to queue with data:', queueData);
-
-      try {
-        const newQueueEntry = await apiService.addToQueue(queueData);
-        console.log('Added to queue successfully:', newQueueEntry);
-
-        if (!newQueueEntry || !newQueueEntry._id) {
-          throw new Error('Invalid queue entry returned from server');
-        }
-
-        // Show the ticket for printing
-        setTicketToPrint(newQueueEntry);
-
-        // Refresh queue data
-        await fetchQueueData();
-
-        return true;
-      } catch (queueError) {
-        console.error('Error adding to queue:', queueError);
-        alert('Failed to add patient to queue. The appointment was created but could not be added to the queue. Please try again or check your network connection.');
-        return false;
-      }
-    } catch (error) {
-      console.error('Error in walk-in patient workflow:', error);
-      alert('An error occurred while processing the walk-in patient. Please try again or check your network connection.');
-      return false;
-    } finally {
-      setLoading(false);
-    }
-  };
 
   // Handle checking in a patient with an appointment
   const handleCheckInAppointment = async (appointment) => {
@@ -517,15 +432,6 @@ function SuperSimpleQueueManagement({ patients, userRole }) {
           )}
         </div>
         <div className="flex flex-wrap gap-2">
-          {(userRole === 'secretary' || userRole === 'admin') && (
-            <button
-              onClick={() => setShowAddToQueueModal(true)}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-md text-sm font-medium flex items-center shadow-sm hover:shadow-md transition-all duration-200"
-            >
-              <FaUserPlus className="mr-2" />
-              Add Walk-in
-            </button>
-          )}
 
           {appointmentsToCheckIn.length > 0 && (userRole === 'secretary' || userRole === 'admin') && (
             <button
@@ -636,15 +542,6 @@ function SuperSimpleQueueManagement({ patients, userRole }) {
           <h3 className="text-lg font-semibold text-blue-800 mb-2">Today's Appointments</h3>
           <div className="bg-blue-50 p-4 rounded-lg border border-blue-100 text-center">
             <p>No appointments to check in today.</p>
-            {(userRole === 'secretary' || userRole === 'admin') && (
-              <button
-                onClick={() => setShowAddToQueueModal(true)}
-                className="mt-3 bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-md text-sm font-medium flex items-center mx-auto"
-              >
-                <FaUserPlus className="mr-2" />
-                Add Walk-in Patient
-              </button>
-            )}
           </div>
         </div>
       )}
@@ -743,36 +640,12 @@ function SuperSimpleQueueManagement({ patients, userRole }) {
         {/* Empty State */}
         {queueEntries.length === 0 && (
           <div className="text-center py-8 bg-gray-50 rounded-lg">
-            <p className="text-gray-500 mb-4">No patients in the queue today</p>
-            {(userRole === 'secretary' || userRole === 'admin') && (
-              <button
-                onClick={() => setShowAddToQueueModal(true)}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm font-medium flex items-center mx-auto"
-              >
-                <FaUserPlus className="mr-2" />
-                Add Walk-in Patient
-              </button>
-            )}
+            <p className="text-gray-500">No patients in the queue today</p>
           </div>
         )}
       </div>
 
-      {/* Add to Queue Modal */}
-      {showAddToQueueModal && (
-        <SuperSimpleAddToQueueModal
-          patients={patients}
-          onClose={() => setShowAddToQueueModal(false)}
-          onSave={async (patientData) => {
-            try {
-              await handleAddWalkIn(patientData);
-              setShowAddToQueueModal(false);
-            } catch (error) {
-              console.error('Error adding to queue:', error);
-              alert('Failed to add patient to queue');
-            }
-          }}
-        />
-      )}
+
 
       {/* Print Ticket Modal */}
       {ticketToPrint && (

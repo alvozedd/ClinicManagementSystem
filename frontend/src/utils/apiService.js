@@ -388,74 +388,21 @@ const apiService = {
 
       console.log('Creating appointment with headers:', headers, 'isVisitorBooking:', isVisitorBooking);
 
-      // For visitor bookings, use the non-API endpoint to avoid authentication
-      const baseUrl = API_URL.replace('/api', '');
-      const endpoint = isVisitorBooking
-        ? `${baseUrl}/appointments`
-        : `${baseUrl}/appointments`;
-
+      // Use the API endpoint
+      const endpoint = `${API_URL}/appointments`;
       console.log('Using appointment endpoint:', endpoint);
 
-      // Try multiple approaches to create appointment
-      try {
-        // First try: with credentials
-        const response = await fetch(endpoint, {
-          method: 'POST',
-          headers,
-          body: JSON.stringify(appointmentData),
-          credentials: 'include', // Include cookies for refresh token
-        });
-        const data = await handleResponse(response);
-        console.log('Successfully created appointment with credentials:', data);
-        return data;
-      } catch (firstError) {
-        console.warn('First attempt failed, trying without credentials:', firstError);
+      // Make the request
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(appointmentData),
+        credentials: 'include', // Include cookies for refresh token
+      });
 
-        try {
-          // Second try: without credentials
-          const response2 = await fetch(endpoint, {
-            method: 'POST',
-            headers,
-            body: JSON.stringify(appointmentData),
-            mode: 'cors',
-          });
-          const data = await handleResponse(response2);
-          console.log('Successfully created appointment without credentials:', data);
-          return data;
-        } catch (secondError) {
-          console.warn('Second attempt failed, trying with no-cors mode:', secondError);
-
-          try {
-            // Third try: with no-cors mode (this will return an opaque response)
-            // This is a last resort and won't return usable data, but might succeed on the server
-            await fetch(endpoint, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'text/plain', // no-cors only supports simple headers
-              },
-              body: JSON.stringify(appointmentData),
-              mode: 'no-cors',
-            });
-
-            // Since no-cors returns an opaque response, we can't read it
-            // Create a mock response that looks like a successful appointment
-            console.log('Used no-cors mode, creating mock response');
-            return {
-              _id: `temp_${Date.now()}`,
-              patient_id: appointmentData.patient_id,
-              appointment_date: appointmentData.appointment_date,
-              status: appointmentData.status || 'Scheduled',
-              type: appointmentData.type || 'Consultation',
-              reason: appointmentData.reason || '',
-              createdAt: new Date().toISOString(),
-              _isTemporary: true
-            };
-          } catch (thirdError) {
-            console.error('All attempts failed:', thirdError);
-            throw new Error('Failed to create appointment after multiple attempts');
-          }
-        }
-      }
+      const data = await handleResponse(response);
+      console.log('Successfully created appointment:', data);
+      return data;
     } catch (error) {
       console.error('Error creating appointment:', error);
       throw error;
