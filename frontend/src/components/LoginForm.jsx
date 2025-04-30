@@ -139,7 +139,7 @@ function LoginForm() {
             <div>
               <button
                 type="submit"
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200"
+                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200 sign-in-button"
                 disabled={loading}
               >
                 {loading ? (
@@ -160,7 +160,7 @@ function LoginForm() {
           </form>
 
           <div className="mt-6 text-center">
-            <Link to="/" className="text-sm text-blue-600 hover:text-blue-800 flex items-center justify-center">
+            <Link to="/" className="text-sm text-blue-600 hover:text-blue-800 flex items-center justify-center py-2 px-4">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
               </svg>

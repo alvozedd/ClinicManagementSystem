@@ -1,0 +1,65 @@
+/* Button fixes for rendering issues */
+
+/* Fix for buttons being cut off at the bottom */
+button, 
+.btn,
+a.btn,
+input[type="submit"],
+input[type="button"] {
+  /* Ensure proper rendering with explicit height */
+  height: auto !important;
+  min-height: 36px;
+  /* Fix for overflow issues */
+  overflow: visible !important;
+  /* Ensure proper padding */
+  padding-top: 0.5rem !important;
+  padding-bottom: 0.5rem !important;
+  /* Fix for line height issues */
+  line-height: 1.5 !important;
+  /* Ensure proper display */
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  /* Fix for border-box issues */
+  box-sizing: border-box !important;
+  /* Fix for transform issues */
+  transform-style: preserve-3d !important;
+  /* Fix for z-index issues */
+  position: relative !important;
+  z-index: 1 !important;
+}
+
+/* Specific fix for login page buttons */
+.login-button,
+form button[type="submit"],
+.sign-in-button {
+  height: auto !important;
+  min-height: 40px !important;
+  padding: 0.625rem 1.25rem !important;
+  line-height: 1.5 !important;
+  overflow: visible !important;
+}
+
+/* Fix for homepage buttons */
+.hero-section button,
+.cta-button,
+.book-now-button,
+.call-us-button {
+  height: auto !important;
+  min-height: 48px !important;
+  padding: 0.75rem 1.5rem !important;
+  line-height: 1.5 !important;
+  overflow: visible !important;
+}
+
+/* Fix for mobile buttons */
+@media (max-width: 640px) {
+  button, 
+  .btn,
+  a.btn,
+  input[type="submit"],
+  input[type="button"] {
+    min-height: 44px !important; /* Slightly taller on mobile for better touch targets */
+    padding: 0.625rem 1rem !important;
+  }
+}
