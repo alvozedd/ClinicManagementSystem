@@ -78,7 +78,7 @@ app.options('*', (req, res) => {
 
   // Set allowed origin
   if (origin) {
-    const allowedOrigins = ['https://urohealthltd.netlify.app', 'https://www.urohealthltd.netlify.app', 'http://localhost:3000', 'http://localhost:5173'];
+    const allowedOrigins = ['https://urohealthltd.netlify.app', 'https://www.urohealthltd.netlify.app', 'http://localhost:3000', 'http://localhost:5173', 'https://urohealthcentral.netlify.app', 'https://www.urohealthcentral.netlify.app'];
 
     if (allowedOrigins.includes(origin) || process.env.NODE_ENV === 'development' || process.env.ALLOW_ALL_ORIGINS === 'true') {
       res.header('Access-Control-Allow-Origin', origin);
@@ -255,18 +255,182 @@ app.delete('/users/:id', (req, res) => {
   });
 });
 
-// Login route
+// OPTIONS handler for login route
+app.options('/users/login', (req, res) => {
+  console.log('Received OPTIONS request for /users/login');
+
+  // Set explicit CORS headers for login route OPTIONS
+  const origin = req.headers.origin;
+  console.log('Login OPTIONS request origin:', origin);
+
+  // Set the Vary header
+  res.header('Vary', 'Origin');
+
+  // Set allowed origin with a more permissive approach for login
+  if (origin) {
+    const allowedOrigins = [
+      'https://urohealthltd.netlify.app',
+      'https://www.urohealthltd.netlify.app',
+      'http://localhost:3000',
+      'http://localhost:5173',
+      'https://urohealthcentral.netlify.app',
+      'https://www.urohealthcentral.netlify.app'
+    ];
+
+    // For login, we'll be more permissive in development/testing
+    if (allowedOrigins.includes(origin) || process.env.NODE_ENV === 'development' || process.env.ALLOW_ALL_ORIGINS === 'true') {
+      res.header('Access-Control-Allow-Origin', origin);
+      res.header('Access-Control-Allow-Credentials', 'true');
+      console.log('CORS headers set for login OPTIONS from origin:', origin);
+    } else {
+      console.log('Login OPTIONS request from non-allowed origin:', origin);
+    }
+  } else {
+    // For requests without origin (like server-to-server), use wildcard
+    res.header('Access-Control-Allow-Origin', '*');
+    console.log('CORS headers set for login OPTIONS without origin');
+  }
+
+  // Set other CORS headers
+  res.header('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.header('Access-Control-Max-Age', '86400'); // 24 hours
+
+  // Respond with 200 OK for OPTIONS
+  res.status(200).end();
+});
+
+// Login route with explicit CORS handling
 app.post('/users/login', (req, res) => {
   console.log('Received login request at /users/login, forwarding to controller directly');
+
+  // Set explicit CORS headers for login route
+  const origin = req.headers.origin;
+  console.log('Login request origin:', origin);
+
+  // Set the Vary header
+  res.header('Vary', 'Origin');
+
+  // Set allowed origin with a more permissive approach for login
+  if (origin) {
+    const allowedOrigins = [
+      'https://urohealthltd.netlify.app',
+      'https://www.urohealthltd.netlify.app',
+      'http://localhost:3000',
+      'http://localhost:5173',
+      'https://urohealthcentral.netlify.app',
+      'https://www.urohealthcentral.netlify.app'
+    ];
+
+    // For login, we'll be more permissive in development/testing
+    if (allowedOrigins.includes(origin) || process.env.NODE_ENV === 'development' || process.env.ALLOW_ALL_ORIGINS === 'true') {
+      res.header('Access-Control-Allow-Origin', origin);
+      res.header('Access-Control-Allow-Credentials', 'true');
+      console.log('CORS headers set for login route from origin:', origin);
+    } else {
+      console.log('Login request from non-allowed origin:', origin);
+    }
+  } else {
+    // For requests without origin (like server-to-server), use wildcard
+    res.header('Access-Control-Allow-Origin', '*');
+    console.log('CORS headers set for login route without origin');
+  }
+
+  // Set other CORS headers
+  res.header('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+
   // Import the controller directly
   const { authUser } = require('./controllers/userController');
   // Call the controller function directly
   authUser(req, res);
 });
 
-// Refresh token route
+// OPTIONS handler for refresh token route
+app.options('/users/refresh-token', (req, res) => {
+  console.log('Received OPTIONS request for /users/refresh-token');
+
+  // Set explicit CORS headers for refresh token route OPTIONS
+  const origin = req.headers.origin;
+  console.log('Refresh token OPTIONS request origin:', origin);
+
+  // Set the Vary header
+  res.header('Vary', 'Origin');
+
+  // Set allowed origin with a more permissive approach for refresh token
+  if (origin) {
+    const allowedOrigins = [
+      'https://urohealthltd.netlify.app',
+      'https://www.urohealthltd.netlify.app',
+      'http://localhost:3000',
+      'http://localhost:5173',
+      'https://urohealthcentral.netlify.app',
+      'https://www.urohealthcentral.netlify.app'
+    ];
+
+    // For refresh token, we'll be more permissive in development/testing
+    if (allowedOrigins.includes(origin) || process.env.NODE_ENV === 'development' || process.env.ALLOW_ALL_ORIGINS === 'true') {
+      res.header('Access-Control-Allow-Origin', origin);
+      res.header('Access-Control-Allow-Credentials', 'true');
+      console.log('CORS headers set for refresh token OPTIONS from origin:', origin);
+    } else {
+      console.log('Refresh token OPTIONS request from non-allowed origin:', origin);
+    }
+  } else {
+    // For requests without origin (like server-to-server), use wildcard
+    res.header('Access-Control-Allow-Origin', '*');
+    console.log('CORS headers set for refresh token OPTIONS without origin');
+  }
+
+  // Set other CORS headers
+  res.header('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.header('Access-Control-Max-Age', '86400'); // 24 hours
+
+  // Respond with 200 OK for OPTIONS
+  res.status(200).end();
+});
+
+// Refresh token route with explicit CORS handling
 app.post('/users/refresh-token', (req, res) => {
   console.log('Received refresh token request at /users/refresh-token, forwarding to controller directly');
+
+  // Set explicit CORS headers for refresh token route
+  const origin = req.headers.origin;
+  console.log('Refresh token request origin:', origin);
+
+  // Set the Vary header
+  res.header('Vary', 'Origin');
+
+  // Set allowed origin with a more permissive approach for refresh token
+  if (origin) {
+    const allowedOrigins = [
+      'https://urohealthltd.netlify.app',
+      'https://www.urohealthltd.netlify.app',
+      'http://localhost:3000',
+      'http://localhost:5173',
+      'https://urohealthcentral.netlify.app',
+      'https://www.urohealthcentral.netlify.app'
+    ];
+
+    // For refresh token, we'll be more permissive in development/testing
+    if (allowedOrigins.includes(origin) || process.env.NODE_ENV === 'development' || process.env.ALLOW_ALL_ORIGINS === 'true') {
+      res.header('Access-Control-Allow-Origin', origin);
+      res.header('Access-Control-Allow-Credentials', 'true');
+      console.log('CORS headers set for refresh token route from origin:', origin);
+    } else {
+      console.log('Refresh token request from non-allowed origin:', origin);
+    }
+  } else {
+    // For requests without origin (like server-to-server), use wildcard
+    res.header('Access-Control-Allow-Origin', '*');
+    console.log('CORS headers set for refresh token route without origin');
+  }
+
+  // Set other CORS headers
+  res.header('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+
   // Import the controller directly
   const { refreshToken } = require('./controllers/userController');
   // Call the controller function directly

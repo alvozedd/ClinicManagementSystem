@@ -7,7 +7,9 @@ const allowedOrigins = [
   'https://urohealthltd.netlify.app',
   'https://www.urohealthltd.netlify.app',
   'http://localhost:3000',
-  'http://localhost:5173'
+  'http://localhost:5173',
+  'https://urohealthcentral.netlify.app',
+  'https://www.urohealthcentral.netlify.app'
 ];
 
 // For development, you can enable this to allow all origins

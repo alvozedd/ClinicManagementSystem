@@ -83,7 +83,9 @@ app.use((req, res, next) => {
   const allowedOrigins = [
     'https://urohealthltd.netlify.app',
     'http://localhost:3000',
-    'http://localhost:5173'
+    'http://localhost:5173',
+    'https://urohealthcentral.netlify.app',
+    'https://www.urohealthcentral.netlify.app'
   ];
 
   const origin = req.headers.origin;
