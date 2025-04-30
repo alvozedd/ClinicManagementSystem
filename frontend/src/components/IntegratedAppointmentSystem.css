@@ -323,6 +323,39 @@
   width: 100%;
 }
 
+/* Loader styles */
+.loader-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  width: 100%;
+  height: 200px;
+}
+
+.loader {
+  text-align: center;
+}
+
+.loader-dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-bounce {
+  animation: bounce 1s infinite;
+}
+
 /* Responsive styles */
 @media (max-width: 768px) {
   .stats-panel {
