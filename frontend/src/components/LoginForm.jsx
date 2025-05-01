@@ -35,10 +35,39 @@ function LoginForm() {
 
       // Import the API service
       const apiService = (await import('../utils/apiService')).default;
-      console.log('API URL:', import.meta.env.VITE_API_URL || 'http://localhost:5000/api');
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      console.log('API URL:', apiUrl);
+
+      // Test direct fetch to the login endpoint
+      try {
+        console.log('Testing direct fetch to login endpoint...');
+        const testResponse = await fetch(`${apiUrl.replace('/api', '')}/users/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password }),
+          mode: 'cors' // Explicitly set CORS mode
+        });
+        console.log('Test response status:', testResponse.status);
+        if (testResponse.ok) {
+          const testData = await testResponse.json();
+          console.log('Test response data:', testData);
+
+          // Use the login function from AuthContext with the test data
+          login(testData);
+
+          // Redirect to dashboard after successful login
+          window.location.href = '/dashboard';
+          return; // Exit early if the direct fetch works
+        } else {
+          console.log('Test response error:', await testResponse.text());
+        }
+      } catch (testError) {
+        console.error('Test fetch error:', testError);
+      }
 
       // Call the login API
       // The backend expects 'username' in the email field
+      console.log('Calling apiService.login...');
       const data = await apiService.login(username, password);
       console.log('Login response:', data);
 
