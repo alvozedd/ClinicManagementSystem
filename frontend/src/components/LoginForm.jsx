@@ -1,6 +1,7 @@
 import { useState, useContext } from 'react';
 import { Navigate, Link } from 'react-router-dom';
 import AuthContext from '../context/AuthContext';
+import authUtils from '../utils/authUtils';
 import './GlassEffects.css';
 
 function LoginForm() {
@@ -31,7 +32,7 @@ function LoginForm() {
       console.log('Attempting login with username:', username);
 
       // Clear any previous logged out flag
-      localStorage.removeItem('user_logged_out');
+      authUtils.clearUserData();
 
       // Import the API service
       const apiService = (await import('../utils/apiService')).default;
@@ -40,38 +41,38 @@ function LoginForm() {
       let loginSuccess = false;
       let userData = null;
 
-      // Approach 1: Try direct fetch to the current origin's backend
+      // Approach 1: Try with API service (which has its own fallback mechanisms)
       try {
-        // Get the current origin (hostname and port)
-        const currentOrigin = window.location.origin;
-        const loginEndpoint = `${currentOrigin}/users/login`;
-
-        console.log('Approach 1: Direct fetch to current origin:', loginEndpoint);
-        const response = await fetch(loginEndpoint, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username, password }),
-          credentials: 'include'
-        });
-
-        if (response.ok) {
-          userData = await response.json();
-          console.log('Login successful with approach 1:', userData);
-          loginSuccess = true;
-        } else {
-          console.log('Approach 1 failed with status:', response.status);
-        }
+        console.log('Approach 1: Using apiService.login');
+        userData = await apiService.login(username, password);
+        console.log('Login successful with approach 1');
+        loginSuccess = true;
       } catch (error) {
         console.warn('Approach 1 failed with error:', error);
       }
 
-      // Approach 2: Try with API service (which has its own fallback mechanisms)
+      // Approach 2: Try direct fetch to the current origin's backend
       if (!loginSuccess) {
         try {
-          console.log('Approach 2: Using apiService.login');
-          userData = await apiService.login(username, password);
-          console.log('Login successful with approach 2:', userData);
-          loginSuccess = true;
+          // Get the current origin (hostname and port)
+          const currentOrigin = window.location.origin;
+          const loginEndpoint = `${currentOrigin}/users/login`;
+
+          console.log('Approach 2: Direct fetch to current origin:', loginEndpoint);
+          const response = await fetch(loginEndpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password }),
+            credentials: 'include'
+          });
+
+          if (response.ok) {
+            userData = await response.json();
+            console.log('Login successful with approach 2');
+            loginSuccess = true;
+          } else {
+            console.log('Approach 2 failed with status:', response.status);
+          }
         } catch (error) {
           console.warn('Approach 2 failed with error:', error);
         }
@@ -91,7 +92,7 @@ function LoginForm() {
 
           if (response.ok) {
             userData = await response.json();
-            console.log('Login successful with approach 3:', userData);
+            console.log('Login successful with approach 3');
             loginSuccess = true;
           } else {
             console.log('Approach 3 failed with status:', response.status);
@@ -102,11 +103,20 @@ function LoginForm() {
       }
 
       if (loginSuccess && userData) {
+        console.log('Login successful, storing user data');
+
+        // Store user data using authUtils
+        authUtils.storeUserData(userData, userData.sessionId);
+
         // Use the login function from AuthContext
         login(userData);
 
+        console.log('User data stored, redirecting to dashboard');
+
         // Redirect to dashboard after successful login
-        window.location.href = '/dashboard';
+        setTimeout(() => {
+          window.location.href = '/dashboard';
+        }, 100);
       } else {
         throw new Error('All login attempts failed');
       }

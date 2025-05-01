@@ -2,23 +2,19 @@ import { useContext, useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import AuthContext from './context/AuthContext'
 import apiService from './utils/apiService'
-import SimplifiedDoctorDashboard from './components/SimplifiedDoctorDashboard'
-import SimplifiedSecretaryDashboard from './components/SimplifiedSecretaryDashboard'
 import IntegratedDoctorDashboard from './components/IntegratedDoctorDashboard'
 import IntegratedSecretaryDashboard from './components/IntegratedSecretaryDashboard'
 import AdminDashboard from './components/AdminDashboard'
-import ModernAppointmentDashboard from './components/ModernAppointmentDashboard'
-import ModernTodaysAppointments from './components/ModernTodaysAppointments'
 import { FaSignOutAlt, FaSync, FaUserMd, FaUserTie } from 'react-icons/fa'
 import {
-  transformPatientsFromBackend,
   transformPatientToBackend,
-  transformAppointmentsFromBackend,
+  transformPatientsFromBackend,
   transformAppointmentToBackend,
   transformAppointmentFromBackend
 } from './utils/dataTransformers'
 import { clearAllCaches, clearCache } from './data/mockData'
 import { updateAppointmentStatuses } from './utils/timeUtils'
+import { syncPatients, syncAppointments, pushTemporaryPatients, pushTemporaryAppointments } from './utils/syncUtils'
 
 function Dashboard() {
   const { userInfo, logout } = useContext(AuthContext)
@@ -26,10 +22,9 @@ function Dashboard() {
   // State for data
   const [patientsData, setPatientsData] = useState([])
   const [appointmentsData, setAppointmentsData] = useState([])
-  const [reportsData, setReportsData] = useState([])
+  const [diagnosesData, setDiagnosesData] = useState([]) // Renamed for clarity
   const [refreshTrigger, setRefreshTrigger] = useState(0) // Used to trigger data refresh
   const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState(null)
   const [selectedPatient, setSelectedPatient] = useState(null) // Track the currently selected patient
 
   // Debug function to check user info and token
@@ -48,37 +43,62 @@ function Dashboard() {
         // Show loading state
         setIsLoading(true);
 
-        // Fetch patients from API
-        const patientsResponse = await apiService.getPatients();
-        console.log('Patients from API (raw):', patientsResponse);
+        // First, try to push any temporary patients and appointments to the backend
+        console.log('Attempting to push temporary data to backend...');
+        if (patientsData && patientsData.length > 0) {
+          const tempPatients = patientsData.filter(p => p._isTemporary);
+          if (tempPatients.length > 0) {
+            console.log(`Found ${tempPatients.length} temporary patients to push`);
+            const updatedPatients = await pushTemporaryPatients(patientsData);
+            setPatientsData(updatedPatients);
+          }
+        }
 
-        // Transform patients to frontend format
-        const transformedPatients = transformPatientsFromBackend(patientsResponse);
-        console.log('Transformed patients:', transformedPatients);
-        setPatientsData(transformedPatients);
+        if (appointmentsData && appointmentsData.length > 0) {
+          const tempAppointments = appointmentsData.filter(a => a._isTemporary);
+          if (tempAppointments.length > 0) {
+            console.log(`Found ${tempAppointments.length} temporary appointments to push`);
+            const updatedAppointments = await pushTemporaryAppointments(appointmentsData);
+            setAppointmentsData(updatedAppointments);
+          }
+        }
 
-        // Fetch appointments from API
-        const appointmentsResponse = await apiService.getAppointments();
-        console.log('Appointments from API (raw):', appointmentsResponse);
+        // Sync patients with backend
+        console.log('Syncing patients with backend...');
+        const syncedPatients = await syncPatients(patientsData);
+        console.log(`Synced ${syncedPatients.length} patients`);
 
-        // Transform appointments to frontend format
-        const transformedAppointments = transformAppointmentsFromBackend(appointmentsResponse);
-        console.log('Transformed appointments:', transformedAppointments);
-        setAppointmentsData(transformedAppointments);
+        // Save to localStorage as fallback for future use
+        if (syncedPatients && syncedPatients.length > 0) {
+          try {
+            localStorage.setItem('fallbackPatients', JSON.stringify(syncedPatients));
+            console.log('Saved patients to localStorage as fallback');
+          } catch (storageError) {
+            console.warn('Failed to save patients to localStorage:', storageError);
+          }
+        }
+
+        setPatientsData(syncedPatients);
+
+        // Sync appointments with backend
+        console.log('Syncing appointments with backend...');
+        const syncedAppointments = await syncAppointments(appointmentsData);
+        console.log(`Synced ${syncedAppointments.length} appointments`);
+        setAppointmentsData(syncedAppointments);
 
         // Fetch diagnoses from API
         const diagnosesResponse = await apiService.getDiagnoses();
         console.log('Diagnoses from API:', diagnosesResponse);
-        setReportsData(diagnosesResponse);
+        setDiagnosesData(diagnosesResponse);
 
         // Link diagnoses to appointments
-        if (diagnosesResponse && diagnosesResponse.length > 0 && transformedAppointments.length > 0) {
+        if (diagnosesResponse && diagnosesResponse.length > 0 && syncedAppointments.length > 0) {
           console.log('Linking diagnoses to appointments...');
-          const appointmentsWithDiagnoses = transformedAppointments.map(appointment => {
+          const appointmentsWithDiagnoses = syncedAppointments.map(appointment => {
             // Find all diagnoses for this appointment
             const appointmentDiagnoses = diagnosesResponse.filter(d => d.appointment_id === appointment._id);
             if (appointmentDiagnoses && appointmentDiagnoses.length > 0) {
-              console.log(`Found ${appointmentDiagnoses.length} diagnoses for appointment ${appointment._id}:`, appointmentDiagnoses);
+              console.log(`Found ${appointmentDiagnoses.length} diagnoses for appointment ${appointment._id}`);
 
               // Process all diagnoses for this appointment
               const diagnosesArray = appointmentDiagnoses.map(diagnosis => {
@@ -97,14 +117,10 @@ function Dashboard() {
                   // Try to parse the diagnosis_text as JSON
                   const parsedDiagnosis = JSON.parse(diagnosis.diagnosis_text);
                   if (parsedDiagnosis && typeof parsedDiagnosis === 'object') {
-                    diagnosisObj = {
-                      ...diagnosisObj,
-                      ...parsedDiagnosis
-                    };
-                    console.log('Successfully parsed diagnosis JSON:', diagnosisObj);
+                    diagnosisObj = { ...diagnosisObj, ...parsedDiagnosis };
                   }
                 } catch (e) {
-                  console.log('Diagnosis text is not valid JSON, using as plain text');
+                  // Using diagnosis text as plain text
                 }
 
                 return diagnosisObj;
@@ -117,27 +133,36 @@ function Dashboard() {
               return {
                 ...appointment,
                 diagnoses: diagnosesArray,
-                // Keep the most recent diagnosis as the primary one for backward compatibility
-                diagnosis: diagnosesArray[0],
+                diagnosis: diagnosesArray[0], // Most recent diagnosis as primary
                 status: 'Completed'
               };
             }
             return appointment;
           });
 
-          console.log('Appointments with diagnoses:', appointmentsWithDiagnoses);
-
-          // Update appointment statuses based on time (for appointments that need diagnoses)
+          // Update appointment statuses based on time
           const updatedAppointments = updateAppointmentStatuses(appointmentsWithDiagnoses);
-          console.log('Appointments after status updates:', updatedAppointments);
-
           setAppointmentsData(updatedAppointments);
-        } else {
-          console.log('No diagnoses found or no appointments to link them to');
         }
       } catch (error) {
         console.error('Error fetching data from API:', error);
-        setError('Failed to load data. Please try again later.');
+        console.warn('Failed to load data. Using fallback mechanisms.');
+
+        // Create some fallback data if we have nothing
+        if (!patientsData || patientsData.length === 0) {
+          console.warn('No patient data available, trying fallback data');
+          // Try to get data from localStorage as a last resort
+          try {
+            const localPatients = localStorage.getItem('fallbackPatients');
+            if (localPatients) {
+              const parsedPatients = JSON.parse(localPatients);
+              console.log('Using fallback patients from localStorage:', parsedPatients.length);
+              setPatientsData(parsedPatients);
+            }
+          } catch (localStorageError) {
+            console.error('Error accessing localStorage:', localStorageError);
+          }
+        }
       } finally {
         setIsLoading(false);
       }
@@ -237,15 +262,14 @@ function Dashboard() {
       // Clear only the patients cache to ensure fresh data
       clearCache('patients');
 
-      // Refresh only patient data from API
-      const patientsResponse = await apiService.getPatients();
-      const transformedPatients = transformPatientsFromBackend(patientsResponse);
-      setPatientsData(transformedPatients);
+      // Sync patients with backend to ensure we have the latest data
+      const syncedPatients = await syncPatients(patientsData);
+      console.log(`Synced ${syncedPatients.length} patients after update`);
+      setPatientsData(syncedPatients);
 
       return response;
     } catch (error) {
       console.error('Error saving patient:', error);
-      setError('Failed to save patient. Please try again.');
       alert('Failed to save patient to database. Please try again.');
       throw error;
     } finally {
@@ -292,13 +316,10 @@ function Dashboard() {
       // Return to the main dashboard view if we were viewing the deleted patient
       if (selectedPatient && (selectedPatient._id === mongoId || selectedPatient.id === patientId)) {
         // If there's a selected patient and it's the one we just deleted, clear the selection
-        if (typeof onPatientDeleted === 'function') {
-          onPatientDeleted();
-        }
+        setSelectedPatient(null);
       }
     } catch (error) {
       console.error('Error deleting patient:', error);
-      setError('Failed to delete patient. Please try again.');
 
       // Check if this is a permission error
       if (error.includes && error.includes('Not authorized')) {
@@ -381,11 +402,15 @@ function Dashboard() {
       // Clear all caches to ensure fresh data
       clearAllCaches();
 
+      // Sync appointments with backend to ensure we have the latest data
+      const syncedAppointments = await syncAppointments(appointmentsData);
+      console.log(`Synced ${syncedAppointments.length} appointments after updates`);
+      setAppointmentsData(syncedAppointments);
+
       // Refresh data from API to ensure we have the latest data
       setRefreshTrigger(prev => prev + 1);
     } catch (error) {
       console.error('Error updating appointments:', error);
-      setError('Failed to update appointments. Please try again.');
       alert('Failed to update appointments. Please try again.');
     }
   };
@@ -556,8 +581,8 @@ function Dashboard() {
 
         // Handle optimistic updates differently based on whether we're creating or updating
         if (appointmentToSave.diagnosisId) {
-          // For updates, replace the existing diagnosis in the reports data
-          setReportsData(prev =>
+          // For updates, replace the existing diagnosis in the diagnoses data
+          setDiagnosesData(prev =>
             prev.map(d => d._id === appointmentToSave.diagnosisId ?
               { ...d, diagnosis_text: JSON.stringify(diagnosisObjForUI) } : d)
           );
@@ -578,8 +603,8 @@ function Dashboard() {
             } : a)
           );
         } else {
-          // For new diagnoses, add to reports data
-          setReportsData(prev => [...prev, {
+          // For new diagnoses, add to diagnoses data
+          setDiagnosesData(prev => [...prev, {
             ...diagnosisResponse,
             diagnosis_text: JSON.stringify(diagnosisObjForUI)
           }]);
@@ -611,29 +636,29 @@ function Dashboard() {
       // Clear specific caches to ensure fresh data
       clearCache('appointments');
       if (appointmentToSave.diagnosis) {
-        clearCache('reports');
+        clearCache('diagnoses'); // Updated cache name for clarity
       }
 
       // Perform a complete refresh of all data to ensure consistency
       console.log('Performing complete data refresh after diagnosis save/update');
 
-      // Fetch fresh data directly
-      const patientsResponse = await apiService.getPatients();
-      const transformedPatients = transformPatientsFromBackend(patientsResponse);
-      setPatientsData(transformedPatients);
+      // Sync data with backend
+      const syncedPatients = await syncPatients(patientsData);
+      console.log(`Synced ${syncedPatients.length} patients after diagnosis save`);
+      setPatientsData(syncedPatients);
 
-      const appointmentsResponse = await apiService.getAppointments();
-      const transformedAppointments = transformAppointmentsFromBackend(appointmentsResponse);
-      setAppointmentsData(transformedAppointments);
+      const syncedAppointments = await syncAppointments(appointmentsData);
+      console.log(`Synced ${syncedAppointments.length} appointments after diagnosis save`);
+      setAppointmentsData(syncedAppointments);
 
+      // Still fetch diagnoses directly as we don't have a sync function for them
       const diagnosesResponse = await apiService.getDiagnoses();
-      setReportsData(diagnosesResponse);
+      setDiagnosesData(diagnosesResponse);
 
       // Force a refresh of the UI by triggering the refresh trigger
       setRefreshTrigger(prev => prev + 1);
     } catch (error) {
       console.error('Error saving diagnosis/appointment:', error);
-      setError('Failed to save. Please try again.');
       alert('Failed to save diagnosis/appointment. Please try again.');
     } finally {
       setIsLoading(false); // Hide loading state
@@ -687,16 +712,15 @@ function Dashboard() {
       // Clear appointments cache
       clearCache('appointments');
 
-      // Refresh appointments data from API
-      const appointmentsResponse = await apiService.getAppointments();
-      const transformedAppointments = transformAppointmentsFromBackend(appointmentsResponse);
-      setAppointmentsData(transformedAppointments);
+      // Sync appointments with backend
+      const syncedAppointments = await syncAppointments(appointmentsData);
+      console.log(`Synced ${syncedAppointments.length} appointments after deletion`);
+      setAppointmentsData(syncedAppointments);
 
       // Show success message
       alert('Appointment deleted successfully');
     } catch (error) {
       console.error('Error deleting appointment:', error);
-      setError('Failed to delete appointment. Please try again.');
       alert('Failed to delete appointment. Please try again: ' + (error.message || 'Unknown error'));
     } finally {
       setIsLoading(false); // Hide loading state
@@ -801,20 +825,11 @@ function Dashboard() {
                     // Clear all caches to ensure fresh data
                     clearAllCaches();
 
-                    // Fetch fresh data directly instead of using refreshTrigger
-                    const patientsResponse = await apiService.getPatients();
-                    const transformedPatients = transformPatientsFromBackend(patientsResponse);
-                    setPatientsData(transformedPatients);
-
-                    const appointmentsResponse = await apiService.getAppointments();
-                    const transformedAppointments = transformAppointmentsFromBackend(appointmentsResponse);
-                    setAppointmentsData(transformedAppointments);
-
-                    const diagnosesResponse = await apiService.getDiagnoses();
-                    setReportsData(diagnosesResponse);
+                    // Trigger data refresh via the useEffect hook
+                    setRefreshTrigger(prev => prev + 1);
 
                     // Show success message
-                    alert('Data refreshed from database');
+                    alert('Data refresh initiated');
                   } catch (error) {
                     console.error('Error refreshing data:', error);
                     alert('Failed to refresh data. Please try again.');

@@ -1,6 +1,6 @@
 import { createContext, useState, useEffect } from 'react';
 import apiService from '../utils/apiService';
-import secureStorage from '../utils/secureStorage';
+import authUtils from '../utils/authUtils';
 
 export const AuthContext = createContext();
 
@@ -10,125 +10,106 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const initAuth = async () => {
-      // Check if user has explicitly logged out
-      const userLoggedOut = localStorage.getItem('user_logged_out') === 'true';
+      console.log('Initializing authentication state');
 
-      // If user has logged out, don't try to restore the session
-      if (userLoggedOut) {
-        console.log('User has explicitly logged out, not restoring session');
-        secureStorage.clear();
-        localStorage.removeItem('userInfo');
-        setLoading(false);
-        return;
-      }
+      try {
+        // Get user data from storage
+        const userData = authUtils.getUserData();
 
-      // Check if session is valid
-      if (!secureStorage.isSessionValid()) {
-        console.log('Session is invalid or expired, not restoring session');
-        secureStorage.clear();
-        localStorage.removeItem('userInfo');
-        setLoading(false);
-        return;
-      }
+        if (userData) {
+          console.log('User data found, checking if token refresh is needed');
 
-      // Check if user is logged in - try secure storage first, then fallback to localStorage
-      const secureUserInfo = secureStorage.getItem('userInfo');
-      const legacyUserInfo = localStorage.getItem('userInfo');
+          // Check if token needs refresh (expires in less than 5 minutes)
+          let needsRefresh = false;
 
-      let parsedUserInfo = null;
+          if (userData.token) {
+            try {
+              const tokenData = JSON.parse(atob(userData.token.split('.')[1]));
+              const expiryTime = tokenData.exp * 1000; // Convert to milliseconds
+              const currentTime = Date.now();
+              const timeUntilExpiry = expiryTime - currentTime;
 
-      // If we have data in secure storage, use that
-      if (secureUserInfo) {
-        parsedUserInfo = secureUserInfo;
+              console.log(`Token expires in ${Math.floor(timeUntilExpiry / 1000 / 60)} minutes`);
 
-        // If we also have legacy data in localStorage, remove it
-        if (legacyUserInfo) {
-          localStorage.removeItem('userInfo');
-        }
-      }
-      // Otherwise, try to use and migrate legacy data
-      else if (legacyUserInfo) {
-        try {
-          parsedUserInfo = JSON.parse(legacyUserInfo);
-
-          // Migrate to secure storage
-          secureStorage.setItem('userInfo', parsedUserInfo);
-
-          // Remove from localStorage
-          localStorage.removeItem('userInfo');
-        } catch (error) {
-          console.error('Error parsing legacy user info:', error);
-        }
-      }
-
-      if (parsedUserInfo) {
-        // Check if token is expired
-        const token = parsedUserInfo.token;
-        if (token) {
-          try {
-            // Check if token needs refresh
-            const base64Url = token.split('.')[1];
-            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-            const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => {
-              return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-            }).join(''));
-
-            const { exp } = JSON.parse(jsonPayload);
-            const isExpired = Date.now() >= exp * 1000;
-
-            // If token is expired or about to expire (within 5 minutes), refresh it
-            const fiveMinutesInMs = 5 * 60 * 1000;
-            if (isExpired || Date.now() >= (exp * 1000) - fiveMinutesInMs) {
-              try {
-                // Try to refresh the token
-                await apiService.refreshToken();
-
-                // Get the updated user info with new token
-                const updatedUserInfo = secureStorage.getItem('userInfo');
-                if (updatedUserInfo) {
-                  setUserInfo(updatedUserInfo);
-                }
-              } catch (error) {
-                console.error('Failed to refresh token on startup:', error);
-                // If refresh fails, clear user info
-                setUserInfo(null);
-                secureStorage.clear();
-                localStorage.removeItem('user_logged_out');
+              // If token expires in less than 5 minutes, refresh it
+              if (timeUntilExpiry < 5 * 60 * 1000) {
+                console.log('Token is about to expire, needs refresh');
+                needsRefresh = true;
               }
-            } else {
-              // Token is still valid
-              setUserInfo(parsedUserInfo);
+            } catch (error) {
+              console.error('Error parsing token:', error);
+              needsRefresh = true; // Refresh if we can't parse the token
             }
-          } catch (error) {
-            console.error('Error checking token:', error);
-            setUserInfo(null);
-            secureStorage.clear();
+          } else {
+            console.log('No token found in user data, needs refresh');
+            needsRefresh = true;
           }
-        } else {
-          // No token in user info
-          setUserInfo(null);
-          secureStorage.clear();
-        }
-      }
 
-      setLoading(false);
+          // If token needs refresh, try to refresh it
+          if (needsRefresh) {
+            console.log('Attempting to refresh token');
+            try {
+              const sessionId = authUtils.getSessionId();
+              const refreshedData = await apiService.refreshToken(sessionId, userData._id);
+
+              if (refreshedData && refreshedData.token) {
+                console.log('Token refreshed successfully');
+
+                // Update the user data with the new token
+                const updatedUserData = {
+                  ...userData,
+                  token: refreshedData.token,
+                  ...(refreshedData.user || {})
+                };
+
+                // Store the updated user data
+                authUtils.storeUserData(updatedUserData, refreshedData.sessionId);
+
+                // Update state
+                setUserInfo(updatedUserData);
+              } else {
+                console.warn('Token refresh returned no data');
+                setUserInfo(userData); // Use existing data
+              }
+            } catch (error) {
+              console.error('Error refreshing token:', error);
+              // Still set the user info with existing data
+              setUserInfo(userData);
+            }
+          } else {
+            // Token is still valid, use existing data
+            setUserInfo(userData);
+          }
+
+          console.log('Successfully restored user session');
+        } else {
+          console.log('No user data found in storage');
+          setUserInfo(null);
+        }
+      } catch (error) {
+        console.error('Error initializing authentication:', error);
+        setUserInfo(null);
+      } finally {
+        setLoading(false);
+      }
     };
 
     initAuth();
   }, []);
 
   const login = (data) => {
-    // Clear any previous logged out flag
-    localStorage.removeItem('user_logged_out');
+    console.log('Login function called with data:', data ? 'Data present' : 'No data');
 
-    // Store the session ID separately
-    if (data.sessionId) {
-      secureStorage.setItem('sessionId', data.sessionId);
+    if (!data) {
+      console.error('No data provided to login function');
+      return;
     }
 
+    // Store user data in storage
+    authUtils.storeUserData(data, data.sessionId);
+
+    // Update state
     setUserInfo(data);
-    // Store in secure storage instead of localStorage
-    secureStorage.setItem('userInfo', data);
 
     console.log('User logged in successfully');
   };
@@ -138,30 +119,25 @@ export const AuthProvider = ({ children }) => {
       console.log('Logout function called');
 
       // Get session ID to include in logout request
-      const sessionId = secureStorage.getItem('sessionId');
+      const sessionId = authUtils.getSessionId();
       console.log('Session ID for logout:', sessionId ? 'Found' : 'Not found');
 
       // First, clear all client-side storage to ensure immediate logout effect
+      authUtils.clearUserData();
+
       // Update state
       setUserInfo(null);
 
-      // Clear all secure storage
-      secureStorage.clear();
-
-      // Clear all localStorage items that might contain user data
-      localStorage.removeItem('userInfo');
-      localStorage.removeItem('session_active');
-      localStorage.removeItem('session_timestamp');
-
-      // Add a flag to indicate user has explicitly logged out
-      // This will prevent automatic login on page refresh
-      localStorage.setItem('user_logged_out', 'true');
-
-      console.log('Local storage cleared, now calling logout API');
+      console.log('All storage cleared, now calling logout API');
 
       // Then call the API to logout (revoke refresh token)
       // Even if this fails, the user is already logged out on the client side
-      await apiService.logout(sessionId);
+      try {
+        await apiService.logout(sessionId);
+        console.log('Server-side logout successful');
+      } catch (apiError) {
+        console.warn('Server-side logout failed, but continuing with client-side logout:', apiError);
+      }
 
       console.log('User logged out successfully, redirecting to login page');
 
@@ -169,9 +145,9 @@ export const AuthProvider = ({ children }) => {
       window.location.href = '/login';
     } catch (error) {
       console.error('Error during logout:', error);
-      // Even if server-side logout fails, we've already cleared local state
-      // No need to clear again, just redirect
-      console.log('Error during logout API call, but user is still logged out locally');
+
+      // Ensure all storage is cleared even if there was an error
+      authUtils.clearUserData();
 
       // Force a full page reload to ensure all React state is reset
       window.location.href = '/login';
