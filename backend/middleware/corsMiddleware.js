@@ -4,14 +4,20 @@
 
 // List of allowed origins
 const allowedOrigins = [
+  // Netlify domains
   'https://urohealthltd.netlify.app',
   'https://www.urohealthltd.netlify.app',
+  'http://urohealthltd.netlify.app',
+  'http://www.urohealthltd.netlify.app',
+  // Local development
   'http://localhost:3000',
   'http://localhost:5173',
+  'http://localhost:5174',
+  'http://localhost:5175',
+  // Other domains
   'https://urohealthcentral.netlify.app',
   'https://www.urohealthcentral.netlify.app',
-  'https://urohealthltd.netlify.app',
-  // Add the Railway domain to allow server-to-server communication
+  // Railway domain for server-to-server communication
   'https://clinicmanagementsystem-production-081b.up.railway.app'
 ];
 
@@ -51,7 +57,7 @@ const allowedHeaders = [
 const allowedMethods = ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH', 'HEAD'];
 
 /**
- * Simplified CORS middleware that allows all origins
+ * Enhanced CORS middleware that allows all origins and handles preflight requests properly
  */
 const corsMiddleware = (req, res, next) => {
   const origin = req.headers.origin;
@@ -62,19 +68,21 @@ const corsMiddleware = (req, res, next) => {
   // Set the Vary header to inform caches that the response varies by Origin
   res.header('Vary', 'Origin');
 
-  // Always allow all origins
+  // Always allow the requesting origin
   if (origin) {
     res.header('Access-Control-Allow-Origin', origin);
+    console.log(`Setting Access-Control-Allow-Origin: ${origin}`);
   } else {
     res.header('Access-Control-Allow-Origin', '*');
+    console.log('Setting Access-Control-Allow-Origin: *');
   }
 
   // Set credentials to true for all requests
   res.header('Access-Control-Allow-Credentials', 'true');
 
   // Set other CORS headers
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.header('Access-Control-Allow-Methods', allowedMethods.join(', '));
+  res.header('Access-Control-Allow-Headers', allowedHeaders.join(', '));
   res.header('Access-Control-Max-Age', '86400'); // 24 hours
 
   // Handle preflight requests

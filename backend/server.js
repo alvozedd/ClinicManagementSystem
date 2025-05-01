@@ -63,37 +63,8 @@ app.use(secureCoookieSettings); // Ensure cookies are secure
 // Apply custom CORS middleware (must be before other middleware)
 app.use(corsMiddleware);
 
-// Set CORS headers for all responses
-app.use((req, res, next) => {
-  // Ensure the Vary header is set
-  res.setHeader('Vary', 'Origin');
-
-  // Always set CORS headers for all responses
-  const origin = req.headers.origin;
-
-  // If there's an origin header, use it
-  if (origin) {
-    res.header('Access-Control-Allow-Origin', origin);
-    res.header('Access-Control-Allow-Credentials', 'true');
-    console.log(`Setting CORS headers for origin: ${origin}`);
-  } else {
-    // For requests without origin, use wildcard
-    res.header('Access-Control-Allow-Origin', '*');
-    console.log('Setting CORS headers with wildcard origin');
-  }
-
-  // Set other CORS headers
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-
-  // Handle preflight requests
-  if (req.method === 'OPTIONS') {
-    console.log('Handling OPTIONS preflight request');
-    return res.status(200).end();
-  }
-
-  next();
-});
+// We're now using our enhanced corsMiddleware for all routes
+// No need for additional CORS handling here
 
 // We're using our custom CORS middleware instead of the cors package
 // This gives us more control over the CORS headers
@@ -103,22 +74,22 @@ app.options('*', (req, res) => {
   // Set CORS headers for OPTIONS requests
   const origin = req.headers.origin;
 
-  // Use the imported allowedHeaders and allowedMethods
+  console.log(`Global OPTIONS handler for request from origin: ${origin || 'unknown'}`);
 
   // Set the Vary header
   res.header('Vary', 'Origin');
 
-  // Set allowed origin
+  // Always allow the requesting origin
   if (origin) {
-    const allowedOrigins = ['https://urohealthltd.netlify.app', 'https://www.urohealthltd.netlify.app', 'http://localhost:3000', 'http://localhost:5173', 'https://urohealthcentral.netlify.app', 'https://www.urohealthcentral.netlify.app'];
-
-    if (allowedOrigins.includes(origin) || process.env.NODE_ENV === 'development' || process.env.ALLOW_ALL_ORIGINS === 'true') {
-      res.header('Access-Control-Allow-Origin', origin);
-      res.header('Access-Control-Allow-Credentials', 'true');
-    }
+    res.header('Access-Control-Allow-Origin', origin);
+    console.log(`Setting Access-Control-Allow-Origin: ${origin}`);
   } else {
     res.header('Access-Control-Allow-Origin', '*');
+    console.log('Setting Access-Control-Allow-Origin: *');
   }
+
+  // Set credentials to true for all requests
+  res.header('Access-Control-Allow-Credentials', 'true');
 
   // Set other CORS headers
   res.header('Access-Control-Allow-Methods', allowedMethods.join(', '));
@@ -287,62 +258,9 @@ app.delete('/users/:id', (req, res) => {
   });
 });
 
-// OPTIONS handler for login route
-app.options('/users/login', (req, res) => {
-  console.log('Received OPTIONS request for /users/login');
-
-  // Set explicit CORS headers for login route OPTIONS
-  const origin = req.headers.origin;
-  console.log('Login OPTIONS request origin:', origin);
-
-  // Set the Vary header
-  res.header('Vary', 'Origin');
-
-  // Always allow the origin that sent the request for login
-  if (origin) {
-    res.header('Access-Control-Allow-Origin', origin);
-    res.header('Access-Control-Allow-Credentials', 'true');
-    console.log('CORS headers set for login OPTIONS from origin:', origin);
-  } else {
-    // For requests without origin (like server-to-server), use wildcard
-    res.header('Access-Control-Allow-Origin', '*');
-    console.log('CORS headers set for login OPTIONS without origin');
-  }
-
-  // Set other CORS headers
-  res.header('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-  res.header('Access-Control-Max-Age', '86400'); // 24 hours
-
-  // Respond with 200 OK for OPTIONS
-  res.status(200).end();
-});
-
-// Login route with explicit CORS handling
+// Login route - CORS is handled by the corsMiddleware
 app.post('/users/login', (req, res) => {
   console.log('Received login request at /users/login, forwarding to controller directly');
-
-  // Set explicit CORS headers for login route
-  const origin = req.headers.origin;
-  console.log('Login request origin:', origin);
-
-  // Set the Vary header
-  res.header('Vary', 'Origin');
-
-  // Always allow the origin that sent the request for login
-  if (origin) {
-    res.header('Access-Control-Allow-Origin', origin);
-    res.header('Access-Control-Allow-Credentials', 'true');
-    console.log('CORS headers set for login route from origin:', origin);
-  } else {
-    // For requests without origin (like server-to-server), use wildcard
-    res.header('Access-Control-Allow-Origin', '*');
-    console.log('CORS headers set for login route without origin');
-  }
-
-  // Set other CORS headers
-  res.header('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
 
   // Import the controller directly
   const { authUser } = require('./controllers/userController');
@@ -350,62 +268,9 @@ app.post('/users/login', (req, res) => {
   authUser(req, res);
 });
 
-// OPTIONS handler for refresh token route
-app.options('/users/refresh-token', (req, res) => {
-  console.log('Received OPTIONS request for /users/refresh-token');
-
-  // Set explicit CORS headers for refresh token route OPTIONS
-  const origin = req.headers.origin;
-  console.log('Refresh token OPTIONS request origin:', origin);
-
-  // Set the Vary header
-  res.header('Vary', 'Origin');
-
-  // Always allow the origin that sent the request for refresh token
-  if (origin) {
-    res.header('Access-Control-Allow-Origin', origin);
-    res.header('Access-Control-Allow-Credentials', 'true');
-    console.log('CORS headers set for refresh token OPTIONS from origin:', origin);
-  } else {
-    // For requests without origin (like server-to-server), use wildcard
-    res.header('Access-Control-Allow-Origin', '*');
-    console.log('CORS headers set for refresh token OPTIONS without origin');
-  }
-
-  // Set other CORS headers
-  res.header('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-  res.header('Access-Control-Max-Age', '86400'); // 24 hours
-
-  // Respond with 200 OK for OPTIONS
-  res.status(200).end();
-});
-
-// Refresh token route with explicit CORS handling
+// Refresh token route - CORS is handled by the corsMiddleware
 app.post('/users/refresh-token', (req, res) => {
   console.log('Received refresh token request at /users/refresh-token, forwarding to controller directly');
-
-  // Set explicit CORS headers for refresh token route
-  const origin = req.headers.origin;
-  console.log('Refresh token request origin:', origin);
-
-  // Set the Vary header
-  res.header('Vary', 'Origin');
-
-  // Always allow the origin that sent the request for refresh token
-  if (origin) {
-    res.header('Access-Control-Allow-Origin', origin);
-    res.header('Access-Control-Allow-Credentials', 'true');
-    console.log('CORS headers set for refresh token route from origin:', origin);
-  } else {
-    // For requests without origin (like server-to-server), use wildcard
-    res.header('Access-Control-Allow-Origin', '*');
-    console.log('CORS headers set for refresh token route without origin');
-  }
-
-  // Set other CORS headers
-  res.header('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
 
   // Import the controller directly
   const { refreshToken } = require('./controllers/userController');
