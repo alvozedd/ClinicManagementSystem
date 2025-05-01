@@ -28,54 +28,88 @@ function LoginForm() {
     setError('');
 
     try {
-      console.log('Attempting login with:', { username });
+      console.log('Attempting login with username:', username);
 
       // Clear any previous logged out flag
       localStorage.removeItem('user_logged_out');
 
       // Import the API service
       const apiService = (await import('../utils/apiService')).default;
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-      console.log('API URL:', apiUrl);
 
-      // Test direct fetch to the login endpoint
+      // Try multiple login approaches to handle potential CORS issues
+      let loginSuccess = false;
+      let userData = null;
+
+      // Approach 1: Try direct fetch to the current origin's backend
       try {
-        console.log('Testing direct fetch to login endpoint...');
-        const testResponse = await fetch(`${apiUrl.replace('/api', '')}/users/login`, {
+        // Get the current origin (hostname and port)
+        const currentOrigin = window.location.origin;
+        const loginEndpoint = `${currentOrigin}/users/login`;
+
+        console.log('Approach 1: Direct fetch to current origin:', loginEndpoint);
+        const response = await fetch(loginEndpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username, password }),
-          mode: 'cors' // Explicitly set CORS mode
+          credentials: 'include'
         });
-        console.log('Test response status:', testResponse.status);
-        if (testResponse.ok) {
-          const testData = await testResponse.json();
-          console.log('Test response data:', testData);
 
-          // Use the login function from AuthContext with the test data
-          login(testData);
-
-          // Redirect to dashboard after successful login
-          window.location.href = '/dashboard';
-          return; // Exit early if the direct fetch works
+        if (response.ok) {
+          userData = await response.json();
+          console.log('Login successful with approach 1:', userData);
+          loginSuccess = true;
         } else {
-          console.log('Test response error:', await testResponse.text());
+          console.log('Approach 1 failed with status:', response.status);
         }
-      } catch (testError) {
-        console.error('Test fetch error:', testError);
+      } catch (error) {
+        console.warn('Approach 1 failed with error:', error);
       }
 
-      // Call the login API
-      // The backend expects 'username' in the email field
-      console.log('Calling apiService.login...');
-      const data = await apiService.login(username, password);
-      console.log('Login response:', data);
+      // Approach 2: Try with API service (which has its own fallback mechanisms)
+      if (!loginSuccess) {
+        try {
+          console.log('Approach 2: Using apiService.login');
+          userData = await apiService.login(username, password);
+          console.log('Login successful with approach 2:', userData);
+          loginSuccess = true;
+        } catch (error) {
+          console.warn('Approach 2 failed with error:', error);
+        }
+      }
 
-      // Use the login function from AuthContext
-      login(data);
+      // Approach 3: Try with Railway deployed backend directly (no credentials to avoid CORS issues)
+      if (!loginSuccess) {
+        try {
+          console.log('Approach 3: Direct fetch to Railway backend');
+          const response = await fetch('https://clinicmanagementsystem-production-081b.up.railway.app/users/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password }),
+            // Omit credentials to avoid CORS preflight issues
+            mode: 'cors'
+          });
 
-      // Redirect to dashboard after successful login
-      window.location.href = '/dashboard';
+          if (response.ok) {
+            userData = await response.json();
+            console.log('Login successful with approach 3:', userData);
+            loginSuccess = true;
+          } else {
+            console.log('Approach 3 failed with status:', response.status);
+          }
+        } catch (error) {
+          console.warn('Approach 3 failed with error:', error);
+        }
+      }
+
+      if (loginSuccess && userData) {
+        // Use the login function from AuthContext
+        login(userData);
+
+        // Redirect to dashboard after successful login
+        window.location.href = '/dashboard';
+      } else {
+        throw new Error('All login attempts failed');
+      }
     } catch (err) {
       console.error('Login error details:', err);
       setError(`Login failed: ${err.toString()}`);
