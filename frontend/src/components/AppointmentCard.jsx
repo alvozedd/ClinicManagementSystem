@@ -64,7 +64,12 @@ const AppointmentCard = ({
     >
       <div>
         <div className="font-medium text-lg">{appointment.patientName}</div>
-        <div className="text-gray-600">{appointment.type || ''}: {appointment.reason}</div>
+        <div className="text-gray-600">
+          {appointment.type || ''}: {appointment.reason}
+          {(appointment.time || appointment.optional_time) && (
+            <span className="ml-2 font-semibold">Time: {appointment.time || appointment.optional_time}</span>
+          )}
+        </div>
         {appointment.date && (
           <div className="text-xs text-gray-500 mt-1">
             {getRelativeDateLabel(appointment.date)}

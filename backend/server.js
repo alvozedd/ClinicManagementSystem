@@ -1,9 +1,7 @@
 const express = require('express');
 const dotenv = require('dotenv');
-const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const helmet = require('helmet');
-const cron = require('node-cron');
 const connectDB = require('./config/db');
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 const { enforceHttps, addSecurityHeaders, secureCoookieSettings } = require('./middleware/securityMiddleware');
@@ -17,7 +15,6 @@ const patientRoutes = require('./routes/patientRoutes');
 const appointmentRoutes = require('./routes/appointmentRoutes');
 const diagnosisRoutes = require('./routes/diagnosisRoutes');
 const contentRoutes = require('./routes/contentRoutes');
-const queueRoutes = require('./routes/queueRoutes');
 const integratedAppointmentRoutes = require('./routes/integratedAppointmentRoutes');
 
 // Load environment variables
@@ -163,7 +160,6 @@ app.use('/api/patients', patientRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/diagnoses', diagnosisRoutes);
 app.use('/api/content', contentRoutes);
-app.use('/api/queue', queueRoutes);
 app.use('/api/integrated-appointments', integratedAppointmentRoutes);
 
 // Create compatibility routes without the /api prefix
@@ -689,132 +685,7 @@ app.delete('/content/:id', (req, res) => {
   });
 });
 
-// Queue routes without /api prefix
-app.get('/queue', (req, res) => {
-  console.log('Received GET request at /queue, forwarding to controller directly');
-  // Set CORS headers explicitly for this route
-  const origin = req.headers.origin;
-
-  // Set the Vary header
-  res.header('Vary', 'Origin');
-
-  // Set allowed origin
-  if (origin) {
-    const allowedOrigins = ['https://urohealthltd.netlify.app', 'https://www.urohealthltd.netlify.app', 'http://localhost:3000', 'http://localhost:5173'];
-
-    if (allowedOrigins.includes(origin) || process.env.NODE_ENV === 'development' || process.env.ALLOW_ALL_ORIGINS === 'true') {
-      res.header('Access-Control-Allow-Origin', origin);
-      res.header('Access-Control-Allow-Credentials', 'true');
-    }
-  } else {
-    res.header('Access-Control-Allow-Origin', '*');
-  }
-
-  // Set other CORS headers
-  res.header('Access-Control-Allow-Methods', allowedMethods.join(', '));
-  res.header('Access-Control-Allow-Headers', allowedHeaders.join(', '));
-  res.header('Access-Control-Max-Age', '86400'); // 24 hours
-
-  // Import the controller directly
-  const { getQueueEntries } = require('./controllers/queueController');
-  // Add authentication middleware manually
-  const { protect, doctorOrSecretary } = require('./middleware/authMiddleware');
-  // Call middleware then controller
-  protect(req, res, () => doctorOrSecretary(req, res, () => getQueueEntries(req, res)));
-});
-
-app.post('/queue', (req, res) => {
-  console.log('Received POST request at /queue, forwarding to controller directly');
-  // Set CORS headers explicitly for this route
-  const origin = req.headers.origin;
-
-  // Set the Vary header
-  res.header('Vary', 'Origin');
-
-  // Set allowed origin
-  if (origin) {
-    const allowedOrigins = ['https://urohealthltd.netlify.app', 'https://www.urohealthltd.netlify.app', 'http://localhost:3000', 'http://localhost:5173'];
-
-    if (allowedOrigins.includes(origin) || process.env.NODE_ENV === 'development' || process.env.ALLOW_ALL_ORIGINS === 'true') {
-      res.header('Access-Control-Allow-Origin', origin);
-      res.header('Access-Control-Allow-Credentials', 'true');
-    }
-  } else {
-    res.header('Access-Control-Allow-Origin', '*');
-  }
-
-  // Set other CORS headers
-  res.header('Access-Control-Allow-Methods', allowedMethods.join(', '));
-  res.header('Access-Control-Allow-Headers', allowedHeaders.join(', '));
-  res.header('Access-Control-Max-Age', '86400'); // 24 hours
-
-  // Import the controller directly
-  const { addToQueue } = require('./controllers/queueController');
-  // Add authentication middleware manually
-  const { protect, doctorOrSecretary } = require('./middleware/authMiddleware');
-  // Call middleware then controller
-  protect(req, res, () => doctorOrSecretary(req, res, () => addToQueue(req, res)));
-});
-
-app.get('/queue/stats', addCorsHeaders, (req, res) => {
-  console.log('Received GET request at /queue/stats, forwarding to controller directly');
-  // Import the controller directly
-  const { getQueueStats } = require('./controllers/queueController');
-  // Add authentication middleware manually
-  const { protect, doctorOrSecretary } = require('./middleware/authMiddleware');
-  // Call middleware then controller
-  protect(req, res, () => doctorOrSecretary(req, res, () => getQueueStats(req, res)));
-});
-
-app.get('/queue/next', addCorsHeaders, (req, res) => {
-  console.log('Received GET request at /queue/next, forwarding to controller directly');
-  // Import the controller directly
-  const { getNextPatient } = require('./controllers/queueController');
-  // Add authentication middleware manually
-  const { protect, doctor } = require('./middleware/authMiddleware');
-  // Call middleware then controller
-  protect(req, res, () => doctor(req, res, () => getNextPatient(req, res)));
-});
-
-app.put('/queue/reorder', addCorsHeaders, (req, res) => {
-  console.log('Received PUT request at /queue/reorder, forwarding to controller directly');
-  // Import the controller directly
-  const { reorderQueue } = require('./controllers/queueController');
-  // Add authentication middleware manually
-  const { protect, secretary } = require('./middleware/authMiddleware');
-  // Call middleware then controller
-  protect(req, res, () => secretary(req, res, () => reorderQueue(req, res)));
-});
-
-app.put('/queue/:id', addCorsHeaders, (req, res) => {
-  console.log('Received PUT request at /queue/:id, forwarding to controller directly');
-  // Import the controller directly
-  const { updateQueueEntry } = require('./controllers/queueController');
-  // Add authentication middleware manually
-  const { protect, doctorOrSecretary } = require('./middleware/authMiddleware');
-  // Call middleware then controller
-  protect(req, res, () => doctorOrSecretary(req, res, () => updateQueueEntry(req, res)));
-});
-
-app.delete('/queue/:id', addCorsHeaders, (req, res) => {
-  console.log('Received DELETE request at /queue/:id, forwarding to controller directly');
-  // Import the controller directly
-  const { removeFromQueue } = require('./controllers/queueController');
-  // Add authentication middleware manually
-  const { protect, secretary } = require('./middleware/authMiddleware');
-  // Call middleware then controller
-  protect(req, res, () => secretary(req, res, () => removeFromQueue(req, res)));
-});
-
-app.delete('/queue/reset', addCorsHeaders, (req, res) => {
-  console.log('Received DELETE request at /queue/reset, forwarding to controller directly');
-  // Import the controller directly
-  const { resetQueue } = require('./controllers/queueController');
-  // Add authentication middleware manually
-  const { protect, admin } = require('./middleware/authMiddleware');
-  // Call middleware then controller
-  protect(req, res, () => admin(req, res, () => resetQueue(req, res)));
-});
+// Queue routes have been removed
 
 // Root route
 app.get('/', (req, res) => {
@@ -831,58 +702,4 @@ const server = app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 
-// Schedule queue reset at midnight
-cron.schedule('0 0 * * *', async () => {
-  try {
-    console.log('Running scheduled queue reset at midnight:', new Date().toISOString());
-    // Reset the queue by calling the resetQueue endpoint
-    const { resetQueue } = require('./controllers/queueController');
-
-    // Call the resetQueue function directly without mock request/response
-    const result = await resetQueue();
-
-    if (result.success) {
-      console.log('Queue reset completed successfully. Removed entries:', result.deletedCount);
-    } else {
-      console.error('Queue reset failed:', result.error);
-    }
-
-    // Double-check that the queue is empty
-    const Queue = require('./models/queueModel');
-    const count = await Queue.countDocuments({});
-    console.log(`Queue entries after reset: ${count}`);
-
-    if (count > 0) {
-      console.log('Queue not fully reset. Attempting force reset...');
-      await Queue.deleteMany({});
-      const finalCount = await Queue.countDocuments({});
-      console.log(`Queue entries after force reset: ${finalCount}`);
-    }
-  } catch (error) {
-    console.error('Error in midnight queue reset cron job:', error);
-  }
-});
-
-// Also schedule a check every hour to verify the queue reset worked
-cron.schedule('5 * * * *', async () => {
-  try {
-    const now = new Date();
-    // If it's between 00:00 and 00:10, check if the queue was reset
-    if (now.getHours() === 0 && now.getMinutes() < 10) {
-      console.log('Verifying midnight queue reset at:', now.toISOString());
-      const Queue = require('./models/queueModel');
-      const count = await Queue.countDocuments({});
-      console.log(`Queue entries at verification check: ${count}`);
-
-      // If there are still entries, force a reset
-      if (count > 0) {
-        console.log('Queue not properly reset at midnight. Forcing reset now...');
-        await Queue.deleteMany({});
-        const finalCount = await Queue.countDocuments({});
-        console.log(`Queue entries after force reset: ${finalCount}`);
-      }
-    }
-  } catch (error) {
-    console.error('Error in queue reset verification job:', error);
-  }
-});
+// Queue-related cron jobs have been removed

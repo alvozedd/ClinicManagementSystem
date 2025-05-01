@@ -10,7 +10,7 @@ import AppointmentManagementModal from './AppointmentManagementModal';
 import PatientSearchAppointmentModal from './PatientSearchAppointmentModal';
 import PatientNavigator from './PatientNavigator';
 import AppointmentCard from './AppointmentCard';
-import AppointmentQueueWrapper from './AppointmentQueueWrapper';
+// Queue functionality removed
 import TodaysAppointments from './TodaysAppointments';
 import { FaCalendarAlt, FaUserTie, FaClipboardList, FaUser, FaUserClock } from 'react-icons/fa';
 import { getTimeBasedGreeting, getFormattedDate, identifyAppointmentsNeedingDiagnosis, getRelativeDateLabel } from '../utils/timeUtils';
@@ -157,12 +157,26 @@ function SimplifiedSecretaryDashboard({
   };
 
   // Handle adding a new patient
-  const handleAddPatient = (newPatient) => {
-    onUpdatePatient(newPatient); // This will add the patient to the patients array
-    setShowAddPatientForm(false);
-    // Select the newly created patient
-    setSelectedPatient(newPatient);
-    setActiveTab('patient-management');
+  const handleAddPatient = async (newPatient) => {
+    try {
+      console.log('Adding new patient in SimplifiedSecretaryDashboard:', newPatient);
+      // Add the patient to the global state
+      const addedPatient = await onUpdatePatient(newPatient);
+      console.log('Patient added successfully:', addedPatient);
+
+      // Close the form
+      setShowAddPatientForm(false);
+
+      // Select the newly created patient
+      setSelectedPatient(addedPatient || newPatient);
+      setActiveTab('patient-management');
+
+      // Show success message
+      alert('Patient added successfully!');
+    } catch (error) {
+      console.error('Error adding patient:', error);
+      alert(`Failed to add patient: ${error.message || 'Unknown error'}`);
+    }
   };
 
   // Handle rebooking an appointment
@@ -318,80 +332,59 @@ function SimplifiedSecretaryDashboard({
           />
         ) : activeTab === 'appointments' ? (
           <>
-            <AppointmentQueueWrapper
-              patients={patients}
-              appointments={appointments}
-              userRole="secretary"
-              onUpdateAppointment={onDiagnoseAppointment}
-              onViewPatient={handleViewPatient}
-              onEditAppointment={setEditingAppointment}
-              onDeleteAppointment={onDeleteAppointment}
-              onUpdatePatient={onUpdatePatient}
-            />
-            <div className="mt-6">
-
-          <div>
-            {/* Today's Appointments Section */}
-            <div className="mb-8">
-              <div className="flex justify-between items-center mb-4">
-                <button
-                  onClick={() => setShowAddAppointmentForm(true)}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded text-base font-medium flex items-center justify-center"
-                  aria-label="Add Appointment"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
-                  </svg>
-                  <span>Add Appointment</span>
-                </button>
-              </div>
-
-              <TodaysAppointments
-                onViewPatient={handleViewPatient}
-                onEditAppointment={setEditingAppointment}
-                onDeleteAppointment={onDeleteAppointment}
-              />
-            </div>
-
-            {/* Upcoming Appointments Section */}
-            <div>
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-semibold text-gray-800">Upcoming Appointments</h2>
-                <button
-                  onClick={() => setActiveTab('calendar')}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-md text-sm font-medium"
-                  aria-label="View Calendar"
-                >
-                  <span className="hidden md:inline">View Calendar</span>
-                  <span className="md:hidden">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                  </span>
-                </button>
-              </div>
-
-              {upcomingAppointments.length > 0 ? (
-                <div className="space-y-3">
-                  {upcomingAppointments.map(appointment => (
-                    <AppointmentCard
-                      key={appointment.id || appointment._id}
-                      appointment={appointment}
-                      onViewPatient={handleViewPatient}
-                      onEditAppointment={(appointment) => setEditingAppointment(appointment)}
-                      onDeleteAppointment={onDeleteAppointment}
-                      patients={patients}
-                      onUpdatePatient={onUpdatePatient}
-                    />
-                  ))}
+            <div className="mt-2">
+              <div>
+                {/* Today's Appointments Section */}
+                <div className="mb-8">
+                  <TodaysAppointments
+                    onViewPatient={handleViewPatient}
+                    onEditAppointment={setEditingAppointment}
+                    onDeleteAppointment={onDeleteAppointment}
+                    patients={patients}
+                    onUpdatePatient={onUpdatePatient}
+                    onDiagnoseAppointment={onDiagnoseAppointment}
+                  />
                 </div>
-              ) : (
-                <div className="no-appointments">
-                  <p>No upcoming appointments scheduled.</p>
+
+                {/* Upcoming Appointments Section */}
+                <div>
+                  <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-lg font-semibold text-gray-800">Upcoming Appointments</h2>
+                    <button
+                      onClick={() => setActiveTab('calendar')}
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-md text-sm font-medium"
+                      aria-label="View Calendar"
+                    >
+                      <span className="hidden md:inline">View Calendar</span>
+                      <span className="md:hidden">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                      </span>
+                    </button>
+                  </div>
+
+                  {upcomingAppointments.length > 0 ? (
+                    <div className="space-y-3">
+                      {upcomingAppointments.map(appointment => (
+                        <AppointmentCard
+                          key={appointment.id || appointment._id}
+                          appointment={appointment}
+                          onViewPatient={handleViewPatient}
+                          onEditAppointment={(appointment) => setEditingAppointment(appointment)}
+                          onDeleteAppointment={onDeleteAppointment}
+                          patients={patients}
+                          onUpdatePatient={onUpdatePatient}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="no-appointments">
+                      <p>No upcoming appointments scheduled.</p>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-          </div>
+              </div>
             </div>
           </>
         ) : (

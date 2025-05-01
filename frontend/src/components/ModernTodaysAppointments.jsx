@@ -22,21 +22,49 @@ function ModernTodaysAppointments({ onUpdateAppointment, onViewPatient }) {
   const fetchTodaysAppointments = async () => {
     setLoading(true);
     try {
+      // Try first with the integrated appointments endpoint (more reliable)
+      try {
+        console.log('Fetching today\'s appointments using integrated endpoint');
+        const todaysAppointments = await apiService.getIntegratedAppointments({ today_only: true });
+
+        if (todaysAppointments && Array.isArray(todaysAppointments)) {
+          // Sort by status (Scheduled first, then others)
+          todaysAppointments.sort((a, b) => {
+            if (a.status === 'Scheduled' && b.status !== 'Scheduled') return -1;
+            if (a.status !== 'Scheduled' && b.status === 'Scheduled') return 1;
+            return 0;
+          });
+
+          console.log('Successfully fetched today\'s appointments:', todaysAppointments.length);
+          setAppointments(todaysAppointments);
+          setError(null);
+          setLoading(false);
+          return;
+        }
+      } catch (integratedError) {
+        console.warn('Error using integrated appointments endpoint:', integratedError);
+        // Continue to fallback method
+      }
+
+      // Fallback to regular appointments endpoint
+      console.log('Falling back to regular appointments endpoint');
       const allAppointments = await apiService.getAppointments();
       const today = new Date().toISOString().split('T')[0];
-      
+
       // Filter for today's appointments
-      const todaysAppointments = allAppointments.filter(appointment => 
-        appointment.date === today
+      const todaysAppointments = allAppointments.filter(appointment =>
+        appointment.date === today ||
+        (appointment.appointment_date && appointment.appointment_date.split('T')[0] === today)
       );
-      
+
       // Sort by status (Scheduled first, then others)
       todaysAppointments.sort((a, b) => {
         if (a.status === 'Scheduled' && b.status !== 'Scheduled') return -1;
         if (a.status !== 'Scheduled' && b.status === 'Scheduled') return 1;
         return 0;
       });
-      
+
+      console.log('Successfully fetched today\'s appointments using fallback:', todaysAppointments.length);
       setAppointments(todaysAppointments);
       setError(null);
     } catch (err) {
@@ -59,7 +87,7 @@ function ModernTodaysAppointments({ onUpdateAppointment, onViewPatient }) {
   const handleCreateAppointment = async (appointmentData) => {
     try {
       setLoading(true);
-      
+
       // Create appointment object
       const newAppointment = {
         patientId: selectedPatient._id,
@@ -78,7 +106,7 @@ function ModernTodaysAppointments({ onUpdateAppointment, onViewPatient }) {
 
       // Refresh appointments
       await fetchTodaysAppointments();
-      
+
       // Close form
       setShowAppointmentForm(false);
       setSelectedPatient(null);
@@ -99,7 +127,7 @@ function ModernTodaysAppointments({ onUpdateAppointment, onViewPatient }) {
   const handleUpdateAppointment = async (updatedAppointment) => {
     try {
       setLoading(true);
-      
+
       // Update appointment
       if (onUpdateAppointment) {
         await onUpdateAppointment(updatedAppointment);
@@ -107,7 +135,7 @@ function ModernTodaysAppointments({ onUpdateAppointment, onViewPatient }) {
 
       // Refresh appointments
       await fetchTodaysAppointments();
-      
+
       // Close form
       setEditingAppointment(null);
     } catch (err) {
@@ -164,9 +192,19 @@ function ModernTodaysAppointments({ onUpdateAppointment, onViewPatient }) {
       ) : error ? (
         <div className="bg-red-50 border-l-4 border-red-500 p-3 mb-3">
           <p className="text-sm text-red-700">{error}</p>
-          <button 
+          <button
             onClick={fetchTodaysAppointments}
             className="mt-1 text-sm text-red-700 underline"
+          >
+            Try again
+          </button>
+        </div>
+      ) : !appointments || !Array.isArray(appointments) ? (
+        <div className="bg-yellow-50 border-l-4 border-yellow-500 p-3 mb-3">
+          <p className="text-sm text-yellow-700">Unable to load appointments data.</p>
+          <button
+            onClick={fetchTodaysAppointments}
+            className="mt-1 text-sm text-yellow-700 underline"
           >
             Try again
           </button>
@@ -178,27 +216,27 @@ function ModernTodaysAppointments({ onUpdateAppointment, onViewPatient }) {
       ) : (
         <div className="space-y-3">
           {appointments.map(appointment => (
-            <div 
-              key={appointment._id} 
+            <div
+              key={appointment._id || appointment.id || `temp-${Math.random()}`}
               className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 p-3"
             >
               <div className="flex justify-between items-start">
                 <div>
-                  <h3 
+                  <h3
                     className="font-medium text-blue-700 hover:text-blue-800 cursor-pointer"
-                    onClick={() => handleViewPatient(appointment.patientId)}
+                    onClick={() => handleViewPatient(appointment.patientId || appointment.patient_id)}
                   >
-                    {appointment.patientName}
+                    {appointment.patientName || appointment.patient_name || 'Unknown Patient'}
                   </h3>
                   <div className="flex items-center mt-1">
-                    <span className={`text-xs px-2 py-0.5 rounded-full ${getStatusColor(appointment.status)}`}>
-                      {appointment.status}
+                    <span className={`text-xs px-2 py-0.5 rounded-full ${getStatusColor(appointment.status || 'Scheduled')}`}>
+                      {appointment.status || 'Scheduled'}
                     </span>
-                    <span className="text-xs text-gray-500 ml-2">{appointment.type}</span>
+                    <span className="text-xs text-gray-500 ml-2">{appointment.type || appointment.appointment_type || 'Consultation'}</span>
                   </div>
-                  {appointment.reason && (
+                  {(appointment.reason || appointment.appointment_reason) && (
                     <p className="text-xs text-gray-700 mt-1 truncate max-w-xs">
-                      {appointment.reason}
+                      {appointment.reason || appointment.appointment_reason}
                     </p>
                   )}
                 </div>
@@ -224,14 +262,14 @@ function ModernTodaysAppointments({ onUpdateAppointment, onViewPatient }) {
           onSelect={handlePatientSelect}
         />
       )}
-      
+
       {/* New Appointment Form */}
       {showAppointmentForm && selectedPatient && (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 backdrop-blur-sm">
           <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md">
             <h2 className="text-xl font-bold text-blue-700 mb-4">New Appointment</h2>
             <p className="mb-4"><strong>Patient:</strong> {selectedPatient.name}</p>
-            
+
             <AppointmentManagementModal
               isNew={true}
               isEmbedded={true}
@@ -249,7 +287,7 @@ function ModernTodaysAppointments({ onUpdateAppointment, onViewPatient }) {
           </div>
         </div>
       )}
-      
+
       {/* Edit Appointment Modal */}
       {editingAppointment && (
         <AppointmentManagementModal

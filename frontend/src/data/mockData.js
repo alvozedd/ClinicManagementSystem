@@ -144,19 +144,23 @@ export const getRecentReports = async () => {
 // Functions to get fresh data from API with caching
 export const getPatients = async () => {
   try {
-    // Check if cache is valid
-    const now = Date.now();
-    if (patientsCache.length > 0 && (now - lastFetchTime.patients) < CACHE_EXPIRATION.LONG) {
-      return patientsCache;
-    }
+    // Always clear cache to ensure fresh data
+    clearCache('patients');
 
     // Fetch from API
     const patients = await apiService.getPatients();
 
+    // Check if we got valid data
+    if (!patients || !Array.isArray(patients)) {
+      console.error('Invalid patients data received:', patients);
+      return patientsCache.length > 0 ? patientsCache : initialPatients;
+    }
+
     // Update cache
     patientsCache = patients;
-    lastFetchTime.patients = now;
+    lastFetchTime.patients = Date.now();
 
+    console.log(`Successfully fetched ${patients.length} patients`);
     return patients;
   } catch (error) {
     console.error('Error fetching patients from API:', error);
@@ -166,22 +170,26 @@ export const getPatients = async () => {
 
 export const getAppointments = async () => {
   try {
-    // Check if cache is valid
-    const now = Date.now();
-    if (appointmentsCache.length > 0 && (now - lastFetchTime.appointments) < CACHE_EXPIRATION.SHORT) {
-      return appointmentsCache;
-    }
+    // Always clear cache to ensure fresh data
+    clearCache('appointments');
 
     // Fetch from API
     const appointmentsResponse = await apiService.getAppointments();
+
+    // Check if we got valid data
+    if (!appointmentsResponse || !Array.isArray(appointmentsResponse)) {
+      console.error('Invalid appointments data received:', appointmentsResponse);
+      return appointmentsCache.length > 0 ? appointmentsCache : initialAppointments;
+    }
 
     // Transform appointments to frontend format
     const appointments = transformAppointmentsFromBackend(appointmentsResponse);
 
     // Update cache
     appointmentsCache = appointments;
-    lastFetchTime.appointments = now;
+    lastFetchTime.appointments = Date.now();
 
+    console.log(`Successfully fetched ${appointments.length} appointments`);
     return appointments;
   } catch (error) {
     console.error('Error fetching appointments from API:', error);

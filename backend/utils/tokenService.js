@@ -34,17 +34,18 @@ const generateSessionId = () => {
  * @param {Object} user - User object
  * @param {string} ipAddress - IP address of the client
  * @param {boolean} enforceSingleSession - Whether to enforce single session per user
+ * @param {string} existingSessionId - Optional existing session ID to maintain
  * @returns {Promise<Object>} Refresh token object and session ID
  */
-const generateRefreshToken = async (user, ipAddress, enforceSingleSession = true) => {
+const generateRefreshToken = async (user, ipAddress, enforceSingleSession = true, existingSessionId = null) => {
   // Create a refresh token that expires in 7 days
   const expires = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
   // Generate a random token string
   const tokenValue = crypto.randomBytes(40).toString('hex');
 
-  // Generate a unique session ID
-  const sessionId = generateSessionId();
+  // Use existing session ID or generate a new one
+  const sessionId = existingSessionId || generateSessionId();
 
   // Create and save refresh token to database
   const refreshToken = await RefreshToken.create({

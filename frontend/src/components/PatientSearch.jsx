@@ -31,6 +31,11 @@ function PatientSearch({ patients, onSelectPatient, onAddPatient }) {
   const sortPatients = (patientsToSort) => {
     if (!patientsToSort || patientsToSort.length === 0) return [];
 
+    // Log the first patient to debug data structure
+    if (patientsToSort.length > 0) {
+      console.log('Patient data structure sample:', patientsToSort[0]);
+    }
+
     const sortedPatients = [...patientsToSort];
 
     return sortedPatients.sort((a, b) => {
@@ -38,17 +43,53 @@ function PatientSearch({ patients, onSelectPatient, onAddPatient }) {
 
       // Handle different field types
       if (sortField === 'lastVisit') {
-        fieldA = a.lastVisit ? new Date(a.lastVisit) : new Date(0);
-        fieldB = b.lastVisit ? new Date(b.lastVisit) : new Date(0);
+        fieldA = a.lastVisit ? new Date(a.lastVisit) :
+                a.updatedAt ? new Date(a.updatedAt) : new Date(0);
+        fieldB = b.lastVisit ? new Date(b.lastVisit) :
+                b.updatedAt ? new Date(b.updatedAt) : new Date(0);
       } else if (sortField === 'dateOfBirth') {
-        fieldA = a.dateOfBirth ? new Date(a.dateOfBirth) : new Date(0);
-        fieldB = b.dateOfBirth ? new Date(b.dateOfBirth) : new Date(0);
+        fieldA = a.dateOfBirth ? new Date(a.dateOfBirth) :
+                a.year_of_birth ? new Date(a.year_of_birth + '-01-01') : new Date(0);
+        fieldB = b.dateOfBirth ? new Date(b.dateOfBirth) :
+                b.year_of_birth ? new Date(b.year_of_birth + '-01-01') : new Date(0);
       } else if (sortField === 'lastName') {
-        fieldA = a.lastName || '';
-        fieldB = b.lastName || '';
+        // Handle both formats: firstName/lastName or full name
+        if (a.lastName) {
+          fieldA = a.lastName || '';
+        } else if (a.name) {
+          const nameParts = a.name.split(' ');
+          fieldA = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
+        } else {
+          fieldA = '';
+        }
+
+        if (b.lastName) {
+          fieldB = b.lastName || '';
+        } else if (b.name) {
+          const nameParts = b.name.split(' ');
+          fieldB = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '';
+        } else {
+          fieldB = '';
+        }
       } else if (sortField === 'firstName') {
-        fieldA = a.firstName || '';
-        fieldB = b.firstName || '';
+        // Handle both formats: firstName/lastName or full name
+        if (a.firstName) {
+          fieldA = a.firstName || '';
+        } else if (a.name) {
+          const nameParts = a.name.split(' ');
+          fieldA = nameParts[0] || '';
+        } else {
+          fieldA = '';
+        }
+
+        if (b.firstName) {
+          fieldB = b.firstName || '';
+        } else if (b.name) {
+          const nameParts = b.name.split(' ');
+          fieldB = nameParts[0] || '';
+        } else {
+          fieldB = '';
+        }
       } else {
         fieldA = a[sortField] || '';
         fieldB = b[sortField] || '';
@@ -100,12 +141,26 @@ function PatientSearch({ patients, onSelectPatient, onAddPatient }) {
       return;
     }
 
-    // Search by name, ID, or phone
-    const filteredResults = patients.filter(patient =>
-      patient.id.toLowerCase().includes(term) ||
-      `${patient.firstName} ${patient.lastName}`.toLowerCase().includes(term) ||
-      patient.phone.includes(term)
-    );
+    // Search by name, ID, or phone - handle both data formats
+    const filteredResults = patients.filter(patient => {
+      // Get patient ID (handle both formats)
+      const patientId = (patient.id || patient._id || '').toString().toLowerCase();
+
+      // Get patient name (handle both formats)
+      let patientName = '';
+      if (patient.firstName && patient.lastName) {
+        patientName = `${patient.firstName} ${patient.lastName}`.toLowerCase();
+      } else if (patient.name) {
+        patientName = patient.name.toLowerCase();
+      }
+
+      // Get patient phone (handle both formats)
+      const patientPhone = patient.phone || '';
+
+      return patientId.includes(term) ||
+             patientName.includes(term) ||
+             patientPhone.includes(term);
+    });
 
     // Sort the filtered results
     const sortedResults = sortPatients(filteredResults);
@@ -297,13 +352,23 @@ function PatientSearch({ patients, onSelectPatient, onAddPatient }) {
                   }}
                 >
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm md:text-base truncate">{patient.firstName} {patient.lastName}</p>
+                    <p className="font-medium text-sm md:text-base truncate">
+                      {patient.firstName && patient.lastName ?
+                        `${patient.firstName} ${patient.lastName}` :
+                        patient.name || 'Unknown Patient'}
+                    </p>
                     <div className="flex flex-wrap items-center text-xs md:text-sm text-gray-600 mt-1">
-                      <span>{calculateAge(patient.dateOfBirth)} years</span>
+                      <span>
+                        {patient.dateOfBirth ?
+                          `${calculateAge(patient.dateOfBirth)} years` :
+                          patient.year_of_birth ?
+                            `${new Date().getFullYear() - patient.year_of_birth} years` :
+                            'Age unknown'}
+                      </span>
                       <span className="mx-1">•</span>
-                      <span>{patient.gender}</span>
+                      <span>{patient.gender || 'Gender unknown'}</span>
                       <span className="mx-1">•</span>
-                      <span>{patient.phone}</span>
+                      <span>{patient.phone || 'No phone'}</span>
                     </div>
                   </div>
                   <div className={`flex items-center space-x-2 ${viewMode === 'grid' ? 'mt-2 justify-end' : ''}`}>
@@ -348,13 +413,23 @@ function PatientSearch({ patients, onSelectPatient, onAddPatient }) {
                 }}
               >
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-sm md:text-base truncate">{patient.firstName} {patient.lastName}</p>
+                  <p className="font-medium text-sm md:text-base truncate">
+                    {patient.firstName && patient.lastName ?
+                      `${patient.firstName} ${patient.lastName}` :
+                      patient.name || 'Unknown Patient'}
+                  </p>
                   <div className="flex flex-wrap items-center text-xs md:text-sm text-gray-600 mt-1">
-                    <span>{calculateAge(patient.dateOfBirth)} years</span>
+                    <span>
+                      {patient.dateOfBirth ?
+                        `${calculateAge(patient.dateOfBirth)} years` :
+                        patient.year_of_birth ?
+                          `${new Date().getFullYear() - patient.year_of_birth} years` :
+                          'Age unknown'}
+                    </span>
                     <span className="mx-1">•</span>
-                    <span>{patient.gender}</span>
+                    <span>{patient.gender || 'Gender unknown'}</span>
                     <span className="mx-1">•</span>
-                    <span>{patient.phone}</span>
+                    <span>{patient.phone || 'No phone'}</span>
                   </div>
                 </div>
                 <div className={`flex items-center space-x-2 ${viewMode === 'grid' ? 'mt-2 justify-end' : ''}`}>

@@ -41,10 +41,35 @@ function IntegratedDoctorDashboard({
   useEffect(() => {
     const fetchTodaysAppointments = async () => {
       try {
-        const data = await apiService.getIntegratedAppointments({ today_only: true });
-        setTodaysAppointments(data);
+        // Try first with the integrated appointments endpoint
+        try {
+          console.log('Doctor Dashboard - Fetching today\'s appointments using integrated endpoint');
+          const data = await apiService.getIntegratedAppointments({ today_only: true });
+          if (data && Array.isArray(data)) {
+            console.log('Doctor Dashboard - Successfully fetched today\'s appointments:', data.length);
+            setTodaysAppointments(data);
+            return;
+          }
+        } catch (integratedError) {
+          console.warn('Doctor Dashboard - Error using integrated appointments endpoint:', integratedError);
+          // Continue to fallback method
+        }
+
+        // Fallback to regular appointments endpoint
+        console.log('Doctor Dashboard - Falling back to regular appointments endpoint');
+        const allAppointments = await apiService.getAppointments();
+        const today = new Date().toISOString().split('T')[0];
+
+        // Filter for today's appointments
+        const todaysAppointments = allAppointments.filter(appointment =>
+          appointment.date === today ||
+          (appointment.appointment_date && appointment.appointment_date.split('T')[0] === today)
+        );
+
+        console.log('Doctor Dashboard - Successfully fetched today\'s appointments using fallback:', todaysAppointments.length);
+        setTodaysAppointments(todaysAppointments);
       } catch (error) {
-        console.error('Error fetching today\'s appointments:', error);
+        console.error('Doctor Dashboard - Error fetching today\'s appointments:', error);
         setTodaysAppointments([]);
       }
     };
@@ -146,7 +171,9 @@ function IntegratedDoctorDashboard({
           </div>
           <div className="flex flex-wrap gap-2 mt-2 md:mt-0">
             <div className="bg-white bg-opacity-20 rounded-md p-1.5 backdrop-blur-sm">
-              <div className="font-semibold text-sm leading-tight">{todaysAppointments.length}</div>
+              <div className="font-semibold text-sm leading-tight">
+                {Array.isArray(todaysAppointments) ? todaysAppointments.length : '0'}
+              </div>
               <div className="text-xs">Today's Appointments</div>
             </div>
           </div>

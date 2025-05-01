@@ -1,15 +1,13 @@
 import React, { useState, useEffect, useCallback, useContext } from 'react';
 import { useSelector } from 'react-redux';
 import AuthContext from '../context/AuthContext';
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import { FaCalendarAlt, FaUserClock, FaUserMd, FaCheck, FaTrash, FaEdit, FaPlus, FaArrowRight, FaArrowLeft, FaSearch, FaChartBar } from 'react-icons/fa';
+import { FaCalendarAlt, FaUserMd, FaCheck, FaTrash, FaEdit, FaPlus, FaArrowRight, FaArrowLeft, FaSearch, FaChartBar } from 'react-icons/fa';
 import apiService from '../utils/apiService';
 import Loader from './Loader';
 import Message from './Message';
 import PatientSearchModal from './PatientSearchModal';
 import AppointmentForm from './AppointmentForm';
 import DiagnosisForm from './DiagnosisForm';
-import QueueNotification from './QueueNotification';
 import AppointmentSearch from './AppointmentSearch';
 import AppointmentAnalytics from './AppointmentAnalytics';
 import './IntegratedAppointmentSystem.css';
@@ -18,18 +16,12 @@ const IntegratedAppointmentSystem = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [appointments, setAppointments] = useState([]);
-  const [queueEntries, setQueueEntries] = useState([]);
-  const [queueStats, setQueueStats] = useState({
+  const [stats, setStats] = useState({
     totalAppointments: 0,
-    checkedInCount: 0,
-    inProgressCount: 0,
     completedCount: 0,
     cancelledCount: 0,
     noShowCount: 0,
-    walkInCount: 0,
-    scheduledCount: 0,
-    nextQueueNumber: 1,
-    avgServiceTime: 0
+    scheduledCount: 0
   });
   const [activeTab, setActiveTab] = useState('appointments');
   const [selectedAppointmentForView, setSelectedAppointmentForView] = useState(null);
@@ -58,50 +50,45 @@ const IntegratedAppointmentSystem = () => {
       setLoading(true);
       const data = await apiService.getIntegratedAppointments({ today_only: true });
       setAppointments(data);
+
+      // Calculate stats
+      const totalAppointments = data.length;
+      const completedCount = data.filter(a => a.status === 'Completed').length;
+      const cancelledCount = data.filter(a => a.status === 'Cancelled').length;
+      const noShowCount = data.filter(a => a.status === 'No-show').length;
+      const scheduledCount = data.filter(a => a.status === 'Scheduled' || a.status === 'In-progress').length;
+
+      setStats({
+        totalAppointments,
+        completedCount,
+        cancelledCount,
+        noShowCount,
+        scheduledCount
+      });
+
       setError(null);
     } catch (err) {
       setError('Failed to fetch appointments: ' + (err.message || err));
       console.error('Error fetching appointments:', err);
+      // Set default stats on error
+      setStats({
+        totalAppointments: 0,
+        completedCount: 0,
+        cancelledCount: 0,
+        noShowCount: 0,
+        scheduledCount: 0
+      });
     } finally {
       setLoading(false);
-    }
-  }, []);
-
-  // Fetch queue entries
-  const fetchQueueEntries = useCallback(async () => {
-    try {
-      setLoading(true);
-      const data = await apiService.getTodaysQueue();
-      setQueueEntries(data);
-      setError(null);
-    } catch (err) {
-      setError('Failed to fetch queue: ' + (err.message || err));
-      console.error('Error fetching queue:', err);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  // Fetch queue statistics
-  const fetchQueueStats = useCallback(async () => {
-    try {
-      const data = await apiService.getIntegratedQueueStats();
-      setQueueStats(data);
-    } catch (err) {
-      console.error('Error fetching queue stats:', err);
     }
   }, []);
 
   // Fetch all data
   const fetchAllData = useCallback(async () => {
     setLoading(true);
-    await Promise.all([
-      fetchTodaysAppointments(),
-      fetchQueueEntries(),
-      fetchQueueStats()
-    ]);
+    await fetchTodaysAppointments();
     setLoading(false);
-  }, [fetchTodaysAppointments, fetchQueueEntries, fetchQueueStats]);
+  }, [fetchTodaysAppointments]);
 
   // Initial data load
   useEffect(() => {
@@ -145,29 +132,15 @@ const IntegratedAppointmentSystem = () => {
     }
   };
 
-  // Handle check-in
-  const handleCheckIn = async (appointmentId) => {
+  // Handle update appointment status
+  const handleUpdateStatus = async (appointmentId, status) => {
     try {
       setLoading(true);
-      await apiService.checkInPatient(appointmentId);
+      await apiService.updateIntegratedAppointment(appointmentId, { status });
       setRefreshTrigger(prev => prev + 1);
     } catch (err) {
-      setError('Failed to check in patient: ' + (err.message || err));
-      console.error('Error checking in patient:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Handle start appointment
-  const handleStartAppointment = async (appointmentId) => {
-    try {
-      setLoading(true);
-      await apiService.startAppointment(appointmentId);
-      setRefreshTrigger(prev => prev + 1);
-    } catch (err) {
-      setError('Failed to start appointment: ' + (err.message || err));
-      console.error('Error starting appointment:', err);
+      setError(`Failed to update appointment status: ${err.message || err}`);
+      console.error('Error updating appointment status:', err);
     } finally {
       setLoading(false);
     }
@@ -189,37 +162,26 @@ const IntegratedAppointmentSystem = () => {
     }
   };
 
-  // Handle drag and drop for queue reordering
-  const handleDragEnd = async (result) => {
-    if (!result.destination) return;
+  // Sort appointments by time
+  const sortAppointmentsByTime = (appointments) => {
+    return [...appointments].sort((a, b) => {
+      // First sort by date
+      const dateA = new Date(a.scheduled_date);
+      const dateB = new Date(b.scheduled_date);
+      if (dateA.getTime() !== dateB.getTime()) {
+        return dateA - dateB;
+      }
 
-    const items = Array.from(queueEntries);
-    const [reorderedItem] = items.splice(result.source.index, 1);
-    items.splice(result.destination.index, 0, reorderedItem);
-
-    // Update the UI immediately
-    setQueueEntries(items);
-
-    // Prepare the data for the API
-    const queueOrder = items.map((item, index) => ({
-      id: item._id,
-      position: index
-    }));
-
-    try {
-      await apiService.reorderIntegratedQueue(queueOrder);
-    } catch (err) {
-      setError('Failed to reorder queue: ' + (err.message || err));
-      console.error('Error reordering queue:', err);
-      // Revert to the original order if the API call fails
-      fetchQueueEntries();
-    }
+      // Then sort by time if dates are the same
+      const timeA = a.appointment_time || '00:00';
+      const timeB = b.appointment_time || '00:00';
+      return timeA.localeCompare(timeB);
+    });
   };
 
   // Render appointment card
   const renderAppointmentCard = (appointment) => {
     const isScheduled = appointment.status === 'Scheduled';
-    const isCheckedIn = appointment.status === 'Checked-in';
     const isInProgress = appointment.status === 'In-progress';
     const isCompleted = appointment.status === 'Completed';
 
@@ -234,29 +196,17 @@ const IntegratedAppointmentSystem = () => {
         </div>
 
         <div className="appointment-details">
+          <p><strong>Time:</strong> {appointment.appointment_time || 'Not set'}</p>
           <p><strong>Type:</strong> {appointment.type}</p>
           {appointment.reason && <p><strong>Reason:</strong> {appointment.reason}</p>}
           <p><strong>Phone:</strong> {appointment.patient_id.phone}</p>
-          {appointment.queue_number && (
-            <p><strong>Ticket #:</strong> {appointment.queue_number}</p>
-          )}
         </div>
 
         <div className="appointment-actions">
           {isScheduled && (
             <button
-              className="btn-check-in"
-              onClick={() => handleCheckIn(appointment._id)}
-              disabled={loading}
-            >
-              <FaUserClock /> Check In
-            </button>
-          )}
-
-          {isCheckedIn && isDoctor && (
-            <button
               className="btn-start"
-              onClick={() => handleStartAppointment(appointment._id)}
+              onClick={() => handleUpdateStatus(appointment._id, 'In-progress')}
               disabled={loading}
             >
               <FaUserMd /> Start
@@ -280,96 +230,34 @@ const IntegratedAppointmentSystem = () => {
     );
   };
 
-  // Render queue entry
-  const renderQueueEntry = (entry, index) => {
-    return (
-      <Draggable
-        key={entry._id}
-        draggableId={entry._id}
-        index={index}
-        isDragDisabled={!isSecretary || entry.status === 'In-progress'}
-      >
-        {(provided) => (
-          <div
-            ref={provided.innerRef}
-            {...provided.draggableProps}
-            {...provided.dragHandleProps}
-            className={`queue-entry status-${entry.status.toLowerCase().replace(' ', '-')}`}
-          >
-            <div className="queue-entry-header">
-              <span className="ticket-number">#{entry.queue_number}</span>
-              <h3>{entry.patient_id.name}</h3>
-              <span className="queue-status">{entry.status}</span>
-            </div>
-
-            <div className="queue-entry-details">
-              <p><strong>Type:</strong> {entry.type}</p>
-              {entry.reason && <p><strong>Reason:</strong> {entry.reason}</p>}
-              <p><strong>Phone:</strong> {entry.patient_id.phone}</p>
-            </div>
-
-            <div className="queue-entry-actions">
-              {entry.status === 'Checked-in' && isDoctor && (
-                <button
-                  className="btn-start"
-                  onClick={() => handleStartAppointment(entry._id)}
-                  disabled={loading}
-                >
-                  <FaUserMd /> Start
-                </button>
-              )}
-
-              {entry.status === 'In-progress' && isDoctor && (
-                <button
-                  className="btn-complete"
-                  onClick={() => {
-                    setSelectedAppointment(entry);
-                    setShowDiagnosisForm(true);
-                  }}
-                  disabled={loading}
-                >
-                  <FaCheck /> Complete
-                </button>
-              )}
-            </div>
-          </div>
-        )}
-      </Draggable>
-    );
-  };
+  // No queue entry rendering needed
 
   return (
     <div className="integrated-appointment-system">
       <div className="system-header">
-        <h2>Appointment & Queue Management</h2>
+        <h2>Appointment Management</h2>
 
         <div className="stats-panel">
           <div className="stat-item">
             <span className="stat-label">Total Today</span>
-            <span className="stat-value">{queueStats.totalAppointments}</span>
+            <span className="stat-value">{stats.totalAppointments}</span>
           </div>
           <div className="stat-item">
-            <span className="stat-label">Waiting</span>
-            <span className="stat-value">{queueStats.checkedInCount}</span>
-          </div>
-          <div className="stat-item">
-            <span className="stat-label">In Progress</span>
-            <span className="stat-value">{queueStats.inProgressCount}</span>
+            <span className="stat-label">Scheduled</span>
+            <span className="stat-value">{stats.scheduledCount}</span>
           </div>
           <div className="stat-item">
             <span className="stat-label">Completed</span>
-            <span className="stat-value">{queueStats.completedCount}</span>
+            <span className="stat-value">{stats.completedCount}</span>
           </div>
           <div className="stat-item">
-            <span className="stat-label">Next Ticket</span>
-            <span className="stat-value">#{queueStats.nextQueueNumber}</span>
+            <span className="stat-label">Cancelled</span>
+            <span className="stat-value">{stats.cancelledCount}</span>
           </div>
-          {queueStats.avgServiceTime > 0 && (
-            <div className="stat-item">
-              <span className="stat-label">Avg. Time</span>
-              <span className="stat-value">{queueStats.avgServiceTime} min</span>
-            </div>
-          )}
+          <div className="stat-item">
+            <span className="stat-label">No-show</span>
+            <span className="stat-value">{stats.noShowCount}</span>
+          </div>
         </div>
 
         <div className="tabs">
@@ -378,12 +266,6 @@ const IntegratedAppointmentSystem = () => {
             onClick={() => setActiveTab('appointments')}
           >
             <FaCalendarAlt /> Appointments
-          </button>
-          <button
-            className={`tab ${activeTab === 'queue' ? 'active' : ''}`}
-            onClick={() => setActiveTab('queue')}
-          >
-            <FaUserClock /> Queue
           </button>
           <button
             className={`tab ${activeTab === 'search' ? 'active' : ''}`}
@@ -397,10 +279,6 @@ const IntegratedAppointmentSystem = () => {
           >
             <FaChartBar /> Analytics
           </button>
-
-          <div className="notification-container">
-            <QueueNotification queueEntries={queueEntries} />
-          </div>
         </div>
       </div>
 
@@ -425,45 +303,9 @@ const IntegratedAppointmentSystem = () => {
               {appointments.length === 0 ? (
                 <p className="no-data-message">No appointments for today.</p>
               ) : (
-                appointments.map(appointment => renderAppointmentCard(appointment))
+                sortAppointmentsByTime(appointments).map(appointment => renderAppointmentCard(appointment))
               )}
             </div>
-          </div>
-        )}
-
-        {activeTab === 'queue' && (
-          <div className="queue-section">
-            <div className="section-header">
-              <h3>Today's Queue</h3>
-              <div className="queue-controls">
-                <button
-                  className="btn-refresh"
-                  onClick={() => setRefreshTrigger(prev => prev + 1)}
-                  disabled={loading}
-                >
-                  Refresh
-                </button>
-              </div>
-            </div>
-
-            <DragDropContext onDragEnd={handleDragEnd}>
-              <Droppable droppableId="queue">
-                {(provided) => (
-                  <div
-                    className="queue-list"
-                    {...provided.droppableProps}
-                    ref={provided.innerRef}
-                  >
-                    {queueEntries.length === 0 ? (
-                      <p className="no-data-message">No patients in queue.</p>
-                    ) : (
-                      queueEntries.map((entry, index) => renderQueueEntry(entry, index))
-                    )}
-                    {provided.placeholder}
-                  </div>
-                )}
-              </Droppable>
-            </DragDropContext>
           </div>
         )}
 
@@ -472,12 +314,7 @@ const IntegratedAppointmentSystem = () => {
             <AppointmentSearch
               onSelectAppointment={(appointment) => {
                 setSelectedAppointmentForView(appointment);
-                // If the appointment is in the queue, switch to queue tab
-                if (appointment.status === 'Checked-in' || appointment.status === 'In-progress') {
-                  setActiveTab('queue');
-                } else {
-                  setActiveTab('appointments');
-                }
+                setActiveTab('appointments');
               }}
             />
           </div>

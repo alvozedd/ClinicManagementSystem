@@ -10,7 +10,7 @@ import GlobalDiagnosesView from './GlobalDiagnosesView';
 import DoctorPatientSearchAppointmentModal from './DoctorPatientSearchAppointmentModal';
 import AppointmentManagementModal from './AppointmentManagementModal';
 import AppointmentCard from './AppointmentCard';
-import AppointmentQueueWrapper from './AppointmentQueueWrapper';
+// Queue functionality removed
 import TodaysAppointments from './TodaysAppointments';
 import ActionButtons from './ActionButtons';
 import { FaCalendarAlt, FaUserMd, FaClipboardList, FaEye, FaArrowLeft, FaUser, FaFileMedical, FaUserClock } from 'react-icons/fa';
@@ -449,78 +449,53 @@ function SimplifiedDoctorDashboard({
           />
         ) : activeTab === 'appointments' ? (
           <>
-            <AppointmentQueueWrapper
-              patients={patients}
-              appointments={appointments}
-              userRole="doctor"
-              onUpdateAppointment={onDiagnoseAppointment}
-              onViewPatient={handleViewPatient}
-              onEditAppointment={setEditingAppointment}
-              onDeleteAppointment={onDeleteAppointment}
-              onUpdatePatient={onUpdatePatient}
-              onAddDiagnosis={setDiagnosingAppointment}
-            />
-            <div className="mt-6">
-          <div>
-            {/* Today's Appointments Section */}
-            <div className="mb-8">
-              <div className="flex justify-between items-center mb-4">
-                <button
-                  onClick={() => setShowAddAppointmentForm(true)}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded text-base font-medium flex items-center justify-center"
-                  aria-label="Add Appointment"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
-                  </svg>
-                  <span>Add Appointment</span>
-                </button>
+            <div className="mt-2">
+              {/* Today's Appointments Section */}
+              <div className="mb-8">
+                <TodaysAppointments
+                  onViewPatient={handleViewPatient}
+                  onEditAppointment={setEditingAppointment}
+                  onDeleteAppointment={onDeleteAppointment}
+                  patients={patients}
+                  onUpdatePatient={onUpdatePatient}
+                  onDiagnoseAppointment={onDiagnoseAppointment}
+                />
               </div>
 
-              <TodaysAppointments
-                onViewPatient={handleViewPatient}
-                onEditAppointment={setEditingAppointment}
-                onDeleteAppointment={onDeleteAppointment}
-              />
-            </div>
+              {/* Upcoming Appointments Section */}
+              <div>
+                <h2 className="text-xl font-semibold text-blue-800 mb-3">Upcoming Appointments</h2>
 
+                {upcomingAppointments.length > 0 ? (
+                  <div className="space-y-3">
+                    {upcomingAppointments.map(appointment => {
+                      // Skip invalid appointments
+                      if (!appointment || (!appointment._id && !appointment.id)) {
+                        console.warn('Skipping invalid appointment in render:', appointment);
+                        return null;
+                      }
 
-
-            {/* Upcoming Appointments Section */}
-            <div>
-              <h2 className="text-xl font-semibold text-blue-800 mb-3">Upcoming Appointments</h2>
-
-              {upcomingAppointments.length > 0 ? (
-                <div className="space-y-3">
-                  {upcomingAppointments.map(appointment => {
-                    // Skip invalid appointments
-                    if (!appointment || (!appointment._id && !appointment.id)) {
-                      console.warn('Skipping invalid appointment in render:', appointment);
-                      return null;
-                    }
-
-                    return (
-                      <AppointmentCard
-                        key={appointment.id || appointment._id}
-                        appointment={appointment}
-                        onViewPatient={handleViewPatient}
-                        onEditAppointment={setEditingAppointment}
-                        onDiagnoseAppointment={setDiagnosingAppointment}
-                        onDeleteAppointment={onDeleteAppointment}
-                        patients={patients}
-                        onUpdatePatient={onUpdatePatient}
-                        isDoctor={true}
-                      />
-                    );
-                  })}
-                </div>
-              ) : (
-                <div className="no-appointments">
-                  <p>No upcoming appointments scheduled.</p>
-                </div>
-              )}
-            </div>
-          </div>
+                      return (
+                        <AppointmentCard
+                          key={appointment.id || appointment._id}
+                          appointment={appointment}
+                          onViewPatient={handleViewPatient}
+                          onEditAppointment={setEditingAppointment}
+                          onDiagnoseAppointment={setDiagnosingAppointment}
+                          onDeleteAppointment={onDeleteAppointment}
+                          patients={patients}
+                          onUpdatePatient={onUpdatePatient}
+                          isDoctor={true}
+                        />
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="no-appointments">
+                    <p>No upcoming appointments scheduled.</p>
+                  </div>
+                )}
+              </div>
             </div>
           </>
         ) : (

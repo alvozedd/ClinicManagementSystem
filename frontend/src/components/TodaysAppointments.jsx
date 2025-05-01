@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { getTodaysAppointments, clearCache } from '../data/mockData';
-import { FaCalendarAlt, FaPhone, FaUserPlus, FaEdit, FaTrash } from 'react-icons/fa';
+import { FaCalendarAlt, FaPhone, FaUserPlus, FaEdit, FaTrash, FaPlus } from 'react-icons/fa';
 import apiService from '../utils/apiService';
+import NewAppointmentButton from './NewAppointmentButton';
 
-function TodaysAppointments({ onViewPatient, onEditAppointment, onDeleteAppointment }) {
+function TodaysAppointments({ onViewPatient, onEditAppointment, onDeleteAppointment, patients, onUpdatePatient, onDiagnoseAppointment }) {
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -58,6 +59,13 @@ function TodaysAppointments({ onViewPatient, onEditAppointment, onDeleteAppointm
     return time;
   };
 
+  // Sort appointments by time
+  const sortedAppointments = [...appointments].sort((a, b) => {
+    const timeA = a.time || a.optional_time || '09:00';
+    const timeB = b.time || b.optional_time || '09:00';
+    return timeA.localeCompare(timeB);
+  });
+
   // Function to get patient initials
   const getPatientInitials = (name) => {
     if (!name) return '';
@@ -77,75 +85,22 @@ function TodaysAppointments({ onViewPatient, onEditAppointment, onDeleteAppointm
     }
   };
 
-  // Handle adding an appointment to the queue
-  const handleAddToQueue = async (appointment) => {
-    try {
-      // Format patient ID correctly
-      let patientId = null;
-
-      // Try to get patient ID from different possible sources
-      if (appointment.patientId) {
-        patientId = appointment.patientId;
-      } else if (appointment.patient_id) {
-        patientId = appointment.patient_id;
-      } else if (appointment.patient && appointment.patient._id) {
-        patientId = appointment.patient._id;
-      }
-
-      // Handle case where patient ID is an object
-      if (typeof patientId === 'object' && patientId !== null) {
-        patientId = patientId._id || patientId.id;
-      }
-
-      if (!patientId) {
-        console.error('Could not determine patient ID from appointment:', appointment);
-        throw new Error('No patient ID found for this appointment');
-      }
-
-      // Create queue data
-      const queueData = {
-        patient_id: patientId,
-        appointment_id: appointment._id || appointment.id,
-        is_walk_in: false,
-        notes: `Checked in for ${appointment.type || 'appointment'}`
-      };
-
-      console.log('Adding to queue with patient_id:', queueData.patient_id, 'type:', typeof queueData.patient_id);
-
-      // Add to queue
-      const newQueueEntry = await apiService.addToQueue(queueData);
-
-      // Show success message
-      alert(`Patient ${appointment.patientName} added to queue with ticket #${newQueueEntry.ticket_number}`);
-
-      // Clear the cache and refresh the appointments list
-      clearCache('appointments');
-      await fetchAppointments();
-
-      // Return true to indicate success
-      return true;
-    } catch (error) {
-      console.error('Error adding to queue:', error);
-
-      // Check if this is a CORS error
-      if (error.toString().includes('CORS') || error.toString().includes('NetworkError')) {
-        // Show a more helpful message for CORS errors
-        alert('Patient added to queue, but there was a network issue. The queue will update when you refresh the page.');
-        // Try to refresh anyway
-        fetchAppointments().catch(e => console.error('Failed to refresh appointments after queue add:', e));
-        return true; // Consider it a success for the user
-      } else {
-        alert('Failed to add patient to queue: ' + error.toString());
-        return false;
-      }
-    }
-  };
+  // Queue functionality has been removed
 
   return (
     <div className="bg-white rounded-lg shadow-sm p-4">
-      <div className="flex items-center mb-4">
-        <FaCalendarAlt className="text-blue-600 mr-2" />
-        <h2 className="text-lg font-semibold text-gray-800">Today's Appointments</h2>
+      <div className="flex justify-between items-center mb-4">
+        <div className="flex items-center">
+          <FaCalendarAlt className="text-blue-600 mr-2" />
+          <h2 className="text-lg font-semibold text-gray-800">Today's Appointments</h2>
+        </div>
+        {patients && onUpdatePatient && onDiagnoseAppointment && (
+          <NewAppointmentButton
+            patients={patients}
+            onSave={onDiagnoseAppointment}
+            onAddPatient={onUpdatePatient}
+          />
+        )}
       </div>
 
       {loading ? (
@@ -154,7 +109,7 @@ function TodaysAppointments({ onViewPatient, onEditAppointment, onDeleteAppointm
         </div>
       ) : appointments.length > 0 ? (
         <div className="space-y-2">
-          {appointments.map((appointment) => {
+          {sortedAppointments.map((appointment) => {
             // Skip rendering if appointment is invalid
             if (!appointment || (!appointment._id && !appointment.id)) {
               console.warn('Skipping invalid appointment in render:', appointment);
@@ -169,7 +124,9 @@ function TodaysAppointments({ onViewPatient, onEditAppointment, onDeleteAppointm
               >
               <div className="flex-grow">
                 <div className="font-medium">{appointment.patientName}</div>
-                <div className="text-xs text-gray-500">{appointment.reason || 'Consultation'}</div>
+                <div className="text-xs text-gray-500">
+                  <span className="font-semibold">{formatTime(appointment.time || appointment.optional_time)}</span> - {appointment.reason || 'Consultation'}
+                </div>
               </div>
               <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-700 font-medium mr-3">
                 {getPatientInitials(appointment.patientName)}
@@ -187,16 +144,7 @@ function TodaysAppointments({ onViewPatient, onEditAppointment, onDeleteAppointm
                     <FaPhone size={14} />
                   </button>
                 )}
-                <button
-                  className="p-2 text-green-600 hover:text-green-800 bg-green-50 rounded-full"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleAddToQueue(appointment);
-                  }}
-                  title="Add to Queue"
-                >
-                  <FaUserPlus size={14} />
-                </button>
+
                 {onEditAppointment && (
                   <button
                     className="p-2 text-blue-600 hover:text-blue-800 bg-blue-50 rounded-full"

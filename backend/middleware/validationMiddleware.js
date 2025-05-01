@@ -12,9 +12,15 @@ const isValidEmail = (email) => {
 
 // Helper function to validate phone number format
 const isValidPhone = (phone) => {
-  // Allow digits, spaces, dashes, parentheses, and plus sign
+  if (!phone) return false;
+
+  // First try to see if it's a valid phone format with special characters
   const phoneRegex = /^[0-9\s\-\(\)\+]+$/;
-  return phoneRegex.test(phone);
+  if (phoneRegex.test(phone)) return true;
+
+  // If that fails, check if it's just digits (after stripping non-digits)
+  const digitsOnly = phone.replace(/[^0-9]/g, '');
+  return digitsOnly.length > 0;
 };
 
 // Helper function to sanitize string input
@@ -336,32 +342,7 @@ const validateIntegratedAppointmentCreation = (req, res, next) => {
   next();
 };
 
-// Validation middleware for queue reordering
-const validateQueueReorder = (req, res, next) => {
-  const { queueOrder } = req.body;
-  const errors = [];
-
-  // Validate queueOrder
-  if (!queueOrder || !Array.isArray(queueOrder)) {
-    errors.push('Queue order must be an array');
-  } else {
-    // Validate each entry in the queue order
-    queueOrder.forEach((entry, index) => {
-      if (!entry.id) {
-        errors.push(`Queue entry at index ${index} is missing an ID`);
-      } else if (!entry.id.match(/^[0-9a-fA-F]{24}$/)) {
-        errors.push(`Queue entry at index ${index} has an invalid ID format`);
-      }
-    });
-  }
-
-  // If there are validation errors, return them
-  if (errors.length > 0) {
-    return res.status(400).json({ errors });
-  }
-
-  next();
-};
+// Queue reordering validation has been removed
 
 module.exports = {
   validateUserRegistration,
@@ -369,6 +350,5 @@ module.exports = {
   validatePatientCreation,
   validateAppointmentCreation,
   validateDiagnosisCreation,
-  validateIntegratedAppointmentCreation,
-  validateQueueReorder
+  validateIntegratedAppointmentCreation
 };

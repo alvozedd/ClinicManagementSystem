@@ -34,14 +34,23 @@ const createPatient = asyncHandler(async (req, res) => {
   const finalCreatedBy = createdBy || (req.user ? req.user.role : 'visitor');
   console.log('Final createdBy value:', finalCreatedBy);
 
+  // Sanitize phone numbers to ensure they only contain digits
+  const sanitizedPhone = phone ? phone.replace(/[^0-9]/g, '') : '';
+  const sanitizedNextOfKinPhone = next_of_kin_phone ? next_of_kin_phone.replace(/[^0-9]/g, '') : '';
+
+  console.log('Sanitized phone numbers:', {
+    original: { phone, next_of_kin_phone },
+    sanitized: { sanitizedPhone, sanitizedNextOfKinPhone }
+  });
+
   const patient = await Patient.create({
     name,
     gender,
-    phone,
+    phone: sanitizedPhone,
     year_of_birth,
     next_of_kin_name,
     next_of_kin_relationship,
-    next_of_kin_phone,
+    next_of_kin_phone: sanitizedNextOfKinPhone,
     medicalHistory: medicalHistory || [],
     allergies: allergies || [],
     medications: medications || [],

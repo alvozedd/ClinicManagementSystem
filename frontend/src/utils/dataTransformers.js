@@ -16,6 +16,32 @@ export const transformPatientFromBackend = (backendPatient) => {
     created_by_user_id: backendPatient.created_by_user_id
   });
 
+  // Check if this is already in frontend format (has firstName/lastName)
+  if (backendPatient.firstName && backendPatient.lastName) {
+    console.log('Patient already in frontend format, returning as is with added fields');
+    // Just ensure all required fields are present
+    return {
+      ...backendPatient,
+      _id: backendPatient._id || backendPatient.id,
+      id: backendPatient.id || backendPatient._id,
+      // Make sure these fields exist
+      gender: backendPatient.gender || '',
+      phone: backendPatient.phone || '',
+      dateOfBirth: backendPatient.dateOfBirth || '',
+      yearOfBirth: backendPatient.yearOfBirth || backendPatient.year_of_birth || '',
+      nextOfKinName: backendPatient.nextOfKinName || backendPatient.next_of_kin_name || '',
+      nextOfKinRelationship: backendPatient.nextOfKinRelationship || backendPatient.next_of_kin_relationship || '',
+      nextOfKinPhone: backendPatient.nextOfKinPhone || backendPatient.next_of_kin_phone || '',
+      createdBy: backendPatient.createdBy || 'unknown',
+      createdAt: backendPatient.createdAt || new Date().toISOString(),
+      updatedAt: backendPatient.updatedAt || new Date().toISOString(),
+      lastVisit: backendPatient.lastVisit || (backendPatient.updatedAt ? new Date(backendPatient.updatedAt).toISOString().split('T')[0] : ''),
+      medicalHistory: backendPatient.medicalHistory || [],
+      medications: backendPatient.medications || [],
+      allergies: backendPatient.allergies || []
+    };
+  }
+
   // Split the name into firstName and lastName
   const nameParts = backendPatient.name ? backendPatient.name.split(' ') : ['', ''];
   const firstName = nameParts[0] || '';
@@ -36,13 +62,18 @@ export const transformPatientFromBackend = (backendPatient) => {
     id: backendPatient._id, // Also set as id for compatibility
     firstName,
     lastName,
+    name: backendPatient.name, // Keep original name too
     gender: backendPatient.gender || '',
     phone: backendPatient.phone || '',
     dateOfBirth: dateOfBirth,
     yearOfBirth: backendPatient.year_of_birth || '',
+    year_of_birth: backendPatient.year_of_birth || '', // Keep original field too
     nextOfKinName: backendPatient.next_of_kin_name || '',
     nextOfKinRelationship: backendPatient.next_of_kin_relationship || '',
     nextOfKinPhone: backendPatient.next_of_kin_phone || '',
+    next_of_kin_name: backendPatient.next_of_kin_name || '', // Keep original fields too
+    next_of_kin_relationship: backendPatient.next_of_kin_relationship || '',
+    next_of_kin_phone: backendPatient.next_of_kin_phone || '',
     createdBy: createdByValue, // Use the actual createdBy field if available
     createdAt: backendPatient.createdAt || new Date().toISOString(),
     updatedAt: backendPatient.updatedAt || new Date().toISOString(),

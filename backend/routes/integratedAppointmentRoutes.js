@@ -4,8 +4,6 @@ const {
   createAppointment,
   getAppointments,
   getAppointmentById,
-  getTodaysQueue,
-  getQueueStats,
   updateAppointment,
   checkInPatient,
   startAppointment,
@@ -13,10 +11,7 @@ const {
   cancelAppointment,
   markNoShow,
   rescheduleAppointment,
-  reorderQueue,
-  deleteAppointment,
-  resetQueue,
-  getNextPatient
+  deleteAppointment
 } = require('../controllers/integratedAppointmentController');
 const {
   protect,
@@ -26,7 +21,7 @@ const {
   doctorOrSecretary,
   admin
 } = require('../middleware/authMiddleware');
-const { validateIntegratedAppointmentCreation, validateQueueReorder } = require('../middleware/validationMiddleware');
+const { validateIntegratedAppointmentCreation } = require('../middleware/validationMiddleware');
 const { publicEndpointLimiter, apiLimiter } = require('../middleware/rateLimitMiddleware');
 
 // Public routes (with optional authentication)
@@ -44,21 +39,7 @@ router.route('/')
 router.route('/')
   .get(protect, apiLimiter, getAppointments);
 
-// Queue management routes - these must come before the /:id routes
-router.route('/queue')
-  .get(protect, doctorOrSecretary, getTodaysQueue);
-
-router.route('/queue/stats')
-  .get(protect, doctorOrSecretary, getQueueStats);
-
-router.route('/queue/next')
-  .get(protect, doctor, getNextPatient);
-
-router.route('/queue/reorder')
-  .put(protect, secretary, validateQueueReorder, reorderQueue);
-
-router.route('/queue/reset')
-  .delete(protect, admin, resetQueue);
+// Queue management routes have been removed
 
 // Individual appointment routes
 router.route('/:id')

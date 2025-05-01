@@ -48,17 +48,47 @@ function AddPatientForm({ onSave, onCancel, createdBy = 'secretary' }) {
       return;
     }
 
-    // Make sure yearOfBirth is properly set
+    // Format the data to match the backend model
     const patientData = {
-      ...formData,
-      yearOfBirth: formData.yearOfBirth ? parseInt(formData.yearOfBirth) : null
+      name: `${formData.firstName} ${formData.lastName}`.trim(),
+      gender: formData.gender,
+      phone: formData.phone,
+      year_of_birth: formData.yearOfBirth ? parseInt(formData.yearOfBirth) : new Date().getFullYear() - 30,
+      next_of_kin_name: formData.nextOfKinName || 'Not Provided',
+      next_of_kin_relationship: formData.nextOfKinRelationship || 'Not Provided',
+      // Make sure next of kin phone is in a valid format (digits only) or use a default
+      next_of_kin_phone: formData.nextOfKinPhone ? formData.nextOfKinPhone.replace(/[^0-9]/g, '') : '0000000000',
+      // Add required arrays for medical history, allergies, and medications
+      medicalHistory: [
+        {
+          condition: 'None',
+          diagnosedDate: new Date().toISOString().split('T')[0],
+          notes: 'Initial record'
+        }
+      ],
+      allergies: ['None'],
+      medications: [
+        {
+          name: 'None',
+          dosage: 'N/A',
+          frequency: 'N/A',
+          startDate: new Date().toISOString().split('T')[0]
+        }
+      ],
+      createdBy: createdBy
     };
 
-    // Create a new patient record with the specified creator
-    const newPatient = createPatientRecord(patientData, createdBy);
-    console.log('Creating patient with year of birth:', patientData.yearOfBirth);
+    // Also ensure the main phone number is in a valid format
+    patientData.phone = patientData.phone.replace(/[^0-9]/g, '');
 
-    onSave(newPatient);
+    console.log('Creating patient with data:', patientData);
+
+    try {
+      onSave(patientData);
+    } catch (error) {
+      console.error('Error saving patient:', error);
+      alert(`Failed to save patient: ${error.message || error}`);
+    }
   };
 
   return (

@@ -10,14 +10,14 @@ const logger = require('../utils/logger');
  * @access  Public/Private (depends on who's creating it)
  */
 const createAppointment = asyncHandler(async (req, res) => {
-  const { 
-    patient_id, 
-    scheduled_date, 
-    type, 
-    reason, 
-    notes, 
+  const {
+    patient_id,
+    scheduled_date,
+    type,
+    reason,
+    notes,
     is_walk_in,
-    createdBy 
+    createdBy
   } = req.body;
 
   // Log the incoming request data for debugging
@@ -56,29 +56,10 @@ const createAppointment = asyncHandler(async (req, res) => {
   // Add createdBy field to track who created the appointment
   appointmentData.createdBy = createdBy || (req.user ? req.user.role : 'visitor');
 
-  // If it's a walk-in, set check-in time and get queue number
+  // If it's a walk-in, set check-in time
   if (is_walk_in) {
     appointmentData.check_in_time = new Date();
-    
-    // Get the next queue number for today
-    const today = new Date();
-    const startOfDay = new Date(today.setHours(0, 0, 0, 0));
-    const endOfDay = new Date(today.setHours(23, 59, 59, 999));
-    
-    const lastQueueEntry = await IntegratedAppointment.findOne({
-      check_in_time: { $gte: startOfDay, $lte: endOfDay },
-      queue_number: { $exists: true }
-    }).sort({ queue_number: -1 });
-    
-    appointmentData.queue_number = lastQueueEntry ? lastQueueEntry.queue_number + 1 : 1;
-    
-    // Get the highest queue position
-    const lastPositionEntry = await IntegratedAppointment.findOne({
-      status: 'Checked-in',
-      queue_position: { $exists: true }
-    }).sort({ queue_position: -1 });
-    
-    appointmentData.queue_position = lastPositionEntry ? lastPositionEntry.queue_position + 1 : 1;
+    appointmentData.appointment_time = new Date().toTimeString().slice(0, 5); // Set current time as appointment time
   }
 
   logger.info('Final appointment data:', appointmentData);
@@ -90,7 +71,7 @@ const createAppointment = asyncHandler(async (req, res) => {
     // Populate patient information
     const populatedAppointment = await IntegratedAppointment.findById(appointment._id)
       .populate('patient_id', 'name gender phone year_of_birth');
-    
+
     res.status(201).json(populatedAppointment);
   } else {
     res.status(400);
@@ -105,12 +86,11 @@ const createAppointment = asyncHandler(async (req, res) => {
  */
 const getAppointments = asyncHandler(async (req, res) => {
   // Get query parameters
-  const { 
-    status, 
-    date_from, 
-    date_to, 
+  const {
+    status,
+    date_from,
+    date_to,
     patient_id,
-    queue_only,
     today_only,
     include_diagnosis
   } = req.query;
@@ -126,19 +106,19 @@ const getAppointments = asyncHandler(async (req, res) => {
   // Filter by date range if provided
   if (date_from || date_to || today_only) {
     query.scheduled_date = {};
-    
+
     if (today_only === 'true') {
       const today = new Date();
       const startOfDay = new Date(today.setHours(0, 0, 0, 0));
       const endOfDay = new Date(today.setHours(23, 59, 59, 999));
-      
+
       query.scheduled_date.$gte = startOfDay;
       query.scheduled_date.$lte = endOfDay;
     } else {
       if (date_from) {
         query.scheduled_date.$gte = new Date(date_from);
       }
-      
+
       if (date_to) {
         query.scheduled_date.$lte = new Date(date_to);
       }
@@ -150,19 +130,16 @@ const getAppointments = asyncHandler(async (req, res) => {
     query.patient_id = patient_id;
   }
 
-  // Filter for queue only if requested
-  if (queue_only === 'true') {
-    query.status = { $in: ['Checked-in', 'In-progress'] };
-  }
+  // No queue filtering needed
 
   // Create the base query
   let appointmentsQuery = IntegratedAppointment.find(query)
     .populate('patient_id', 'name gender phone year_of_birth');
 
-  // Sort based on status and queue position
-  appointmentsQuery = appointmentsQuery.sort({ 
+  // Sort based on date and time
+  appointmentsQuery = appointmentsQuery.sort({
     scheduled_date: 1,
-    queue_position: 1
+    appointment_time: 1
   });
 
   // Execute the query
@@ -189,90 +166,7 @@ const getAppointmentById = asyncHandler(async (req, res) => {
   }
 });
 
-/**
- * @desc    Get today's queue
- * @route   GET /api/integrated-appointments/queue
- * @access  Private
- */
-const getTodaysQueue = asyncHandler(async (req, res) => {
-  const today = new Date();
-  const startOfDay = new Date(today.setHours(0, 0, 0, 0));
-  const endOfDay = new Date(today.setHours(23, 59, 59, 999));
-
-  // Get all appointments that are in the queue (checked-in or in-progress)
-  const queueEntries = await IntegratedAppointment.find({
-    $or: [
-      { check_in_time: { $gte: startOfDay, $lte: endOfDay } },
-      { scheduled_date: { $gte: startOfDay, $lte: endOfDay }, status: { $in: ['Checked-in', 'In-progress'] } }
-    ]
-  })
-    .populate('patient_id', 'name gender phone year_of_birth')
-    .sort({ status: 1, queue_position: 1 });
-
-  res.json(queueEntries);
-});
-
-/**
- * @desc    Get queue statistics
- * @route   GET /api/integrated-appointments/queue/stats
- * @access  Private
- */
-const getQueueStats = asyncHandler(async (req, res) => {
-  const today = new Date();
-  const startOfDay = new Date(today.setHours(0, 0, 0, 0));
-  const endOfDay = new Date(today.setHours(23, 59, 59, 999));
-
-  // Get all appointments for today
-  const allAppointments = await IntegratedAppointment.find({
-    scheduled_date: { $gte: startOfDay, $lte: endOfDay }
-  });
-
-  // Calculate statistics
-  const totalAppointments = allAppointments.length;
-  const checkedInCount = allAppointments.filter(a => a.status === 'Checked-in').length;
-  const inProgressCount = allAppointments.filter(a => a.status === 'In-progress').length;
-  const completedCount = allAppointments.filter(a => a.status === 'Completed').length;
-  const cancelledCount = allAppointments.filter(a => a.status === 'Cancelled').length;
-  const noShowCount = allAppointments.filter(a => a.status === 'No-show').length;
-  const walkInCount = allAppointments.filter(a => a.is_walk_in).length;
-  const scheduledCount = allAppointments.filter(a => a.status === 'Scheduled').length;
-
-  // Get the next queue number
-  const lastQueueEntry = await IntegratedAppointment.findOne({
-    check_in_time: { $gte: startOfDay, $lte: endOfDay },
-    queue_number: { $exists: true }
-  }).sort({ queue_number: -1 });
-  
-  const nextQueueNumber = lastQueueEntry ? lastQueueEntry.queue_number + 1 : 1;
-
-  // Calculate average service time for completed appointments
-  let avgServiceTime = 0;
-  const completedAppointments = allAppointments.filter(a => 
-    a.status === 'Completed' && a.start_time && a.end_time
-  );
-  
-  if (completedAppointments.length > 0) {
-    const totalServiceTime = completedAppointments.reduce((total, appointment) => {
-      const serviceTime = appointment.end_time - appointment.start_time;
-      return total + serviceTime;
-    }, 0);
-    
-    avgServiceTime = Math.round(totalServiceTime / completedAppointments.length / 60000); // in minutes
-  }
-
-  res.json({
-    totalAppointments,
-    checkedInCount,
-    inProgressCount,
-    completedCount,
-    cancelledCount,
-    noShowCount,
-    walkInCount,
-    scheduledCount,
-    nextQueueNumber,
-    avgServiceTime
-  });
-});
+// Queue-related functions have been removed
 
 /**
  * @desc    Update appointment
@@ -287,11 +181,11 @@ const updateAppointment = asyncHandler(async (req, res) => {
     throw new Error('Appointment not found');
   }
 
-  const { 
-    scheduled_date, 
-    type, 
-    reason, 
-    notes, 
+  const {
+    scheduled_date,
+    type,
+    reason,
+    notes,
     status,
     diagnosis
   } = req.body;
@@ -352,7 +246,7 @@ const checkInPatient = asyncHandler(async (req, res) => {
 
   try {
     await appointment.checkIn();
-    
+
     // Get the updated appointment with populated fields
     const updatedAppointment = await IntegratedAppointment.findById(req.params.id)
       .populate('patient_id', 'name gender phone year_of_birth');
@@ -379,7 +273,7 @@ const startAppointment = asyncHandler(async (req, res) => {
 
   try {
     await appointment.startAppointment();
-    
+
     // Get the updated appointment with populated fields
     const updatedAppointment = await IntegratedAppointment.findById(req.params.id)
       .populate('patient_id', 'name gender phone year_of_birth');
@@ -406,7 +300,7 @@ const completeAppointment = asyncHandler(async (req, res) => {
 
   try {
     await appointment.completeAppointment(req.body.diagnosis);
-    
+
     // Get the updated appointment with populated fields
     const updatedAppointment = await IntegratedAppointment.findById(req.params.id)
       .populate('patient_id', 'name gender phone year_of_birth');
@@ -433,7 +327,7 @@ const cancelAppointment = asyncHandler(async (req, res) => {
 
   try {
     await appointment.cancelAppointment(req.body.reason);
-    
+
     // Get the updated appointment with populated fields
     const updatedAppointment = await IntegratedAppointment.findById(req.params.id)
       .populate('patient_id', 'name gender phone year_of_birth');
@@ -460,7 +354,7 @@ const markNoShow = asyncHandler(async (req, res) => {
 
   try {
     await appointment.markNoShow();
-    
+
     // Get the updated appointment with populated fields
     const updatedAppointment = await IntegratedAppointment.findById(req.params.id)
       .populate('patient_id', 'name gender phone year_of_birth');
@@ -490,7 +384,7 @@ const rescheduleAppointment = asyncHandler(async (req, res) => {
       req.body.new_date,
       req.body.reason
     );
-    
+
     // Get the updated appointment with populated fields
     const updatedNewAppointment = await IntegratedAppointment.findById(newAppointment._id)
       .populate('patient_id', 'name gender phone year_of_birth');
@@ -502,46 +396,7 @@ const rescheduleAppointment = asyncHandler(async (req, res) => {
   }
 });
 
-/**
- * @desc    Reorder queue
- * @route   PUT /api/integrated-appointments/queue/reorder
- * @access  Private
- */
-const reorderQueue = asyncHandler(async (req, res) => {
-  const { queueOrder } = req.body;
-
-  if (!queueOrder || !Array.isArray(queueOrder)) {
-    res.status(400);
-    throw new Error('Invalid queue order data');
-  }
-
-  // Update each appointment with its new position
-  const updatePromises = queueOrder.map((item, index) => {
-    return IntegratedAppointment.findByIdAndUpdate(
-      item.id,
-      { queue_position: index },
-      { new: true }
-    );
-  });
-
-  await Promise.all(updatePromises);
-
-  // Get the updated queue
-  const today = new Date();
-  const startOfDay = new Date(today.setHours(0, 0, 0, 0));
-  const endOfDay = new Date(today.setHours(23, 59, 59, 999));
-
-  const queueEntries = await IntegratedAppointment.find({
-    $or: [
-      { check_in_time: { $gte: startOfDay, $lte: endOfDay } },
-      { scheduled_date: { $gte: startOfDay, $lte: endOfDay }, status: { $in: ['Checked-in', 'In-progress'] } }
-    ]
-  })
-    .populate('patient_id', 'name gender phone year_of_birth')
-    .sort({ status: 1, queue_position: 1 });
-
-  res.json(queueEntries);
-});
+// Reorder queue function has been removed
 
 /**
  * @desc    Delete appointment
@@ -560,68 +415,14 @@ const deleteAppointment = asyncHandler(async (req, res) => {
   res.json({ message: 'Appointment removed' });
 });
 
-/**
- * @desc    Reset queue (admin only)
- * @route   DELETE /api/integrated-appointments/queue/reset
- * @access  Private/Admin
- */
-const resetQueue = asyncHandler(async (req, res) => {
-  const today = new Date();
-  const startOfDay = new Date(today.setHours(0, 0, 0, 0));
-  const endOfDay = new Date(today.setHours(23, 59, 59, 999));
+// Reset queue function has been removed
 
-  // Find all appointments in the queue and reset them
-  const queueEntries = await IntegratedAppointment.find({
-    $or: [
-      { check_in_time: { $gte: startOfDay, $lte: endOfDay } },
-      { scheduled_date: { $gte: startOfDay, $lte: endOfDay }, status: { $in: ['Checked-in', 'In-progress'] } }
-    ]
-  });
-
-  // Update each appointment to remove queue information
-  const updatePromises = queueEntries.map(entry => {
-    entry.status = 'Scheduled';
-    entry.queue_number = undefined;
-    entry.queue_position = undefined;
-    entry.check_in_time = undefined;
-    entry.start_time = undefined;
-    entry.end_time = undefined;
-    
-    return entry.save();
-  });
-
-  await Promise.all(updatePromises);
-
-  res.json({ 
-    message: `Queue has been reset. ${queueEntries.length} entries removed from queue.`,
-    resetCount: queueEntries.length
-  });
-});
-
-/**
- * @desc    Get next patient in queue
- * @route   GET /api/integrated-appointments/queue/next
- * @access  Private
- */
-const getNextPatient = asyncHandler(async (req, res) => {
-  const nextPatient = await IntegratedAppointment.findOne({ status: 'Checked-in' })
-    .sort({ queue_position: 1 })
-    .populate('patient_id', 'name gender phone year_of_birth');
-
-  if (nextPatient) {
-    res.json(nextPatient);
-  } else {
-    res.status(404);
-    throw new Error('No patients waiting in queue');
-  }
-});
+// Get next patient function has been removed
 
 module.exports = {
   createAppointment,
   getAppointments,
   getAppointmentById,
-  getTodaysQueue,
-  getQueueStats,
   updateAppointment,
   checkInPatient,
   startAppointment,
@@ -629,8 +430,5 @@ module.exports = {
   cancelAppointment,
   markNoShow,
   rescheduleAppointment,
-  reorderQueue,
-  deleteAppointment,
-  resetQueue,
-  getNextPatient
+  deleteAppointment
 };

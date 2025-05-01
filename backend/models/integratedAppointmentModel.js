@@ -2,9 +2,8 @@ const mongoose = require('mongoose');
 
 /**
  * Integrated Appointment Model
- * 
- * This model combines the functionality of appointments and queue entries
- * to create a more streamlined workflow.
+ *
+ * This model handles appointments with time-based sorting.
  */
 const integratedAppointmentSchema = mongoose.Schema(
   {
@@ -14,13 +13,13 @@ const integratedAppointmentSchema = mongoose.Schema(
       required: true,
       ref: 'Patient',
     },
-    
+
     // Appointment details
     scheduled_date: {
       type: Date,
       required: true,
     },
-    
+
     // Appointment type and reason
     type: {
       type: String,
@@ -30,7 +29,7 @@ const integratedAppointmentSchema = mongoose.Schema(
     reason: {
       type: String,
     },
-    
+
     // Appointment status
     status: {
       type: String,
@@ -45,19 +44,13 @@ const integratedAppointmentSchema = mongoose.Schema(
       ],
       default: 'Scheduled',
     },
-    
-    // Queue information
-    queue_number: {
-      type: Number,
+
+    // Time information for sorting
+    appointment_time: {
+      type: String,
+      default: '09:00',
     },
-    queue_position: {
-      type: Number,
-    },
-    is_walk_in: {
-      type: Boolean,
-      default: false,
-    },
-    
+
     // Timestamps for tracking patient flow
     check_in_time: {
       type: Date,
@@ -68,12 +61,12 @@ const integratedAppointmentSchema = mongoose.Schema(
     end_time: {
       type: Date,
     },
-    
+
     // Notes and additional information
     notes: {
       type: String,
     },
-    
+
     // Diagnosis information (can be populated when appointment is completed)
     diagnosis: {
       text: String,
@@ -86,7 +79,7 @@ const integratedAppointmentSchema = mongoose.Schema(
         duration: String
       }]
     },
-    
+
     // Metadata
     created_by_user_id: {
       type: mongoose.Schema.Types.ObjectId,
@@ -97,7 +90,7 @@ const integratedAppointmentSchema = mongoose.Schema(
       enum: ['doctor', 'secretary', 'visitor', 'admin'],
       default: 'visitor',
     },
-    
+
     // For tracking rescheduled appointments
     original_appointment_id: {
       type: mongoose.Schema.Types.ObjectId,
@@ -113,7 +106,7 @@ const integratedAppointmentSchema = mongoose.Schema(
 integratedAppointmentSchema.index({ scheduled_date: 1 });
 integratedAppointmentSchema.index({ patient_id: 1 });
 integratedAppointmentSchema.index({ status: 1 });
-integratedAppointmentSchema.index({ queue_position: 1 });
+integratedAppointmentSchema.index({ appointment_time: 1 });
 
 // Virtual for patient's age at time of appointment
 integratedAppointmentSchema.virtual('patientInfo', {
@@ -128,34 +121,11 @@ integratedAppointmentSchema.methods.checkIn = async function() {
   if (this.status !== 'Scheduled' && this.status !== 'Rescheduled') {
     throw new Error(`Cannot check in appointment with status: ${this.status}`);
   }
-  
-  // Get the next queue number for today
-  const today = new Date();
-  const startOfDay = new Date(today.setHours(0, 0, 0, 0));
-  const endOfDay = new Date(today.setHours(23, 59, 59, 999));
-  
-  const IntegratedAppointment = this.constructor;
-  
-  const lastQueueEntry = await IntegratedAppointment.findOne({
-    check_in_time: { $gte: startOfDay, $lte: endOfDay },
-    queue_number: { $exists: true }
-  }).sort({ queue_number: -1 });
-  
-  const queueNumber = lastQueueEntry ? lastQueueEntry.queue_number + 1 : 1;
-  
+
   // Update the appointment
   this.status = 'Checked-in';
   this.check_in_time = new Date();
-  this.queue_number = queueNumber;
-  
-  // Get the highest queue position
-  const lastPositionEntry = await IntegratedAppointment.findOne({
-    status: 'Checked-in',
-    queue_position: { $exists: true }
-  }).sort({ queue_position: -1 });
-  
-  this.queue_position = lastPositionEntry ? lastPositionEntry.queue_position + 1 : 1;
-  
+
   return this.save();
 };
 
@@ -164,10 +134,10 @@ integratedAppointmentSchema.methods.startAppointment = async function() {
   if (this.status !== 'Checked-in') {
     throw new Error(`Cannot start appointment with status: ${this.status}`);
   }
-  
+
   this.status = 'In-progress';
   this.start_time = new Date();
-  
+
   return this.save();
 };
 
@@ -176,14 +146,14 @@ integratedAppointmentSchema.methods.completeAppointment = async function(diagnos
   if (this.status !== 'In-progress') {
     throw new Error(`Cannot complete appointment with status: ${this.status}`);
   }
-  
+
   this.status = 'Completed';
   this.end_time = new Date();
-  
+
   if (diagnosisData) {
     this.diagnosis = diagnosisData;
   }
-  
+
   return this.save();
 };
 
@@ -192,12 +162,12 @@ integratedAppointmentSchema.methods.cancelAppointment = async function(reason) {
   if (this.status === 'Completed' || this.status === 'In-progress') {
     throw new Error(`Cannot cancel appointment with status: ${this.status}`);
   }
-  
+
   this.status = 'Cancelled';
   if (reason) {
     this.notes = this.notes ? `${this.notes}\nCancellation reason: ${reason}` : `Cancellation reason: ${reason}`;
   }
-  
+
   return this.save();
 };
 
@@ -206,9 +176,9 @@ integratedAppointmentSchema.methods.markNoShow = async function() {
   if (this.status !== 'Scheduled' && this.status !== 'Rescheduled') {
     throw new Error(`Cannot mark no-show for appointment with status: ${this.status}`);
   }
-  
+
   this.status = 'No-show';
-  
+
   return this.save();
 };
 
@@ -217,10 +187,10 @@ integratedAppointmentSchema.methods.rescheduleAppointment = async function(newDa
   if (this.status === 'Completed' || this.status === 'In-progress') {
     throw new Error(`Cannot reschedule appointment with status: ${this.status}`);
   }
-  
+
   // Create a new appointment based on this one
   const IntegratedAppointment = this.constructor;
-  
+
   const newAppointment = new IntegratedAppointment({
     patient_id: this.patient_id,
     scheduled_date: newDate,
@@ -232,18 +202,18 @@ integratedAppointmentSchema.methods.rescheduleAppointment = async function(newDa
     original_appointment_id: this._id,
     status: 'Scheduled'
   });
-  
+
   // Save the new appointment
   await newAppointment.save();
-  
+
   // Update this appointment
   this.status = 'Rescheduled';
   if (reason) {
     this.notes = this.notes ? `${this.notes}\nRescheduled reason: ${reason}` : `Rescheduled reason: ${reason}`;
   }
-  
+
   await this.save();
-  
+
   return newAppointment;
 };
 
