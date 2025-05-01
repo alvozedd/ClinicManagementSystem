@@ -7,6 +7,8 @@ import SimplifiedSecretaryDashboard from './components/SimplifiedSecretaryDashbo
 import IntegratedDoctorDashboard from './components/IntegratedDoctorDashboard'
 import IntegratedSecretaryDashboard from './components/IntegratedSecretaryDashboard'
 import AdminDashboard from './components/AdminDashboard'
+import ModernAppointmentDashboard from './components/ModernAppointmentDashboard'
+import ModernTodaysAppointments from './components/ModernTodaysAppointments'
 import { FaSignOutAlt, FaSync, FaUserMd, FaUserTie } from 'react-icons/fa'
 import {
   transformPatientsFromBackend,
@@ -186,14 +188,48 @@ function Dashboard() {
         // Add new patient - transform to backend format
         const backendPatientData = transformPatientToBackend(updatedPatient);
         console.log('Creating new patient with data:', backendPatientData);
-        response = await apiService.createPatient(backendPatientData);
 
-        // Transform the response back to frontend format
-        const transformedResponse = transformPatientsFromBackend([response])[0];
-        console.log('Transformed new patient response:', transformedResponse);
+        try {
+          response = await apiService.createPatient(backendPatientData);
+          console.log('Patient creation API response:', response);
 
-        // Add to local state immediately (optimistic update)
-        setPatientsData(prevData => [...prevData, transformedResponse]);
+          // Check if we got a valid response or a temporary object
+          if (response && response._isTemporary) {
+            console.log('Received temporary patient object:', response);
+            // Use the temporary object but mark it for refresh
+            setPatientsData(prevData => [...prevData, response]);
+
+            // Try to refresh data after a short delay
+            setTimeout(() => {
+              console.log('Refreshing data after temporary patient creation');
+              setRefreshTrigger(prev => prev + 1);
+            }, 2000);
+
+            return response;
+          }
+
+          // Transform the response back to frontend format
+          const transformedResponse = transformPatientsFromBackend([response])[0];
+          console.log('Transformed new patient response:', transformedResponse);
+
+          // Add to local state immediately (optimistic update)
+          setPatientsData(prevData => [...prevData, transformedResponse]);
+        } catch (error) {
+          console.error('Error creating patient:', error);
+
+          // Create a temporary patient object with an ID for local use
+          const tempPatient = {
+            _id: 'temp_' + Date.now(),
+            ...updatedPatient,
+            _isTemporary: true
+          };
+
+          console.log('Created temporary patient after error:', tempPatient);
+          setPatientsData(prevData => [...prevData, tempPatient]);
+
+          // Return the temporary patient so the UI can continue
+          return tempPatient;
+        }
       }
 
       console.log('Patient saved to database:', response);

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FaCalendarAlt, FaClipboardList, FaUserInjured, FaRegStickyNote } from 'react-icons/fa';
+import { FaCalendarAlt, FaClipboardList, FaUserInjured, FaRegStickyNote, FaTimes, FaCheck } from 'react-icons/fa';
 import { transformAppointmentFromBackend } from '../utils/dataTransformers';
 
 function AppointmentManagementModal({ appointment, onClose, onSave, isNew = false, isEmbedded = false }) {
@@ -83,11 +83,9 @@ function AppointmentManagementModal({ appointment, onClose, onSave, isNew = fals
           </h2>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 transition-colors p-1 rounded-full hover:bg-gray-100"
+            className="text-gray-500 hover:text-gray-700 transition-colors p-1 rounded-full hover:bg-gray-100 flex items-center justify-center"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-            </svg>
+            <FaTimes className="h-5 w-5" />
           </button>
         </div>
 
@@ -193,15 +191,15 @@ function AppointmentManagementModal({ appointment, onClose, onSave, isNew = fals
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 shadow-sm hover:shadow transition-all duration-200"
+                className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 shadow-sm hover:shadow transition-all duration-200 flex items-center"
               >
-                Cancel
+                <FaTimes className="mr-1" /> Cancel
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 bg-blue-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-blue-700 shadow-sm hover:shadow-md transition-all duration-200 transform hover:translate-y-[-1px]"
+                className="px-4 py-2 bg-blue-600 border border-transparent rounded-md text-sm font-medium text-white hover:bg-blue-700 shadow-sm hover:shadow-md transition-all duration-200 transform hover:translate-y-[-1px] flex items-center"
               >
-                {isNew ? 'Create Appointment' : 'Save Changes'}
+                <FaCheck className="mr-1" /> {isNew ? 'Create Appointment' : 'Save Changes'}
               </button>
             </div>
           </div>

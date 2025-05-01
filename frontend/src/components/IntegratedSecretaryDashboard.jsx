@@ -5,7 +5,8 @@ import SecretaryPatientView from './SecretaryPatientView';
 import AddPatientForm from './AddPatientForm';
 import SecretaryCalendarView from './SecretaryCalendarView';
 import PatientNavigator from './PatientNavigator';
-import IntegratedAppointmentSystem from './IntegratedAppointmentSystem';
+import ModernAppointmentDashboard from './ModernAppointmentDashboard';
+import ModernTodaysAppointments from './ModernTodaysAppointments';
 import { getTimeBasedGreeting, getFormattedDate } from '../utils/timeUtils';
 import apiService from '../utils/apiService';
 
@@ -26,7 +27,7 @@ function IntegratedSecretaryDashboard({
 
   // Set global user role for patient view component
   window.userRole = 'secretary';
-  
+
   // State for active tab (patient-management, appointments, calendar)
   const [activeTab, setActiveTab] = useState('patient-management');
   const [selectedPatient, setSelectedPatient] = useState(null);
@@ -66,14 +67,14 @@ function IntegratedSecretaryDashboard({
         ...patientData,
         createdBy: 'secretary'
       });
-      
+
       setShowAddPatientForm(false);
-      
+
       // Refresh patients list
       if (onUpdatePatient) {
         onUpdatePatient(newPatient);
       }
-      
+
       return newPatient;
     } catch (error) {
       console.error('Error adding patient:', error);
@@ -101,6 +102,19 @@ function IntegratedSecretaryDashboard({
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Today's Appointments */}
+      <div className="mb-4">
+        <ModernTodaysAppointments
+          onUpdateAppointment={onDiagnoseAppointment}
+          onViewPatient={(patientId) => {
+            const patient = patients.find(p => p._id === patientId || p.id === patientId);
+            if (patient) {
+              handleViewPatient(patient);
+            }
+          }}
+        />
       </div>
 
       {/* Enhanced Tab Navigation - Mobile Optimized */}
@@ -166,7 +180,10 @@ function IntegratedSecretaryDashboard({
             }}
           />
         ) : activeTab === 'appointments' ? (
-          <IntegratedAppointmentSystem />
+          <ModernAppointmentDashboard
+            onUpdateAppointment={onDiagnoseAppointment}
+            onDeleteAppointment={onDeleteAppointment}
+          />
         ) : (
           <div>
             {/* Patient Management Tab */}

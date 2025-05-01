@@ -7,7 +7,8 @@ import AddPatientForm from './AddPatientForm';
 import DoctorCalendarView from './DoctorCalendarView';
 import PatientNavigator from './PatientNavigator';
 import GlobalDiagnosesView from './GlobalDiagnosesView';
-import IntegratedAppointmentSystem from './IntegratedAppointmentSystem';
+import ModernAppointmentDashboard from './ModernAppointmentDashboard';
+import ModernTodaysAppointments from './ModernTodaysAppointments';
 import { getTimeBasedGreeting, getFormattedDate } from '../utils/timeUtils';
 import apiService from '../utils/apiService';
 
@@ -28,7 +29,7 @@ function IntegratedDoctorDashboard({
 
   // Set global user role for patient view component
   window.userRole = 'doctor';
-  
+
   // State for active tab (patient-management, appointments, diagnoses, calendar)
   const [activeTab, setActiveTab] = useState('patient-management');
   const [selectedPatient, setSelectedPatient] = useState(null);
@@ -65,21 +66,52 @@ function IntegratedDoctorDashboard({
   // Handle add patient
   const handleAddPatient = async (patientData) => {
     try {
-      const newPatient = await apiService.createPatient({
-        ...patientData,
+      console.log('Handling add patient with data:', patientData);
+
+      // Make sure the data is formatted correctly for the backend
+      const formattedData = {
+        name: patientData.name,
+        gender: patientData.gender,
+        phone: patientData.phone,
+        year_of_birth: patientData.year_of_birth,
+        next_of_kin_name: patientData.next_of_kin_name,
+        next_of_kin_relationship: patientData.next_of_kin_relationship,
+        next_of_kin_phone: patientData.next_of_kin_phone,
+        medicalHistory: patientData.medicalHistory || [
+          {
+            condition: 'None',
+            diagnosedDate: new Date().toISOString().split('T')[0],
+            notes: 'Initial record'
+          }
+        ],
+        allergies: patientData.allergies || ['None'],
+        medications: patientData.medications || [
+          {
+            name: 'None',
+            dosage: 'N/A',
+            frequency: 'N/A',
+            startDate: new Date().toISOString().split('T')[0]
+          }
+        ],
         createdBy: 'doctor'
-      });
-      
+      };
+
+      console.log('Sending formatted data to API:', formattedData);
+
+      const newPatient = await apiService.createPatient(formattedData);
+      console.log('Successfully created patient:', newPatient);
+
       setShowAddPatientForm(false);
-      
+
       // Refresh patients list
       if (onUpdatePatient) {
         onUpdatePatient(newPatient);
       }
-      
+
       return newPatient;
     } catch (error) {
       console.error('Error adding patient:', error);
+      alert(`Failed to add patient: ${error.message || error}`);
       throw error;
     }
   };
@@ -119,6 +151,19 @@ function IntegratedDoctorDashboard({
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Today's Appointments */}
+      <div className="mb-4">
+        <ModernTodaysAppointments
+          onUpdateAppointment={onDiagnoseAppointment}
+          onViewPatient={(patientId) => {
+            const patient = patients.find(p => p._id === patientId || p.id === patientId);
+            if (patient) {
+              handleViewPatient(patient);
+            }
+          }}
+        />
       </div>
 
       {/* Enhanced Tab Navigation - Mobile Optimized */}
@@ -196,7 +241,10 @@ function IntegratedDoctorDashboard({
             }}
           />
         ) : activeTab === 'appointments' ? (
-          <IntegratedAppointmentSystem />
+          <ModernAppointmentDashboard
+            onUpdateAppointment={onDiagnoseAppointment}
+            onDeleteAppointment={onDeleteAppointment}
+          />
         ) : (
           <div>
             {/* Patient Management Tab */}
