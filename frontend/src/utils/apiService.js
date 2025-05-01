@@ -355,51 +355,147 @@ const apiService = {
 
   // Patient endpoints
   getPatients: async () => {
-    return secureFetch(`${API_URL}/patients`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        ...authHeader(),
-      },
-      credentials: 'include', // Include cookies for refresh token
-    });
+    try {
+      console.log('Fetching patients');
+
+      // Try multiple approaches to get patients
+      try {
+        // First try: with API prefix
+        console.log('First attempt - Using API prefix');
+        return await secureFetch(`${API_URL}/patients`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            ...authHeader(),
+          },
+          credentials: 'include', // Include cookies for refresh token
+        });
+      } catch (firstError) {
+        console.warn('First attempt failed, trying without API prefix:', firstError);
+
+        // Second try: without API prefix
+        const baseUrl = API_URL.replace('/api', '');
+        console.log('Second attempt - Using endpoint without API prefix:', `${baseUrl}/patients`);
+
+        const response = await fetch(`${baseUrl}/patients`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            ...authHeader(),
+          },
+          credentials: 'include', // Include cookies for refresh token
+        });
+
+        return handleResponse(response);
+      }
+    } catch (error) {
+      console.error('Error fetching patients:', error);
+      throw error;
+    }
   },
 
   getPatientById: async (id) => {
-    const response = await fetch(`${API_URL}/patients/${id}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        ...authHeader(),
-      },
-    });
-    return handleResponse(response);
+    try {
+      console.log(`Fetching patient with ID: ${id}`);
+
+      // Try multiple approaches to get patient by ID
+      try {
+        // First try: with API prefix
+        console.log('First attempt - Using API prefix');
+        const response = await fetch(`${API_URL}/patients/${id}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            ...authHeader(),
+          },
+          credentials: 'include',
+        });
+
+        if (response.ok) {
+          return handleResponse(response);
+        }
+        throw new Error(`Failed to fetch patient with status: ${response.status}`);
+      } catch (firstError) {
+        console.warn('First attempt failed, trying without API prefix:', firstError);
+
+        // Second try: without API prefix
+        const baseUrl = API_URL.replace('/api', '');
+        console.log('Second attempt - Using endpoint without API prefix:', `${baseUrl}/patients/${id}`);
+
+        const response = await fetch(`${baseUrl}/patients/${id}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            ...authHeader(),
+          },
+          credentials: 'include',
+        });
+
+        return handleResponse(response);
+      }
+    } catch (error) {
+      console.error(`Error fetching patient with ID ${id}:`, error);
+      throw error;
+    }
   },
 
   createPatient: async (patientData) => {
-    // Check if this is a visitor booking (no auth token needed)
-    const isVisitorBooking = patientData.createdBy === 'visitor';
+    try {
+      // Check if this is a visitor booking (no auth token needed)
+      const isVisitorBooking = patientData.createdBy === 'visitor';
 
-    const headers = {
-      'Content-Type': 'application/json',
-      ...(isVisitorBooking ? {} : authHeader()),
-    };
+      const headers = {
+        'Content-Type': 'application/json',
+        ...(isVisitorBooking ? {} : authHeader()),
+      };
 
-    console.log('Creating patient with headers:', headers, 'isVisitorBooking:', isVisitorBooking);
+      console.log('Creating patient with headers:', headers, 'isVisitorBooking:', isVisitorBooking);
 
-    // For visitor bookings, use the non-API endpoint to avoid authentication
-    const endpoint = isVisitorBooking
-      ? `${API_URL.replace('/api', '')}/patients`
-      : `${API_URL}/patients`;
+      // Try multiple endpoints to handle both API and non-API routes
+      let endpoint;
+      let response;
 
-    console.log('Using patient endpoint:', endpoint);
+      // First try with API prefix
+      try {
+        endpoint = `${API_URL}/patients`;
+        console.log('First attempt - Using patient endpoint with API prefix:', endpoint);
 
-    const response = await fetch(endpoint, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(patientData),
-    });
-    return handleResponse(response);
+        response = await fetch(endpoint, {
+          method: 'POST',
+          headers,
+          body: JSON.stringify(patientData),
+          credentials: 'include',
+        });
+
+        if (response.ok) {
+          return handleResponse(response);
+        }
+      } catch (firstError) {
+        console.warn('First attempt failed, trying without API prefix:', firstError);
+      }
+
+      // If that fails, try without API prefix
+      try {
+        const baseUrl = API_URL.replace('/api', '');
+        endpoint = `${baseUrl}/patients`;
+        console.log('Second attempt - Using patient endpoint without API prefix:', endpoint);
+
+        response = await fetch(endpoint, {
+          method: 'POST',
+          headers,
+          body: JSON.stringify(patientData),
+          credentials: 'include',
+        });
+
+        return handleResponse(response);
+      } catch (secondError) {
+        console.error('All attempts to create patient failed:', secondError);
+        throw secondError;
+      }
+    } catch (error) {
+      console.error('Error creating patient:', error);
+      throw error;
+    }
   },
 
   updatePatient: async (id, patientData) => {
