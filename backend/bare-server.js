@@ -114,6 +114,55 @@ app.get('/api/status', (req, res) => {
   });
 });
 
+// Health check route with database status
+app.get('/api/health', async (req, res) => {
+  try {
+    // Check MongoDB connection
+    const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
+
+    // Get basic system info
+    const systemInfo = {
+      nodeVersion: process.version,
+      platform: process.platform,
+      memoryUsage: process.memoryUsage(),
+      uptime: process.uptime()
+    };
+
+    // Get MongoDB connection info
+    const dbInfo = {
+      status: dbStatus,
+      host: mongoose.connection.host,
+      name: mongoose.connection.name,
+      collections: Object.keys(mongoose.connection.collections).length
+    };
+
+    // Return health status
+    res.status(200).json({
+      status: 'ok',
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'development',
+      database: dbInfo,
+      system: systemInfo
+    });
+  } catch (error) {
+    console.error('Health check error:', error);
+    res.status(500).json({
+      status: 'error',
+      message: 'Health check failed',
+      error: error.message
+    });
+  }
+});
+
+// Simple health check route without database status
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    message: 'Server is running'
+  });
+});
+
 // Basic user login routes - adding both paths to match frontend requests
 // Original API path
 app.post('/api/users/login', (req, res) => {
@@ -191,6 +240,36 @@ app.get('/patients', (req, res) => {
   res.status(200).json([]);
 });
 
+app.post('/api/patients', (req, res) => {
+  console.log('POST /api/patients request received');
+  console.log('Request body:', req.body);
+
+  // Generate a fake ID and return the patient data
+  const patientData = {
+    ...req.body,
+    _id: 'temp_' + Date.now(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+
+  res.status(201).json(patientData);
+});
+
+app.post('/patients', (req, res) => {
+  console.log('POST /patients request received');
+  console.log('Request body:', req.body);
+
+  // Generate a fake ID and return the patient data
+  const patientData = {
+    ...req.body,
+    _id: 'temp_' + Date.now(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+
+  res.status(201).json(patientData);
+});
+
 // Appointment routes
 app.get('/api/appointments', (req, res) => {
   console.log('GET /api/appointments request received');
@@ -200,6 +279,36 @@ app.get('/api/appointments', (req, res) => {
 app.get('/appointments', (req, res) => {
   console.log('GET /appointments request received');
   res.status(200).json([]);
+});
+
+app.post('/api/appointments', (req, res) => {
+  console.log('POST /api/appointments request received');
+  console.log('Request body:', req.body);
+
+  // Generate a fake ID and return the appointment data
+  const appointmentData = {
+    ...req.body,
+    _id: 'temp_' + Date.now(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+
+  res.status(201).json(appointmentData);
+});
+
+app.post('/appointments', (req, res) => {
+  console.log('POST /appointments request received');
+  console.log('Request body:', req.body);
+
+  // Generate a fake ID and return the appointment data
+  const appointmentData = {
+    ...req.body,
+    _id: 'temp_' + Date.now(),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+
+  res.status(201).json(appointmentData);
 });
 
 // Diagnosis routes

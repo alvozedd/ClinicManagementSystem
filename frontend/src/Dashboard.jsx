@@ -2,10 +2,12 @@ import { useContext, useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import AuthContext from './context/AuthContext'
 import apiService from './utils/apiService'
+import apiUtils from './utils/apiUtils'
 import IntegratedDoctorDashboard from './components/IntegratedDoctorDashboard'
 import IntegratedSecretaryDashboard from './components/IntegratedSecretaryDashboard'
 import AdminDashboard from './components/AdminDashboard'
-import { FaSignOutAlt, FaSync, FaUserMd, FaUserTie } from 'react-icons/fa'
+import HealthCheck from './components/HealthCheck'
+import { FaSignOutAlt, FaSync, FaUserMd, FaUserTie, FaHeartbeat } from 'react-icons/fa'
 import {
   transformPatientToBackend,
   transformPatientsFromBackend,
@@ -26,6 +28,7 @@ function Dashboard() {
   const [refreshTrigger, setRefreshTrigger] = useState(0) // Used to trigger data refresh
   const [isLoading, setIsLoading] = useState(false)
   const [selectedPatient, setSelectedPatient] = useState(null) // Track the currently selected patient
+  const [showHealthCheck, setShowHealthCheck] = useState(false) // Toggle health check display
 
   // Debug function to check user info and token
   useEffect(() => {
@@ -746,6 +749,11 @@ function Dashboard() {
     // Debug userInfo
     console.log('Dashboard - userInfo:', userInfo);
 
+    // If health check is active, show the health check component
+    if (showHealthCheck) {
+      return <HealthCheck />;
+    }
+
     // For admin, use the admin dashboard focused on user management
     if (userInfo.role === 'admin') {
       return (
@@ -847,6 +855,14 @@ function Dashboard() {
                   <FaSync className="md:mr-1" />
                 )}
                 <span className="hidden md:inline">Refresh</span>
+              </button>
+              <button
+                onClick={() => setShowHealthCheck(!showHealthCheck)}
+                className="bg-purple-600 hover:bg-purple-700 text-white px-2 md:px-3 py-1 rounded text-sm mr-2 flex items-center"
+                title="System Health Check"
+              >
+                <FaHeartbeat className="md:mr-1" />
+                <span className="hidden md:inline">Health Check</span>
               </button>
               <button
                 onClick={handleLogout}

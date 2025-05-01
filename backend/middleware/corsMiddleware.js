@@ -24,6 +24,9 @@ const allowedOrigins = [
 // Always allow all origins to fix CORS issues
 const ALLOW_ALL_ORIGINS = true;
 
+// Debug flag to log detailed CORS information
+const DEBUG_CORS = true;
+
 // Comprehensive list of headers to allow
 const allowedHeaders = [
   'Origin',
@@ -63,18 +66,28 @@ const corsMiddleware = (req, res, next) => {
   const origin = req.headers.origin;
 
   // Log the request for debugging
-  console.log(`CORS middleware processing request: ${req.method} ${req.path} from origin: ${origin || 'unknown'}`);
+  if (DEBUG_CORS) {
+    console.log(`CORS middleware processing request: ${req.method} ${req.path} from origin: ${origin || 'unknown'}`);
+  }
 
   // Set the Vary header to inform caches that the response varies by Origin
   res.header('Vary', 'Origin');
 
   // Always allow the requesting origin
   if (origin) {
-    res.header('Access-Control-Allow-Origin', origin);
-    console.log(`Setting Access-Control-Allow-Origin: ${origin}`);
+    // Check if origin is in allowed list or if we're allowing all origins
+    if (allowedOrigins.includes(origin) || ALLOW_ALL_ORIGINS) {
+      res.header('Access-Control-Allow-Origin', origin);
+      if (DEBUG_CORS) console.log(`Setting Access-Control-Allow-Origin: ${origin}`);
+    } else {
+      // For non-allowed origins, still set the header to prevent CORS errors in development
+      res.header('Access-Control-Allow-Origin', origin);
+      if (DEBUG_CORS) console.log(`Warning: Allowing non-whitelisted origin: ${origin}`);
+    }
   } else {
+    // No origin in request, set to wildcard
     res.header('Access-Control-Allow-Origin', '*');
-    console.log('Setting Access-Control-Allow-Origin: *');
+    if (DEBUG_CORS) console.log('Setting Access-Control-Allow-Origin: *');
   }
 
   // Set credentials to true for all requests

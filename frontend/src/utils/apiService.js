@@ -307,7 +307,34 @@ const apiService = {
     try {
       console.log('Fetching patients');
 
-      // Use makeApiRequest to try multiple endpoints
+      // Try direct Railway URL first (most reliable)
+      try {
+        console.log('First attempt - Using direct Railway URL');
+        const response = await fetch('https://clinicmanagementsystem-production-081b.up.railway.app/patients', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            ...authHeader(),
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+          },
+          mode: 'cors', // No credentials to avoid CORS issues
+          cache: 'no-cache'
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log(`Successfully fetched ${data.length} patients with direct Railway URL`);
+          return data;
+        } else {
+          console.warn(`Railway URL attempt failed with status: ${response.status}`);
+        }
+      } catch (railwayError) {
+        console.warn('Railway URL attempt failed with error:', railwayError);
+      }
+
+      // Fall back to makeApiRequest to try multiple endpoints
       const patientsData = await makeApiRequest('/patients', {
         method: 'GET',
         headers: {
@@ -318,7 +345,7 @@ const apiService = {
         }
       });
 
-      console.log(`Successfully fetched ${patientsData.length} patients`);
+      console.log(`Successfully fetched ${patientsData.length} patients with makeApiRequest`);
       return patientsData;
     } catch (error) {
       console.error('Error fetching patients:', error);
@@ -356,20 +383,50 @@ const apiService = {
       console.log('Creating patient with data:', patientData);
       console.log('isVisitorBooking:', isVisitorBooking);
 
+      // Prepare headers
+      const headers = {
+        'Content-Type': 'application/json'
+      };
+
+      // Add auth headers if required
+      if (requiresAuth) {
+        Object.assign(headers, authHeader());
+      }
+
+      // Try direct Railway URL first (most reliable)
       try {
-        // Use makeApiRequest to try multiple endpoints
+        console.log('First attempt - Using direct Railway URL');
+        const response = await fetch('https://clinicmanagementsystem-production-081b.up.railway.app/patients', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify(patientData),
+          mode: 'cors'
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Successfully created patient with Railway URL:', data);
+          return data;
+        } else {
+          const errorText = await response.text();
+          console.error('First attempt failed with status:', response.status, errorText);
+        }
+      } catch (railwayError) {
+        console.warn('Railway URL attempt failed with error:', railwayError);
+      }
+
+      // Fall back to makeApiRequest to try multiple endpoints
+      try {
         const createdPatient = await makeApiRequest('/patients', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
+          headers,
           body: JSON.stringify(patientData)
         }, requiresAuth);
 
-        console.log('Patient creation successful');
+        console.log('Successfully created patient with makeApiRequest:', createdPatient);
         return createdPatient;
       } catch (error) {
-        console.error('Error creating patient:', error);
+        console.error('Error creating patient with makeApiRequest:', error);
 
         // Create a temporary patient object with an ID for local use
         // This allows the UI to continue working even if the API call fails

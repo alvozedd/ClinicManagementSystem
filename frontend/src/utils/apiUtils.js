@@ -10,42 +10,53 @@
 export const makeApiRequest = async (path, options = {}, requiresAuth = true) => {
   const isProduction = import.meta.env.PROD;
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-  
+
   // Add authentication headers if required
   const headers = { ...options.headers };
   if (requiresAuth) {
     const authHeaders = getAuthHeaders();
     Object.assign(headers, authHeaders);
   }
-  
-  // Define endpoints to try in order
+
+  // Define endpoints to try in order - ALWAYS prioritize Railway in production and development
   const endpoints = [
-    // Direct Railway URL (most reliable in production)
+    // Direct Railway URL (most reliable)
     `https://clinicmanagementsystem-production-081b.up.railway.app${path}`,
     // Standard API URL
     `${API_URL}${path}`,
     // API URL without /api prefix
     `${API_URL.replace('/api', '')}${path}`
   ];
-  
-  // In development, prioritize localhost
-  if (!isProduction) {
+
+  // Only use localhost first in explicit development mode with a special flag
+  const useLocalFirst = !isProduction && localStorage.getItem('use_local_first') === 'true';
+  if (useLocalFirst) {
+    console.log('Using local endpoints first (development mode)');
     endpoints.reverse();
   }
-  
+
   let lastError = null;
-  
+
   // Try each endpoint until one works
   for (const endpoint of endpoints) {
     try {
       console.log(`Trying endpoint: ${endpoint}`);
-      
-      const response = await fetch(endpoint, {
+
+      // Add timestamp to prevent caching
+      const timestamp = new Date().getTime();
+      const hasQuery = endpoint.includes('?');
+      const timeParam = hasQuery ? `&_t=${timestamp}` : `?_t=${timestamp}`;
+      const urlWithTimestamp = `${endpoint}${timeParam}`;
+
+      console.log(`Making request to: ${urlWithTimestamp}`);
+
+      const response = await fetch(urlWithTimestamp, {
         ...options,
         headers,
-        mode: 'cors'
+        mode: 'cors',
+        cache: 'no-cache'
       });
-      
+
       if (response.ok) {
         const contentType = response.headers.get('content-type');
         if (contentType && contentType.includes('application/json')) {
@@ -67,7 +78,7 @@ export const makeApiRequest = async (path, options = {}, requiresAuth = true) =>
       lastError = error;
     }
   }
-  
+
   // If we get here, all endpoints failed
   throw lastError || new Error('All API request attempts failed');
 };
@@ -79,17 +90,18 @@ export const makeApiRequest = async (path, options = {}, requiresAuth = true) =>
 export const getAuthHeaders = () => {
   // Try to get token from sessionStorage first
   let token = null;
-  
+
   try {
     const sessionUserInfo = sessionStorage.getItem('userInfo');
     if (sessionUserInfo) {
       const userInfo = JSON.parse(sessionUserInfo);
       token = userInfo.token;
+      console.log('Found token in sessionStorage');
     }
   } catch (e) {
     console.warn('Error accessing sessionStorage:', e);
   }
-  
+
   // If not found, try localStorage
   if (!token) {
     try {
@@ -97,16 +109,54 @@ export const getAuthHeaders = () => {
       if (localUserInfo) {
         const userInfo = JSON.parse(localUserInfo);
         token = userInfo.token;
+        console.log('Found token in localStorage');
       }
     } catch (e) {
       console.warn('Error accessing localStorage:', e);
     }
   }
-  
-  return token ? { 'Authorization': `Bearer ${token}` } : {};
+
+  if (token) {
+    console.log('Using authentication token for request');
+    return { 'Authorization': `Bearer ${token}` };
+  } else {
+    console.warn('No authentication token found');
+    return {};
+  }
+};
+
+/**
+ * Test the database connection directly
+ * @returns {Promise<Object>} - Connection status
+ */
+export const testDatabaseConnection = async () => {
+  try {
+    console.log('Testing database connection...');
+    const response = await fetch('https://clinicmanagementsystem-production-081b.up.railway.app/api/health', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-cache'
+      },
+      cache: 'no-cache'
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      console.log('Database connection test result:', data);
+      return data;
+    } else {
+      console.error('Database connection test failed with status:', response.status);
+      return { status: 'error', message: `HTTP error: ${response.status}` };
+    }
+  } catch (error) {
+    console.error('Database connection test failed:', error);
+    return { status: 'error', message: error.message };
+  }
 };
 
 export default {
   makeApiRequest,
-  getAuthHeaders
+  getAuthHeaders,
+  testDatabaseConnection
 };
