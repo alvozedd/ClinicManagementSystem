@@ -51,8 +51,7 @@ const allowedHeaders = [
 const allowedMethods = ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH', 'HEAD'];
 
 /**
- * Enhanced CORS middleware that ensures headers are set for all responses
- * including error responses
+ * Simplified CORS middleware that allows all origins
  */
 const corsMiddleware = (req, res, next) => {
   const origin = req.headers.origin;
@@ -63,51 +62,20 @@ const corsMiddleware = (req, res, next) => {
   // Set the Vary header to inform caches that the response varies by Origin
   res.header('Vary', 'Origin');
 
-  // Always set these headers for all responses
-  res.header('Access-Control-Allow-Methods', allowedMethods.join(', '));
-  res.header('Access-Control-Allow-Headers', allowedHeaders.join(', '));
-  res.header('Access-Control-Max-Age', '86400'); // 24 hours
-
-  // In development or if ALLOW_ALL_ORIGINS is true, allow all origins
-  if (ALLOW_ALL_ORIGINS) {
-    // For requests with credentials, we must specify the exact origin
-    if (origin) {
-      res.header('Access-Control-Allow-Origin', origin);
-      res.header('Access-Control-Allow-Credentials', 'true');
-    } else {
-      // For requests without origin, use wildcard
-      res.header('Access-Control-Allow-Origin', '*');
-    }
-    console.log('CORS: Development mode - allowing all origins');
-  }
-  // Check if the origin is in our allowed list
-  else if (origin && allowedOrigins.includes(origin)) {
-    // Set CORS headers - never use wildcard with credentials
+  // Always allow all origins
+  if (origin) {
     res.header('Access-Control-Allow-Origin', origin);
-    res.header('Access-Control-Allow-Credentials', 'true');
-
-    // Log CORS headers for debugging
-    console.log(`CORS headers set for allowed origin: ${origin}`);
   } else {
-    // For requests without origin (like curl) or non-allowed origins
-    if (!origin) {
-      console.log('No origin in request, setting minimal CORS headers');
-      // For requests without origin, use wildcard
-      res.header('Access-Control-Allow-Origin', '*');
-    } else {
-      // For non-allowed origins, we'll still set the origin for OPTIONS requests
-      // This helps with browser preflight requests
-      console.log(`Origin not in allowed list: ${origin}, setting CORS headers for OPTIONS requests`);
-      // For better security, we'll only set the origin for OPTIONS requests
-      if (req.method === 'OPTIONS') {
-        res.header('Access-Control-Allow-Origin', origin);
-      } else {
-        // For actual requests, we'll use a wildcard
-        // This allows the preflight to succeed but actual requests will be blocked
-        res.header('Access-Control-Allow-Origin', '*');
-      }
-    }
+    res.header('Access-Control-Allow-Origin', '*');
   }
+
+  // Set credentials to true for all requests
+  res.header('Access-Control-Allow-Credentials', 'true');
+
+  // Set other CORS headers
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.header('Access-Control-Max-Age', '86400'); // 24 hours
 
   // Handle preflight requests
   if (req.method === 'OPTIONS') {
