@@ -78,30 +78,19 @@ const connectDB = async () => {
 // Create Express app
 const app = express();
 
-// Improved CORS configuration
+// Super permissive CORS configuration
 app.use((req, res, next) => {
-  const allowedOrigins = [
-    'https://urohealthltd.netlify.app',
-    'http://localhost:3000',
-    'http://localhost:5173',
-    'https://urohealthcentral.netlify.app',
-    'https://www.urohealthcentral.netlify.app'
-  ];
-
-  const origin = req.headers.origin;
-
-  // Check if the request origin is in our allowed list
-  if (allowedOrigins.includes(origin)) {
-    // Set the specific origin instead of wildcard
-    res.header('Access-Control-Allow-Origin', origin);
-    // Allow credentials
-    res.header('Access-Control-Allow-Credentials', 'true');
-  }
-
+  // Always allow all origins
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Credentials', 'true');
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
 
+  // Log the request for debugging
+  console.log(`CORS request: ${req.method} ${req.path} from origin: ${req.headers.origin || 'unknown'}`);
+
   if (req.method === 'OPTIONS') {
+    console.log('Handling OPTIONS preflight request');
     return res.status(200).end();
   }
 
@@ -129,18 +118,22 @@ app.get('/api/status', (req, res) => {
 // Original API path
 app.post('/api/users/login', (req, res) => {
   try {
-    const { email, password } = req.body;
+    // Support both email and username fields
+    const { email, username, password } = req.body;
+    const userIdentifier = email || username;
 
-    console.log('Login attempt at /api/users/login:', email);
+    console.log('Login attempt at /api/users/login:', userIdentifier);
+    console.log('Request body:', req.body);
 
     // For now, just return a success response with a dummy token
     // This is just to test CORS, not for actual authentication
     res.status(200).json({
       _id: '123456789',
       name: 'Test User',
-      email: email || 'test@example.com',
+      email: userIdentifier || 'test@example.com',
       role: 'doctor',
-      token: 'dummy-jwt-token'
+      token: 'dummy-jwt-token',
+      sessionId: 'dummy-session-id'
     });
   } catch (error) {
     console.error('Login error:', error);
@@ -151,18 +144,22 @@ app.post('/api/users/login', (req, res) => {
 // Path without /api prefix - matching the frontend request
 app.post('/users/login', (req, res) => {
   try {
-    const { email, password } = req.body;
+    // Support both email and username fields
+    const { email, username, password } = req.body;
+    const userIdentifier = email || username;
 
-    console.log('Login attempt at /users/login:', email);
+    console.log('Login attempt at /users/login:', userIdentifier);
+    console.log('Request body:', req.body);
 
     // For now, just return a success response with a dummy token
     // This is just to test CORS, not for actual authentication
     res.status(200).json({
       _id: '123456789',
       name: 'Test User',
-      email: email || 'test@example.com',
+      email: userIdentifier || 'test@example.com',
       role: 'doctor',
-      token: 'dummy-jwt-token'
+      token: 'dummy-jwt-token',
+      sessionId: 'dummy-session-id'
     });
   } catch (error) {
     console.error('Login error:', error);
