@@ -160,7 +160,9 @@ const DraggableAppointments = ({ role }) => {
               isCompleted ? 'completed-appointment' : ''
             } ${appointment.createdBy === 'visitor' ? 'visitor-appointment' : ''}`}
           >
-            <div className="ticket-number">{appointment.ticketNumber}</div>
+            {appointment.status === 'Scheduled' && (
+              <div className="ticket-number">{appointment.ticketNumber}</div>
+            )}
             <div className="appointment-grip" {...provided.dragHandleProps}>
               <FaGripVertical />
             </div>

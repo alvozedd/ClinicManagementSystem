@@ -465,9 +465,9 @@ body.dark-mode {
 .badge {
   display: inline-flex;
   align-items: center;
-  padding: 0.25rem 0.5rem;
+  padding: 0.15rem 0.4rem;
   border-radius: 9999px;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 500;
 }
 
@@ -527,8 +527,8 @@ body.dark-mode {
 .queue-item, .appointment-card {
   display: flex;
   align-items: center;
-  padding: 0.75rem;
-  margin-bottom: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 0.25rem;
   background-color: var(--bg-card);
   border-radius: 0.375rem;
   box-shadow: var(--card-shadow);
@@ -546,13 +546,14 @@ body.dark-mode {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 2rem;
-  height: 2rem;
+  width: 1.75rem;
+  height: 1.75rem;
   background-color: #3b82f6;
   color: white;
   border-radius: 9999px;
   font-weight: 600;
   margin-right: 0.75rem;
+  font-size: 0.875rem;
 }
 
 .queue-grip, .appointment-grip {
@@ -568,15 +569,16 @@ body.dark-mode {
 .queue-patient-name, .appointment-patient-name {
   font-weight: 500;
   color: var(--text-primary);
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.125rem;
+  font-size: 0.95rem;
 }
 
 .queue-patient-info, .appointment-info {
   display: flex;
-  gap: 1rem;
-  font-size: 0.875rem;
+  gap: 0.75rem;
+  font-size: 0.8rem;
   color: var(--text-secondary);
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.125rem;
 }
 
 .queue-appointment-info {
@@ -642,7 +644,7 @@ body.dark-mode {
 .appointments-list {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.25rem;
 }
 
 .appointment-item {
