@@ -287,8 +287,13 @@ const AppointmentManagement = ({ role }) => {
     }
   });
 
-  // Sort appointments by date (most recent first)
+  // Sort appointments by status (completed at the bottom) and then by date (most recent first)
   const sortedAppointments = [...filteredAppointments].sort((a, b) => {
+    // First, sort by completion status (completed appointments at the bottom)
+    if (a.status === 'Completed' && b.status !== 'Completed') return 1;
+    if (a.status !== 'Completed' && b.status === 'Completed') return -1;
+
+    // Then sort by date (most recent first) for appointments with the same status
     return new Date(b.appointment_date) - new Date(a.appointment_date);
   });
 
@@ -467,10 +472,21 @@ const AppointmentManagement = ({ role }) => {
 
   // Render Today's Appointments in Card or List View
   const renderTodayAppointments = () => {
-    const todayAppointments = sortedAppointments.filter(appointment => {
+    // Filter for today's appointments
+    const todayAppointmentsUnsorted = appointments.filter(appointment => {
       const appointmentDate = new Date(appointment.appointment_date);
       const today = new Date();
       return appointmentDate.toDateString() === today.toDateString();
+    });
+
+    // Sort today's appointments with completed ones at the bottom
+    const todayAppointments = [...todayAppointmentsUnsorted].sort((a, b) => {
+      // First, sort by completion status (completed appointments at the bottom)
+      if (a.status === 'Completed' && b.status !== 'Completed') return 1;
+      if (a.status !== 'Completed' && b.status === 'Completed') return -1;
+
+      // Then sort by date (most recent first) for appointments with the same status
+      return new Date(b.appointment_date) - new Date(a.appointment_date);
     });
 
     if (todayAppointments.length === 0) {

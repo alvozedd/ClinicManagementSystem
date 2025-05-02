@@ -47,9 +47,15 @@ const DashboardLayout = ({ children, activeTab, setActiveTab, role }) => {
 
   const navItems = getNavItems();
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
+  const handleLogout = async () => {
+    // Show a loading indicator or disable the button if needed
+    // This prevents multiple clicks during the logout process
+
+    // Call the logout function from context
+    // The context's logout function will handle the redirection
+    await logout();
+
+    // No need to navigate here as the context will handle it
   };
 
   const toggleMenu = () => {

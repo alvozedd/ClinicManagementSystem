@@ -122,16 +122,14 @@ export const AuthProvider = ({ children }) => {
       const sessionId = authUtils.getSessionId();
       console.log('Session ID for logout:', sessionId ? 'Found' : 'Not found');
 
-      // First, clear all client-side storage to ensure immediate logout effect
-      authUtils.clearUserData();
+      // Prepare for redirection
+      const redirectToLogin = () => {
+        console.log('Redirecting to login page');
+        // Use replace instead of href to avoid adding to browser history
+        window.location.replace('/login');
+      };
 
-      // Update state
-      setUserInfo(null);
-
-      console.log('All storage cleared, now calling logout API');
-
-      // Then call the API to logout (revoke refresh token)
-      // Even if this fails, the user is already logged out on the client side
+      // First, call the API to logout (revoke refresh token)
       try {
         await apiService.logout(sessionId);
         console.log('Server-side logout successful');
@@ -139,18 +137,28 @@ export const AuthProvider = ({ children }) => {
         console.warn('Server-side logout failed, but continuing with client-side logout:', apiError);
       }
 
-      console.log('User logged out successfully, redirecting to login page');
+      // Clear all client-side storage to ensure immediate logout effect
+      authUtils.clearUserData();
 
-      // Force a full page reload to ensure all React state is reset
-      window.location.href = '/login';
+      // Update state
+      setUserInfo(null);
+
+      console.log('User logged out successfully');
+
+      // Use a small timeout to avoid the flashing issue
+      // This allows React to process the state change before redirecting
+      setTimeout(redirectToLogin, 50);
     } catch (error) {
       console.error('Error during logout:', error);
 
       // Ensure all storage is cleared even if there was an error
       authUtils.clearUserData();
+      setUserInfo(null);
 
-      // Force a full page reload to ensure all React state is reset
-      window.location.href = '/login';
+      // Redirect with a small delay
+      setTimeout(() => {
+        window.location.replace('/login');
+      }, 50);
     }
   };
 

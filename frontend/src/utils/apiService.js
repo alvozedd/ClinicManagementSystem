@@ -229,12 +229,7 @@ const apiService = {
     try {
       console.log('Calling logout API with sessionId:', sessionId ? 'Present' : 'Not present');
 
-      // First, clear all client-side storage to ensure immediate logout effect
-      authUtils.clearUserData();
-
-      console.log('Local storage cleared, now calling logout API');
-
-      // Use makeApiRequest to try multiple endpoints
+      // Call the API first, before clearing storage
       try {
         const logoutData = await makeApiRequest('/users/logout', {
           method: 'POST',
@@ -246,12 +241,11 @@ const apiService = {
         return logoutData;
       } catch (error) {
         console.warn('Logout API call failed:', error);
-        // Even if the server-side logout fails, we've already cleared local storage
+        // Continue even if the server-side logout fails
         return { success: true, message: 'Logged out (client-side only)' };
       }
     } catch (error) {
       console.error('Error during logout process:', error);
-      // Return success anyway since we've already cleared local storage
       return { success: true, message: 'Logged out (client-side only)' };
     }
   },
