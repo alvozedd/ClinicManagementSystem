@@ -369,11 +369,68 @@ const validateIntegratedAppointmentCreation = (req, res, next) => {
 
 // Queue reordering validation has been removed
 
+// Validation middleware for note creation/update
+const validateNoteCreation = (req, res, next) => {
+  const { patient_id, title, content, category, tags, is_private } = req.body;
+  const errors = [];
+
+  // Validate patient_id
+  if (!patient_id) {
+    errors.push('Patient ID is required');
+  } else if (!patient_id.match(/^[0-9a-fA-F]{24}$/)) {
+    errors.push('Invalid patient ID format');
+  }
+
+  // Validate title
+  if (!title || title.trim() === '') {
+    errors.push('Title is required');
+  } else if (title.length > 200) {
+    errors.push('Title must be less than 200 characters');
+  }
+
+  // Validate content
+  if (!content || content.trim() === '') {
+    errors.push('Content is required');
+  } else if (content.length > 5000) {
+    errors.push('Content must be less than 5000 characters');
+  }
+
+  // Validate category if provided
+  if (category && !['General', 'Medication', 'Lab Result', 'Procedure', 'Follow-up', 'Other'].includes(category)) {
+    errors.push('Category must be General, Medication, Lab Result, Procedure, Follow-up, or Other');
+  }
+
+  // Validate tags if provided
+  if (tags && !Array.isArray(tags)) {
+    errors.push('Tags must be an array');
+  }
+
+  // Validate is_private if provided
+  if (is_private !== undefined && typeof is_private !== 'boolean') {
+    errors.push('is_private must be a boolean');
+  }
+
+  // If there are validation errors, return them
+  if (errors.length > 0) {
+    return res.status(400).json({ errors });
+  }
+
+  // Sanitize inputs
+  req.body.title = sanitizeString(title);
+  req.body.content = sanitizeString(content);
+  if (tags && Array.isArray(tags)) {
+    req.body.tags = tags.map(tag => sanitizeString(tag));
+  }
+
+  next();
+};
+
 module.exports = {
   validateUserRegistration,
   validateUserLogin,
   validatePatientCreation,
   validateAppointmentCreation,
   validateDiagnosisCreation,
-  validateIntegratedAppointmentCreation
+  validateIntegratedAppointmentCreation,
+  validateNoteCreation
 };

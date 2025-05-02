@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react';
 import { FaUserPlus, FaSearch, FaEdit, FaTrash, FaArrowLeft, FaPhone, FaEnvelope, FaFileMedical, FaCalendarAlt, FaThLarge, FaList } from 'react-icons/fa';
 import apiService from '../../utils/apiService';
-import Modal from '../common/Modal';
-import PatientForm from './PatientForm';
 import PatientView from './PatientView';
 import './DashboardStyles.css';
 
@@ -307,14 +305,13 @@ const PatientManagement = ({ role, selectedPatient, onSelectPatient, onBackToPat
     if (!selectedPatient) return null;
 
     return (
-      <PatientView
-        patient={selectedPatient}
-        onBackToPatients={onBackToPatients}
-      />
-    );
-  };
+      <div>
+        <PatientView
+          patient={selectedPatient}
+          onBackToPatients={onBackToPatients}
+        />
 
-  {role === 'doctor' && (
+        {role === 'doctor' && (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
               <div className="glass-card p-4 rounded-lg">

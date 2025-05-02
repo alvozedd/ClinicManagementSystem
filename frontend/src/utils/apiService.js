@@ -1027,6 +1027,116 @@ const apiService = {
     return handleResponse(response);
   },
 
+  // Notes endpoints
+  getNotes: async (filters = {}) => {
+    // Build query string from filters
+    const queryParams = new URLSearchParams();
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value) queryParams.append(key, value);
+    });
+
+    const queryString = queryParams.toString() ? `?${queryParams.toString()}` : '';
+
+    const response = await fetch(`${API_URL}/notes${queryString}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        ...authHeader(),
+      },
+    });
+    return handleResponse(response);
+  },
+
+  getNotesByPatientId: async (patientId) => {
+    const response = await fetch(`${API_URL}/notes/patient/${patientId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        ...authHeader(),
+      },
+    });
+    return handleResponse(response);
+  },
+
+  getNotesByAppointmentId: async (appointmentId) => {
+    const response = await fetch(`${API_URL}/notes/appointment/${appointmentId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        ...authHeader(),
+      },
+    });
+    return handleResponse(response);
+  },
+
+  getNoteById: async (noteId) => {
+    const response = await fetch(`${API_URL}/notes/${noteId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        ...authHeader(),
+      },
+    });
+    return handleResponse(response);
+  },
+
+  createNote: async (noteData) => {
+    const response = await fetch(`${API_URL}/notes`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...authHeader(),
+      },
+      body: JSON.stringify(noteData),
+    });
+    return handleResponse(response);
+  },
+
+  updateNote: async (noteId, noteData) => {
+    const response = await fetch(`${API_URL}/notes/${noteId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        ...authHeader(),
+      },
+      body: JSON.stringify(noteData),
+    });
+    return handleResponse(response);
+  },
+
+  deleteNote: async (noteId) => {
+    const response = await fetch(`${API_URL}/notes/${noteId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        ...authHeader(),
+      },
+    });
+    return handleResponse(response);
+  },
+
+  uploadNoteAttachment: async (noteId, formData) => {
+    const response = await fetch(`${API_URL}/notes/${noteId}/attachments`, {
+      method: 'POST',
+      headers: {
+        ...authHeader(),
+      },
+      body: formData,
+    });
+    return handleResponse(response);
+  },
+
+  deleteNoteAttachment: async (noteId, filename) => {
+    const response = await fetch(`${API_URL}/notes/${noteId}/attachments/${filename}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        ...authHeader(),
+      },
+    });
+    return handleResponse(response);
+  },
+
   getDiagnosisByAppointmentId: async (appointmentId) => {
     const response = await fetch(`${API_URL}/diagnoses/appointment/${appointmentId}`, {
       method: 'GET',
