@@ -10,6 +10,7 @@ const { addRequestId } = require('./middleware/requestIdMiddleware');
 const { conditionalRequestLogger } = require('./middleware/requestLoggingMiddleware');
 const { corsMiddleware, allowedHeaders, allowedMethods } = require('./middleware/corsMiddleware');
 const { checkRequiredEnvVars } = require('./utils/checkEnv');
+const ensureDirectories = require('./utils/ensureDirectories');
 const userRoutes = require('./routes/userRoutes');
 const patientRoutes = require('./routes/patientRoutes');
 const appointmentRoutes = require('./routes/appointmentRoutes');
@@ -35,6 +36,9 @@ if (process.env.NODE_ENV === 'production') {
 
 // Check required environment variables
 checkRequiredEnvVars();
+
+// Ensure required directories exist
+ensureDirectories();
 
 // Connect to MongoDB
 connectDB();
