@@ -1,0 +1,100 @@
+/* Mobile Button Fixes */
+
+/* Fix for buttons in appointment cards on mobile */
+@media (max-width: 640px) {
+  /* Improve appointment card layout on mobile */
+  .appointment-card {
+    flex-wrap: wrap;
+    padding: 0.75rem;
+    gap: 0.5rem;
+  }
+
+  /* Make the appointment content take full width */
+  .appointment-content {
+    width: 100%;
+    order: 1;
+  }
+
+  /* Position the grip and ticket number */
+  .appointment-grip {
+    order: 0;
+    margin-right: 0.5rem;
+  }
+
+  .ticket-number {
+    order: 0;
+  }
+
+  /* Position the status badge */
+  .appointment-status {
+    order: 2;
+    margin-right: 0;
+    margin-left: auto;
+  }
+
+  /* Fix the action buttons container */
+  .appointment-actions {
+    width: 100%;
+    order: 3;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  /* Make buttons larger and more tappable */
+  .btn-icon {
+    width: 2.75rem;
+    height: 2.75rem;
+    border-width: 2px;
+  }
+
+  /* Ensure buttons don't get cut off */
+  .btn-icon svg {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  /* Add more contrast to buttons */
+  .btn-complete {
+    border-color: #10b981;
+    background-color: rgba(16, 185, 129, 0.15);
+  }
+
+  .btn-edit {
+    border-color: #3b82f6;
+    background-color: rgba(59, 130, 246, 0.15);
+  }
+
+  .btn-notes {
+    border-color: #8b5cf6;
+    background-color: rgba(139, 92, 246, 0.15);
+  }
+
+  .btn-up, .btn-down {
+    border-color: #3b82f6;
+    background-color: rgba(59, 130, 246, 0.15);
+  }
+
+  /* Dark mode adjustments */
+  :root.dark-mode .btn-complete {
+    border-color: #34d399;
+    background-color: rgba(52, 211, 153, 0.25);
+  }
+
+  :root.dark-mode .btn-edit {
+    border-color: #60a5fa;
+    background-color: rgba(96, 165, 250, 0.25);
+  }
+
+  :root.dark-mode .btn-notes {
+    border-color: #a78bfa;
+    background-color: rgba(167, 139, 250, 0.25);
+  }
+
+  :root.dark-mode .btn-up, :root.dark-mode .btn-down {
+    border-color: #60a5fa;
+    background-color: rgba(96, 165, 250, 0.25);
+  }
+}

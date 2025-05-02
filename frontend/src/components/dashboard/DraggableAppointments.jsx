@@ -491,6 +491,7 @@ const DraggableAppointments = ({ role }) => {
                     className="btn-icon btn-complete"
                     onClick={() => handleCompleteAppointment(appointment._id)}
                     title="Complete"
+                    aria-label="Complete appointment"
                   >
                     <FaCheck />
                   </button>
@@ -498,6 +499,7 @@ const DraggableAppointments = ({ role }) => {
                     className="btn-icon btn-up"
                     onClick={() => moveAppointmentUp(index)}
                     title="Move Up"
+                    aria-label="Move appointment up"
                     disabled={index === 0}
                   >
                     <FaArrowUp />
@@ -506,6 +508,7 @@ const DraggableAppointments = ({ role }) => {
                     className="btn-icon btn-down"
                     onClick={() => moveAppointmentDown(index)}
                     title="Move Down"
+                    aria-label="Move appointment down"
                     disabled={index === appointments.length - 1}
                   >
                     <FaArrowDown />
@@ -516,6 +519,7 @@ const DraggableAppointments = ({ role }) => {
                 className="btn-icon btn-edit"
                 onClick={() => handleEditAppointment(appointment._id)}
                 title="Edit"
+                aria-label="Edit appointment"
               >
                 <FaEdit />
               </button>
@@ -524,6 +528,7 @@ const DraggableAppointments = ({ role }) => {
                   className="btn-icon btn-notes"
                   onClick={() => handleAddNotes(appointment._id)}
                   title="Add Notes"
+                  aria-label="Add notes to appointment"
                 >
                   <FaNotesMedical />
                 </button>

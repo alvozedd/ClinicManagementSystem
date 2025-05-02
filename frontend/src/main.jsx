@@ -5,6 +5,7 @@ import './index.css'
 import './styles/mobileResponsive.css'
 import './styles/buttonFixes.css' // Import button fixes
 import './styles/buttonStyleFixes.css' // Import specific button style fixes
+import './styles/mobileButtonFixes.css' // Import mobile button fixes
 import './styles/darkMode.css' // Import dark mode styles
 import App from './App.jsx'
 import { AuthProvider } from './context/AuthContext'
