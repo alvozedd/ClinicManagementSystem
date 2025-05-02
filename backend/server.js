@@ -827,10 +827,41 @@ app.post('/queue/reset', addCorsHeaders, (req, res) => {
   protect(req, res, () => doctorOrSecretary(req, res, () => resetQueue(req, res)));
 });
 
-// Root route
+// Root route and health check routes
 app.get('/', (req, res) => {
+  // Set CORS headers explicitly for this route
+  const origin = req.headers.origin;
+  if (origin) {
+    res.header('Access-Control-Allow-Origin', origin);
+    res.header('Access-Control-Allow-Credentials', 'true');
+  }
   res.send('API is running...');
 });
+
+// Import health controller
+const { checkHealth } = require('./controllers/healthController');
+
+// Health check endpoint
+app.get('/health', (req, res, next) => {
+  // Set CORS headers explicitly for this route
+  const origin = req.headers.origin;
+  if (origin) {
+    res.header('Access-Control-Allow-Origin', origin);
+    res.header('Access-Control-Allow-Credentials', 'true');
+  }
+  next();
+}, checkHealth);
+
+// API health check endpoint
+app.get('/api/health', (req, res, next) => {
+  // Set CORS headers explicitly for this route
+  const origin = req.headers.origin;
+  if (origin) {
+    res.header('Access-Control-Allow-Origin', origin);
+    res.header('Access-Control-Allow-Credentials', 'true');
+  }
+  next();
+}, checkHealth);
 
 // Error handling middleware
 app.use(notFound);

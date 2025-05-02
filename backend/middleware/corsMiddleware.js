@@ -27,6 +27,11 @@ const ALLOW_ALL_ORIGINS = true;
 // Debug flag to log detailed CORS information
 const DEBUG_CORS = true;
 
+// Add Netlify deployment URL to allowed origins
+if (!allowedOrigins.includes('https://urohealthltd.netlify.app')) {
+  allowedOrigins.push('https://urohealthltd.netlify.app');
+}
+
 // Comprehensive list of headers to allow
 const allowedHeaders = [
   'Origin',
@@ -91,6 +96,9 @@ const corsMiddleware = (req, res, next) => {
   res.header('Access-Control-Allow-Methods', allowedMethods.join(', '));
   res.header('Access-Control-Allow-Headers', allowedHeaders.join(', '));
   res.header('Access-Control-Max-Age', '86400'); // 24 hours
+
+  // Add additional headers to help with CORS issues
+  res.header('Access-Control-Expose-Headers', 'Content-Length, X-Request-Id');
 
   // Handle preflight requests
   if (req.method === 'OPTIONS') {

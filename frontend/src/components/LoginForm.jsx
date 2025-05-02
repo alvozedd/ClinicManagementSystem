@@ -113,11 +113,17 @@ function LoginForm() {
           console.log('Approach 3: Direct fetch to Railway backend');
           const response = await fetch('https://clinicmanagementsystem-production-081b.up.railway.app/users/login', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+              'Content-Type': 'application/json',
+              'Cache-Control': 'no-cache, no-store, must-revalidate',
+              'Pragma': 'no-cache',
+              'Expires': '0'
+            },
             body: JSON.stringify({ username, password }),
             // Include credentials for proper authentication
             credentials: 'include',
-            mode: 'cors'
+            mode: 'cors',
+            cache: 'no-cache'
           });
 
           if (response.ok) {

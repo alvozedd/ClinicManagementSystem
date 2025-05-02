@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/userModel');
+const { checkHealth } = require('../controllers/healthController');
 
 // @route   GET /test-users
 // @desc    Get test users for login
@@ -13,7 +14,7 @@ router.get('/test-users', async (req, res) => {
       { username: 'doctor', role: 'doctor', password: 'doctor123' },
       { username: 'secretary', role: 'secretary', password: 'secretary123' }
     ];
-    
+
     res.json(testUsers);
   } catch (error) {
     console.error('Error fetching test users:', error);
@@ -24,26 +25,6 @@ router.get('/test-users', async (req, res) => {
 // @route   GET /health
 // @desc    Health check endpoint
 // @access  Public
-router.get('/health', async (req, res) => {
-  try {
-    // Check if we can connect to the database
-    const count = await User.countDocuments().limit(1);
-    
-    res.json({
-      status: 'ok',
-      message: 'Server is running',
-      database: 'connected',
-      timestamp: new Date().toISOString()
-    });
-  } catch (error) {
-    console.error('Health check failed:', error);
-    res.status(500).json({
-      status: 'error',
-      message: 'Server is running but database connection failed',
-      error: error.message,
-      timestamp: new Date().toISOString()
-    });
-  }
-});
+router.get('/health', checkHealth);
 
 module.exports = router;

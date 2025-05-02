@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import apiUtils from '../utils/apiUtils';
+import { testDatabaseConnection } from '../utils/apiUtils';
 import './HealthCheck.css';
 
 const HealthCheck = () => {
@@ -11,7 +11,7 @@ const HealthCheck = () => {
     const checkHealth = async () => {
       try {
         setLoading(true);
-        const result = await apiUtils.testDatabaseConnection();
+        const result = await testDatabaseConnection();
         setHealthStatus(result);
         setError(null);
       } catch (err) {
@@ -28,7 +28,7 @@ const HealthCheck = () => {
   const handleRetry = () => {
     setLoading(true);
     setError(null);
-    apiUtils.testDatabaseConnection()
+    testDatabaseConnection()
       .then(result => {
         setHealthStatus(result);
       })

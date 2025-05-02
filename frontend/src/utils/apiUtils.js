@@ -121,6 +121,8 @@ export const testDatabaseConnection = async () => {
         'Content-Type': 'application/json',
         'Cache-Control': 'no-cache'
       },
+      mode: 'cors',
+      credentials: 'include',
       cache: 'no-cache'
     });
 
