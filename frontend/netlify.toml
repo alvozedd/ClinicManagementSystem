@@ -3,7 +3,33 @@
   publish = "dist"
   command = "npm run build"
 
+# Environment variables for build
+[build.environment]
+  # Increase Node memory limit for build
+  NODE_OPTIONS = "--max_old_space_size=4096"
+  # Add VITE_SKIP_PREFLIGHT_CHECK to avoid issues with ESLint
+  VITE_SKIP_PREFLIGHT_CHECK = "true"
+
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
+
+# Post-processing settings
+[build.processing]
+  skip_processing = false
+
+# Asset optimization
+[build.processing.css]
+  bundle = true
+  minify = true
+
+[build.processing.js]
+  bundle = true
+  minify = true
+
+[build.processing.html]
+  pretty_urls = true
+
+[build.processing.images]
+  compress = true

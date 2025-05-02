@@ -1,21 +1,61 @@
-import React, { useState } from 'react';
-import { Document, Page, pdfjs } from 'react-pdf';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { FaArrowLeft, FaArrowRight, FaDownload, FaTimes } from 'react-icons/fa';
 import Spinner from './Spinner';
+import PDFViewerFallback from './PDFViewerFallback';
+import ErrorBoundary from './ErrorBoundary';
 
-// Set up the worker for PDF.js
-pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+// Dynamically import react-pdf to avoid build issues
+const PDFModule = lazy(() => import('react-pdf'));
+
+// Create a component that will load the PDF components
+const PDFRenderer = ({ fileUrl, pageNumber, onDocumentLoadSuccess, onDocumentLoadError }) => {
+  const [pdfjs, setPdfjs] = useState(null);
+
+  useEffect(() => {
+    // Dynamically import pdfjs
+    import('react-pdf').then((pdf) => {
+      // Set up the worker for PDF.js
+      pdf.pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdf.pdfjs.version}/pdf.worker.min.js`;
+      setPdfjs(pdf);
+    });
+  }, []);
+
+  if (!pdfjs) return <Spinner />;
+
+  const { Document, Page } = pdfjs;
+
+  return (
+    <Document
+      file={fileUrl}
+      onLoadSuccess={onDocumentLoadSuccess}
+      onLoadError={onDocumentLoadError}
+      loading={<Spinner />}
+      className="flex justify-center"
+    >
+      <Page
+        pageNumber={pageNumber}
+        renderTextLayer={false}
+        renderAnnotationLayer={false}
+        className="shadow-md"
+        scale={1.2}
+      />
+    </Document>
+  );
+};
 
 const PDFViewer = ({ fileUrl, fileName, onClose }) => {
   const [numPages, setNumPages] = useState(null);
   const [pageNumber, setPageNumber] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [loadFailed, setLoadFailed] = useState(false);
 
   // Handle document load success
   const onDocumentLoadSuccess = ({ numPages }) => {
     setNumPages(numPages);
     setLoading(false);
+    setError(null);
+    setLoadFailed(false);
   };
 
   // Handle document load error
@@ -23,6 +63,12 @@ const PDFViewer = ({ fileUrl, fileName, onClose }) => {
     console.error('Error loading PDF:', error);
     setError('Failed to load PDF. Please try downloading the file instead.');
     setLoading(false);
+    setLoadFailed(true);
+  };
+
+  // If the PDF viewer fails to load, show the fallback component
+  if (loadFailed) {
+    return <PDFViewerFallback fileUrl={fileUrl} fileName={fileName} onClose={onClose} />;
   };
 
   // Navigate to previous page
@@ -87,21 +133,16 @@ const PDFViewer = ({ fileUrl, fileName, onClose }) => {
             </div>
           )}
 
-          <Document
-            file={fileUrl}
-            onLoadSuccess={onDocumentLoadSuccess}
-            onLoadError={onDocumentLoadError}
-            loading={<Spinner />}
-            className="flex justify-center"
-          >
-            <Page
-              pageNumber={pageNumber}
-              renderTextLayer={false}
-              renderAnnotationLayer={false}
-              className="shadow-md"
-              scale={1.2}
-            />
-          </Document>
+          <Suspense fallback={<Spinner />}>
+            <ErrorBoundary fallback={<PDFViewerFallback fileUrl={fileUrl} fileName={fileName} onClose={onClose} />}>
+              <PDFRenderer
+                fileUrl={fileUrl}
+                pageNumber={pageNumber}
+                onDocumentLoadSuccess={onDocumentLoadSuccess}
+                onDocumentLoadError={onDocumentLoadError}
+              />
+            </ErrorBoundary>
+          </Suspense>
         </div>
 
         {/* Footer with pagination */}
