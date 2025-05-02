@@ -6,9 +6,9 @@ This document outlines planned improvements for the UroHealth Clinic Management 
 
 ### Search Field Spacing
 - **Issue**: The search icon and placeholder text are overlapping in search fields
-- **Solution**: 
+- **Solution**:
   - Increase left padding in search input fields from `pl-12` to `pl-14`
-  - Move search icon position from `left-4` to `left-5` 
+  - Move search icon position from `left-4` to `left-5`
   - Add more spacing between the icon and placeholder text
 
 ### Patient Gender Indicators
@@ -31,8 +31,8 @@ This document outlines planned improvements for the UroHealth Clinic Management 
   - Implement with a new CSS class:
     ```css
     .visitor-appointment {
-      background-color: #F0F7FF;
-      border-left: 3px solid #3B82F6;
+      background-color: rgba(253, 230, 138, 0.2); /* Subtle light yellow */
+      border-left: 3px solid #F59E0B; /* Amber/yellow border */
     }
     ```
   - Apply this class conditionally based on `createdBy === 'visitor'`
@@ -127,8 +127,8 @@ This document outlines planned improvements for the UroHealth Clinic Management 
   {filteredPatients.length > 0 && (
     <div className="patient-search-results">
       {filteredPatients.map(patient => (
-        <div 
-          key={patient._id} 
+        <div
+          key={patient._id}
           className="patient-search-item"
           onClick={() => selectPatient(patient)}
         >
