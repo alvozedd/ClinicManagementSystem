@@ -78,6 +78,7 @@ const NotesManagement = () => {
       if (!data || data.length === 0) {
         console.log('No appointments found');
         setError('No appointments found. Please create an appointment first.');
+        setAppointments([]);
         return [];
       }
 
@@ -89,10 +90,12 @@ const NotesManagement = () => {
       }));
 
       setAppointments(appointmentsWithEligibility);
+      setError(null); // Clear any previous errors
       return appointmentsWithEligibility;
     } catch (err) {
       console.error('Error fetching appointments:', err);
       setError('Failed to load appointments. Please try again.');
+      setAppointments([]);
       return [];
     }
   };
@@ -185,8 +188,8 @@ const NotesManagement = () => {
     if (!appointment) {
       try {
         // Refresh appointments list to make sure we have the latest data
-        await fetchAppointments();
-        appointment = appointments.find(app => app._id === appointmentId);
+        const refreshedAppointments = await fetchAppointments();
+        appointment = refreshedAppointments.find(app => app._id === appointmentId);
       } catch (err) {
         console.error('Error refreshing appointments:', err);
       }
@@ -213,6 +216,8 @@ const NotesManagement = () => {
     });
     setSelectedFile(null);
     setShowAddModal(true);
+    // Clear any previous error
+    setError(null);
   };
 
   const handleEditNote = (note) => {
@@ -455,37 +460,37 @@ const NotesManagement = () => {
           <div key={note._id} className="dashboard-card p-4">
             <div className="flex items-start justify-between">
               <div>
-                <h3 className="font-semibold text-gray-800 dark:text-gray-100">
+                <h3 className="font-semibold text-gray-800 dark:text-white">
                   {note.appointment_id && getPatientName(note.appointment_id)}
                 </h3>
-                <p className="text-sm text-gray-500 dark:text-gray-300">{formatDate(note.createdAt)}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-200">{formatDate(note.createdAt)}</p>
               </div>
               <div className="flex space-x-2">
                 <button
                   onClick={() => handleEditNote(note)}
-                  className="text-blue-600 hover:text-blue-800"
+                  className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
                 >
                   <FaEdit />
                 </button>
                 <button
                   onClick={() => handleDeleteNote(note._id)}
-                  className="text-red-600 hover:text-red-800"
+                  className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
                 >
                   <FaTrash />
                 </button>
               </div>
             </div>
             <div className="mt-3">
-              <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-3">
+              <p className="text-sm text-gray-600 dark:text-white line-clamp-3">
                 {note.diagnosis_text}
               </p>
             </div>
             {note.diagnosis && note.diagnosis.medications && note.diagnosis.medications.length > 0 && (
               <div className="mt-2">
-                <p className="text-xs font-medium text-gray-700 dark:text-gray-200">Medications:</p>
+                <p className="text-xs font-medium text-gray-700 dark:text-white">Medications:</p>
                 <div className="flex flex-wrap gap-1 mt-1">
                   {note.diagnosis.medications.map((med, index) => (
-                    <span key={index} className="badge badge-blue text-xs">
+                    <span key={index} className="badge badge-blue text-xs dark:bg-blue-700 dark:text-white">
                       {med.name}
                     </span>
                   ))}
@@ -498,8 +503,26 @@ const NotesManagement = () => {
     );
   };
 
+  // State for appointment search in modal
+  const [appointmentSearchTerm, setAppointmentSearchTerm] = useState('');
+
+  // Filter appointments based on search term
+  const getFilteredAppointments = () => {
+    if (!appointmentSearchTerm) return appointments;
+
+    return appointments.filter(appointment => {
+      const patientName = getPatientName(appointment).toLowerCase();
+      const appointmentDate = new Date(appointment.appointment_date).toLocaleDateString().toLowerCase();
+      const searchLower = appointmentSearchTerm.toLowerCase();
+
+      return patientName.includes(searchLower) || appointmentDate.includes(searchLower);
+    });
+  };
+
   // Add Note Modal
   const renderAddNoteModal = () => {
+    const filteredAppointments = getFilteredAppointments();
+
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto border dark:border-gray-700">
@@ -508,6 +531,21 @@ const NotesManagement = () => {
           <form onSubmit={submitAddNote}>
             <div className="form-group">
               <label className="form-label dark:text-gray-200">Appointment*</label>
+
+              {/* Appointment search input */}
+              <div className="search-input-container mb-2">
+                <input
+                  type="text"
+                  placeholder="Search appointments by patient name or date..."
+                  value={appointmentSearchTerm}
+                  onChange={(e) => setAppointmentSearchTerm(e.target.value)}
+                  className="form-input"
+                />
+                <span className="search-icon">
+                  <FaSearch />
+                </span>
+              </div>
+
               <select
                 name="appointment_id"
                 value={formData.appointment_id}
@@ -516,7 +554,7 @@ const NotesManagement = () => {
                 required
               >
                 <option value="">Select Appointment</option>
-                {appointments.map(appointment => (
+                {filteredAppointments.map(appointment => (
                   <option
                     key={appointment._id}
                     value={appointment._id}
