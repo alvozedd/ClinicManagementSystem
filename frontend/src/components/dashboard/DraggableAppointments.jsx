@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import { FaGripVertical, FaCheck, FaTimes, FaEdit, FaNotesMedical } from 'react-icons/fa';
+import { FaGripVertical, FaCheck, FaTimes, FaEdit, FaNotesMedical, FaArrowUp, FaArrowDown } from 'react-icons/fa';
 import apiService from '../../utils/apiService';
 import './DashboardStyles.css';
 
@@ -176,6 +176,90 @@ const DraggableAppointments = ({ role }) => {
     window.location.href = `${currentPath}?tab=notes`;
   };
 
+  // Move appointment up in the list
+  const moveAppointmentUp = async (index) => {
+    if (index <= 0) return; // Already at the top
+
+    try {
+      // Create a copy of the appointments array
+      const newAppointments = Array.from(appointments);
+
+      // Swap the appointment with the one above it
+      [newAppointments[index], newAppointments[index - 1]] =
+      [newAppointments[index - 1], newAppointments[index]];
+
+      // Update ticket numbers for scheduled appointments
+      let ticketCounter = 1;
+      const updatedAppointments = newAppointments.map(appointment => {
+        if (appointment.status === 'Scheduled') {
+          return {
+            ...appointment,
+            ticketNumber: ticketCounter++
+          };
+        }
+        return {
+          ...appointment,
+          ticketNumber: null
+        };
+      });
+
+      setAppointments(updatedAppointments);
+
+      // Save the new order to the backend
+      const orderData = updatedAppointments.map((appointment, idx) => ({
+        id: appointment._id,
+        position: idx + 1
+      }));
+
+      await apiService.reorderAppointments(orderData);
+    } catch (err) {
+      console.error('Error moving appointment up:', err);
+      setError('Failed to reorder appointments. Please try again.');
+    }
+  };
+
+  // Move appointment down in the list
+  const moveAppointmentDown = async (index) => {
+    if (index >= appointments.length - 1) return; // Already at the bottom
+
+    try {
+      // Create a copy of the appointments array
+      const newAppointments = Array.from(appointments);
+
+      // Swap the appointment with the one below it
+      [newAppointments[index], newAppointments[index + 1]] =
+      [newAppointments[index + 1], newAppointments[index]];
+
+      // Update ticket numbers for scheduled appointments
+      let ticketCounter = 1;
+      const updatedAppointments = newAppointments.map(appointment => {
+        if (appointment.status === 'Scheduled') {
+          return {
+            ...appointment,
+            ticketNumber: ticketCounter++
+          };
+        }
+        return {
+          ...appointment,
+          ticketNumber: null
+        };
+      });
+
+      setAppointments(updatedAppointments);
+
+      // Save the new order to the backend
+      const orderData = updatedAppointments.map((appointment, idx) => ({
+        id: appointment._id,
+        position: idx + 1
+      }));
+
+      await apiService.reorderAppointments(orderData);
+    } catch (err) {
+      console.error('Error moving appointment down:', err);
+      setError('Failed to reorder appointments. Please try again.');
+    }
+  };
+
   // Format time for display
   const formatTime = (dateString) => {
     if (!dateString) return '';
@@ -236,13 +320,31 @@ const DraggableAppointments = ({ role }) => {
             </div>
             <div className="appointment-actions">
               {!isCompleted && (
-                <button
-                  className="btn-icon btn-complete"
-                  onClick={() => handleCompleteAppointment(appointment._id)}
-                  title="Complete"
-                >
-                  <FaCheck />
-                </button>
+                <>
+                  <button
+                    className="btn-icon btn-complete"
+                    onClick={() => handleCompleteAppointment(appointment._id)}
+                    title="Complete"
+                  >
+                    <FaCheck />
+                  </button>
+                  <button
+                    className="btn-icon btn-up"
+                    onClick={() => moveAppointmentUp(index)}
+                    title="Move Up"
+                    disabled={index === 0}
+                  >
+                    <FaArrowUp />
+                  </button>
+                  <button
+                    className="btn-icon btn-down"
+                    onClick={() => moveAppointmentDown(index)}
+                    title="Move Down"
+                    disabled={index === appointments.length - 1}
+                  >
+                    <FaArrowDown />
+                  </button>
+                </>
               )}
               <button
                 className="btn-icon btn-edit"
@@ -251,7 +353,7 @@ const DraggableAppointments = ({ role }) => {
               >
                 <FaEdit />
               </button>
-              {isCompleted && (
+              {isCompleted && role === 'doctor' && (
                 <button
                   className="btn-icon btn-notes"
                   onClick={() => handleAddNotes(appointment._id)}

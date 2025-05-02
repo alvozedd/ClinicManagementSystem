@@ -633,6 +633,27 @@ body.dark-mode {
   background-color: #dbeafe;
 }
 
+.btn-up {
+  color: #3b82f6;
+}
+
+.btn-up:hover {
+  background-color: #dbeafe;
+}
+
+.btn-down {
+  color: #3b82f6;
+}
+
+.btn-down:hover {
+  background-color: #dbeafe;
+}
+
+.btn-icon:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .appointments-section {
   background-color: var(--bg-secondary);
   border-radius: 0.5rem;
@@ -781,6 +802,11 @@ body.dark-mode {
 }
 
 :root.dark-mode .btn-add:hover {
+  background-color: rgba(30, 64, 175, 0.5);
+}
+
+:root.dark-mode .btn-up:hover,
+:root.dark-mode .btn-down:hover {
   background-color: rgba(30, 64, 175, 0.5);
 }
 
