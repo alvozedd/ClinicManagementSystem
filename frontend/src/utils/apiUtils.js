@@ -28,12 +28,8 @@ export const makeApiRequest = async (path, options = {}, requiresAuth = true) =>
     `${API_URL.replace('/api', '')}${path}`
   ];
 
-  // Only use localhost first in explicit development mode with a special flag
-  const useLocalFirst = !isProduction && localStorage.getItem('use_local_first') === 'true';
-  if (useLocalFirst) {
-    console.log('Using local endpoints first (development mode)');
-    endpoints.reverse();
-  }
+  // Always use the endpoints in the defined order
+  console.log('Using endpoints in standard order');
 
   let lastError = null;
 
@@ -84,11 +80,11 @@ export const makeApiRequest = async (path, options = {}, requiresAuth = true) =>
 };
 
 /**
- * Gets authentication headers from storage
+ * Gets authentication headers from sessionStorage
  * @returns {Object} - The authentication headers
  */
 export const getAuthHeaders = () => {
-  // Try to get token from sessionStorage first
+  // Try to get token from sessionStorage only
   let token = null;
 
   try {
@@ -100,20 +96,6 @@ export const getAuthHeaders = () => {
     }
   } catch (e) {
     console.warn('Error accessing sessionStorage:', e);
-  }
-
-  // If not found, try localStorage
-  if (!token) {
-    try {
-      const localUserInfo = localStorage.getItem('userInfo');
-      if (localUserInfo) {
-        const userInfo = JSON.parse(localUserInfo);
-        token = userInfo.token;
-        console.log('Found token in localStorage');
-      }
-    } catch (e) {
-      console.warn('Error accessing localStorage:', e);
-    }
   }
 
   if (token) {

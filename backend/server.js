@@ -16,6 +16,7 @@ const appointmentRoutes = require('./routes/appointmentRoutes');
 const diagnosisRoutes = require('./routes/diagnosisRoutes');
 const contentRoutes = require('./routes/contentRoutes');
 const integratedAppointmentRoutes = require('./routes/integratedAppointmentRoutes');
+const testRoutes = require('./routes/testRoutes');
 
 // Load environment variables
 dotenv.config();
@@ -161,6 +162,10 @@ app.use('/api/appointments', appointmentRoutes);
 app.use('/api/diagnoses', diagnosisRoutes);
 app.use('/api/content', contentRoutes);
 app.use('/api/integrated-appointments', integratedAppointmentRoutes);
+
+// Test routes - no authentication required
+app.use('/', testRoutes);
+app.use('/api', testRoutes);
 
 // Create compatibility routes without the /api prefix
 // User routes
@@ -452,35 +457,7 @@ app.post('/integrated-appointments', addCorsHeaders, (req, res) => {
   optionalAuth(req, res, () => createAppointment(req, res));
 });
 
-app.get('/integrated-appointments/queue', addCorsHeaders, (req, res) => {
-  console.log('Received GET request at /integrated-appointments/queue, forwarding to controller directly');
-  // Import the controller directly
-  const { getTodaysQueue } = require('./controllers/integratedAppointmentController');
-  // Add authentication middleware manually
-  const { protect, doctorOrSecretary } = require('./middleware/authMiddleware');
-  // Call middleware then controller
-  protect(req, res, () => doctorOrSecretary(req, res, () => getTodaysQueue(req, res)));
-});
-
-app.get('/integrated-appointments/queue/stats', addCorsHeaders, (req, res) => {
-  console.log('Received GET request at /integrated-appointments/queue/stats, forwarding to controller directly');
-  // Import the controller directly
-  const { getQueueStats } = require('./controllers/integratedAppointmentController');
-  // Add authentication middleware manually
-  const { protect, doctorOrSecretary } = require('./middleware/authMiddleware');
-  // Call middleware then controller
-  protect(req, res, () => doctorOrSecretary(req, res, () => getQueueStats(req, res)));
-});
-
-app.put('/integrated-appointments/queue/reorder', addCorsHeaders, (req, res) => {
-  console.log('Received PUT request at /integrated-appointments/queue/reorder, forwarding to controller directly');
-  // Import the controller directly
-  const { reorderQueue } = require('./controllers/integratedAppointmentController');
-  // Add authentication middleware manually
-  const { protect, secretary } = require('./middleware/authMiddleware');
-  // Call middleware then controller
-  protect(req, res, () => secretary(req, res, () => reorderQueue(req, res)));
-});
+// Queue-related endpoints have been removed
 
 app.put('/integrated-appointments/:id/check-in', addCorsHeaders, (req, res) => {
   console.log('Received PUT request at /integrated-appointments/:id/check-in, forwarding to controller directly');

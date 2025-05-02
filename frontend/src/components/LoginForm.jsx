@@ -1,7 +1,8 @@
-import { useState, useContext } from 'react';
+import { useState, useContext, useEffect } from 'react';
 import { Navigate, Link } from 'react-router-dom';
 import AuthContext from '../context/AuthContext';
 import authUtils from '../utils/authUtils';
+import { testDatabaseConnection, getTestUsers } from '../utils/dbConnectionTest';
 import './GlassEffects.css';
 
 function LoginForm() {
@@ -9,12 +10,40 @@ function LoginForm() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [dbConnected, setDbConnected] = useState(null);
+  const [testUsers, setTestUsers] = useState([]);
+  const [showTestUsers, setShowTestUsers] = useState(false);
 
   const { userInfo, login } = useContext(AuthContext);
 
-  // If already logged in, redirect to dashboard
+  useEffect(() => {
+    // Test database connection on component mount
+    const checkConnection = async () => {
+      const isConnected = await testDatabaseConnection();
+      setDbConnected(isConnected);
+
+      if (isConnected) {
+        const users = await getTestUsers();
+        if (users && users.length > 0) {
+          setTestUsers(users);
+        }
+      }
+    };
+
+    checkConnection();
+  }, []);
+
+  // If already logged in, redirect to appropriate dashboard
   if (userInfo) {
-    return <Navigate to="/dashboard" replace />;
+    if (userInfo.role === 'admin') {
+      return <Navigate to="/dashboard/admin" replace />;
+    } else if (userInfo.role === 'doctor') {
+      return <Navigate to="/dashboard/doctor" replace />;
+    } else if (userInfo.role === 'secretary') {
+      return <Navigate to="/dashboard/secretary" replace />;
+    } else {
+      return <Navigate to="/dashboard" replace />;
+    }
   }
 
   const handleSubmit = async (e) => {
@@ -113,9 +142,18 @@ function LoginForm() {
 
         console.log('User data stored, redirecting to dashboard');
 
-        // Redirect to dashboard after successful login
+        // Redirect to appropriate dashboard based on role
         setTimeout(() => {
-          window.location.href = '/dashboard';
+          const role = userData.role;
+          if (role === 'admin') {
+            window.location.href = '/dashboard/admin';
+          } else if (role === 'doctor') {
+            window.location.href = '/dashboard/doctor';
+          } else if (role === 'secretary') {
+            window.location.href = '/dashboard/secretary';
+          } else {
+            window.location.href = '/dashboard';
+          }
         }, 100);
       } else {
         throw new Error('All login attempts failed');
@@ -240,6 +278,51 @@ function LoginForm() {
               Return to Home
             </Link>
           </div>
+
+          {/* Database Connection Status */}
+          <div className="mt-4 text-center">
+            <div className="text-xs text-gray-500 mb-1">Database Connection Status:</div>
+            <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs ${dbConnected === null ? 'bg-gray-100 text-gray-600' : dbConnected ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+              <span className={`w-2 h-2 rounded-full mr-1 ${dbConnected === null ? 'bg-gray-400' : dbConnected ? 'bg-green-500' : 'bg-red-500'}`}></span>
+              {dbConnected === null ? 'Checking...' : dbConnected ? 'Connected' : 'Disconnected'}
+            </div>
+          </div>
+
+          {/* Test Users */}
+          {testUsers.length > 0 && (
+            <div className="mt-4 text-center">
+              <button
+                type="button"
+                className="text-xs text-blue-600 hover:text-blue-800 underline"
+                onClick={() => setShowTestUsers(!showTestUsers)}
+              >
+                {showTestUsers ? 'Hide Test Users' : 'Show Test Users'}
+              </button>
+
+              {showTestUsers && (
+                <div className="mt-2 text-xs bg-gray-50 p-2 rounded text-left">
+                  <div className="font-medium mb-1">Available Test Users:</div>
+                  <ul className="space-y-1">
+                    {testUsers.map((user, index) => (
+                      <li key={index} className="flex justify-between">
+                        <span>{user.username || user.email}</span>
+                        <button
+                          type="button"
+                          className="text-blue-600 hover:text-blue-800 text-xs"
+                          onClick={() => {
+                            setUsername(user.username || user.email);
+                            setPassword(user.password || 'password123');
+                          }}
+                        >
+                          Use
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>

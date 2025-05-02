@@ -21,10 +21,7 @@ const authSlice = createSlice({
     logout: (state) => {
       state.userInfo = null;
       secureStorage.clear();
-      localStorage.removeItem('userInfo');
-      localStorage.removeItem('session_active');
-      localStorage.removeItem('session_timestamp');
-      localStorage.setItem('user_logged_out', 'true');
+      sessionStorage.clear();
     },
     setLoading: (state, action) => {
       state.loading = action.payload;

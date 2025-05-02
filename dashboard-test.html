@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UroHealth Dashboard Tests</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #2563eb;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 10px;
+        }
+        .card {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .test-section {
+            margin-bottom: 30px;
+        }
+        button {
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #1d4ed8;
+        }
+        button:disabled {
+            background-color: #93c5fd;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .success {
+            background-color: #d1fae5;
+            border-left: 4px solid #10b981;
+        }
+        .error {
+            background-color: #fee2e2;
+            border-left: 4px solid #ef4444;
+        }
+        .info {
+            background-color: #e0f2fe;
+            border-left: 4px solid #0ea5e9;
+        }
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .test-card {
+            background-color: #f9fafb;
+            border-radius: 6px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        .test-card h3 {
+            margin-top: 0;
+            font-size: 16px;
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-pending {
+            background-color: #9ca3af;
+        }
+        .status-success {
+            background-color: #10b981;
+        }
+        .status-error {
+            background-color: #ef4444;
+        }
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .login-form input {
+            padding: 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+        }
+        .login-form button {
+            align-self: flex-start;
+        }
+    </style>
+</head>
+<body>
+    <h1>UroHealth Dashboard Tests</h1>
+    
+    <div class="card">
+        <h2>Test Dashboard Connectivity</h2>
+        <p>This tool helps verify that your dashboards are properly connected to the backend and database.</p>
+        
+        <div class="test-section">
+            <h3>Database Connection</h3>
+            <button id="test-db-connection">Test Database Connection</button>
+            <div id="db-connection-result" class="result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>Test Users</h3>
+            <button id="get-test-users">Get Test Users</button>
+            <div id="test-users-result" class="result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>Login Test</h3>
+            <div class="login-form">
+                <input type="text" id="username" placeholder="Username" value="admin">
+                <input type="password" id="password" placeholder="Password" value="admin123">
+                <button id="test-login">Test Login</button>
+            </div>
+            <div id="login-result" class="result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>Run All Tests</h3>
+            <button id="run-all-tests">Run All Tests</button>
+            <div id="all-tests-result" class="result"></div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <h2>Dashboard Links</h2>
+        <p>Once you've verified connectivity, use these links to access the dashboards:</p>
+        
+        <div class="test-grid">
+            <div class="test-card">
+                <h3>Admin Dashboard</h3>
+                <a href="/dashboard/admin" target="_blank">Open Admin Dashboard</a>
+            </div>
+            <div class="test-card">
+                <h3>Doctor Dashboard</h3>
+                <a href="/dashboard/doctor" target="_blank">Open Doctor Dashboard</a>
+            </div>
+            <div class="test-card">
+                <h3>Secretary Dashboard</h3>
+                <a href="/dashboard/secretary" target="_blank">Open Secretary Dashboard</a>
+            </div>
+        </div>
+    </div>
+    
+    <script src="test-dashboard-functionality.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Test database connection
+            document.getElementById('test-db-connection').addEventListener('click', async () => {
+                const resultElement = document.getElementById('db-connection-result');
+                resultElement.textContent = 'Testing database connection...';
+                resultElement.className = 'result info';
+                
+                try {
+                    const result = await window.dashboardTests.testDatabaseConnection();
+                    if (result.success) {
+                        resultElement.textContent = `✅ Database connection successful: ${JSON.stringify(result.data, null, 2)}`;
+                        resultElement.className = 'result success';
+                    } else {
+                        resultElement.textContent = `❌ Database connection failed: ${JSON.stringify(result.error, null, 2)}`;
+                        resultElement.className = 'result error';
+                    }
+                } catch (error) {
+                    resultElement.textContent = `❌ Error: ${error.message}`;
+                    resultElement.className = 'result error';
+                }
+            });
+            
+            // Get test users
+            document.getElementById('get-test-users').addEventListener('click', async () => {
+                const resultElement = document.getElementById('test-users-result');
+                resultElement.textContent = 'Fetching test users...';
+                resultElement.className = 'result info';
+                
+                try {
+                    const result = await window.dashboardTests.getTestUsers();
+                    if (result.success && result.users.length > 0) {
+                        resultElement.textContent = `✅ Test users fetched successfully: ${JSON.stringify(result.users, null, 2)}`;
+                        resultElement.className = 'result success';
+                    } else {
+                        resultElement.textContent = `❌ Failed to fetch test users: ${JSON.stringify(result, null, 2)}`;
+                        resultElement.className = 'result error';
+                    }
+                } catch (error) {
+                    resultElement.textContent = `❌ Error: ${error.message}`;
+                    resultElement.className = 'result error';
+                }
+            });
+            
+            // Test login
+            document.getElementById('test-login').addEventListener('click', async () => {
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                const resultElement = document.getElementById('login-result');
+                
+                if (!username || !password) {
+                    resultElement.textContent = '❌ Please enter both username and password';
+                    resultElement.className = 'result error';
+                    return;
+                }
+                
+                resultElement.textContent = `Testing login with username: ${username}...`;
+                resultElement.className = 'result info';
+                
+                try {
+                    const result = await window.dashboardTests.testLogin(username, password);
+                    if (result.success) {
+                        resultElement.textContent = `✅ Login successful: ${JSON.stringify(result.userData, null, 2)}`;
+                        resultElement.className = 'result success';
+                    } else {
+                        resultElement.textContent = `❌ Login failed: ${JSON.stringify(result.error, null, 2)}`;
+                        resultElement.className = 'result error';
+                    }
+                } catch (error) {
+                    resultElement.textContent = `❌ Error: ${error.message}`;
+                    resultElement.className = 'result error';
+                }
+            });
+            
+            // Run all tests
+            document.getElementById('run-all-tests').addEventListener('click', async () => {
+                const resultElement = document.getElementById('all-tests-result');
+                resultElement.textContent = 'Running all tests...';
+                resultElement.className = 'result info';
+                
+                try {
+                    // Capture console.log output
+                    const logs = [];
+                    const originalConsoleLog = console.log;
+                    console.log = (...args) => {
+                        logs.push(args.map(arg => 
+                            typeof arg === 'object' ? JSON.stringify(arg, null, 2) : arg
+                        ).join(' '));
+                        originalConsoleLog(...args);
+                    };
+                    
+                    await window.dashboardTests.runAllTests();
+                    
+                    // Restore console.log
+                    console.log = originalConsoleLog;
+                    
+                    resultElement.textContent = logs.join('\n');
+                    resultElement.className = 'result info';
+                } catch (error) {
+                    resultElement.textContent = `❌ Error: ${error.message}`;
+                    resultElement.className = 'result error';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

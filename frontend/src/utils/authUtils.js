@@ -13,57 +13,33 @@ const STORAGE_KEYS = {
 };
 
 /**
- * Store user information in all available storage mechanisms
+ * Store user information in sessionStorage only
  * @param {Object} userData - User data to store
  * @param {string} sessionId - Session ID (optional)
  */
 export const storeUserData = (userData, sessionId = null) => {
   try {
-    // Clear any previous logged out flag
-    localStorage.removeItem(STORAGE_KEYS.USER_LOGGED_OUT);
-    
-    // Store user data in sessionStorage (primary)
+    // Store user data in sessionStorage only
     sessionStorage.setItem(STORAGE_KEYS.USER_INFO, JSON.stringify(userData));
-    
-    // Store user data in localStorage (backup)
-    localStorage.setItem(STORAGE_KEYS.USER_INFO, JSON.stringify(userData));
-    
+
     // Store session ID if provided
     if (sessionId) {
       sessionStorage.setItem(STORAGE_KEYS.SESSION_ID, sessionId);
-      localStorage.setItem(STORAGE_KEYS.SESSION_ID, sessionId);
     }
-    
-    // Set session flags
-    localStorage.setItem(STORAGE_KEYS.SESSION_ACTIVE, 'true');
-    localStorage.setItem(STORAGE_KEYS.SESSION_TIMESTAMP, new Date().getTime().toString());
-    
-    console.log('User data stored successfully in multiple storage locations');
+
+    console.log('User data stored successfully in sessionStorage');
   } catch (error) {
     console.error('Error storing user data:', error);
   }
 };
 
 /**
- * Retrieve user information from available storage mechanisms
+ * Retrieve user information from sessionStorage only
  * @returns {Object|null} - User data or null if not found
  */
 export const getUserData = () => {
   try {
-    // Check if user has explicitly logged out
-    const userLoggedOut = localStorage.getItem(STORAGE_KEYS.USER_LOGGED_OUT) === 'true';
-    if (userLoggedOut) {
-      console.log('User has explicitly logged out, not retrieving session');
-      return null;
-    }
-    
-    // Check if session is still valid
-    if (!isSessionValid()) {
-      console.log('Session is invalid or expired');
-      return null;
-    }
-    
-    // Try sessionStorage first (most reliable)
+    // Try to get data from sessionStorage
     let userData = null;
     try {
       const sessionData = sessionStorage.getItem(STORAGE_KEYS.USER_INFO);
@@ -74,20 +50,7 @@ export const getUserData = () => {
     } catch (error) {
       console.warn('Error accessing sessionStorage:', error);
     }
-    
-    // If not found, try localStorage
-    if (!userData) {
-      try {
-        const localData = localStorage.getItem(STORAGE_KEYS.USER_INFO);
-        if (localData) {
-          userData = JSON.parse(localData);
-          console.log('Found user data in localStorage');
-        }
-      } catch (error) {
-        console.warn('Error accessing localStorage:', error);
-      }
-    }
-    
+
     return userData;
   } catch (error) {
     console.error('Error retrieving user data:', error);
@@ -96,19 +59,13 @@ export const getUserData = () => {
 };
 
 /**
- * Get the current session ID
+ * Get the current session ID from sessionStorage
  * @returns {string|null} - Session ID or null if not found
  */
 export const getSessionId = () => {
   try {
-    // Try sessionStorage first
-    let sessionId = sessionStorage.getItem(STORAGE_KEYS.SESSION_ID);
-    
-    // If not found, try localStorage
-    if (!sessionId) {
-      sessionId = localStorage.getItem(STORAGE_KEYS.SESSION_ID);
-    }
-    
+    // Get from sessionStorage only
+    const sessionId = sessionStorage.getItem(STORAGE_KEYS.SESSION_ID);
     return sessionId;
   } catch (error) {
     console.error('Error retrieving session ID:', error);
@@ -121,19 +78,11 @@ export const getSessionId = () => {
  */
 export const clearUserData = () => {
   try {
-    // Clear sessionStorage
+    // Clear sessionStorage only
     sessionStorage.removeItem(STORAGE_KEYS.USER_INFO);
     sessionStorage.removeItem(STORAGE_KEYS.SESSION_ID);
     sessionStorage.clear();
-    
-    // Clear localStorage items
-    localStorage.removeItem(STORAGE_KEYS.USER_INFO);
-    localStorage.removeItem(STORAGE_KEYS.SESSION_ACTIVE);
-    localStorage.removeItem(STORAGE_KEYS.SESSION_TIMESTAMP);
-    
-    // Set logged out flag
-    localStorage.setItem(STORAGE_KEYS.USER_LOGGED_OUT, 'true');
-    
+
     console.log('All user data cleared successfully');
   } catch (error) {
     console.error('Error clearing user data:', error);
@@ -146,17 +95,9 @@ export const clearUserData = () => {
  */
 export const isSessionValid = () => {
   try {
-    const sessionActive = localStorage.getItem(STORAGE_KEYS.SESSION_ACTIVE);
-    const sessionTimestamp = localStorage.getItem(STORAGE_KEYS.SESSION_TIMESTAMP);
-    const currentTime = new Date().getTime();
-    
-    // If session flag is missing or session is too old, consider it invalid
-    if (!sessionActive || !sessionTimestamp || 
-        (currentTime - parseInt(sessionTimestamp)) > SESSION_DURATION) {
-      return false;
-    }
-    
-    return true;
+    // Check if user data exists in sessionStorage
+    const userData = sessionStorage.getItem(STORAGE_KEYS.USER_INFO);
+    return !!userData;
   } catch (error) {
     console.error('Error checking session validity:', error);
     return false;
@@ -170,7 +111,7 @@ export const isSessionValid = () => {
  */
 export const isTokenExpired = (token) => {
   if (!token) return true;
-  
+
   try {
     // Get the expiration time from the token (JWT tokens are base64 encoded)
     const base64Url = token.split('.')[1];
@@ -178,9 +119,9 @@ export const isTokenExpired = (token) => {
     const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => {
       return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
     }).join(''));
-    
+
     const { exp } = JSON.parse(jsonPayload);
-    
+
     // Check if the token is expired
     return Date.now() >= exp * 1000;
   } catch (error) {

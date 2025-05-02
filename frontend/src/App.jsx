@@ -1,10 +1,14 @@
 import { useContext, useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import AuthContext from './context/AuthContext'
-import Dashboard from './Dashboard'
 import HomePage from './components/HomePage'
 import LoginForm from './components/LoginForm'
+import ProtectedRoute from './components/ProtectedRoute'
+import AdminDashboard from './components/dashboard/AdminDashboard'
+import DoctorDashboard from './components/dashboard/DoctorDashboard'
+import SecretaryDashboard from './components/dashboard/SecretaryDashboard'
 import './components/GlassEffects.css'
+import './components/dashboard/DashboardStyles.css'
 
 function App() {
   const { userInfo, loading } = useContext(AuthContext)
@@ -24,11 +28,8 @@ function App() {
       </div>;
     }
 
-    // Check if user is logged out flag is set
-    const userLoggedOut = localStorage.getItem('user_logged_out') === 'true';
-
-    // If user is not logged in or explicitly logged out, redirect to login
-    return userInfo && !userLoggedOut ? children : <Navigate to="/login" replace />
+    // If user is not logged in, redirect to login
+    return userInfo ? children : <Navigate to="/login" replace />
   }
 
   return (
@@ -36,11 +37,38 @@ function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginForm />} />
-        <Route path="/dashboard" element={
-          <ProtectedRoute>
-            <Dashboard />
+
+        {/* Admin Dashboard */}
+        <Route path="/dashboard/admin" element={
+          <ProtectedRoute allowedRoles={['admin']}>
+            <AdminDashboard />
           </ProtectedRoute>
         } />
+
+        {/* Doctor Dashboard */}
+        <Route path="/dashboard/doctor" element={
+          <ProtectedRoute allowedRoles={['doctor']}>
+            <DoctorDashboard />
+          </ProtectedRoute>
+        } />
+
+        {/* Secretary Dashboard */}
+        <Route path="/dashboard/secretary" element={
+          <ProtectedRoute allowedRoles={['secretary']}>
+            <SecretaryDashboard />
+          </ProtectedRoute>
+        } />
+
+        {/* Generic dashboard route that redirects based on role */}
+        <Route path="/dashboard" element={
+          <ProtectedRoute>
+            {userInfo && userInfo.role === 'admin' ? <Navigate to="/dashboard/admin" replace /> :
+             userInfo && userInfo.role === 'doctor' ? <Navigate to="/dashboard/doctor" replace /> :
+             userInfo && userInfo.role === 'secretary' ? <Navigate to="/dashboard/secretary" replace /> :
+             <Navigate to="/login" replace />}
+          </ProtectedRoute>
+        } />
+
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>

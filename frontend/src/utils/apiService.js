@@ -41,7 +41,7 @@ const secureFetch = async (url, options = {}) => {
   let userInfo = null;
   let token = null;
 
-  // Try sessionStorage first
+  // Try sessionStorage only
   try {
     const sessionUserInfo = sessionStorage.getItem('userInfo');
     if (sessionUserInfo) {
@@ -51,30 +51,6 @@ const secureFetch = async (url, options = {}) => {
     }
   } catch (e) {
     console.warn('Error accessing sessionStorage:', e);
-  }
-
-  // If not found, try localStorage
-  if (!token) {
-    try {
-      const localUserInfo = localStorage.getItem('userInfo');
-      if (localUserInfo) {
-        userInfo = JSON.parse(localUserInfo);
-        token = userInfo.token;
-        console.log('Found token in localStorage');
-      }
-    } catch (e) {
-      console.warn('Error accessing localStorage:', e);
-    }
-  }
-
-  // If still not found, try secureStorage
-  if (!token) {
-    const secureUserInfo = secureStorage.getItem('userInfo');
-    if (secureUserInfo) {
-      userInfo = secureUserInfo;
-      token = userInfo.token;
-      console.log('Found token in secureStorage');
-    }
   }
 
   console.log('Token retrieved:', token ? 'Yes (token exists)' : 'No');
@@ -1098,6 +1074,23 @@ const apiService = {
     }
   },
 
+  getAllContent: async () => {
+    try {
+      // For admin dashboard, we need authentication
+      return secureFetch(`${API_URL}/content`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeader(),
+        },
+        credentials: 'include',
+      });
+    } catch (error) {
+      console.error('Error fetching all content:', error);
+      return []; // Return empty array instead of throwing
+    }
+  },
+
   getContentById: async (id) => {
     return secureFetch(`${API_URL}/content/${id}`, {
       method: 'GET',
@@ -1271,65 +1264,45 @@ const apiService = {
     }
   },
 
-  // Get today's queue function has been removed
+  // Queue-related functions have been removed as per requirements
 
-  // Get integrated queue stats function has been removed
-
-  checkInPatient: async (id) => {
+  // File upload for notes
+  uploadFile: async (formData) => {
     try {
-      console.log('Checking in patient with appointment ID:', id);
-      // Use updateIntegratedAppointment instead of the queue-based check-in
-      return await apiService.updateIntegratedAppointment(id, { status: 'In-progress' });
-    } catch (error) {
-      console.error('Error checking in patient:', error);
-      throw error;
-    }
-  },
+      console.log('Uploading file');
 
-  startAppointment: async (id) => {
-    try {
-      console.log('Starting appointment with ID:', id);
-      // Use updateIntegratedAppointment instead of the queue-based start
-      return await apiService.updateIntegratedAppointment(id, { status: 'In-progress' });
-    } catch (error) {
-      console.error('Error starting appointment:', error);
-      throw error;
-    }
-  },
-
-  completeAppointment: async (id, diagnosisData) => {
-    try {
-      console.log('Completing appointment with ID:', id);
-      // Use updateIntegratedAppointment instead of the queue-based complete
-      return await apiService.updateIntegratedAppointment(id, {
-        status: 'Completed',
-        diagnosis: diagnosisData
+      return await secureFetch(`${API_URL}/uploads`, {
+        method: 'POST',
+        headers: {
+          ...authHeader(),
+          // Don't set Content-Type here, it will be set automatically with the boundary
+        },
+        body: formData,
+        credentials: 'include'
       });
     } catch (error) {
-      console.error('Error completing appointment:', error);
+      console.error('Error uploading file:', error);
       throw error;
     }
   },
 
-  // Reorder integrated queue function has been removed
+  // Get file for notes
+  getFile: async (fileId) => {
+    try {
+      console.log('Getting file with ID:', fileId);
 
-  // Get queue entries function has been removed
-
-  // Queue stats function has been removed
-
-  // Add to queue function has been removed
-
-  // Update queue entry function has been removed
-
-  // Update queue status function has been removed
-
-  // Remove from queue function has been removed
-
-  // Get next patient function has been removed
-
-  // Reorder queue function has been removed
-
-  // Clear completed queue function has been removed
+      return await secureFetch(`${API_URL}/uploads/${fileId}`, {
+        method: 'GET',
+        headers: {
+          ...authHeader(),
+        },
+        credentials: 'include'
+      });
+    } catch (error) {
+      console.error('Error getting file:', error);
+      throw error;
+    }
+  }
 };
 
 export default apiService;

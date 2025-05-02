@@ -63,11 +63,6 @@ const setItem = (key, value) => {
     if (encryptedValue) {
       // Use sessionStorage for secure data that should not persist across browser sessions
       sessionStorage.setItem(key, encryptedValue);
-
-      // Set a flag in localStorage to indicate active session
-      // This flag will be used to detect if the browser was closed and reopened
-      localStorage.setItem('session_active', 'true');
-      localStorage.setItem('session_timestamp', new Date().getTime().toString());
     }
   } catch (error) {
     console.error('Error storing data securely:', error);
@@ -81,19 +76,6 @@ const setItem = (key, value) => {
  */
 const getItem = (key) => {
   try {
-    // Check if session is still valid
-    const sessionActive = localStorage.getItem('session_active');
-    const sessionTimestamp = localStorage.getItem('session_timestamp');
-    const currentTime = new Date().getTime();
-
-    // If session flag is missing or session is too old (24 hours), consider it invalid
-    if (!sessionActive || !sessionTimestamp ||
-        (currentTime - parseInt(sessionTimestamp)) > 24 * 60 * 60 * 1000) {
-      console.log('Session expired or invalid, clearing data');
-      clear(); // Clear all session data
-      return null;
-    }
-
     const encryptedValue = sessionStorage.getItem(key);
     if (!encryptedValue) return null;
 
@@ -121,12 +103,8 @@ const removeItem = (key) => {
  */
 const clear = () => {
   try {
-    // Clear session storage
+    // Clear session storage only
     sessionStorage.clear();
-
-    // Clear session flags from local storage
-    localStorage.removeItem('session_active');
-    localStorage.removeItem('session_timestamp');
   } catch (error) {
     console.error('Error clearing secure storage:', error);
   }
@@ -138,17 +116,8 @@ const clear = () => {
  */
 const isSessionValid = () => {
   try {
-    const sessionActive = localStorage.getItem('session_active');
-    const sessionTimestamp = localStorage.getItem('session_timestamp');
-    const currentTime = new Date().getTime();
-
-    // If session flag is missing or session is too old (24 hours), consider it invalid
-    if (!sessionActive || !sessionTimestamp ||
-        (currentTime - parseInt(sessionTimestamp)) > 24 * 60 * 60 * 1000) {
-      return false;
-    }
-
-    return true;
+    // Check if there's any data in sessionStorage
+    return sessionStorage.length > 0;
   } catch (error) {
     console.error('Error checking session validity:', error);
     return false;
