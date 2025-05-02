@@ -27,10 +27,26 @@ const ALLOW_ALL_ORIGINS = true;
 // Debug flag to log detailed CORS information
 const DEBUG_CORS = true;
 
-// Add Netlify deployment URL to allowed origins
+// Make sure all Netlify domains are included
 if (!allowedOrigins.includes('https://urohealthltd.netlify.app')) {
   allowedOrigins.push('https://urohealthltd.netlify.app');
 }
+
+// Add any missing domains that might be used
+const additionalDomains = [
+  'https://urohealth.netlify.app',
+  'https://www.urohealth.netlify.app',
+  'https://urohealthcentral.netlify.app',
+  'https://www.urohealthcentral.netlify.app'
+];
+
+additionalDomains.forEach(domain => {
+  if (!allowedOrigins.includes(domain)) {
+    allowedOrigins.push(domain);
+  }
+});
+
+console.log('Allowed origins:', allowedOrigins);
 
 // Comprehensive list of headers to allow
 const allowedHeaders = [
@@ -99,6 +115,10 @@ const corsMiddleware = (req, res, next) => {
 
   // Add additional headers to help with CORS issues
   res.header('Access-Control-Expose-Headers', 'Content-Length, X-Request-Id');
+
+  // Add additional headers that might help with CORS issues
+  res.header('X-Content-Type-Options', 'nosniff');
+  res.header('X-XSS-Protection', '1; mode=block');
 
   // Handle preflight requests
   if (req.method === 'OPTIONS') {

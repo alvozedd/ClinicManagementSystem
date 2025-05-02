@@ -849,25 +849,67 @@ app.get('/', (req, res) => {
 // Import health controller
 const { checkHealth } = require('./controllers/healthController');
 
-// Health check endpoint
+// Health check endpoint with enhanced CORS handling
 app.get('/health', (req, res, next) => {
   // Set CORS headers explicitly for this route
   const origin = req.headers.origin;
+
+  console.log(`Health check request from origin: ${origin || 'unknown'}`);
+
+  // Set the Vary header
+  res.header('Vary', 'Origin');
+
+  // Always allow the requesting origin
   if (origin) {
     res.header('Access-Control-Allow-Origin', origin);
-    res.header('Access-Control-Allow-Credentials', 'true');
+    console.log(`Setting Access-Control-Allow-Origin: ${origin} for health check`);
+  } else {
+    // No origin in request, set to wildcard
+    res.header('Access-Control-Allow-Origin', '*');
+    console.log('Setting Access-Control-Allow-Origin: * for health check');
   }
+
+  // Set credentials to true for all requests
+  res.header('Access-Control-Allow-Credentials', 'true');
+
+  // Set other CORS headers
+  res.header('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.header('Access-Control-Allow-Headers', allowedHeaders.join(', '));
+  res.header('Access-Control-Max-Age', '86400'); // 24 hours
+  res.header('Access-Control-Expose-Headers', 'Content-Length, X-Request-Id');
+
   next();
 }, checkHealth);
 
-// API health check endpoint
+// API health check endpoint with enhanced CORS handling
 app.get('/api/health', (req, res, next) => {
   // Set CORS headers explicitly for this route
   const origin = req.headers.origin;
+
+  console.log(`API Health check request from origin: ${origin || 'unknown'}`);
+
+  // Set the Vary header
+  res.header('Vary', 'Origin');
+
+  // Always allow the requesting origin
   if (origin) {
     res.header('Access-Control-Allow-Origin', origin);
-    res.header('Access-Control-Allow-Credentials', 'true');
+    console.log(`Setting Access-Control-Allow-Origin: ${origin} for API health check`);
+  } else {
+    // No origin in request, set to wildcard
+    res.header('Access-Control-Allow-Origin', '*');
+    console.log('Setting Access-Control-Allow-Origin: * for API health check');
   }
+
+  // Set credentials to true for all requests
+  res.header('Access-Control-Allow-Credentials', 'true');
+
+  // Set other CORS headers
+  res.header('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.header('Access-Control-Allow-Headers', allowedHeaders.join(', '));
+  res.header('Access-Control-Max-Age', '86400'); // 24 hours
+  res.header('Access-Control-Expose-Headers', 'Content-Length, X-Request-Id');
+
   next();
 }, checkHealth);
 

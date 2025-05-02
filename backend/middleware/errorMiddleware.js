@@ -13,22 +13,28 @@ const notFound = (req, res, next) => {
 
   // Ensure CORS headers are set for 404 responses
   const origin = req.headers.origin;
-  const allowedOrigins = [
-    'https://urohealthltd.netlify.app',
-    'https://www.urohealthltd.netlify.app',
-    'http://localhost:3000',
-    'http://localhost:5173',
-    'https://urohealthcentral.netlify.app',
-    'https://www.urohealthcentral.netlify.app',
-    'https://clinicmanagementsystem-production-081b.up.railway.app'
-  ];
 
-  if (allowedOrigins.includes(origin) || !origin) {
-    res.header('Access-Control-Allow-Origin', origin || '*');
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-    res.header('Access-Control-Allow-Credentials', 'true');
+  // Set the Vary header
+  res.header('Vary', 'Origin');
+
+  // Always allow the requesting origin
+  if (origin) {
+    res.header('Access-Control-Allow-Origin', origin);
+    logger.debug(`Setting Access-Control-Allow-Origin: ${origin} for 404 response`);
+  } else {
+    // No origin in request, set to wildcard
+    res.header('Access-Control-Allow-Origin', '*');
+    logger.debug('Setting Access-Control-Allow-Origin: * for 404 response');
   }
+
+  // Set credentials to true for all requests
+  res.header('Access-Control-Allow-Credentials', 'true');
+
+  // Set other CORS headers
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, Cache-Control, Pragma, Expires');
+  res.header('Access-Control-Max-Age', '86400'); // 24 hours
+  res.header('Access-Control-Expose-Headers', 'Content-Length, X-Request-Id');
 
   const error = new Error(`Not Found - ${req.originalUrl}`);
   res.status(404);
@@ -95,22 +101,28 @@ const errorHandler = (err, req, res, next) => {
 
   // Ensure CORS headers are set even in error responses
   const origin = req.headers.origin;
-  const allowedOrigins = [
-    'https://urohealthltd.netlify.app',
-    'https://www.urohealthltd.netlify.app',
-    'http://localhost:3000',
-    'http://localhost:5173',
-    'https://urohealthcentral.netlify.app',
-    'https://www.urohealthcentral.netlify.app',
-    'https://clinicmanagementsystem-production-081b.up.railway.app'
-  ];
 
-  if (allowedOrigins.includes(origin) || !origin) {
-    res.header('Access-Control-Allow-Origin', origin || '*');
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-    res.header('Access-Control-Allow-Credentials', 'true');
+  // Set the Vary header
+  res.header('Vary', 'Origin');
+
+  // Always allow the requesting origin
+  if (origin) {
+    res.header('Access-Control-Allow-Origin', origin);
+    logger.debug(`Setting Access-Control-Allow-Origin: ${origin} for error response`);
+  } else {
+    // No origin in request, set to wildcard
+    res.header('Access-Control-Allow-Origin', '*');
+    logger.debug('Setting Access-Control-Allow-Origin: * for error response');
   }
+
+  // Set credentials to true for all requests
+  res.header('Access-Control-Allow-Credentials', 'true');
+
+  // Set other CORS headers
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, Cache-Control, Pragma, Expires');
+  res.header('Access-Control-Max-Age', '86400'); // 24 hours
+  res.header('Access-Control-Expose-Headers', 'Content-Length, X-Request-Id');
 
   // Sanitize the error message
   const sanitizedMessage = sanitizeErrorMessage(err);
