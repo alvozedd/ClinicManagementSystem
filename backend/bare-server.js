@@ -9,6 +9,11 @@ const mongoose = require('mongoose');
 const fs = require('fs');
 const path = require('path');
 
+// Import models
+const Patient = require('./models/patientModel');
+const Appointment = require('./models/appointmentModel');
+const Diagnosis = require('./models/diagnosisModel');
+
 console.log('Starting bare minimum server directly...');
 
 // Load environment variables
@@ -230,96 +235,180 @@ app.post('/users/refresh-token', (req, res) => {
 });
 
 // Patient routes
-app.get('/api/patients', (req, res) => {
+app.get('/api/patients', async (req, res) => {
   console.log('GET /api/patients request received');
-  res.status(200).json([]);
+  try {
+    const patients = await Patient.find({});
+    console.log(`Found ${patients.length} patients in database`);
+    res.status(200).json(patients);
+  } catch (error) {
+    console.error('Error fetching patients:', error);
+    res.status(500).json({ message: 'Error fetching patients', error: error.message });
+  }
 });
 
-app.get('/patients', (req, res) => {
+app.get('/patients', async (req, res) => {
   console.log('GET /patients request received');
-  res.status(200).json([]);
+  try {
+    const patients = await Patient.find({});
+    console.log(`Found ${patients.length} patients in database`);
+    res.status(200).json(patients);
+  } catch (error) {
+    console.error('Error fetching patients:', error);
+    res.status(500).json({ message: 'Error fetching patients', error: error.message });
+  }
 });
 
-app.post('/api/patients', (req, res) => {
+app.post('/api/patients', async (req, res) => {
   console.log('POST /api/patients request received');
   console.log('Request body:', req.body);
 
-  // Generate a fake ID and return the patient data
-  const patientData = {
-    ...req.body,
-    _id: 'temp_' + Date.now(),
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  };
+  try {
+    // Create a new patient in the database
+    const newPatient = new Patient(req.body);
+    const savedPatient = await newPatient.save();
 
-  res.status(201).json(patientData);
+    console.log('Patient saved to database:', savedPatient);
+    res.status(201).json(savedPatient);
+  } catch (error) {
+    console.error('Error creating patient:', error);
+    res.status(400).json({ message: 'Error creating patient', error: error.message });
+  }
 });
 
-app.post('/patients', (req, res) => {
+app.post('/patients', async (req, res) => {
   console.log('POST /patients request received');
   console.log('Request body:', req.body);
 
-  // Generate a fake ID and return the patient data
-  const patientData = {
-    ...req.body,
-    _id: 'temp_' + Date.now(),
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  };
+  try {
+    // Create a new patient in the database
+    const newPatient = new Patient(req.body);
+    const savedPatient = await newPatient.save();
 
-  res.status(201).json(patientData);
+    console.log('Patient saved to database:', savedPatient);
+    res.status(201).json(savedPatient);
+  } catch (error) {
+    console.error('Error creating patient:', error);
+    res.status(400).json({ message: 'Error creating patient', error: error.message });
+  }
 });
 
 // Appointment routes
-app.get('/api/appointments', (req, res) => {
+app.get('/api/appointments', async (req, res) => {
   console.log('GET /api/appointments request received');
-  res.status(200).json([]);
+  try {
+    const appointments = await Appointment.find({}).populate('patient_id');
+    console.log(`Found ${appointments.length} appointments in database`);
+    res.status(200).json(appointments);
+  } catch (error) {
+    console.error('Error fetching appointments:', error);
+    res.status(500).json({ message: 'Error fetching appointments', error: error.message });
+  }
 });
 
-app.get('/appointments', (req, res) => {
+app.get('/appointments', async (req, res) => {
   console.log('GET /appointments request received');
-  res.status(200).json([]);
+  try {
+    const appointments = await Appointment.find({}).populate('patient_id');
+    console.log(`Found ${appointments.length} appointments in database`);
+    res.status(200).json(appointments);
+  } catch (error) {
+    console.error('Error fetching appointments:', error);
+    res.status(500).json({ message: 'Error fetching appointments', error: error.message });
+  }
 });
 
-app.post('/api/appointments', (req, res) => {
+app.post('/api/appointments', async (req, res) => {
   console.log('POST /api/appointments request received');
   console.log('Request body:', req.body);
 
-  // Generate a fake ID and return the appointment data
-  const appointmentData = {
-    ...req.body,
-    _id: 'temp_' + Date.now(),
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  };
+  try {
+    // Create a new appointment in the database
+    const newAppointment = new Appointment(req.body);
+    const savedAppointment = await newAppointment.save();
 
-  res.status(201).json(appointmentData);
+    console.log('Appointment saved to database:', savedAppointment);
+    res.status(201).json(savedAppointment);
+  } catch (error) {
+    console.error('Error creating appointment:', error);
+    res.status(400).json({ message: 'Error creating appointment', error: error.message });
+  }
 });
 
-app.post('/appointments', (req, res) => {
+app.post('/appointments', async (req, res) => {
   console.log('POST /appointments request received');
   console.log('Request body:', req.body);
 
-  // Generate a fake ID and return the appointment data
-  const appointmentData = {
-    ...req.body,
-    _id: 'temp_' + Date.now(),
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  };
+  try {
+    // Create a new appointment in the database
+    const newAppointment = new Appointment(req.body);
+    const savedAppointment = await newAppointment.save();
 
-  res.status(201).json(appointmentData);
+    console.log('Appointment saved to database:', savedAppointment);
+    res.status(201).json(savedAppointment);
+  } catch (error) {
+    console.error('Error creating appointment:', error);
+    res.status(400).json({ message: 'Error creating appointment', error: error.message });
+  }
 });
 
 // Diagnosis routes
-app.get('/api/diagnoses', (req, res) => {
+app.get('/api/diagnoses', async (req, res) => {
   console.log('GET /api/diagnoses request received');
-  res.status(200).json([]);
+  try {
+    const diagnoses = await Diagnosis.find({}).populate('appointment_id');
+    console.log(`Found ${diagnoses.length} diagnoses in database`);
+    res.status(200).json(diagnoses);
+  } catch (error) {
+    console.error('Error fetching diagnoses:', error);
+    res.status(500).json({ message: 'Error fetching diagnoses', error: error.message });
+  }
 });
 
-app.get('/diagnoses', (req, res) => {
+app.get('/diagnoses', async (req, res) => {
   console.log('GET /diagnoses request received');
-  res.status(200).json([]);
+  try {
+    const diagnoses = await Diagnosis.find({}).populate('appointment_id');
+    console.log(`Found ${diagnoses.length} diagnoses in database`);
+    res.status(200).json(diagnoses);
+  } catch (error) {
+    console.error('Error fetching diagnoses:', error);
+    res.status(500).json({ message: 'Error fetching diagnoses', error: error.message });
+  }
+});
+
+app.post('/api/diagnoses', async (req, res) => {
+  console.log('POST /api/diagnoses request received');
+  console.log('Request body:', req.body);
+
+  try {
+    // Create a new diagnosis in the database
+    const newDiagnosis = new Diagnosis(req.body);
+    const savedDiagnosis = await newDiagnosis.save();
+
+    console.log('Diagnosis saved to database:', savedDiagnosis);
+    res.status(201).json(savedDiagnosis);
+  } catch (error) {
+    console.error('Error creating diagnosis:', error);
+    res.status(400).json({ message: 'Error creating diagnosis', error: error.message });
+  }
+});
+
+app.post('/diagnoses', async (req, res) => {
+  console.log('POST /diagnoses request received');
+  console.log('Request body:', req.body);
+
+  try {
+    // Create a new diagnosis in the database
+    const newDiagnosis = new Diagnosis(req.body);
+    const savedDiagnosis = await newDiagnosis.save();
+
+    console.log('Diagnosis saved to database:', savedDiagnosis);
+    res.status(201).json(savedDiagnosis);
+  } catch (error) {
+    console.error('Error creating diagnosis:', error);
+    res.status(400).json({ message: 'Error creating diagnosis', error: error.message });
+  }
 });
 
 // Catch-all route to log unmatched requests
