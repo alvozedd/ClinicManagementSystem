@@ -15,7 +15,7 @@ html, body, #root {
   padding: 0 !important;
   overflow-x: hidden;
   min-height: 100vh;
-  background-color: #1e3a8a !important; /* Match the blue background color */
+  /* Removed the blue background color that was causing issues */
 }
 
 /* Ensure footer extends to bottom */

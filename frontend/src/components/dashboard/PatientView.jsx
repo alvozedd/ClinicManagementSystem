@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useSelector } from 'react-redux';
-import { FaArrowLeft, FaEdit, FaTrash, FaUserPlus, FaCalendarPlus, FaFileMedical } from 'react-icons/fa';
+import { FaArrowLeft, FaEdit, FaTrash, FaUserPlus, FaCalendarPlus, FaFileMedical, FaPhone } from 'react-icons/fa';
 import AuthContext from '../../context/AuthContext';
 import apiService from '../../utils/apiService';
 import Spinner from '../common/Spinner';
@@ -126,39 +126,59 @@ const PatientView = ({ patient, onBackToPatients }) => {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Name</p>
-              <p className="font-medium text-gray-800 dark:text-white">{patient.name}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-300 font-medium">Name</p>
+              <p className="font-semibold text-gray-900 dark:text-white text-base">{patient.name}</p>
             </div>
             <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Gender</p>
-              <p className="font-medium text-gray-800 dark:text-white">{patient.gender}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-300 font-medium">Gender</p>
+              <p className="font-semibold text-gray-900 dark:text-white text-base">{patient.gender}</p>
             </div>
             <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Age</p>
-              <p className="font-medium text-gray-800 dark:text-white">{calculateAge(patient.year_of_birth)} years</p>
+              <p className="text-sm text-gray-600 dark:text-gray-300 font-medium">Age</p>
+              <p className="font-semibold text-gray-900 dark:text-white text-base">{calculateAge(patient.year_of_birth)} years</p>
             </div>
             <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Phone</p>
-              <p className="font-medium text-gray-800 dark:text-white">{patient.phone}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-300 font-medium">Phone</p>
+              <div className="flex items-center">
+                <p className="font-semibold text-gray-900 dark:text-white text-base mr-2">{patient.phone}</p>
+                {patient.phone && (
+                  <a
+                    href={`tel:${patient.phone}`}
+                    className="bg-green-500 hover:bg-green-600 text-white p-1.5 rounded-full flex items-center justify-center"
+                    title="Call patient"
+                  >
+                    <FaPhone size={12} />
+                  </a>
+                )}
+              </div>
             </div>
             <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Email</p>
-              <p className="font-medium text-gray-800 dark:text-white">{patient.email || 'Not provided'}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-300 font-medium">Email</p>
+              <p className="font-semibold text-gray-900 dark:text-white text-base">{patient.email || 'Not provided'}</p>
             </div>
             <div>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Added By</p>
-              <p className="font-medium text-gray-800 dark:text-white">{patient.createdBy || 'Staff'}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-300 font-medium">Added By</p>
+              <p className="font-semibold text-gray-900 dark:text-white text-base">{patient.createdBy || 'Staff'}</p>
             </div>
             {patient.next_of_kin && (
               <div className="md:col-span-2">
-                <p className="text-sm text-gray-500 dark:text-gray-400">Next of Kin</p>
-                <p className="font-medium text-gray-800 dark:text-white">{patient.next_of_kin}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-300 font-medium">Next of Kin</p>
+                <p className="font-semibold text-gray-900 dark:text-white text-base">{patient.next_of_kin}</p>
               </div>
             )}
             {patient.next_of_kin_phone && (
               <div className="md:col-span-2">
-                <p className="text-sm text-gray-500 dark:text-gray-400">Next of Kin Phone</p>
-                <p className="font-medium text-gray-800 dark:text-white">{patient.next_of_kin_phone}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-300 font-medium">Next of Kin Phone</p>
+                <div className="flex items-center">
+                  <p className="font-semibold text-gray-900 dark:text-white text-base mr-2">{patient.next_of_kin_phone}</p>
+                  <a
+                    href={`tel:${patient.next_of_kin_phone}`}
+                    className="bg-green-500 hover:bg-green-600 text-white p-1.5 rounded-full flex items-center justify-center"
+                    title="Call next of kin"
+                  >
+                    <FaPhone size={12} />
+                  </a>
+                </div>
               </div>
             )}
           </div>
@@ -249,53 +269,73 @@ const PatientView = ({ patient, onBackToPatients }) => {
             <h3 className="font-semibold text-gray-700 dark:text-white mb-4">Patient Biodata</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Name</p>
-                <p className="font-medium text-gray-800 dark:text-white">{patient.name}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-300 font-medium">Name</p>
+                <p className="font-semibold text-gray-900 dark:text-white text-base">{patient.name}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Gender</p>
-                <p className="font-medium text-gray-800 dark:text-white">{patient.gender}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-300 font-medium">Gender</p>
+                <p className="font-semibold text-gray-900 dark:text-white text-base">{patient.gender}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Year of Birth</p>
-                <p className="font-medium text-gray-800 dark:text-white">{patient.year_of_birth}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-300 font-medium">Year of Birth</p>
+                <p className="font-semibold text-gray-900 dark:text-white text-base">{patient.year_of_birth}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Age</p>
-                <p className="font-medium text-gray-800 dark:text-white">{calculateAge(patient.year_of_birth)} years</p>
+                <p className="text-sm text-gray-600 dark:text-gray-300 font-medium">Age</p>
+                <p className="font-semibold text-gray-900 dark:text-white text-base">{calculateAge(patient.year_of_birth)} years</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Phone</p>
-                <p className="font-medium text-gray-800 dark:text-white">{patient.phone}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-300 font-medium">Phone</p>
+                <div className="flex items-center">
+                  <p className="font-semibold text-gray-900 dark:text-white text-base mr-2">{patient.phone}</p>
+                  {patient.phone && (
+                    <a
+                      href={`tel:${patient.phone}`}
+                      className="bg-green-500 hover:bg-green-600 text-white p-1.5 rounded-full flex items-center justify-center"
+                      title="Call patient"
+                    >
+                      <FaPhone size={12} />
+                    </a>
+                  )}
+                </div>
               </div>
               <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Email</p>
-                <p className="font-medium text-gray-800 dark:text-white">{patient.email || 'Not provided'}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-300 font-medium">Email</p>
+                <p className="font-semibold text-gray-900 dark:text-white text-base">{patient.email || 'Not provided'}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Address</p>
-                <p className="font-medium text-gray-800 dark:text-white">{patient.address || 'Not provided'}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-300 font-medium">Address</p>
+                <p className="font-semibold text-gray-900 dark:text-white text-base">{patient.address || 'Not provided'}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Added By</p>
-                <p className="font-medium text-gray-800 dark:text-white">{patient.createdBy || 'Staff'}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-300 font-medium">Added By</p>
+                <p className="font-semibold text-gray-900 dark:text-white text-base">{patient.createdBy || 'Staff'}</p>
               </div>
               {patient.next_of_kin && (
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Next of Kin</p>
-                  <p className="font-medium text-gray-800 dark:text-white">{patient.next_of_kin}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 font-medium">Next of Kin</p>
+                  <p className="font-semibold text-gray-900 dark:text-white text-base">{patient.next_of_kin}</p>
                 </div>
               )}
               {patient.next_of_kin_phone && (
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Next of Kin Phone</p>
-                  <p className="font-medium text-gray-800 dark:text-white">{patient.next_of_kin_phone}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 font-medium">Next of Kin Phone</p>
+                  <div className="flex items-center">
+                    <p className="font-semibold text-gray-900 dark:text-white text-base mr-2">{patient.next_of_kin_phone}</p>
+                    <a
+                      href={`tel:${patient.next_of_kin_phone}`}
+                      className="bg-green-500 hover:bg-green-600 text-white p-1.5 rounded-full flex items-center justify-center"
+                      title="Call next of kin"
+                    >
+                      <FaPhone size={12} />
+                    </a>
+                  </div>
                 </div>
               )}
               {patient.next_of_kin_relationship && (
                 <div>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">Relationship</p>
-                  <p className="font-medium text-gray-800 dark:text-white">{patient.next_of_kin_relationship}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-300 font-medium">Relationship</p>
+                  <p className="font-semibold text-gray-900 dark:text-white text-base">{patient.next_of_kin_relationship}</p>
                 </div>
               )}
             </div>
@@ -303,7 +343,7 @@ const PatientView = ({ patient, onBackToPatients }) => {
         )}
 
         {activeTab === 'appointments' && (
-          <div>
+          <div className="glass-card p-4 rounded-lg bg-white dark:bg-gray-800">
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-semibold text-gray-700 dark:text-white">Appointments</h3>
               <button
@@ -356,7 +396,9 @@ const PatientView = ({ patient, onBackToPatients }) => {
         )}
 
         {activeTab === 'notes' && (
-          <NotesView patientId={patient._id} />
+          <div className="glass-card p-4 rounded-lg bg-white dark:bg-gray-800">
+            <NotesView patientId={patient._id} />
+          </div>
         )}
 
         {activeTab === 'medical' && userInfo?.role === 'doctor' && (
