@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FaCalendarPlus, FaSearch, FaEdit, FaTrash, FaFilter, FaCalendarAlt, FaUserPlus, FaCheck } from 'react-icons/fa';
+import { FaCalendarPlus, FaSearch, FaEdit, FaTrash, FaFilter, FaCalendarAlt, FaUserPlus, FaCheck, FaFileMedical, FaNotesMedical } from 'react-icons/fa';
 import apiService from '../../utils/apiService';
 import './DashboardStyles.css';
 
@@ -199,6 +199,15 @@ const AppointmentManagement = ({ role }) => {
     }
   };
 
+  // Navigate to Notes tab with the appointment pre-selected
+  const handleAddNotes = (appointmentId) => {
+    // Store the appointment ID in sessionStorage
+    sessionStorage.setItem('selectedAppointmentForNote', appointmentId);
+
+    // Redirect to the Notes tab
+    window.location.href = '/dashboard/doctor?tab=notes';
+  };
+
   const submitAddAppointment = async (e) => {
     e.preventDefault();
     try {
@@ -327,6 +336,15 @@ const AppointmentManagement = ({ role }) => {
                       <FaCheck />
                     </button>
                   )}
+                  {appointment.status === 'Completed' && role === 'doctor' && (
+                    <button
+                      onClick={() => handleAddNotes(appointment._id)}
+                      className="text-purple-600 hover:text-purple-800 mr-3"
+                      title="Add Notes"
+                    >
+                      <FaNotesMedical />
+                    </button>
+                  )}
                   <button
                     onClick={() => handleEditAppointment(appointment)}
                     className="text-blue-600 hover:text-blue-800 mr-3"
@@ -398,6 +416,15 @@ const AppointmentManagement = ({ role }) => {
                   title="Mark as Completed"
                 >
                   <FaCheck />
+                </button>
+              )}
+              {appointment.status === 'Completed' && role === 'doctor' && (
+                <button
+                  onClick={() => handleAddNotes(appointment._id)}
+                  className="text-purple-600 hover:text-purple-800"
+                  title="Add Notes"
+                >
+                  <FaNotesMedical />
                 </button>
               )}
               <button

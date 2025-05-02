@@ -11,6 +11,7 @@ const NotesManagement = () => {
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterPatient, setFilterPatient] = useState('all');
+  const [filterAppointment, setFilterAppointment] = useState('all');
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [currentNote, setCurrentNote] = useState(null);
@@ -37,6 +38,18 @@ const NotesManagement = () => {
     fetchNotes();
     fetchAppointments();
     fetchPatients();
+
+    // Check if there's a selected appointment from the appointments page
+    const selectedAppointmentId = sessionStorage.getItem('selectedAppointmentForNote');
+    if (selectedAppointmentId) {
+      // Clear the session storage to prevent it from persisting across page refreshes
+      sessionStorage.removeItem('selectedAppointmentForNote');
+
+      // Set a small delay to ensure appointments are loaded
+      setTimeout(() => {
+        handleAddNoteForAppointment(selectedAppointmentId);
+      }, 500);
+    }
   }, []);
 
   const fetchNotes = async () => {
@@ -130,6 +143,25 @@ const NotesManagement = () => {
     });
     setSelectedFile(null);
     setShowAddModal(true);
+  };
+
+  const handleAddNoteForAppointment = (appointmentId) => {
+    // Find the appointment in the appointments array
+    const appointment = appointments.find(app => app._id === appointmentId);
+
+    if (appointment) {
+      setFormData({
+        appointment_id: appointmentId,
+        diagnosis_text: '',
+        treatment_plan: '',
+        follow_up: '',
+        medications: []
+      });
+      setSelectedFile(null);
+      setShowAddModal(true);
+    } else {
+      setError('Appointment not found. It may have been deleted or is no longer available.');
+    }
   };
 
   const handleEditNote = (note) => {
@@ -251,21 +283,34 @@ const NotesManagement = () => {
     }
   };
 
-  // Filter notes based on search term and patient filter
+  // Filter notes based on search term, patient filter, and appointment filter
   const filteredNotes = notes.filter(note => {
     const patientName = note.appointment_id && note.appointment_id.patient_id &&
       typeof note.appointment_id.patient_id === 'object'
         ? note.appointment_id.patient_id.name
         : '';
 
-    const matchesSearch = patientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (note.diagnosis_text && note.diagnosis_text.toLowerCase().includes(searchTerm.toLowerCase()));
+    // Get appointment date if available
+    const appointmentDate = note.appointment_id && note.appointment_id.appointment_date
+      ? new Date(note.appointment_id.appointment_date).toLocaleDateString()
+      : '';
 
+    // Check if the search term matches patient name, diagnosis text, or appointment date
+    const matchesSearch =
+      patientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (note.diagnosis_text && note.diagnosis_text.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      appointmentDate.toLowerCase().includes(searchTerm.toLowerCase());
+
+    // Check if the note matches the selected patient filter
     const matchesPatient = filterPatient === 'all' ||
       (note.appointment_id && note.appointment_id.patient_id &&
        note.appointment_id.patient_id._id === filterPatient);
 
-    return matchesSearch && matchesPatient;
+    // Check if the note matches the selected appointment filter
+    const matchesAppointment = filterAppointment === 'all' ||
+      (note.appointment_id && note.appointment_id._id === filterAppointment);
+
+    return matchesSearch && matchesPatient && matchesAppointment;
   });
 
   // Sort notes by date (most recent first)
@@ -700,7 +745,7 @@ const NotesManagement = () => {
           <FaSearch className="absolute left-5 top-1/2 transform -translate-y-1/2 text-gray-400" />
         </div>
 
-        <div className="w-full sm:w-auto">
+        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
           <select
             value={filterPatient}
             onChange={(e) => setFilterPatient(e.target.value)}
@@ -710,6 +755,19 @@ const NotesManagement = () => {
             {patients.map(patient => (
               <option key={patient._id} value={patient._id}>
                 {patient.name}
+              </option>
+            ))}
+          </select>
+
+          <select
+            value={filterAppointment}
+            onChange={(e) => setFilterAppointment(e.target.value)}
+            className="form-input w-full"
+          >
+            <option value="all">All Appointments</option>
+            {appointments.map(appointment => (
+              <option key={appointment._id} value={appointment._id}>
+                {getPatientName(appointment)} - {new Date(appointment.appointment_date).toLocaleDateString()}
               </option>
             ))}
           </select>
