@@ -160,20 +160,8 @@ const validatePatientCreation = (req, res, next) => {
     }
   }
 
-  // Validate next of kin name
-  if (!next_of_kin_name || next_of_kin_name.trim() === '') {
-    errors.push('Next of kin name is required');
-  }
-
-  // Validate next of kin relationship
-  if (!next_of_kin_relationship || next_of_kin_relationship.trim() === '') {
-    errors.push('Next of kin relationship is required');
-  }
-
-  // Validate next of kin phone
-  if (!next_of_kin_phone || next_of_kin_phone.trim() === '') {
-    errors.push('Next of kin phone is required');
-  } else if (!isValidPhone(next_of_kin_phone)) {
+  // Validate next of kin phone if provided
+  if (next_of_kin_phone && !isValidPhone(next_of_kin_phone)) {
     errors.push('Invalid next of kin phone number format');
   }
 
@@ -186,9 +174,9 @@ const validatePatientCreation = (req, res, next) => {
   req.body.name = sanitizeString(name);
   req.body.gender = sanitizeString(gender);
   req.body.phone = sanitizeString(phone);
-  req.body.next_of_kin_name = sanitizeString(next_of_kin_name);
-  req.body.next_of_kin_relationship = sanitizeString(next_of_kin_relationship);
-  req.body.next_of_kin_phone = sanitizeString(next_of_kin_phone);
+  if (next_of_kin_name) req.body.next_of_kin_name = sanitizeString(next_of_kin_name);
+  if (next_of_kin_relationship) req.body.next_of_kin_relationship = sanitizeString(next_of_kin_relationship);
+  if (next_of_kin_phone) req.body.next_of_kin_phone = sanitizeString(next_of_kin_phone);
 
   next();
 };

@@ -53,15 +53,12 @@ const patientSchema = mongoose.Schema(
     },
     next_of_kin_name: {
       type: String,
-      required: true,
     },
     next_of_kin_relationship: {
       type: String,
-      required: true,
     },
     next_of_kin_phone: {
       type: String,
-      required: true,
     },
     // New fields for medical history, allergies, and medications
     medicalHistory: [medicalHistorySchema],

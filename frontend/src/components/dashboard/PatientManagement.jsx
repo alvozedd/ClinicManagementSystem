@@ -468,38 +468,35 @@ const PatientManagement = ({ role, selectedPatient, onSelectPatient, onBackToPat
             </div>
 
             <div className="form-group">
-              <label className="form-label">Next of Kin Name*</label>
+              <label className="form-label">Next of Kin Name</label>
               <input
                 type="text"
                 name="next_of_kin_name"
                 value={formData.next_of_kin_name}
                 onChange={handleInputChange}
                 className="form-input"
-                required
               />
             </div>
 
             <div className="form-group">
-              <label className="form-label">Next of Kin Relationship*</label>
+              <label className="form-label">Next of Kin Relationship</label>
               <input
                 type="text"
                 name="next_of_kin_relationship"
                 value={formData.next_of_kin_relationship}
                 onChange={handleInputChange}
                 className="form-input"
-                required
               />
             </div>
 
             <div className="form-group">
-              <label className="form-label">Next of Kin Phone*</label>
+              <label className="form-label">Next of Kin Phone</label>
               <input
                 type="tel"
                 name="next_of_kin_phone"
                 value={formData.next_of_kin_phone}
                 onChange={handleInputChange}
                 className="form-input"
-                required
               />
             </div>
 
@@ -586,38 +583,35 @@ const PatientManagement = ({ role, selectedPatient, onSelectPatient, onBackToPat
             </div>
 
             <div className="form-group">
-              <label className="form-label">Next of Kin Name*</label>
+              <label className="form-label">Next of Kin Name</label>
               <input
                 type="text"
                 name="next_of_kin_name"
                 value={formData.next_of_kin_name}
                 onChange={handleInputChange}
                 className="form-input"
-                required
               />
             </div>
 
             <div className="form-group">
-              <label className="form-label">Next of Kin Relationship*</label>
+              <label className="form-label">Next of Kin Relationship</label>
               <input
                 type="text"
                 name="next_of_kin_relationship"
                 value={formData.next_of_kin_relationship}
                 onChange={handleInputChange}
                 className="form-input"
-                required
               />
             </div>
 
             <div className="form-group">
-              <label className="form-label">Next of Kin Phone*</label>
+              <label className="form-label">Next of Kin Phone</label>
               <input
                 type="tel"
                 name="next_of_kin_phone"
                 value={formData.next_of_kin_phone}
                 onChange={handleInputChange}
                 className="form-input"
-                required
               />
             </div>
 
