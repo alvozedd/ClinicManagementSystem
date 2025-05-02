@@ -74,14 +74,25 @@ const NotesManagement = () => {
   const fetchAppointments = async () => {
     try {
       const data = await apiService.getAppointments();
-      // Filter to only completed appointments without notes
-      const completedAppointments = data.filter(
-        appointment => appointment.status === 'Completed' || appointment.status === 'In-progress'
-      );
-      setAppointments(completedAppointments);
-      return completedAppointments;
+
+      if (!data || data.length === 0) {
+        console.log('No appointments found');
+        setError('No appointments found. Please create an appointment first.');
+        return [];
+      }
+
+      // Get all appointments but mark which ones are eligible for notes
+      // We'll filter in the UI but keep all appointments available
+      const appointmentsWithEligibility = data.map(appointment => ({
+        ...appointment,
+        isEligibleForNotes: appointment.status === 'Completed' || appointment.status === 'In-progress'
+      }));
+
+      setAppointments(appointmentsWithEligibility);
+      return appointmentsWithEligibility;
     } catch (err) {
       console.error('Error fetching appointments:', err);
+      setError('Failed to load appointments. Please try again.');
       return [];
     }
   };
@@ -143,6 +154,18 @@ const NotesManagement = () => {
   };
 
   const handleAddNote = () => {
+    // Check if there are any appointments available
+    if (!appointments || appointments.length === 0) {
+      setError('No appointments available. Please create an appointment first before adding a note.');
+      return;
+    }
+
+    // Check if there are any appointments eligible for notes
+    const eligibleAppointments = appointments.filter(app => app.isEligibleForNotes);
+    if (eligibleAppointments.length === 0) {
+      setError('No completed or in-progress appointments found. Please complete an appointment before adding a note.');
+    }
+
     setFormData({
       appointment_id: '',
       diagnosis_text: '',
@@ -169,19 +192,27 @@ const NotesManagement = () => {
       }
     }
 
-    if (appointment) {
-      setFormData({
-        appointment_id: appointmentId,
-        diagnosis_text: '',
-        treatment_plan: '',
-        follow_up: '',
-        medications: []
-      });
-      setSelectedFile(null);
-      setShowAddModal(true);
-    } else {
+    if (!appointment) {
       setError('Appointment not found. It may have been deleted or is no longer available.');
+      return;
     }
+
+    // Check if the appointment is eligible for notes
+    if (appointment.status !== 'Completed' && appointment.status !== 'In-progress') {
+      setError(`This appointment cannot have notes added because its status is "${appointment.status}". Only completed or in-progress appointments can have notes.`);
+      return;
+    }
+
+    // Appointment exists and is eligible for notes
+    setFormData({
+      appointment_id: appointmentId,
+      diagnosis_text: '',
+      treatment_plan: '',
+      follow_up: '',
+      medications: []
+    });
+    setSelectedFile(null);
+    setShowAddModal(true);
   };
 
   const handleEditNote = (note) => {
@@ -358,10 +389,62 @@ const NotesManagement = () => {
 
   // Render Notes List
   const renderNotesList = () => {
+    // No notes found
     if (sortedNotes.length === 0) {
+      // If there are no appointments at all
+      if (!appointments || appointments.length === 0) {
+        return (
+          <div className="text-center py-8 bg-blue-50 dark:bg-blue-900/20 rounded-lg p-6 shadow-sm">
+            <h3 className="text-xl font-semibold text-blue-800 dark:text-blue-300 mb-2">No Appointments Available</h3>
+            <p className="text-gray-700 dark:text-gray-300 mb-4">
+              Before you can add notes, you need to create and complete an appointment.
+            </p>
+            <div className="flex flex-col space-y-3 max-w-md mx-auto text-left bg-white dark:bg-gray-800 p-4 rounded-md shadow-sm border border-blue-100 dark:border-blue-800">
+              <p className="font-medium text-gray-800 dark:text-gray-200">Steps to add notes:</p>
+              <ol className="list-decimal list-inside space-y-2 text-gray-700 dark:text-gray-300">
+                <li>Go to the <span className="font-medium">Appointments</span> tab</li>
+                <li>Create a new appointment or select an existing one</li>
+                <li>Change the appointment status to <span className="font-medium">Completed</span></li>
+                <li>Return to the <span className="font-medium">Notes</span> tab</li>
+                <li>Click <span className="font-medium">Add Note</span> to create a note for the completed appointment</li>
+              </ol>
+            </div>
+          </div>
+        );
+      }
+
+      // If there are appointments but no eligible ones
+      const eligibleAppointments = appointments.filter(app => app.isEligibleForNotes);
+      if (eligibleAppointments.length === 0) {
+        return (
+          <div className="text-center py-8 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg p-6 shadow-sm">
+            <h3 className="text-xl font-semibold text-yellow-800 dark:text-yellow-300 mb-2">No Eligible Appointments</h3>
+            <p className="text-gray-700 dark:text-gray-300 mb-4">
+              You have {appointments.length} appointment(s), but none are eligible for notes yet.
+            </p>
+            <div className="flex flex-col space-y-3 max-w-md mx-auto text-left bg-white dark:bg-gray-800 p-4 rounded-md shadow-sm border border-yellow-100 dark:border-yellow-800">
+              <p className="font-medium text-gray-800 dark:text-gray-200">To make an appointment eligible for notes:</p>
+              <ol className="list-decimal list-inside space-y-2 text-gray-700 dark:text-gray-300">
+                <li>Go to the <span className="font-medium">Appointments</span> tab</li>
+                <li>Find the appointment you want to add notes for</li>
+                <li>Change its status to <span className="font-medium">Completed</span> or <span className="font-medium">In-progress</span></li>
+                <li>Return to this tab to add notes</li>
+              </ol>
+            </div>
+          </div>
+        );
+      }
+
+      // If there are eligible appointments but no notes yet
       return (
-        <div className="text-center py-8 text-gray-500">
-          No notes found. Try a different search term or add a new note.
+        <div className="text-center py-8 bg-gray-50 dark:bg-gray-800 rounded-lg p-6 shadow-sm">
+          <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-2">No Notes Found</h3>
+          <p className="text-gray-700 dark:text-gray-300 mb-4">
+            You have {eligibleAppointments.length} appointment(s) eligible for notes.
+          </p>
+          <p className="text-gray-600 dark:text-gray-400">
+            Click the "Add Note" button above to create your first note.
+          </p>
         </div>
       );
     }
@@ -434,8 +517,14 @@ const NotesManagement = () => {
               >
                 <option value="">Select Appointment</option>
                 {appointments.map(appointment => (
-                  <option key={appointment._id} value={appointment._id}>
+                  <option
+                    key={appointment._id}
+                    value={appointment._id}
+                    disabled={!appointment.isEligibleForNotes}
+                    className={!appointment.isEligibleForNotes ? 'text-gray-400' : ''}
+                  >
                     {getPatientName(appointment)} - {new Date(appointment.appointment_date).toLocaleDateString()}
+                    {!appointment.isEligibleForNotes ? ' (Not eligible - ' + appointment.status + ')' : ''}
                   </option>
                 ))}
               </select>
@@ -748,8 +837,22 @@ const NotesManagement = () => {
       </div>
 
       {error && (
-        <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4">
-          {error}
+        <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 flex items-center justify-between">
+          <div>
+            <p className="font-medium">{error}</p>
+            {error.includes('No appointments') && (
+              <p className="text-sm mt-1">
+                Go to the Appointments tab to create an appointment first, then mark it as completed before adding notes.
+              </p>
+            )}
+          </div>
+          <button
+            onClick={() => setError(null)}
+            className="text-red-700 hover:text-red-900"
+            aria-label="Dismiss error"
+          >
+            &times;
+          </button>
         </div>
       )}
 

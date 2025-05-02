@@ -54,7 +54,7 @@ const AppointmentCard = ({
   return (
     <div
       key={appointment.id || appointment._id}
-      className={`p-4 rounded-lg border border-gray-200 flex justify-between items-center cursor-pointer hover:shadow-lg transition-all duration-300 appointment-card ${
+      className={`p-4 rounded-lg border border-gray-200 dark:border-gray-700 flex justify-between items-center cursor-pointer hover:shadow-lg transition-all duration-300 appointment-card ${
         appointment.status === 'Scheduled' ? 'glass-card-green' :
         appointment.status === 'Completed' ? 'glass-card-blue' :
         appointment.status === 'Cancelled' ? 'glass-card-red' :
@@ -63,26 +63,26 @@ const AppointmentCard = ({
       onClick={handleCardClick}
     >
       <div>
-        <div className="font-medium text-lg">{appointment.patientName}</div>
-        <div className="text-gray-600">
+        <div className="font-medium text-lg dark:text-white">{appointment.patientName}</div>
+        <div className="text-gray-600 dark:text-gray-300">
           {appointment.type || ''}: {appointment.reason}
           {(appointment.time || appointment.optional_time) && (
             <span className="ml-2 font-semibold">Time: {appointment.time || appointment.optional_time}</span>
           )}
         </div>
         {appointment.date && (
-          <div className="text-xs text-gray-500 mt-1">
+          <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
             {getRelativeDateLabel(appointment.date)}
           </div>
         )}
         {appointment.createdBy && (
           <div className="flex items-center mt-1">
-            <span className="text-gray-500 text-xs mr-1">Added by:</span>
+            <span className="text-gray-500 dark:text-gray-400 text-xs mr-1">Added by:</span>
             <span className={`px-2 py-0.5 rounded text-xs font-medium ${
-              appointment.createdBy === 'doctor' ? 'bg-blue-50 text-blue-700' :
-              appointment.createdBy === 'secretary' ? 'bg-green-50 text-green-700' :
-              appointment.createdBy === 'admin' ? 'bg-gray-50 text-gray-700' :
-              'bg-purple-50 text-purple-700'
+              appointment.createdBy === 'doctor' ? 'bg-blue-50 text-blue-700 dark:bg-blue-900 dark:text-blue-200' :
+              appointment.createdBy === 'secretary' ? 'bg-green-50 text-green-700 dark:bg-green-900 dark:text-green-200' :
+              appointment.createdBy === 'admin' ? 'bg-gray-50 text-gray-700 dark:bg-gray-800 dark:text-gray-200' :
+              'bg-purple-50 text-purple-700 dark:bg-purple-900 dark:text-purple-200'
             }`}>
               <FaUser className="inline mr-1" size={10} />
               {getCreatorLabel(appointment.createdBy)}
@@ -91,12 +91,12 @@ const AppointmentCard = ({
         )}
       </div>
       <div className="flex space-x-2">
-        <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-          appointment.status === 'Scheduled' ? 'bg-green-50 text-green-700' :
-          appointment.status === 'Completed' ? 'bg-blue-50 text-blue-700' :
-          appointment.status === 'Cancelled' ? 'bg-red-50 text-red-700' :
-          appointment.status === 'Needs Diagnosis' ? 'bg-purple-50 text-purple-700' :
-          'bg-gray-50 text-gray-700'
+        <span className={`px-3 py-1 rounded-full text-sm font-medium dark-mode-status-badge ${
+          appointment.status === 'Scheduled' ? 'bg-green-50 text-green-700 dark:bg-green-900 dark:text-green-200 dark:border dark:border-green-500' :
+          appointment.status === 'Completed' ? 'bg-blue-50 text-blue-700 dark:bg-blue-900 dark:text-blue-200 dark:border dark:border-blue-500' :
+          appointment.status === 'Cancelled' ? 'bg-red-50 text-red-700 dark:bg-red-900 dark:text-red-200 dark:border dark:border-red-500' :
+          appointment.status === 'Needs Diagnosis' ? 'bg-purple-50 text-purple-700 dark:bg-purple-900 dark:text-purple-200 dark:border dark:border-purple-500' :
+          'bg-gray-50 text-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:border dark:border-gray-500'
         }`}>
           {appointment.status}
         </span>

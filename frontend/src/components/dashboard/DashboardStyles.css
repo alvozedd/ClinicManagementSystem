@@ -17,17 +17,17 @@
 
 /* Dark mode */
 :root.dark-mode {
-  --bg-primary: #111827;
-  --bg-secondary: #1f2937;
-  --bg-card: rgba(31, 41, 55, 0.8);
-  --text-primary: #f9fafb;
-  --text-secondary: #e5e7eb;
-  --text-muted: #9ca3af;
-  --border-color: #374151;
-  --input-bg: #374151;
-  --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-  --highlight-bg: #1e3a8a;
-  --highlight-border: #60a5fa;
+  --bg-primary: #0f172a; /* Darker background */
+  --bg-secondary: #1e293b; /* Darker secondary */
+  --bg-card: rgba(30, 41, 59, 0.9); /* More opaque for better contrast */
+  --text-primary: #f8fafc; /* Brighter white text */
+  --text-secondary: #e2e8f0; /* Brighter secondary text */
+  --text-muted: #cbd5e1; /* Brighter muted text for better contrast */
+  --border-color: #475569; /* Brighter border for better visibility */
+  --input-bg: #334155; /* Slightly lighter input background */
+  --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.5); /* Stronger shadow */
+  --highlight-bg: #1e40af; /* Brighter highlight background */
+  --highlight-border: #3b82f6; /* Brighter highlight border */
 }
 
 /* Apply dark mode to the entire app */
@@ -120,6 +120,27 @@ body.dark-mode {
   background-color: #6b7280; /* gray */
 }
 
+/* Dark mode status indicators with higher contrast */
+:root.dark-mode .status-scheduled {
+  background-color: #60a5fa; /* brighter blue */
+}
+
+:root.dark-mode .status-completed {
+  background-color: #34d399; /* brighter green */
+}
+
+:root.dark-mode .status-cancelled {
+  background-color: #f87171; /* brighter red */
+}
+
+:root.dark-mode .status-in-progress {
+  background-color: #fbbf24; /* brighter amber */
+}
+
+:root.dark-mode .status-no-show {
+  background-color: #9ca3af; /* brighter gray */
+}
+
 /* Mobile styles */
 @media (max-width: 768px) {
   .mobile-header {
@@ -175,6 +196,37 @@ body.dark-mode {
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(239, 68, 68, 0.18);
+}
+
+/* Dark mode glass card effects with higher contrast */
+:root.dark-mode .glass-card {
+  background: rgba(30, 41, 59, 0.8);
+  border: 1px solid rgba(71, 85, 105, 0.3);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+:root.dark-mode .glass-card-blue {
+  background: rgba(30, 58, 138, 0.7);
+  border: 1px solid rgba(96, 165, 250, 0.3);
+  color: #e0f2fe;
+}
+
+:root.dark-mode .glass-card-green {
+  background: rgba(6, 78, 59, 0.7);
+  border: 1px solid rgba(52, 211, 153, 0.3);
+  color: #d1fae5;
+}
+
+:root.dark-mode .glass-card-yellow {
+  background: rgba(120, 53, 15, 0.7);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  color: #fef3c7;
+}
+
+:root.dark-mode .glass-card-red {
+  background: rgba(153, 27, 27, 0.7);
+  border: 1px solid rgba(248, 113, 113, 0.3);
+  color: #fee2e2;
 }
 
 /* Tab styles */
@@ -370,33 +422,39 @@ body.dark-mode {
 
 /* Dark mode adjustments */
 :root.dark-mode .badge-blue {
-  background-color: #1e3a8a;
-  color: #bfdbfe;
+  background-color: #1e40af; /* Brighter blue */
+  color: #dbeafe; /* Brighter text */
+  border: 1px solid #3b82f6; /* Add border for better visibility */
 }
 
 :root.dark-mode .badge-green {
-  background-color: #064e3b;
-  color: #a7f3d0;
+  background-color: #065f46; /* Brighter green */
+  color: #d1fae5; /* Brighter text */
+  border: 1px solid #10b981; /* Add border for better visibility */
 }
 
 :root.dark-mode .badge-yellow {
-  background-color: #78350f;
-  color: #fef3c7;
+  background-color: #92400e; /* Brighter yellow */
+  color: #fef9c3; /* Brighter text */
+  border: 1px solid #f59e0b; /* Add border for better visibility */
 }
 
 :root.dark-mode .badge-red {
-  background-color: #991b1b;
-  color: #fee2e2;
+  background-color: #b91c1c; /* Brighter red */
+  color: #fee2e2; /* Brighter text */
+  border: 1px solid #ef4444; /* Add border for better visibility */
 }
 
 :root.dark-mode .badge-pink {
-  background-color: #831843;
-  color: #fbcfe8;
+  background-color: #9d174d; /* Brighter pink */
+  color: #fbcfe8; /* Brighter text */
+  border: 1px solid #ec4899; /* Add border for better visibility */
 }
 
 :root.dark-mode .badge-gray {
-  background-color: #374151;
-  color: #f3f4f6;
+  background-color: #4b5563; /* Brighter gray */
+  color: #f9fafb; /* Brighter text */
+  border: 1px solid #9ca3af; /* Add border for better visibility */
 }
 
 :root.dark-mode .btn-outline-primary {

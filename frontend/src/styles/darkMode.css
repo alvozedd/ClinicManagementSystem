@@ -1,0 +1,142 @@
+/* Dark Mode Styles */
+
+/* Improved contrast for dark mode */
+.dark-mode {
+  /* Base text colors */
+  --text-high-contrast: #f8fafc;
+  --text-medium-contrast: #e2e8f0;
+  --text-low-contrast: #cbd5e1;
+  
+  /* Background colors */
+  --bg-primary: #0f172a;
+  --bg-secondary: #1e293b;
+  --bg-tertiary: #334155;
+  
+  /* Accent colors with better contrast */
+  --blue-accent: #3b82f6;
+  --blue-accent-light: #60a5fa;
+  --green-accent: #10b981;
+  --green-accent-light: #34d399;
+  --red-accent: #ef4444;
+  --red-accent-light: #f87171;
+  --yellow-accent: #f59e0b;
+  --yellow-accent-light: #fbbf24;
+}
+
+/* Status badges with improved contrast */
+.dark-mode .dark-mode-status-badge {
+  border: 1px solid;
+  font-weight: 600;
+}
+
+/* Improved contrast for appointment cards */
+.dark-mode .appointment-card {
+  border-color: var(--bg-tertiary);
+}
+
+/* Improved contrast for form elements */
+.dark-mode input,
+.dark-mode select,
+.dark-mode textarea {
+  background-color: var(--bg-tertiary);
+  color: var(--text-high-contrast);
+  border-color: #475569;
+}
+
+.dark-mode input::placeholder,
+.dark-mode textarea::placeholder {
+  color: var(--text-low-contrast);
+}
+
+/* Improved contrast for buttons */
+.dark-mode button:not(.icon-button) {
+  border: 1px solid transparent;
+}
+
+.dark-mode button:hover:not(.icon-button) {
+  filter: brightness(1.1);
+}
+
+/* Improved contrast for tables */
+.dark-mode table {
+  border-color: #475569;
+}
+
+.dark-mode th {
+  background-color: var(--bg-tertiary);
+  color: var(--text-high-contrast);
+}
+
+.dark-mode td {
+  border-color: #475569;
+  color: var(--text-medium-contrast);
+}
+
+.dark-mode tr:nth-child(even) {
+  background-color: rgba(51, 65, 85, 0.5);
+}
+
+/* Improved contrast for links */
+.dark-mode a:not(.btn) {
+  color: var(--blue-accent-light);
+}
+
+.dark-mode a:hover:not(.btn) {
+  color: var(--text-high-contrast);
+}
+
+/* Improved contrast for icons */
+.dark-mode svg {
+  fill: currentColor;
+}
+
+/* Improved contrast for modals and dialogs */
+.dark-mode .modal-content,
+.dark-mode .dialog-content {
+  background-color: var(--bg-secondary);
+  border-color: #475569;
+}
+
+.dark-mode .modal-header,
+.dark-mode .dialog-header {
+  border-bottom-color: #475569;
+}
+
+.dark-mode .modal-footer,
+.dark-mode .dialog-footer {
+  border-top-color: #475569;
+}
+
+/* Improved contrast for alerts and notifications */
+.dark-mode .alert,
+.dark-mode .notification {
+  border: 1px solid;
+}
+
+.dark-mode .alert-info,
+.dark-mode .notification-info {
+  background-color: rgba(59, 130, 246, 0.2);
+  border-color: var(--blue-accent);
+  color: var(--blue-accent-light);
+}
+
+.dark-mode .alert-success,
+.dark-mode .notification-success {
+  background-color: rgba(16, 185, 129, 0.2);
+  border-color: var(--green-accent);
+  color: var(--green-accent-light);
+}
+
+.dark-mode .alert-warning,
+.dark-mode .notification-warning {
+  background-color: rgba(245, 158, 11, 0.2);
+  border-color: var(--yellow-accent);
+  color: var(--yellow-accent-light);
+}
+
+.dark-mode .alert-error,
+.dark-mode .notification-error {
+  background-color: rgba(239, 68, 68, 0.2);
+  border-color: var(--red-accent);
+  color: var(--red-accent-light);
+}
