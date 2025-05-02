@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { FaCalendarPlus, FaSearch, FaEdit, FaTrash, FaUserPlus, FaCheck, FaNotesMedical, FaThLarge, FaList, FaUserClock } from 'react-icons/fa';
 import apiService from '../../utils/apiService';
 import './DashboardStyles.css';
+import DraggableAppointments from './DraggableAppointments';
 import QueueList from './QueueList';
 
 const AppointmentManagement = ({ role }) => {
@@ -15,7 +16,7 @@ const AppointmentManagement = ({ role }) => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [currentAppointment, setCurrentAppointment] = useState(null);
   // Removed unused selectedDate state
-  const [viewMode, setViewMode] = useState('today'); // 'today', 'all', 'queue'
+  const [viewMode, setViewMode] = useState('today'); // 'today', 'all', 'draggable'
   const [displayMode, setDisplayMode] = useState('grid'); // 'grid' or 'list'
   const [patientSearchTerm, setPatientSearchTerm] = useState('');
   const [showNewPatientModal, setShowNewPatientModal] = useState(false);
@@ -1074,6 +1075,13 @@ const AppointmentManagement = ({ role }) => {
             </span>
           </button>
           <button
+            onClick={() => setViewMode('draggable')}
+            className={`tab-button ${viewMode === 'draggable' ? 'active' : ''} relative`}
+          >
+            <FaUserClock className="mr-1" />
+            Draggable Appointments
+          </button>
+          <button
             onClick={() => setViewMode('queue')}
             className={`tab-button ${viewMode === 'queue' ? 'active' : ''} relative`}
           >
@@ -1120,6 +1128,7 @@ const AppointmentManagement = ({ role }) => {
         <>
           {viewMode === 'today' ? renderTodayAppointments() :
            viewMode === 'all' ? renderAppointmentList() :
+           viewMode === 'draggable' ? <DraggableAppointments role={role} /> :
            viewMode === 'queue' ? <QueueList role={role} /> : null}
         </>
       )}

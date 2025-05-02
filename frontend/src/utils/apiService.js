@@ -917,6 +917,39 @@ const apiService = {
     }
   },
 
+  // Appointment reordering for draggable appointments
+  reorderAppointments: async (appointmentOrder) => {
+    try {
+      console.log('Reordering appointments with data:', appointmentOrder);
+
+      // In a real implementation, this would call an API endpoint to save the order
+      // For now, we'll just return the order as if it was saved successfully
+      return {
+        success: true,
+        message: 'Appointments reordered successfully',
+        data: appointmentOrder
+      };
+
+      // Example of how this would be implemented with a real API endpoint:
+      /*
+      const baseUrl = API_URL.replace('/api', '');
+      const response = await fetch(`${baseUrl}/appointments/reorder`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeader(),
+        },
+        body: JSON.stringify({ appointmentOrder }),
+        credentials: 'include',
+      });
+      return handleResponse(response);
+      */
+    } catch (error) {
+      console.error('Error reordering appointments:', error);
+      throw error;
+    }
+  },
+
   // Diagnosis endpoints
   getDiagnoses: async () => {
     const response = await fetch(`${API_URL}/diagnoses`, {

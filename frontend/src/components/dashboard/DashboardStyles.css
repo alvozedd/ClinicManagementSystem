@@ -476,20 +476,20 @@ body.dark-mode {
   margin-top: 1rem;
 }
 
-.queue-header {
+.queue-header, .appointments-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1rem;
 }
 
-.queue-stats {
+.queue-stats, .appointments-stats {
   display: flex;
   align-items: center;
   gap: 1rem;
 }
 
-.queue-count {
+.queue-count, .appointments-count {
   font-weight: 500;
   color: var(--text-secondary);
   background-color: var(--bg-secondary);
@@ -510,19 +510,13 @@ body.dark-mode {
   background-color: #e5e7eb;
 }
 
-.queue-container {
+.queue-container, .appointments-container {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 1.5rem;
 }
 
-@media (max-width: 768px) {
-  .queue-container {
-    grid-template-columns: 1fr;
-  }
-}
-
-.queue-list {
+.queue-list, .appointments-list {
   background-color: var(--bg-secondary);
   border-radius: 0.5rem;
   box-shadow: var(--card-shadow);
@@ -530,7 +524,7 @@ body.dark-mode {
   min-height: 300px;
 }
 
-.queue-item {
+.queue-item, .appointment-card {
   display: flex;
   align-items: center;
   padding: 0.75rem;
@@ -542,13 +536,13 @@ body.dark-mode {
   border: 1px solid var(--border-color);
 }
 
-.queue-item.dragging {
+.queue-item.dragging, .appointment-card.dragging {
   box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
   border: 1px dashed #3b82f6;
   background-color: rgba(219, 234, 254, 0.3);
 }
 
-.queue-number {
+.queue-number, .ticket-number {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -561,23 +555,23 @@ body.dark-mode {
   margin-right: 0.75rem;
 }
 
-.queue-grip {
+.queue-grip, .appointment-grip {
   color: var(--text-muted);
   margin-right: 0.75rem;
   cursor: grab;
 }
 
-.queue-content {
+.queue-content, .appointment-content {
   flex: 1;
 }
 
-.queue-patient-name {
+.queue-patient-name, .appointment-patient-name {
   font-weight: 500;
   color: var(--text-primary);
   margin-bottom: 0.25rem;
 }
 
-.queue-patient-info {
+.queue-patient-info, .appointment-info {
   display: flex;
   gap: 1rem;
   font-size: 0.875rem;
@@ -590,7 +584,7 @@ body.dark-mode {
   color: var(--text-muted);
 }
 
-.queue-actions {
+.queue-actions, .appointment-actions {
   display: flex;
   gap: 0.5rem;
 }
@@ -691,6 +685,26 @@ body.dark-mode {
   height: 200px;
   color: var(--text-muted);
   font-style: italic;
+}
+
+.appointment-status {
+  margin-right: 0.75rem;
+}
+
+.btn-notes {
+  color: #8b5cf6;
+}
+
+.btn-notes:hover {
+  background-color: #ede9fe;
+}
+
+.btn-edit {
+  color: #3b82f6;
+}
+
+.btn-edit:hover {
+  background-color: #dbeafe;
 }
 
 .error-message {
