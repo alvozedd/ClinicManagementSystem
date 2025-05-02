@@ -6,12 +6,12 @@
   --text-high-contrast: #f8fafc;
   --text-medium-contrast: #e2e8f0;
   --text-low-contrast: #cbd5e1;
-  
+
   /* Background colors */
   --bg-primary: #0f172a;
   --bg-secondary: #1e293b;
   --bg-tertiary: #334155;
-  
+
   /* Accent colors with better contrast */
   --blue-accent: #3b82f6;
   --blue-accent-light: #60a5fa;
@@ -46,6 +46,32 @@
 .dark-mode input::placeholder,
 .dark-mode textarea::placeholder {
   color: var(--text-low-contrast);
+}
+
+/* Improved contrast for select options in dark mode */
+.dark-mode select option {
+  background-color: var(--bg-secondary);
+  color: var(--text-high-contrast);
+}
+
+.dark-mode select option:disabled {
+  color: var(--text-low-contrast);
+  opacity: 0.7;
+}
+
+/* Improved contrast for form labels */
+.dark-mode .form-label {
+  color: var(--text-medium-contrast);
+  font-weight: 500;
+}
+
+/* Improved contrast for patient names and text */
+.dark-mode .dashboard-card h3 {
+  color: var(--text-high-contrast);
+}
+
+.dark-mode .dashboard-card p {
+  color: var(--text-medium-contrast);
 }
 
 /* Improved contrast for buttons */

@@ -296,6 +296,22 @@ body.dark-mode {
   pointer-events: none; /* Ensures the icon doesn't interfere with input */
 }
 
+/* Dark mode search input improvements */
+:root.dark-mode .search-input-container .search-icon {
+  color: var(--text-muted);
+}
+
+:root.dark-mode .search-input-container input {
+  background-color: var(--input-bg);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+:root.dark-mode .search-input-container input::placeholder {
+  color: var(--text-muted);
+  opacity: 0.8;
+}
+
 .form-input:focus {
   outline: none;
   border-color: #3b82f6;

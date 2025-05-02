@@ -455,10 +455,10 @@ const NotesManagement = () => {
           <div key={note._id} className="dashboard-card p-4">
             <div className="flex items-start justify-between">
               <div>
-                <h3 className="font-semibold text-gray-800">
+                <h3 className="font-semibold text-gray-800 dark:text-gray-100">
                   {note.appointment_id && getPatientName(note.appointment_id)}
                 </h3>
-                <p className="text-sm text-gray-500">{formatDate(note.createdAt)}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-300">{formatDate(note.createdAt)}</p>
               </div>
               <div className="flex space-x-2">
                 <button
@@ -476,13 +476,13 @@ const NotesManagement = () => {
               </div>
             </div>
             <div className="mt-3">
-              <p className="text-sm text-gray-600 line-clamp-3">
+              <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-3">
                 {note.diagnosis_text}
               </p>
             </div>
             {note.diagnosis && note.diagnosis.medications && note.diagnosis.medications.length > 0 && (
               <div className="mt-2">
-                <p className="text-xs font-medium text-gray-700">Medications:</p>
+                <p className="text-xs font-medium text-gray-700 dark:text-gray-200">Medications:</p>
                 <div className="flex flex-wrap gap-1 mt-1">
                   {note.diagnosis.medications.map((med, index) => (
                     <span key={index} className="badge badge-blue text-xs">
@@ -502,12 +502,12 @@ const NotesManagement = () => {
   const renderAddNoteModal = () => {
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
-          <h2 className="text-xl font-bold mb-4">Add New Note</h2>
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto border dark:border-gray-700">
+          <h2 className="text-xl font-bold mb-4 dark:text-white">Add New Note</h2>
 
           <form onSubmit={submitAddNote}>
             <div className="form-group">
-              <label className="form-label">Appointment*</label>
+              <label className="form-label dark:text-gray-200">Appointment*</label>
               <select
                 name="appointment_id"
                 value={formData.appointment_id}
@@ -531,7 +531,7 @@ const NotesManagement = () => {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Diagnosis*</label>
+              <label className="form-label dark:text-gray-200">Diagnosis*</label>
               <textarea
                 name="diagnosis_text"
                 value={formData.diagnosis_text}
@@ -543,7 +543,7 @@ const NotesManagement = () => {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Treatment Plan</label>
+              <label className="form-label dark:text-gray-200">Treatment Plan</label>
               <textarea
                 name="treatment_plan"
                 value={formData.treatment_plan}
@@ -554,7 +554,7 @@ const NotesManagement = () => {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Follow-up Instructions</label>
+              <label className="form-label dark:text-gray-200">Follow-up Instructions</label>
               <textarea
                 name="follow_up"
                 value={formData.follow_up}
@@ -565,15 +565,15 @@ const NotesManagement = () => {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Medications</label>
+              <label className="form-label dark:text-gray-200">Medications</label>
 
               <div className="mb-2">
                 {formData.medications.map((med, index) => (
-                  <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded mb-1">
+                  <div key={index} className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 p-2 rounded mb-1">
                     <div>
-                      <span className="font-medium">{med.name}</span>
-                      <span className="text-sm text-gray-600"> - {med.dosage}, {med.frequency}</span>
-                      {med.duration && <span className="text-sm text-gray-600"> for {med.duration}</span>}
+                      <span className="font-medium dark:text-white">{med.name}</span>
+                      <span className="text-sm text-gray-600 dark:text-gray-300"> - {med.dosage}, {med.frequency}</span>
+                      {med.duration && <span className="text-sm text-gray-600 dark:text-gray-300"> for {med.duration}</span>}
                     </div>
                     <button
                       type="button"
@@ -634,7 +634,7 @@ const NotesManagement = () => {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Upload File (optional)</label>
+              <label className="form-label dark:text-gray-200">Upload File (optional)</label>
               <input
                 type="file"
                 onChange={handleFileChange}
@@ -667,12 +667,12 @@ const NotesManagement = () => {
   const renderEditNoteModal = () => {
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
-          <h2 className="text-xl font-bold mb-4">Edit Note</h2>
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto border dark:border-gray-700">
+          <h2 className="text-xl font-bold mb-4 dark:text-white">Edit Note</h2>
 
           <form onSubmit={submitEditNote}>
             <div className="form-group">
-              <label className="form-label">Appointment*</label>
+              <label className="form-label dark:text-gray-200">Appointment*</label>
               <select
                 name="appointment_id"
                 value={formData.appointment_id}
@@ -691,7 +691,7 @@ const NotesManagement = () => {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Diagnosis*</label>
+              <label className="form-label dark:text-gray-200">Diagnosis*</label>
               <textarea
                 name="diagnosis_text"
                 value={formData.diagnosis_text}
@@ -703,7 +703,7 @@ const NotesManagement = () => {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Treatment Plan</label>
+              <label className="form-label dark:text-gray-200">Treatment Plan</label>
               <textarea
                 name="treatment_plan"
                 value={formData.treatment_plan}
@@ -714,7 +714,7 @@ const NotesManagement = () => {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Follow-up Instructions</label>
+              <label className="form-label dark:text-gray-200">Follow-up Instructions</label>
               <textarea
                 name="follow_up"
                 value={formData.follow_up}
@@ -725,15 +725,15 @@ const NotesManagement = () => {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Medications</label>
+              <label className="form-label dark:text-gray-200">Medications</label>
 
               <div className="mb-2">
                 {formData.medications.map((med, index) => (
-                  <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded mb-1">
+                  <div key={index} className="flex items-center justify-between bg-gray-50 dark:bg-gray-700 p-2 rounded mb-1">
                     <div>
-                      <span className="font-medium">{med.name}</span>
-                      <span className="text-sm text-gray-600"> - {med.dosage}, {med.frequency}</span>
-                      {med.duration && <span className="text-sm text-gray-600"> for {med.duration}</span>}
+                      <span className="font-medium dark:text-white">{med.name}</span>
+                      <span className="text-sm text-gray-600 dark:text-gray-300"> - {med.dosage}, {med.frequency}</span>
+                      {med.duration && <span className="text-sm text-gray-600 dark:text-gray-300"> for {med.duration}</span>}
                     </div>
                     <button
                       type="button"
@@ -794,7 +794,7 @@ const NotesManagement = () => {
             </div>
 
             <div className="form-group">
-              <label className="form-label">Upload File (optional)</label>
+              <label className="form-label dark:text-gray-200">Upload File (optional)</label>
               <input
                 type="file"
                 onChange={handleFileChange}
@@ -826,7 +826,7 @@ const NotesManagement = () => {
   return (
     <div className="notes-management">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Notes Management</h1>
+        <h1 className="text-2xl font-bold text-gray-800 dark:text-white">Notes Management</h1>
         <button
           onClick={handleAddNote}
           className="btn btn-primary flex items-center"
@@ -886,8 +886,8 @@ const NotesManagement = () => {
         </div>
 
         {/* Appointment Search Section */}
-        <div className="bg-gray-50 p-3 rounded-lg">
-          <h3 className="text-sm font-medium text-gray-700 mb-2">Search by Appointment</h3>
+        <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
+          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Search by Appointment</h3>
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="search-input-container w-full">
               <input
