@@ -283,6 +283,10 @@ body.dark-mode {
   color: #374151;
 }
 
+:root.dark-mode .form-label {
+  color: #e5e7eb; /* Brighter text in dark mode */
+}
+
 .form-input {
   width: 100%;
   padding: 0.5rem 0.75rem;
@@ -293,9 +297,25 @@ body.dark-mode {
   transition: border-color 0.2s ease;
 }
 
+:root.dark-mode .form-input {
+  background-color: #1e293b; /* Darker background for better contrast */
+  color: #f8fafc; /* Brighter text */
+  border-color: #475569; /* More visible border */
+}
+
+:root.dark-mode select.form-input option {
+  background-color: #1e293b; /* Darker background for options */
+  color: #f8fafc; /* Brighter text */
+}
+
 .form-input::placeholder {
   color: var(--text-muted);
   opacity: 1;
+}
+
+:root.dark-mode .form-input::placeholder {
+  color: #94a3b8; /* Brighter placeholder text */
+  opacity: 0.8;
 }
 
 /* Fix search icon positioning */
@@ -318,17 +338,37 @@ body.dark-mode {
 
 /* Dark mode search input improvements */
 :root.dark-mode .search-input-container .search-icon {
-  color: var(--text-muted);
+  color: #94a3b8; /* Brighter icon color for better visibility */
 }
 
 :root.dark-mode .search-input-container input {
-  background-color: var(--input-bg);
-  color: var(--text-primary);
-  border-color: var(--border-color);
+  background-color: #1e293b; /* Darker background for better contrast */
+  color: #f8fafc; /* Brighter text */
+  border-color: #475569; /* More visible border */
 }
 
 :root.dark-mode .search-input-container input::placeholder {
-  color: var(--text-muted);
+  color: #94a3b8; /* Brighter placeholder text */
+  opacity: 0.8;
+}
+
+/* Improve modal inputs contrast */
+:root.dark-mode .modal-content input,
+:root.dark-mode .modal-content select,
+:root.dark-mode .modal-content textarea {
+  background-color: #1e293b; /* Darker background for better contrast */
+  color: #f8fafc; /* Brighter text */
+  border-color: #475569; /* More visible border */
+}
+
+:root.dark-mode .modal-content select option {
+  background-color: #1e293b; /* Darker background for options */
+  color: #f8fafc; /* Brighter text */
+}
+
+:root.dark-mode .modal-content input::placeholder,
+:root.dark-mode .modal-content textarea::placeholder {
+  color: #94a3b8; /* Brighter placeholder text */
   opacity: 0.8;
 }
 
@@ -336,6 +376,11 @@ body.dark-mode {
   outline: none;
   border-color: #3b82f6;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+:root.dark-mode .form-input:focus {
+  border-color: #60a5fa; /* Brighter blue for better visibility */
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.3); /* More visible focus ring */
 }
 
 /* Button styles */

@@ -440,7 +440,7 @@ const AppointmentManagement = ({ role }) => {
     );
   };
 
-  // Render Today's Appointments in Card View
+  // Render Today's Appointments in Card or List View
   const renderTodayAppointments = () => {
     const todayAppointments = sortedAppointments.filter(appointment => {
       const appointmentDate = new Date(appointment.appointment_date);
@@ -450,72 +450,152 @@ const AppointmentManagement = ({ role }) => {
 
     if (todayAppointments.length === 0) {
       return (
-        <div className="text-center py-8 text-gray-500">
+        <div className="text-center py-8 text-gray-500 dark:text-gray-300">
           No appointments scheduled for today.
         </div>
       );
     }
 
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {todayAppointments.map(appointment => (
-          <div key={appointment._id} className={`dashboard-card p-4 ${appointment.createdBy === 'visitor' ? 'visitor-appointment' : ''} ${appointment.status === 'Completed' ? 'completed-appointment' : ''}`}>
-            <div className="flex items-start justify-between">
-              <div>
-                <h3 className="font-semibold text-gray-800 dark:text-white">{getPatientName(appointment.patient_id)}</h3>
-                <p className="text-sm text-gray-500 dark:text-gray-300">{formatDate(appointment.appointment_date)}</p>
+    // Grid view for today's appointments
+    if (displayMode === 'grid') {
+      return (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {todayAppointments.map(appointment => (
+            <div key={appointment._id} className={`dashboard-card p-4 ${appointment.createdBy === 'visitor' ? 'visitor-appointment' : ''} ${appointment.status === 'Completed' ? 'completed-appointment' : ''}`}>
+              <div className="flex items-start justify-between">
+                <div>
+                  <h3 className="font-semibold text-gray-800 dark:text-white">{getPatientName(appointment.patient_id)}</h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-300">{formatDate(appointment.appointment_date)}</p>
+                </div>
+                <span className={`badge ${
+                  appointment.status === 'Scheduled' ? 'badge-blue' :
+                  appointment.status === 'Completed' ? 'badge-green' :
+                  appointment.status === 'Cancelled' ? 'badge-red' :
+                  appointment.status === 'In-progress' ? 'badge-yellow' : 'badge-gray'
+                }`}>
+                  {appointment.status}
+                </span>
               </div>
-              <span className={`badge ${
-                appointment.status === 'Scheduled' ? 'badge-blue' :
-                appointment.status === 'Completed' ? 'badge-green' :
-                appointment.status === 'Cancelled' ? 'badge-red' :
-                appointment.status === 'In-progress' ? 'badge-yellow' : 'badge-gray'
-              }`}>
-                {appointment.status}
-              </span>
-            </div>
-            <div className="mt-3">
-              <p className="text-sm font-medium text-gray-700 dark:text-gray-200">Type: {appointment.type}</p>
-              {appointment.reason && (
-                <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">Reason: {appointment.reason}</p>
-              )}
-            </div>
-            <div className="mt-3 flex justify-end space-x-2">
-              {appointment.status !== 'Completed' && (
+              <div className="mt-3">
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-200">Type: {appointment.type}</p>
+                {appointment.reason && (
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">Reason: {appointment.reason}</p>
+                )}
+              </div>
+              <div className="mt-3 flex justify-end space-x-2">
+                {appointment.status !== 'Completed' && (
+                  <button
+                    onClick={() => markAppointmentCompleted(appointment._id)}
+                    className="text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300"
+                    title="Mark as Completed"
+                  >
+                    <FaCheck />
+                  </button>
+                )}
+                {appointment.status === 'Completed' && role === 'doctor' && (
+                  <button
+                    onClick={() => handleAddNotes(appointment._id)}
+                    className="text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300"
+                    title="Add Notes"
+                  >
+                    <FaNotesMedical />
+                  </button>
+                )}
                 <button
-                  onClick={() => markAppointmentCompleted(appointment._id)}
-                  className="text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300"
-                  title="Mark as Completed"
+                  onClick={() => handleEditAppointment(appointment)}
+                  className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                  title="Edit Appointment"
                 >
-                  <FaCheck />
+                  <FaEdit />
                 </button>
-              )}
-              {appointment.status === 'Completed' && role === 'doctor' && (
                 <button
-                  onClick={() => handleAddNotes(appointment._id)}
-                  className="text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300"
-                  title="Add Notes"
+                  onClick={() => handleDeleteAppointment(appointment._id)}
+                  className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
+                  title="Delete Appointment"
                 >
-                  <FaNotesMedical />
+                  <FaTrash />
                 </button>
-              )}
-              <button
-                onClick={() => handleEditAppointment(appointment)}
-                className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
-                title="Edit Appointment"
-              >
-                <FaEdit />
-              </button>
-              <button
-                onClick={() => handleDeleteAppointment(appointment._id)}
-                className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
-                title="Delete Appointment"
-              >
-                <FaTrash />
-              </button>
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
+      );
+    }
+
+    // List view (table) for today's appointments
+    return (
+      <div className="overflow-x-auto">
+        <table className="min-w-full bg-white dark:bg-gray-800 rounded-lg overflow-hidden">
+          <thead className="bg-gray-100 dark:bg-gray-700">
+            <tr>
+              <th className="py-3 px-4 text-left text-xs font-medium text-gray-600 dark:text-gray-200 uppercase tracking-wider">Patient</th>
+              <th className="py-3 px-4 text-left text-xs font-medium text-gray-600 dark:text-gray-200 uppercase tracking-wider">Date</th>
+              <th className="py-3 px-4 text-left text-xs font-medium text-gray-600 dark:text-gray-200 uppercase tracking-wider">Type</th>
+              <th className="py-3 px-4 text-left text-xs font-medium text-gray-600 dark:text-gray-200 uppercase tracking-wider">Status</th>
+              <th className="py-3 px-4 text-left text-xs font-medium text-gray-600 dark:text-gray-200 uppercase tracking-wider">Reason</th>
+              <th className="py-3 px-4 text-right text-xs font-medium text-gray-600 dark:text-gray-200 uppercase tracking-wider">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+            {todayAppointments.map((appointment) => (
+              <tr
+                key={appointment._id}
+                className={`hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-white ${appointment.createdBy === 'visitor' ? 'visitor-appointment' : ''} ${appointment.status === 'Completed' ? 'completed-appointment' : ''}`}
+              >
+                <td className="py-3 px-4 whitespace-nowrap dark:text-gray-200">
+                  {getPatientName(appointment.patient_id)}
+                </td>
+                <td className="py-3 px-4 whitespace-nowrap dark:text-gray-200">
+                  {formatDate(appointment.appointment_date)}
+                </td>
+                <td className="py-3 px-4 whitespace-nowrap dark:text-gray-200">
+                  {appointment.type}
+                </td>
+                <td className="py-3 px-4 whitespace-nowrap dark:text-gray-200">
+                  <span className={`status-indicator status-${appointment.status.toLowerCase()}`}></span>
+                  {appointment.status}
+                </td>
+                <td className="py-3 px-4 dark:text-gray-200">
+                  {appointment.reason || 'N/A'}
+                </td>
+                <td className="py-3 px-4 whitespace-nowrap text-right">
+                  {appointment.status !== 'Completed' && (
+                    <button
+                      onClick={() => markAppointmentCompleted(appointment._id)}
+                      className="text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300 mr-3"
+                      title="Mark as Completed"
+                    >
+                      <FaCheck />
+                    </button>
+                  )}
+                  {appointment.status === 'Completed' && role === 'doctor' && (
+                    <button
+                      onClick={() => handleAddNotes(appointment._id)}
+                      className="text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300 mr-3"
+                      title="Add Notes"
+                    >
+                      <FaNotesMedical />
+                    </button>
+                  )}
+                  <button
+                    onClick={() => handleEditAppointment(appointment)}
+                    className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 mr-3"
+                    title="Edit Appointment"
+                  >
+                    <FaEdit />
+                  </button>
+                  <button
+                    onClick={() => handleDeleteAppointment(appointment._id)}
+                    className="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300"
+                    title="Delete Appointment"
+                  >
+                    <FaTrash />
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     );
   };
@@ -524,8 +604,8 @@ const AppointmentManagement = ({ role }) => {
   const renderAddAppointmentModal = () => {
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
-          <h2 className="text-xl font-bold mb-4">Add New Appointment</h2>
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 w-full max-w-md">
+          <h2 className="text-xl font-bold mb-4 dark:text-white">Add New Appointment</h2>
 
           <form onSubmit={submitAddAppointment}>
             <div className="form-group">
@@ -542,11 +622,11 @@ const AppointmentManagement = ({ role }) => {
               </div>
 
               {filteredPatients.length > 0 && (
-                <div className="patient-search-results mb-2 max-h-40 overflow-y-auto border border-gray-200 rounded">
+                <div className="patient-search-results mb-2 max-h-40 overflow-y-auto border border-gray-200 dark:border-gray-600 rounded">
                   {filteredPatients.map(patient => (
                     <div
                       key={patient._id}
-                      className="patient-search-item p-2 hover:bg-gray-100 cursor-pointer"
+                      className="patient-search-item p-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer dark:text-gray-200"
                       onClick={() => selectPatient(patient)}
                     >
                       {patient.name} - {patient.phone}
@@ -674,8 +754,8 @@ const AppointmentManagement = ({ role }) => {
   const renderNewPatientModal = () => {
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
-          <h2 className="text-xl font-bold mb-4">Add New Patient</h2>
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 w-full max-w-md">
+          <h2 className="text-xl font-bold mb-4 dark:text-white">Add New Patient</h2>
 
           <form onSubmit={submitNewPatient}>
             <div className="form-group">
@@ -787,8 +867,8 @@ const AppointmentManagement = ({ role }) => {
   const renderEditAppointmentModal = () => {
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
-          <h2 className="text-xl font-bold mb-4">Edit Appointment</h2>
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 w-full max-w-md">
+          <h2 className="text-xl font-bold mb-4 dark:text-white">Edit Appointment</h2>
 
           <form onSubmit={submitEditAppointment}>
             <div className="form-group">
@@ -805,11 +885,11 @@ const AppointmentManagement = ({ role }) => {
               </div>
 
               {filteredPatients.length > 0 && (
-                <div className="patient-search-results mb-2 max-h-40 overflow-y-auto border border-gray-200 rounded">
+                <div className="patient-search-results mb-2 max-h-40 overflow-y-auto border border-gray-200 dark:border-gray-600 rounded">
                   {filteredPatients.map(patient => (
                     <div
                       key={patient._id}
-                      className="patient-search-item p-2 hover:bg-gray-100 cursor-pointer"
+                      className="patient-search-item p-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer dark:text-gray-200"
                       onClick={() => selectPatient(patient)}
                     >
                       {patient.name} - {patient.phone}
