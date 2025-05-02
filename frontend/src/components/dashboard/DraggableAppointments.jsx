@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import { FaGripVertical, FaCheck, FaTimes, FaEdit, FaNotesMedical, FaArrowUp, FaArrowDown } from 'react-icons/fa';
+import { FaGripVertical, FaCheck, FaTimes, FaEdit, FaNotesMedical, FaArrowUp, FaArrowDown, FaUndo } from 'react-icons/fa';
 import apiService from '../../utils/apiService';
 import './DashboardStyles.css';
 
@@ -12,60 +12,117 @@ const DraggableAppointments = ({ role }) => {
   // Fetch today's appointments
   // Function to fetch appointments
   const fetchAppointments = async () => {
-      try {
-        setLoading(true);
+    try {
+      setLoading(true);
 
-        // Fetch today's appointments
-        const today = new Date().toISOString().split('T')[0];
-        const appointmentsData = await apiService.getAppointments();
+      // Fetch today's appointments
+      const today = new Date().toISOString().split('T')[0];
+      const appointmentsData = await apiService.getAppointments();
 
-        // Filter for today's appointments
-        const todayAppointments = appointmentsData.filter(appointment => {
-          const appointmentDate = appointment.appointment_date
-            ? appointment.appointment_date.split('T')[0]
-            : appointment.date;
-          return appointmentDate === today;
+      // Filter for today's appointments
+      const todayAppointments = appointmentsData.filter(appointment => {
+        const appointmentDate = appointment.appointment_date
+          ? appointment.appointment_date.split('T')[0]
+          : appointment.date;
+        return appointmentDate === today;
+      });
+
+      // Check if there's a saved order in localStorage
+      const savedOrder = localStorage.getItem('appointmentOrder');
+      let customOrder = null;
+
+      if (savedOrder && userHasReordered) {
+        try {
+          customOrder = JSON.parse(savedOrder);
+          console.log('Using saved appointment order from localStorage');
+        } catch (e) {
+          console.error('Error parsing saved appointment order:', e);
+          localStorage.removeItem('appointmentOrder');
+        }
+      }
+
+      let sortedAppointments;
+
+      if (customOrder && customOrder.length > 0) {
+        // Create a map of appointment IDs to their positions
+        const positionMap = new Map(customOrder.map(item => [item.id, item.position]));
+
+        // Sort appointments based on the saved positions
+        sortedAppointments = [...todayAppointments].sort((a, b) => {
+          // First, handle completed appointments (always at the bottom)
+          if (a.status === 'Completed' && b.status !== 'Completed') return 1;
+          if (a.status !== 'Completed' && b.status === 'Completed') return -1;
+
+          // If both are completed or both are not completed, use the custom order
+          const posA = positionMap.get(a._id) || Number.MAX_SAFE_INTEGER;
+          const posB = positionMap.get(b._id) || Number.MAX_SAFE_INTEGER;
+          return posA - posB;
         });
-
-        // Sort appointments - completed ones at the bottom
-        const sortedAppointments = [...todayAppointments].sort((a, b) => {
+      } else {
+        // Default sorting - completed ones at the bottom
+        sortedAppointments = [...todayAppointments].sort((a, b) => {
           if (a.status === 'Completed' && b.status !== 'Completed') return 1;
           if (a.status !== 'Completed' && b.status === 'Completed') return -1;
           return 0;
         });
+      }
 
-        // Add ticket numbers only to scheduled appointments
-        let ticketCounter = 1;
-        const appointmentsWithTickets = sortedAppointments.map(appointment => {
-          if (appointment.status === 'Scheduled') {
-            return {
-              ...appointment,
-              ticketNumber: ticketCounter++
-            };
-          }
+      // Add ticket numbers only to scheduled appointments
+      let ticketCounter = 1;
+      const appointmentsWithTickets = sortedAppointments.map(appointment => {
+        if (appointment.status === 'Scheduled') {
           return {
             ...appointment,
-            ticketNumber: null
+            ticketNumber: ticketCounter++
           };
-        });
+        }
+        return {
+          ...appointment,
+          ticketNumber: null
+        };
+      });
 
-        setAppointments(appointmentsWithTickets);
-      } catch (err) {
-        console.error('Error fetching appointments:', err);
-        setError('Failed to load appointments. Please try again.');
-      } finally {
-        setLoading(false);
-      }
-    };
+      setAppointments(appointmentsWithTickets);
+    } catch (err) {
+      console.error('Error fetching appointments:', err);
+      setError('Failed to load appointments. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Track if user has manually reordered appointments
+  const [userHasReordered, setUserHasReordered] = useState(false);
 
   useEffect(() => {
+    // Initial fetch of appointments
     fetchAppointments();
 
-    // Refresh appointments every 30 seconds
-    const intervalId = setInterval(fetchAppointments, 30000);
+    // Check if there's a saved order in localStorage
+    const savedOrder = localStorage.getItem('appointmentOrder');
+    if (savedOrder) {
+      try {
+        const parsedOrder = JSON.parse(savedOrder);
+        console.log('Found saved appointment order in localStorage:', parsedOrder);
+        setUserHasReordered(true);
+      } catch (e) {
+        console.error('Error parsing saved appointment order:', e);
+        localStorage.removeItem('appointmentOrder');
+      }
+    }
+
+    // Refresh appointments every 30 seconds, but only if user hasn't reordered
+    const intervalId = setInterval(() => {
+      if (!userHasReordered) {
+        console.log('Auto-refreshing appointments (no user reordering detected)');
+        fetchAppointments();
+      } else {
+        console.log('Skipping auto-refresh because user has manually reordered appointments');
+      }
+    }, 30000);
 
     return () => clearInterval(intervalId);
-  }, []);
+  }, [userHasReordered]);
 
   // Handle drag end event
   const handleDragEnd = async (result) => {
@@ -115,8 +172,16 @@ const DraggableAppointments = ({ role }) => {
       }));
 
       try {
-        await apiService.reorderAppointments(orderData);
-        console.log('Appointment order saved successfully');
+        const result = await apiService.reorderAppointments(orderData);
+        console.log('Appointment order saved successfully', result);
+
+        // Mark that user has manually reordered appointments
+        setUserHasReordered(true);
+
+        // If the result indicates it's local only, show a warning
+        if (result._isLocalOnly) {
+          setError('Changes saved locally. The order will be maintained but may reset if you clear your browser data.');
+        }
       } catch (orderError) {
         console.error('Failed to save appointment order:', orderError);
         setError('Failed to save the new appointment order. The visual order will be maintained but may reset on refresh.');
@@ -166,10 +231,28 @@ const DraggableAppointments = ({ role }) => {
 
       setAppointments(finalAppointments);
 
-      // Fetch appointments again after a short delay to ensure backend changes are reflected
-      setTimeout(() => {
-        fetchAppointments();
-      }, 1000);
+      // Update the order data in localStorage to reflect the completed appointment
+      if (userHasReordered) {
+        try {
+          const savedOrder = localStorage.getItem('appointmentOrder');
+          if (savedOrder) {
+            const parsedOrder = JSON.parse(savedOrder);
+            // Update the order to reflect the new status (completed appointments at the bottom)
+            const updatedOrder = finalAppointments.map((appointment, idx) => ({
+              id: appointment._id,
+              position: idx + 1
+            }));
+            localStorage.setItem('appointmentOrder', JSON.stringify(updatedOrder));
+          }
+        } catch (e) {
+          console.error('Error updating saved appointment order:', e);
+        }
+      } else {
+        // Only fetch appointments if user hasn't manually reordered
+        setTimeout(() => {
+          fetchAppointments();
+        }, 1000);
+      }
     } catch (err) {
       console.error('Error completing appointment:', err);
       setError('Failed to complete appointment. Please try again.');
@@ -235,7 +318,15 @@ const DraggableAppointments = ({ role }) => {
         position: idx + 1
       }));
 
-      await apiService.reorderAppointments(orderData);
+      const result = await apiService.reorderAppointments(orderData);
+
+      // Mark that user has manually reordered appointments
+      setUserHasReordered(true);
+
+      // If the result indicates it's local only, show a warning
+      if (result._isLocalOnly) {
+        setError('Changes saved locally. The order will be maintained but may reset if you clear your browser data.');
+      }
     } catch (err) {
       console.error('Error moving appointment up:', err);
       setError('Failed to reorder appointments. Please try again.');
@@ -277,7 +368,15 @@ const DraggableAppointments = ({ role }) => {
         position: idx + 1
       }));
 
-      await apiService.reorderAppointments(orderData);
+      const result = await apiService.reorderAppointments(orderData);
+
+      // Mark that user has manually reordered appointments
+      setUserHasReordered(true);
+
+      // If the result indicates it's local only, show a warning
+      if (result._isLocalOnly) {
+        setError('Changes saved locally. The order will be maintained but may reset if you clear your browser data.');
+      }
     } catch (err) {
       console.error('Error moving appointment down:', err);
       setError('Failed to reorder appointments. Please try again.');
@@ -393,6 +492,14 @@ const DraggableAppointments = ({ role }) => {
     );
   };
 
+  // Reset the custom order and fetch appointments with default order
+  const resetOrder = () => {
+    localStorage.removeItem('appointmentOrder');
+    setUserHasReordered(false);
+    fetchAppointments();
+    setError(null);
+  };
+
   return (
     <div className="draggable-appointments">
       <div className="appointments-header">
@@ -401,6 +508,15 @@ const DraggableAppointments = ({ role }) => {
           <span className="appointments-count">
             {appointments.length} appointments
           </span>
+          {userHasReordered && (
+            <button
+              onClick={resetOrder}
+              className="btn btn-sm btn-outline-secondary ml-2"
+              title="Reset to default order"
+            >
+              <FaUndo className="mr-1" /> Reset Order
+            </button>
+          )}
         </div>
       </div>
 

@@ -489,6 +489,45 @@ body.dark-mode {
   gap: 1rem;
 }
 
+.btn-sm {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  border-radius: 0.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-outline-secondary {
+  color: var(--text-muted);
+  border: 1px solid var(--border-color);
+  background-color: transparent;
+  transition: all 0.2s ease;
+}
+
+.btn-outline-secondary:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+  color: var(--text-primary);
+}
+
+:root.dark-mode .btn-outline-secondary {
+  color: #9ca3af;
+  border-color: #4b5563;
+}
+
+:root.dark-mode .btn-outline-secondary:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #e5e7eb;
+}
+
+.ml-2 {
+  margin-left: 0.5rem;
+}
+
+.mr-1 {
+  margin-right: 0.25rem;
+}
+
 .queue-count, .appointments-count {
   font-weight: 500;
   color: var(--text-secondary);

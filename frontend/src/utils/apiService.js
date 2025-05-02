@@ -937,28 +937,78 @@ const apiService = {
     try {
       console.log('Reordering appointments with data:', appointmentOrder);
 
-      // In a real implementation, this would call an API endpoint to save the order
-      // For now, we'll just return the order as if it was saved successfully
+      // Try multiple approaches to reorder appointments
+      try {
+        // First try: with direct Railway URL
+        const railwayUrl = 'https://clinicmanagementsystem-production-081b.up.railway.app/queue/reorder';
+        console.log('First attempt - Using direct Railway URL for reordering');
+        const response = await fetch(railwayUrl, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            ...authHeader(),
+          },
+          body: JSON.stringify({ queueOrder: appointmentOrder }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Successfully reordered appointments with direct Railway URL:', data);
+          return data;
+        } else {
+          console.warn(`Railway URL attempt failed with status: ${response.status}`);
+        }
+      } catch (firstError) {
+        console.warn('First attempt failed with error:', firstError);
+      }
+
+      // Second try with API prefix
+      try {
+        const baseUrl = API_URL.replace('/api', '');
+        const endpoint = `${baseUrl}/queue/reorder`;
+        console.log('Second attempt - Using queue/reorder endpoint:', endpoint);
+
+        const response = await fetch(endpoint, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            ...authHeader(),
+          },
+          body: JSON.stringify({ queueOrder: appointmentOrder }),
+          credentials: 'include',
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Successfully reordered appointments with API URL:', data);
+          return data;
+        }
+
+        // If not ok, log the error response
+        const errorText = await response.text();
+        console.error('Second attempt failed with status:', response.status, errorText);
+      } catch (secondError) {
+        console.warn('Second attempt failed with error:', secondError);
+      }
+
+      // If all attempts fail, update the appointments in localStorage as a fallback
+      console.log('All API attempts failed, using localStorage fallback for appointment order');
+
+      // Store the order in localStorage
+      const appointmentsInOrder = appointmentOrder.map(item => ({
+        id: item.id,
+        position: item.position
+      }));
+
+      localStorage.setItem('appointmentOrder', JSON.stringify(appointmentsInOrder));
+
+      // Return a mock success response
       return {
         success: true,
-        message: 'Appointments reordered successfully',
-        data: appointmentOrder
+        message: 'Appointments reordered successfully (local only)',
+        data: appointmentOrder,
+        _isLocalOnly: true
       };
-
-      // Example of how this would be implemented with a real API endpoint:
-      /*
-      const baseUrl = API_URL.replace('/api', '');
-      const response = await fetch(`${baseUrl}/appointments/reorder`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...authHeader(),
-        },
-        body: JSON.stringify({ appointmentOrder }),
-        credentials: 'include',
-      });
-      return handleResponse(response);
-      */
     } catch (error) {
       console.error('Error reordering appointments:', error);
       throw error;
