@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useSelector } from 'react-redux';
 import { FaArrowLeft, FaEdit, FaTrash, FaUserPlus, FaCalendarPlus, FaFileMedical } from 'react-icons/fa';
+import AuthContext from '../../context/AuthContext';
 import apiService from '../../utils/apiService';
 import Spinner from '../common/Spinner';
 import Modal from '../common/Modal';
@@ -18,7 +19,14 @@ const PatientView = ({ patient, onBackToPatients }) => {
   const [showAddAppointmentModal, setShowAddAppointmentModal] = useState(false);
   const [appointments, setAppointments] = useState([]);
   const [loadingAppointments, setLoadingAppointments] = useState(false);
-  const { userInfo } = useSelector((state) => state.auth);
+  // Get user info from context as primary source
+  const { userInfo: contextUserInfo } = useContext(AuthContext);
+
+  // Also try to get from Redux as fallback
+  const reduxUserInfo = useSelector((state) => state.auth?.userInfo);
+
+  // Use context userInfo if available, otherwise use Redux userInfo
+  const userInfo = contextUserInfo || reduxUserInfo || { role: 'visitor' };
 
   // Fetch patient appointments when component mounts or patient changes
   useEffect(() => {
@@ -173,7 +181,7 @@ const PatientView = ({ patient, onBackToPatients }) => {
               <FaCalendarPlus className="mr-2" />
               Add Appointment
             </button>
-            {userInfo.role === 'doctor' && (
+            {userInfo?.role === 'doctor' && (
               <button
                 onClick={handleDeletePatient}
                 className="w-full btn btn-outline btn-danger flex items-center justify-center dark:text-red-300 dark:border-red-500 dark:hover:bg-red-900/30"
@@ -219,7 +227,7 @@ const PatientView = ({ patient, onBackToPatients }) => {
           >
             Notes
           </button>
-          {userInfo.role === 'doctor' && (
+          {userInfo?.role === 'doctor' && (
             <button
               className={`inline-block p-4 border-b-2 rounded-t-lg ${
                 activeTab === 'medical'
@@ -307,7 +315,7 @@ const PatientView = ({ patient, onBackToPatients }) => {
                 <span className="hidden sm:inline">Add Appointment</span>
               </button>
             </div>
-            
+
             {loadingAppointments ? (
               <Spinner />
             ) : appointments.length === 0 ? (
@@ -320,7 +328,7 @@ const PatientView = ({ patient, onBackToPatients }) => {
                   <div
                     key={appointment._id}
                     className={`glass-card p-4 rounded-lg ${
-                      appointment.status === 'completed' ? 'border-l-4 border-green-500' : 
+                      appointment.status === 'completed' ? 'border-l-4 border-green-500' :
                       appointment.status === 'scheduled' ? 'border-l-4 border-blue-500' : ''
                     }`}
                   >
@@ -330,8 +338,8 @@ const PatientView = ({ patient, onBackToPatients }) => {
                         <p className="text-sm text-gray-500 dark:text-gray-400">{appointment.reason || 'No reason specified'}</p>
                       </div>
                       <span className={`badge ${
-                        appointment.status === 'completed' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' : 
-                        appointment.status === 'scheduled' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300' : 
+                        appointment.status === 'completed' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' :
+                        appointment.status === 'scheduled' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300' :
                         'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
                       }`}>
                         {appointment.status}
@@ -351,10 +359,10 @@ const PatientView = ({ patient, onBackToPatients }) => {
           <NotesView patientId={patient._id} />
         )}
 
-        {activeTab === 'medical' && userInfo.role === 'doctor' && (
+        {activeTab === 'medical' && userInfo?.role === 'doctor' && (
           <div className="glass-card p-4 rounded-lg">
             <h3 className="font-semibold text-gray-700 dark:text-white mb-4">Medical History</h3>
-            
+
             <div className="mb-6">
               <h4 className="font-medium text-gray-700 dark:text-white mb-2">Medical Conditions</h4>
               {patient.medical_history && patient.medical_history.length > 0 ? (
@@ -367,7 +375,7 @@ const PatientView = ({ patient, onBackToPatients }) => {
                 <p className="text-gray-500 dark:text-gray-400">No medical history recorded</p>
               )}
             </div>
-            
+
             <div className="mb-6">
               <h4 className="font-medium text-gray-700 dark:text-white mb-2">Allergies</h4>
               {patient.allergies && patient.allergies.length > 0 ? (
@@ -380,7 +388,7 @@ const PatientView = ({ patient, onBackToPatients }) => {
                 <p className="text-gray-500 dark:text-gray-400">No allergies recorded</p>
               )}
             </div>
-            
+
             <div>
               <h4 className="font-medium text-gray-700 dark:text-white mb-2">Current Medications</h4>
               {patient.current_medications && patient.current_medications.length > 0 ? (
