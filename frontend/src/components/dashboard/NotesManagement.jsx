@@ -867,7 +867,7 @@ const NotesManagement = () => {
         <h1 className="text-2xl font-bold text-gray-800 dark:text-white">Notes Management</h1>
         <button
           onClick={handleAddNote}
-          className="btn btn-primary flex items-center"
+          className="btn btn-primary flex items-center dark:bg-blue-700 dark:hover:bg-blue-600"
         >
           <FaFileMedical className="mr-2" />
           Add Note
@@ -875,18 +875,18 @@ const NotesManagement = () => {
       </div>
 
       {error && (
-        <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 flex items-center justify-between">
+        <div className="bg-red-100 dark:bg-red-900/30 border-l-4 border-red-500 text-red-700 dark:text-red-400 p-4 mb-4 flex items-center justify-between">
           <div>
-            <p className="font-medium">{error}</p>
+            <p className="font-medium dark:text-red-300">{error}</p>
             {error.includes('No appointments') && (
-              <p className="text-sm mt-1">
+              <p className="text-sm mt-1 dark:text-red-200">
                 Go to the Appointments tab to create an appointment first, then mark it as completed before adding notes.
               </p>
             )}
           </div>
           <button
             onClick={() => setError(null)}
-            className="text-red-700 hover:text-red-900"
+            className="text-red-700 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300"
             aria-label="Dismiss error"
           >
             &times;
@@ -900,18 +900,18 @@ const NotesManagement = () => {
             <input
               type="text"
               placeholder="Search notes..."
-              className="form-input w-full"
+              className="form-input w-full dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
-            <FaSearch className="search-icon" />
+            <FaSearch className="search-icon dark:text-gray-400" />
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
             <select
               value={filterPatient}
               onChange={(e) => setFilterPatient(e.target.value)}
-              className="form-input w-full"
+              className="form-input w-full dark:bg-gray-700 dark:text-white dark:border-gray-600"
             >
               <option value="all">All Patients</option>
               {patients.map(patient => (
@@ -923,50 +923,7 @@ const NotesManagement = () => {
           </div>
         </div>
 
-        {/* Appointment Search Section */}
-        <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
-          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Search by Appointment</h3>
-          <div className="flex flex-col sm:flex-row gap-3">
-            <div className="search-input-container w-full">
-              <input
-                type="text"
-                placeholder="Search appointments..."
-                className="form-input w-full"
-                onChange={(e) => {
-                  const searchTerm = e.target.value.toLowerCase();
-                  if (searchTerm === '') {
-                    setFilterAppointment('all');
-                  } else {
-                    // Find matching appointment
-                    const matchingAppointment = appointments.find(appointment => {
-                      const patientName = getPatientName(appointment).toLowerCase();
-                      const appointmentDate = new Date(appointment.appointment_date).toLocaleDateString().toLowerCase();
-                      return patientName.includes(searchTerm) || appointmentDate.includes(searchTerm);
-                    });
 
-                    if (matchingAppointment) {
-                      setFilterAppointment(matchingAppointment._id);
-                    }
-                  }
-                }}
-              />
-              <FaSearch className="search-icon" />
-            </div>
-
-            <select
-              value={filterAppointment}
-              onChange={(e) => setFilterAppointment(e.target.value)}
-              className="form-input w-full sm:w-auto"
-            >
-              <option value="all">All Appointments</option>
-              {appointments.map(appointment => (
-                <option key={appointment._id} value={appointment._id}>
-                  {getPatientName(appointment)} - {new Date(appointment.appointment_date).toLocaleDateString()}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
       </div>
 
       {loading ? (

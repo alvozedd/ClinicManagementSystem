@@ -96,6 +96,20 @@ const integratedAppointmentSchema = mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'IntegratedAppointment',
     },
+
+    // Queue management fields
+    queue_number: {
+      type: Number,
+      default: 0
+    },
+    queue_position: {
+      type: Number,
+      default: 0
+    },
+    in_queue: {
+      type: Boolean,
+      default: false
+    },
   },
   {
     timestamps: true,
@@ -107,6 +121,7 @@ integratedAppointmentSchema.index({ scheduled_date: 1 });
 integratedAppointmentSchema.index({ patient_id: 1 });
 integratedAppointmentSchema.index({ status: 1 });
 integratedAppointmentSchema.index({ appointment_time: 1 });
+integratedAppointmentSchema.index({ in_queue: 1, queue_position: 1 });
 
 // Virtual for patient's age at time of appointment
 integratedAppointmentSchema.virtual('patientInfo', {
@@ -215,6 +230,63 @@ integratedAppointmentSchema.methods.rescheduleAppointment = async function(newDa
   await this.save();
 
   return newAppointment;
+};
+
+// Method to add appointment to queue
+integratedAppointmentSchema.methods.addToQueue = async function(queueNumber) {
+  // Only scheduled appointments can be added to the queue
+  if (this.status !== 'Scheduled' && this.status !== 'Rescheduled') {
+    throw new Error(`Cannot add appointment with status ${this.status} to queue`);
+  }
+
+  // Update queue fields
+  this.in_queue = true;
+  this.queue_number = queueNumber;
+  this.status = 'Checked-in';
+  this.check_in_time = new Date();
+
+  return this.save();
+};
+
+// Method to remove appointment from queue
+integratedAppointmentSchema.methods.removeFromQueue = async function() {
+  // Only appointments in the queue can be removed
+  if (!this.in_queue) {
+    throw new Error('Appointment is not in the queue');
+  }
+
+  // Update queue fields
+  this.in_queue = false;
+  this.queue_position = 0;
+
+  return this.save();
+};
+
+// Static method to get today's queue
+integratedAppointmentSchema.statics.getTodayQueue = async function() {
+  const today = new Date();
+  const startOfDay = new Date(today.setHours(0, 0, 0, 0));
+  const endOfDay = new Date(today.setHours(23, 59, 59, 999));
+
+  return this.find({
+    scheduled_date: { $gte: startOfDay, $lte: endOfDay },
+    in_queue: true
+  })
+  .sort({ queue_position: 1 })
+  .populate('patient_id', 'name gender phone year_of_birth');
+};
+
+// Static method to reorder queue
+integratedAppointmentSchema.statics.reorderQueue = async function(queueOrder) {
+  // queueOrder is an array of { id, position } objects
+  const bulkOps = queueOrder.map(item => ({
+    updateOne: {
+      filter: { _id: item.id },
+      update: { queue_position: item.position }
+    }
+  }));
+
+  return this.bulkWrite(bulkOps);
 };
 
 const IntegratedAppointment = mongoose.model('IntegratedAppointment', integratedAppointmentSchema);

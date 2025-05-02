@@ -1,7 +1,7 @@
 import { useState, useContext, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import AuthContext from '../../context/AuthContext';
-import { FaHome, FaSignOutAlt, FaUser, FaCalendarAlt, FaUsers, FaCog, FaFileAlt, FaClipboardList, FaListOl } from 'react-icons/fa';
+import { FaHome, FaSignOutAlt, FaUser, FaCalendarAlt, FaUsers, FaCog, FaFileAlt, FaClipboardList } from 'react-icons/fa';
 import './DashboardStyles.css';
 import DarkModeToggle from './DarkModeToggle';
 
@@ -26,7 +26,6 @@ const DashboardLayout = ({ children, activeTab, setActiveTab, role }) => {
     const commonItems = [
       { id: 'patients', label: 'Patients', icon: <FaUsers className="text-blue-500" /> },
       { id: 'appointments', label: 'Appointments', icon: <FaCalendarAlt className="text-green-600 dark:text-green-400" /> },
-      { id: 'queue', label: 'Queue', icon: <FaListOl className="text-amber-500" /> },
       { id: 'calendar', label: 'Calendar', icon: <FaCalendarAlt className="text-purple-500" /> },
     ];
 

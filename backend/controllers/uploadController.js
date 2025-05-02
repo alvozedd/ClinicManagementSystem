@@ -3,17 +3,6 @@ const path = require('path');
 const fs = require('fs');
 const logger = require('../utils/logger');
 
-// Ensure uploads directory exists
-const uploadsDir = path.join(__dirname, '../uploads');
-if (!fs.existsSync(uploadsDir)) {
-  try {
-    fs.mkdirSync(uploadsDir, { recursive: true });
-    logger.info(`Created uploads directory: ${uploadsDir}`);
-  } catch (error) {
-    logger.error(`Failed to create uploads directory: ${error.message}`);
-  }
-}
-
 // @desc    Upload a file
 // @route   POST /api/uploads
 // @access  Private/Doctor

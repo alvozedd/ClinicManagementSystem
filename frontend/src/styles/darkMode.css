@@ -34,6 +34,12 @@
   border-color: var(--bg-tertiary);
 }
 
+/* Visitor appointment styling for dark mode */
+.dark-mode .visitor-appointment {
+  background-color: rgba(253, 230, 138, 0.1); /* Subtle yellow in dark mode */
+  border-left: 3px solid #D97706; /* Darker amber for better contrast */
+}
+
 /* Improved contrast for form elements */
 .dark-mode input,
 .dark-mode select,

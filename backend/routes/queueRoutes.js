@@ -3,23 +3,31 @@ const router = express.Router();
 const {
   getTodayQueue,
   addToQueue,
+  removeFromQueue,
   reorderQueue,
-  completeQueueAppointment,
-  removeFromQueue
+  resetQueue
 } = require('../controllers/queueController');
-const { protect, doctor, secretary, doctorOrSecretary } = require('../middleware/authMiddleware');
+const { protect, doctorOrSecretary } = require('../middleware/authMiddleware');
 const { apiLimiter } = require('../middleware/rateLimitMiddleware');
 
-// Apply protection middleware to all routes
+// All queue routes are protected and require doctor or secretary role
 router.use(protect);
 router.use(doctorOrSecretary);
 router.use(apiLimiter);
 
-// Queue routes
+// Get today's queue
 router.get('/today', getTodayQueue);
-router.post('/add', addToQueue);
+
+// Add appointment to queue
+router.post('/add/:id', addToQueue);
+
+// Remove appointment from queue
+router.delete('/remove/:id', removeFromQueue);
+
+// Reorder queue
 router.put('/reorder', reorderQueue);
-router.put('/complete', completeQueueAppointment);
-router.delete('/remove', removeFromQueue);
+
+// Reset queue (clear all queue positions)
+router.post('/reset', resetQueue);
 
 module.exports = router;

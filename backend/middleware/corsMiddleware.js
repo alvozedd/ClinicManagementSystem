@@ -75,15 +75,9 @@ const corsMiddleware = (req, res, next) => {
 
   // Always allow the requesting origin
   if (origin) {
-    // Check if origin is in allowed list or if we're allowing all origins
-    if (allowedOrigins.includes(origin) || ALLOW_ALL_ORIGINS) {
-      res.header('Access-Control-Allow-Origin', origin);
-      if (DEBUG_CORS) console.log(`Setting Access-Control-Allow-Origin: ${origin}`);
-    } else {
-      // For non-allowed origins, still set the header to prevent CORS errors in development
-      res.header('Access-Control-Allow-Origin', origin);
-      if (DEBUG_CORS) console.log(`Warning: Allowing non-whitelisted origin: ${origin}`);
-    }
+    // Always set the origin to the requesting origin
+    res.header('Access-Control-Allow-Origin', origin);
+    if (DEBUG_CORS) console.log(`Setting Access-Control-Allow-Origin: ${origin}`);
   } else {
     // No origin in request, set to wildcard
     res.header('Access-Control-Allow-Origin', '*');

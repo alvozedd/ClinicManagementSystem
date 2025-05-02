@@ -107,7 +107,7 @@ function LoginForm() {
         }
       }
 
-      // Approach 3: Try with Railway deployed backend directly (no credentials to avoid CORS issues)
+      // Approach 3: Try with Railway deployed backend directly (with credentials)
       if (!loginSuccess) {
         try {
           console.log('Approach 3: Direct fetch to Railway backend');
@@ -115,7 +115,8 @@ function LoginForm() {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, password }),
-            // Omit credentials to avoid CORS preflight issues
+            // Include credentials for proper authentication
+            credentials: 'include',
             mode: 'cors'
           });
 

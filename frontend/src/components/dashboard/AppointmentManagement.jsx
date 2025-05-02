@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { FaCalendarPlus, FaSearch, FaEdit, FaTrash, FaFilter, FaCalendarAlt, FaUserPlus, FaCheck, FaFileMedical, FaNotesMedical, FaThLarge, FaList } from 'react-icons/fa';
+import { FaCalendarPlus, FaSearch, FaEdit, FaTrash, FaUserPlus, FaCheck, FaNotesMedical, FaThLarge, FaList, FaUserClock } from 'react-icons/fa';
 import apiService from '../../utils/apiService';
 import './DashboardStyles.css';
+import QueueList from './QueueList';
 
 const AppointmentManagement = ({ role }) => {
   const [appointments, setAppointments] = useState([]);
@@ -13,8 +14,8 @@ const AppointmentManagement = ({ role }) => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [currentAppointment, setCurrentAppointment] = useState(null);
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const [viewMode, setViewMode] = useState('today'); // 'today', 'all', 'calendar'
+  // Removed unused selectedDate state
+  const [viewMode, setViewMode] = useState('today'); // 'today', 'all', 'queue'
   const [displayMode, setDisplayMode] = useState('grid'); // 'grid' or 'list'
   const [patientSearchTerm, setPatientSearchTerm] = useState('');
   const [showNewPatientModal, setShowNewPatientModal] = useState(false);
@@ -1072,6 +1073,13 @@ const AppointmentManagement = ({ role }) => {
               {appointments.length}
             </span>
           </button>
+          <button
+            onClick={() => setViewMode('queue')}
+            className={`tab-button ${viewMode === 'queue' ? 'active' : ''} relative`}
+          >
+            <FaUserClock className="mr-1" />
+            Queue Management
+          </button>
           <div className="flex items-center ml-auto">
             {(viewMode === 'today' || viewMode === 'all') && (
               <div className="flex border rounded overflow-hidden mr-4">
@@ -1110,7 +1118,9 @@ const AppointmentManagement = ({ role }) => {
         </div>
       ) : (
         <>
-          {viewMode === 'today' ? renderTodayAppointments() : renderAppointmentList()}
+          {viewMode === 'today' ? renderTodayAppointments() :
+           viewMode === 'all' ? renderAppointmentList() :
+           viewMode === 'queue' ? <QueueList role={role} /> : null}
         </>
       )}
 

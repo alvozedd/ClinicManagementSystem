@@ -1264,11 +1264,10 @@ const apiService = {
     }
   },
 
-  // Queue management endpoints
+  // Queue management functions
   getTodayQueue: async () => {
     try {
       console.log('Fetching today\'s queue');
-
       return await secureFetch(`${API_URL}/queue/today`, {
         method: 'GET',
         headers: {
@@ -1281,23 +1280,20 @@ const apiService = {
         credentials: 'include'
       });
     } catch (error) {
-      console.error('Error fetching queue:', error);
-      // Return empty queue data instead of throwing to prevent UI errors
-      return { queue: { appointments: [] }, availableAppointments: [] };
+      console.error('Error fetching today\'s queue:', error);
+      return []; // Return empty array instead of throwing
     }
   },
 
   addToQueue: async (appointmentId) => {
     try {
       console.log(`Adding appointment ${appointmentId} to queue`);
-
-      return await secureFetch(`${API_URL}/queue/add`, {
+      return await secureFetch(`${API_URL}/queue/add/${appointmentId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           ...authHeader()
         },
-        body: JSON.stringify({ appointmentId }),
         credentials: 'include'
       });
     } catch (error) {
@@ -1306,17 +1302,33 @@ const apiService = {
     }
   },
 
-  reorderQueue: async (appointmentIds) => {
+  removeFromQueue: async (appointmentId) => {
     try {
-      console.log('Reordering queue with appointment IDs:', appointmentIds);
+      console.log(`Removing appointment ${appointmentId} from queue`);
+      return await secureFetch(`${API_URL}/queue/remove/${appointmentId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeader()
+        },
+        credentials: 'include'
+      });
+    } catch (error) {
+      console.error('Error removing from queue:', error);
+      throw error;
+    }
+  },
 
+  reorderQueue: async (queueOrder) => {
+    try {
+      console.log('Reordering queue:', queueOrder);
       return await secureFetch(`${API_URL}/queue/reorder`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           ...authHeader()
         },
-        body: JSON.stringify({ appointmentIds }),
+        body: JSON.stringify({ queueOrder }),
         credentials: 'include'
       });
     } catch (error) {
@@ -1325,40 +1337,19 @@ const apiService = {
     }
   },
 
-  completeQueueAppointment: async (appointmentId) => {
+  resetQueue: async () => {
     try {
-      console.log(`Marking appointment ${appointmentId} as completed in queue`);
-
-      return await secureFetch(`${API_URL}/queue/complete`, {
-        method: 'PUT',
+      console.log('Resetting queue');
+      return await secureFetch(`${API_URL}/queue/reset`, {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           ...authHeader()
         },
-        body: JSON.stringify({ appointmentId }),
         credentials: 'include'
       });
     } catch (error) {
-      console.error('Error completing queue appointment:', error);
-      throw error;
-    }
-  },
-
-  removeFromQueue: async (appointmentId) => {
-    try {
-      console.log(`Removing appointment ${appointmentId} from queue`);
-
-      return await secureFetch(`${API_URL}/queue/remove`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          ...authHeader()
-        },
-        body: JSON.stringify({ appointmentId }),
-        credentials: 'include'
-      });
-    } catch (error) {
-      console.error('Error removing from queue:', error);
+      console.error('Error resetting queue:', error);
       throw error;
     }
   },

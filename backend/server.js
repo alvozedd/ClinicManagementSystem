@@ -10,15 +10,14 @@ const { addRequestId } = require('./middleware/requestIdMiddleware');
 const { conditionalRequestLogger } = require('./middleware/requestLoggingMiddleware');
 const { corsMiddleware, allowedHeaders, allowedMethods } = require('./middleware/corsMiddleware');
 const { checkRequiredEnvVars } = require('./utils/checkEnv');
-const ensureDirectories = require('./utils/ensureDirectories');
 const userRoutes = require('./routes/userRoutes');
 const patientRoutes = require('./routes/patientRoutes');
 const appointmentRoutes = require('./routes/appointmentRoutes');
 const diagnosisRoutes = require('./routes/diagnosisRoutes');
 const contentRoutes = require('./routes/contentRoutes');
 const integratedAppointmentRoutes = require('./routes/integratedAppointmentRoutes');
-const uploadRoutes = require('./routes/uploadRoutes');
 const queueRoutes = require('./routes/queueRoutes');
+const uploadRoutes = require('./routes/uploadRoutes');
 const testRoutes = require('./routes/testRoutes');
 
 // Load environment variables
@@ -36,9 +35,6 @@ if (process.env.NODE_ENV === 'production') {
 
 // Check required environment variables
 checkRequiredEnvVars();
-
-// Ensure required directories exist
-ensureDirectories();
 
 // Connect to MongoDB
 connectDB();
@@ -168,8 +164,8 @@ app.use('/api/appointments', appointmentRoutes);
 app.use('/api/diagnoses', diagnosisRoutes);
 app.use('/api/content', contentRoutes);
 app.use('/api/integrated-appointments', integratedAppointmentRoutes);
-app.use('/api/uploads', uploadRoutes);
 app.use('/api/queue', queueRoutes);
+app.use('/api/uploads', uploadRoutes);
 
 // Test routes - no authentication required
 app.use('/', testRoutes);
@@ -780,7 +776,56 @@ app.delete('/content/:id', (req, res) => {
   });
 });
 
-// Queue routes have been removed
+// Queue routes
+app.get('/queue/today', addCorsHeaders, (req, res) => {
+  console.log('Received GET request at /queue/today, forwarding to controller directly');
+  // Import the controller directly
+  const { getTodayQueue } = require('./controllers/queueController');
+  // Add authentication middleware manually
+  const { protect, doctorOrSecretary } = require('./middleware/authMiddleware');
+  // Call middleware then controller
+  protect(req, res, () => doctorOrSecretary(req, res, () => getTodayQueue(req, res)));
+});
+
+app.post('/queue/add/:id', addCorsHeaders, (req, res) => {
+  console.log('Received POST request at /queue/add/:id, forwarding to controller directly');
+  // Import the controller directly
+  const { addToQueue } = require('./controllers/queueController');
+  // Add authentication middleware manually
+  const { protect, doctorOrSecretary } = require('./middleware/authMiddleware');
+  // Call middleware then controller
+  protect(req, res, () => doctorOrSecretary(req, res, () => addToQueue(req, res)));
+});
+
+app.delete('/queue/remove/:id', addCorsHeaders, (req, res) => {
+  console.log('Received DELETE request at /queue/remove/:id, forwarding to controller directly');
+  // Import the controller directly
+  const { removeFromQueue } = require('./controllers/queueController');
+  // Add authentication middleware manually
+  const { protect, doctorOrSecretary } = require('./middleware/authMiddleware');
+  // Call middleware then controller
+  protect(req, res, () => doctorOrSecretary(req, res, () => removeFromQueue(req, res)));
+});
+
+app.put('/queue/reorder', addCorsHeaders, (req, res) => {
+  console.log('Received PUT request at /queue/reorder, forwarding to controller directly');
+  // Import the controller directly
+  const { reorderQueue } = require('./controllers/queueController');
+  // Add authentication middleware manually
+  const { protect, doctorOrSecretary } = require('./middleware/authMiddleware');
+  // Call middleware then controller
+  protect(req, res, () => doctorOrSecretary(req, res, () => reorderQueue(req, res)));
+});
+
+app.post('/queue/reset', addCorsHeaders, (req, res) => {
+  console.log('Received POST request at /queue/reset, forwarding to controller directly');
+  // Import the controller directly
+  const { resetQueue } = require('./controllers/queueController');
+  // Add authentication middleware manually
+  const { protect, doctorOrSecretary } = require('./middleware/authMiddleware');
+  // Call middleware then controller
+  protect(req, res, () => doctorOrSecretary(req, res, () => resetQueue(req, res)));
+});
 
 // Root route
 app.get('/', (req, res) => {
@@ -797,4 +842,21 @@ const server = app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 
-// Queue-related cron jobs have been removed
+// Automatically reset queue at midnight
+const cron = require('node-cron');
+const IntegratedAppointment = require('./models/integratedAppointmentModel');
+
+// Schedule a task to run at midnight every day
+cron.schedule('0 0 * * *', async () => {
+  console.log('Running scheduled task: Resetting queue at midnight');
+  try {
+    // Reset all queue positions
+    await IntegratedAppointment.updateMany(
+      { in_queue: true },
+      { in_queue: false, queue_position: 0 }
+    );
+    console.log('Queue reset successfully');
+  } catch (error) {
+    console.error('Error resetting queue:', error);
+  }
+});

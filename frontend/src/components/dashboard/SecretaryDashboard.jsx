@@ -7,7 +7,6 @@ import apiService from '../../utils/apiService';
 import PatientManagement from './PatientManagement';
 import AppointmentManagement from './AppointmentManagement';
 import CalendarManagement from './CalendarManagement';
-import QueueManagement from './QueueManagement';
 import './DashboardStyles.css';
 
 const SecretaryDashboard = () => {
@@ -18,7 +17,7 @@ const SecretaryDashboard = () => {
   const getInitialTab = () => {
     const params = new URLSearchParams(location.search);
     const tab = params.get('tab');
-    return tab && ['patients', 'appointments', 'calendar', 'queue'].includes(tab) ? tab : 'patients';
+    return tab && ['patients', 'appointments', 'calendar'].includes(tab) ? tab : 'patients';
   };
 
   const [activeTab, setActiveTab] = useState(getInitialTab());
@@ -134,10 +133,6 @@ const SecretaryDashboard = () => {
 
       {activeTab === 'calendar' && (
         <CalendarManagement role="secretary" />
-      )}
-
-      {activeTab === 'queue' && (
-        <QueueManagement role="secretary" />
       )}
     </DashboardLayout>
   );

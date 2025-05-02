@@ -50,6 +50,7 @@ export const makeApiRequest = async (path, options = {}, requiresAuth = true) =>
         ...options,
         headers,
         mode: 'cors',
+        credentials: 'include',
         cache: 'no-cache'
       });
 
