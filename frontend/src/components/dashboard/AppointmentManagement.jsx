@@ -695,9 +695,10 @@ const AppointmentManagement = ({ role }) => {
                 type="button"
                 onClick={handleAddNewPatient}
                 className="btn btn-outline-primary w-full flex items-center justify-center"
+                title="Add New Patient"
               >
-                <FaUserPlus className="mr-2" />
-                New Patient
+                <FaUserPlus className="sm:mr-2" />
+                <span className="hidden sm:inline">New Patient</span>
               </button>
             </div>
 
@@ -1052,9 +1053,10 @@ const AppointmentManagement = ({ role }) => {
         <button
           onClick={handleAddAppointment}
           className="btn btn-primary flex items-center dark:bg-blue-700 dark:hover:bg-blue-600"
+          title="Add Appointment"
         >
-          <FaCalendarPlus className="mr-2" />
-          Add Appointment
+          <FaCalendarPlus className="sm:mr-2" />
+          <span className="hidden sm:inline">Add Appointment</span>
         </button>
       </div>
 

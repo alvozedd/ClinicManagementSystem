@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { FaFileMedical, FaSearch, FaEdit, FaTrash, FaDownload, FaUpload, FaFilter } from 'react-icons/fa';
+import { FaFileMedical, FaSearch, FaEdit, FaTrash, FaDownload, FaUpload, FaFilter, FaPills } from 'react-icons/fa';
 import apiService from '../../utils/apiService';
 import './DashboardStyles.css';
 
@@ -673,9 +673,11 @@ const NotesManagement = () => {
               <button
                 type="button"
                 onClick={handleAddMedication}
-                className="btn btn-outline-primary w-full"
+                className="btn btn-outline-primary w-full flex items-center justify-center"
+                title="Add Medication"
               >
-                Add Medication
+                <FaPills className="sm:mr-2" />
+                <span className="hidden sm:inline">Add Medication</span>
               </button>
             </div>
 
@@ -833,9 +835,11 @@ const NotesManagement = () => {
               <button
                 type="button"
                 onClick={handleAddMedication}
-                className="btn btn-outline-primary w-full"
+                className="btn btn-outline-primary w-full flex items-center justify-center"
+                title="Add Medication"
               >
-                Add Medication
+                <FaPills className="sm:mr-2" />
+                <span className="hidden sm:inline">Add Medication</span>
               </button>
             </div>
 
@@ -876,9 +880,10 @@ const NotesManagement = () => {
         <button
           onClick={handleAddNote}
           className="btn btn-primary flex items-center dark:bg-blue-700 dark:hover:bg-blue-600"
+          title="Add Note"
         >
-          <FaFileMedical className="mr-2" />
-          Add Note
+          <FaFileMedical className="sm:mr-2" />
+          <span className="hidden sm:inline">Add Note</span>
         </button>
       </div>
 

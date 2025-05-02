@@ -760,9 +760,10 @@ const PatientManagement = ({ role, selectedPatient, onSelectPatient, onBackToPat
             <button
               onClick={handleAddPatient}
               className="btn btn-primary flex items-center dark:bg-blue-700 dark:hover:bg-blue-600"
+              title="Add Patient"
             >
-              <FaUserPlus className="mr-2" />
-              Add Patient
+              <FaUserPlus className="sm:mr-2" />
+              <span className="hidden sm:inline">Add Patient</span>
             </button>
           </div>
 
