@@ -29,8 +29,7 @@ const DashboardLayout = ({ children, activeTab, setActiveTab, role }) => {
     if (role === 'admin') {
       return [
         { id: 'users', label: 'Users', icon: <FaUser className="text-purple-500" /> },
-        { id: 'content', label: 'Content', icon: <FaFileAlt className="text-yellow-500" /> },
-        ...commonItems
+        { id: 'content', label: 'Content', icon: <FaFileAlt className="text-yellow-500" /> }
       ];
     } else if (role === 'doctor') {
       return [
@@ -60,7 +59,7 @@ const DashboardLayout = ({ children, activeTab, setActiveTab, role }) => {
       {isMobile && (
         <header className="mobile-header bg-white shadow-sm p-4 flex justify-between items-center">
           <div className="flex items-center">
-            <button 
+            <button
               onClick={toggleMenu}
               className="mr-4 text-gray-700 focus:outline-none"
             >
@@ -85,7 +84,7 @@ const DashboardLayout = ({ children, activeTab, setActiveTab, role }) => {
           {isMobile && menuOpen && (
             <div className="absolute inset-0 bg-black opacity-50 z-40" onClick={toggleMenu}></div>
           )}
-          
+
           <div className={`sidebar-content ${isMobile ? 'z-50 relative bg-white h-full w-64' : ''} p-4 flex flex-col h-full`}>
             {!isMobile && (
               <div className="sidebar-header mb-8 flex items-center">
@@ -98,7 +97,7 @@ const DashboardLayout = ({ children, activeTab, setActiveTab, role }) => {
                 </div>
               </div>
             )}
-            
+
             <nav className="flex-1">
               <ul className="space-y-2">
                 {navItems.map((item) => (
@@ -121,7 +120,7 @@ const DashboardLayout = ({ children, activeTab, setActiveTab, role }) => {
                 ))}
               </ul>
             </nav>
-            
+
             <div className="sidebar-footer mt-auto pt-4 border-t border-gray-200">
               <button
                 onClick={handleLogout}

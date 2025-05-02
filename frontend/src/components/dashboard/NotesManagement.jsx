@@ -100,7 +100,7 @@ const NotesManagement = () => {
           { ...medicationInput }
         ]
       });
-      
+
       // Reset medication input
       setMedicationInput({
         name: '',
@@ -134,13 +134,13 @@ const NotesManagement = () => {
 
   const handleEditNote = (note) => {
     setCurrentNote(note);
-    
+
     // Parse the diagnosis text to extract structured data if available
     let diagnosisText = note.diagnosis_text;
     let treatmentPlan = '';
     let followUp = '';
     let medications = [];
-    
+
     // Check if the diagnosis text contains structured data
     if (note.diagnosis && typeof note.diagnosis === 'object') {
       diagnosisText = note.diagnosis.text || diagnosisText;
@@ -148,7 +148,7 @@ const NotesManagement = () => {
       followUp = note.diagnosis.follow_up_instructions || '';
       medications = note.diagnosis.medications || [];
     }
-    
+
     setFormData({
       appointment_id: note.appointment_id._id || note.appointment_id,
       diagnosis_text: diagnosisText,
@@ -156,7 +156,7 @@ const NotesManagement = () => {
       follow_up: followUp,
       medications: medications
     });
-    
+
     setShowEditModal(true);
   };
 
@@ -186,25 +186,25 @@ const NotesManagement = () => {
         follow_up_instructions: formData.follow_up,
         medications: formData.medications
       };
-      
+
       // Create note with structured data
       const noteData = {
         appointment_id: formData.appointment_id,
         diagnosis_text: formData.diagnosis_text,
         diagnosis: diagnosisData
       };
-      
+
       await apiService.createDiagnosis(noteData);
-      
+
       // If there's a file, upload it
       if (selectedFile) {
         const formData = new FormData();
         formData.append('file', selectedFile);
         formData.append('appointment_id', noteData.appointment_id);
-        
+
         await apiService.uploadFile(formData);
       }
-      
+
       setShowAddModal(false);
       fetchNotes();
       fetchAppointments(); // Refresh appointments to update status
@@ -224,25 +224,25 @@ const NotesManagement = () => {
         follow_up_instructions: formData.follow_up,
         medications: formData.medications
       };
-      
+
       // Create note with structured data
       const noteData = {
         appointment_id: formData.appointment_id,
         diagnosis_text: formData.diagnosis_text,
         diagnosis: diagnosisData
       };
-      
+
       await apiService.updateDiagnosis(currentNote._id, noteData);
-      
+
       // If there's a file, upload it
       if (selectedFile) {
         const formData = new FormData();
         formData.append('file', selectedFile);
         formData.append('appointment_id', noteData.appointment_id);
-        
+
         await apiService.uploadFile(formData);
       }
-      
+
       setShowEditModal(false);
       fetchNotes();
     } catch (err) {
@@ -253,18 +253,18 @@ const NotesManagement = () => {
 
   // Filter notes based on search term and patient filter
   const filteredNotes = notes.filter(note => {
-    const patientName = note.appointment_id && note.appointment_id.patient_id && 
-      typeof note.appointment_id.patient_id === 'object' 
-        ? note.appointment_id.patient_id.name 
+    const patientName = note.appointment_id && note.appointment_id.patient_id &&
+      typeof note.appointment_id.patient_id === 'object'
+        ? note.appointment_id.patient_id.name
         : '';
-    
+
     const matchesSearch = patientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (note.diagnosis_text && note.diagnosis_text.toLowerCase().includes(searchTerm.toLowerCase()));
-    
-    const matchesPatient = filterPatient === 'all' || 
-      (note.appointment_id && note.appointment_id.patient_id && 
+
+    const matchesPatient = filterPatient === 'all' ||
+      (note.appointment_id && note.appointment_id.patient_id &&
        note.appointment_id.patient_id._id === filterPatient);
-    
+
     return matchesSearch && matchesPatient;
   });
 
@@ -282,11 +282,11 @@ const NotesManagement = () => {
   // Get patient name from appointment
   const getPatientName = (appointment) => {
     if (!appointment) return 'Unknown Patient';
-    
+
     if (appointment.patient_id && typeof appointment.patient_id === 'object') {
       return appointment.patient_id.name;
     }
-    
+
     const patient = patients.find(p => p._id === appointment.patient_id);
     return patient ? patient.name : 'Unknown Patient';
   };
@@ -356,7 +356,7 @@ const NotesManagement = () => {
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
           <h2 className="text-xl font-bold mb-4">Add New Note</h2>
-          
+
           <form onSubmit={submitAddNote}>
             <div className="form-group">
               <label className="form-label">Appointment*</label>
@@ -375,7 +375,7 @@ const NotesManagement = () => {
                 ))}
               </select>
             </div>
-            
+
             <div className="form-group">
               <label className="form-label">Diagnosis*</label>
               <textarea
@@ -387,7 +387,7 @@ const NotesManagement = () => {
                 required
               ></textarea>
             </div>
-            
+
             <div className="form-group">
               <label className="form-label">Treatment Plan</label>
               <textarea
@@ -398,7 +398,7 @@ const NotesManagement = () => {
                 rows="3"
               ></textarea>
             </div>
-            
+
             <div className="form-group">
               <label className="form-label">Follow-up Instructions</label>
               <textarea
@@ -409,10 +409,10 @@ const NotesManagement = () => {
                 rows="2"
               ></textarea>
             </div>
-            
+
             <div className="form-group">
               <label className="form-label">Medications</label>
-              
+
               <div className="mb-2">
                 {formData.medications.map((med, index) => (
                   <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded mb-1">
@@ -431,7 +431,7 @@ const NotesManagement = () => {
                   </div>
                 ))}
               </div>
-              
+
               <div className="grid grid-cols-2 gap-2 mb-2">
                 <input
                   type="text"
@@ -450,7 +450,7 @@ const NotesManagement = () => {
                   className="form-input"
                 />
               </div>
-              
+
               <div className="grid grid-cols-2 gap-2 mb-2">
                 <input
                   type="text"
@@ -469,7 +469,7 @@ const NotesManagement = () => {
                   className="form-input"
                 />
               </div>
-              
+
               <button
                 type="button"
                 onClick={handleAddMedication}
@@ -478,7 +478,7 @@ const NotesManagement = () => {
                 Add Medication
               </button>
             </div>
-            
+
             <div className="form-group">
               <label className="form-label">Upload File (optional)</label>
               <input
@@ -487,7 +487,7 @@ const NotesManagement = () => {
                 className="form-input"
               />
             </div>
-            
+
             <div className="flex justify-end mt-6">
               <button
                 type="button"
@@ -515,7 +515,7 @@ const NotesManagement = () => {
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
           <h2 className="text-xl font-bold mb-4">Edit Note</h2>
-          
+
           <form onSubmit={submitEditNote}>
             <div className="form-group">
               <label className="form-label">Appointment*</label>
@@ -535,7 +535,7 @@ const NotesManagement = () => {
                 ))}
               </select>
             </div>
-            
+
             <div className="form-group">
               <label className="form-label">Diagnosis*</label>
               <textarea
@@ -547,7 +547,7 @@ const NotesManagement = () => {
                 required
               ></textarea>
             </div>
-            
+
             <div className="form-group">
               <label className="form-label">Treatment Plan</label>
               <textarea
@@ -558,7 +558,7 @@ const NotesManagement = () => {
                 rows="3"
               ></textarea>
             </div>
-            
+
             <div className="form-group">
               <label className="form-label">Follow-up Instructions</label>
               <textarea
@@ -569,10 +569,10 @@ const NotesManagement = () => {
                 rows="2"
               ></textarea>
             </div>
-            
+
             <div className="form-group">
               <label className="form-label">Medications</label>
-              
+
               <div className="mb-2">
                 {formData.medications.map((med, index) => (
                   <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded mb-1">
@@ -591,7 +591,7 @@ const NotesManagement = () => {
                   </div>
                 ))}
               </div>
-              
+
               <div className="grid grid-cols-2 gap-2 mb-2">
                 <input
                   type="text"
@@ -610,7 +610,7 @@ const NotesManagement = () => {
                   className="form-input"
                 />
               </div>
-              
+
               <div className="grid grid-cols-2 gap-2 mb-2">
                 <input
                   type="text"
@@ -629,7 +629,7 @@ const NotesManagement = () => {
                   className="form-input"
                 />
               </div>
-              
+
               <button
                 type="button"
                 onClick={handleAddMedication}
@@ -638,7 +638,7 @@ const NotesManagement = () => {
                 Add Medication
               </button>
             </div>
-            
+
             <div className="form-group">
               <label className="form-label">Upload File (optional)</label>
               <input
@@ -647,7 +647,7 @@ const NotesManagement = () => {
                 className="form-input"
               />
             </div>
-            
+
             <div className="flex justify-end mt-6">
               <button
                 type="button"
@@ -673,7 +673,7 @@ const NotesManagement = () => {
     <div className="notes-management">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-800">Notes Management</h1>
-        <button 
+        <button
           onClick={handleAddNote}
           className="btn btn-primary flex items-center"
         >
@@ -693,13 +693,13 @@ const NotesManagement = () => {
           <input
             type="text"
             placeholder="Search notes..."
-            className="form-input pl-10 w-full"
+            className="form-input pl-12 w-full"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
-          <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+          <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
         </div>
-        
+
         <div className="w-full sm:w-auto">
           <select
             value={filterPatient}
@@ -723,7 +723,7 @@ const NotesManagement = () => {
       ) : (
         renderNotesList()
       )}
-      
+
       {showAddModal && renderAddNoteModal()}
       {showEditModal && renderEditNoteModal()}
     </div>

@@ -118,7 +118,7 @@ const AdminDashboard = () => {
     }
   };
 
-  const filteredUsers = users.filter(user => 
+  const filteredUsers = users.filter(user =>
     user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -131,7 +131,7 @@ const AdminDashboard = () => {
       <div className="users-tab">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold text-gray-800">User Management</h1>
-          <button 
+          <button
             onClick={handleAddUser}
             className="btn btn-primary flex items-center"
           >
@@ -151,11 +151,11 @@ const AdminDashboard = () => {
             <input
               type="text"
               placeholder="Search users..."
-              className="form-input pl-10"
+              className="form-input pl-12"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
-            <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
           </div>
         </div>
 
@@ -183,7 +183,7 @@ const AdminDashboard = () => {
                     <td className="py-3 px-4 whitespace-nowrap">{user.email}</td>
                     <td className="py-3 px-4 whitespace-nowrap">
                       <span className={`badge ${
-                        user.role === 'admin' ? 'badge-red' : 
+                        user.role === 'admin' ? 'badge-red' :
                         user.role === 'doctor' ? 'badge-blue' : 'badge-green'
                       }`}>
                         {user.role}
@@ -228,7 +228,7 @@ const AdminDashboard = () => {
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
           <h2 className="text-xl font-bold mb-4">Add New User</h2>
-          
+
           <form onSubmit={submitAddUser}>
             <div className="form-group">
               <label className="form-label">Name</label>
@@ -241,7 +241,7 @@ const AdminDashboard = () => {
                 required
               />
             </div>
-            
+
             <div className="form-group">
               <label className="form-label">Username</label>
               <input
@@ -253,7 +253,7 @@ const AdminDashboard = () => {
                 required
               />
             </div>
-            
+
             <div className="form-group">
               <label className="form-label">Email</label>
               <input
@@ -265,7 +265,7 @@ const AdminDashboard = () => {
                 required
               />
             </div>
-            
+
             <div className="form-group">
               <label className="form-label">Password</label>
               <div className="relative">
@@ -286,7 +286,7 @@ const AdminDashboard = () => {
                 </button>
               </div>
             </div>
-            
+
             <div className="form-group">
               <label className="form-label">Role</label>
               <select
@@ -301,7 +301,7 @@ const AdminDashboard = () => {
                 <option value="secretary">Secretary</option>
               </select>
             </div>
-            
+
             <div className="flex justify-end mt-6">
               <button
                 type="button"
@@ -329,7 +329,7 @@ const AdminDashboard = () => {
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
           <h2 className="text-xl font-bold mb-4">Edit User</h2>
-          
+
           <form onSubmit={submitEditUser}>
             <div className="form-group">
               <label className="form-label">Name</label>
@@ -342,7 +342,7 @@ const AdminDashboard = () => {
                 required
               />
             </div>
-            
+
             <div className="form-group">
               <label className="form-label">Username</label>
               <input
@@ -354,7 +354,7 @@ const AdminDashboard = () => {
                 required
               />
             </div>
-            
+
             <div className="form-group">
               <label className="form-label">Email</label>
               <input
@@ -366,7 +366,7 @@ const AdminDashboard = () => {
                 required
               />
             </div>
-            
+
             <div className="form-group">
               <label className="form-label">Password (leave blank to keep current)</label>
               <div className="relative">
@@ -386,7 +386,7 @@ const AdminDashboard = () => {
                 </button>
               </div>
             </div>
-            
+
             <div className="form-group">
               <label className="form-label">Role</label>
               <select
@@ -401,7 +401,7 @@ const AdminDashboard = () => {
                 <option value="secretary">Secretary</option>
               </select>
             </div>
-            
+
             <div className="flex justify-end mt-6">
               <button
                 type="button"
@@ -427,9 +427,7 @@ const AdminDashboard = () => {
     <DashboardLayout activeTab={activeTab} setActiveTab={setActiveTab} role="admin">
       {activeTab === 'users' && renderUsersTab()}
       {activeTab === 'content' && <ContentManagement />}
-      {activeTab === 'patients' && <div>Patients Management</div>}
-      {activeTab === 'appointments' && <div>Appointments Management</div>}
-      
+
       {showAddUserModal && renderAddUserModal()}
       {showEditUserModal && renderEditUserModal()}
     </DashboardLayout>

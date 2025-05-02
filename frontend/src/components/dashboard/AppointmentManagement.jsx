@@ -65,7 +65,7 @@ const AppointmentManagement = ({ role }) => {
   const handleAddAppointment = () => {
     const today = new Date();
     const formattedDate = today.toISOString().split('T')[0];
-    
+
     setFormData({
       patient_id: '',
       appointment_date: formattedDate,
@@ -79,7 +79,7 @@ const AppointmentManagement = ({ role }) => {
 
   const handleEditAppointment = (appointment) => {
     const formattedDate = new Date(appointment.appointment_date).toISOString().split('T')[0];
-    
+
     setCurrentAppointment(appointment);
     setFormData({
       patient_id: appointment.patient_id._id || appointment.patient_id,
@@ -134,21 +134,21 @@ const AppointmentManagement = ({ role }) => {
 
   // Filter appointments based on search term, status, and view mode
   const filteredAppointments = appointments.filter(appointment => {
-    const patientName = appointment.patient_id && typeof appointment.patient_id === 'object' 
-      ? appointment.patient_id.name 
+    const patientName = appointment.patient_id && typeof appointment.patient_id === 'object'
+      ? appointment.patient_id.name
       : '';
-    
+
     const matchesSearch = patientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (appointment.reason && appointment.reason.toLowerCase().includes(searchTerm.toLowerCase()));
-    
+
     const matchesStatus = filterStatus === 'all' || appointment.status === filterStatus;
-    
+
     const appointmentDate = new Date(appointment.appointment_date);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
+
     const isToday = appointmentDate.toDateString() === today.toDateString();
-    
+
     if (viewMode === 'today') {
       return matchesSearch && matchesStatus && isToday;
     } else {
@@ -172,7 +172,7 @@ const AppointmentManagement = ({ role }) => {
     if (typeof patientId === 'object' && patientId !== null) {
       return patientId.name;
     }
-    
+
     const patient = patients.find(p => p._id === patientId);
     return patient ? patient.name : 'Unknown Patient';
   };
@@ -267,9 +267,9 @@ const AppointmentManagement = ({ role }) => {
                 <p className="text-sm text-gray-500">{formatDate(appointment.appointment_date)}</p>
               </div>
               <span className={`badge ${
-                appointment.status === 'Scheduled' ? 'badge-blue' : 
-                appointment.status === 'Completed' ? 'badge-green' : 
-                appointment.status === 'Cancelled' ? 'badge-red' : 
+                appointment.status === 'Scheduled' ? 'badge-blue' :
+                appointment.status === 'Completed' ? 'badge-green' :
+                appointment.status === 'Cancelled' ? 'badge-red' :
                 appointment.status === 'In-progress' ? 'badge-yellow' : 'badge-gray'
               }`}>
                 {appointment.status}
@@ -307,7 +307,7 @@ const AppointmentManagement = ({ role }) => {
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
           <h2 className="text-xl font-bold mb-4">Add New Appointment</h2>
-          
+
           <form onSubmit={submitAddAppointment}>
             <div className="form-group">
               <label className="form-label">Patient*</label>
@@ -326,7 +326,7 @@ const AppointmentManagement = ({ role }) => {
                 ))}
               </select>
             </div>
-            
+
             <div className="form-group">
               <label className="form-label">Appointment Date*</label>
               <input
@@ -338,7 +338,7 @@ const AppointmentManagement = ({ role }) => {
                 required
               />
             </div>
-            
+
             <div className="form-group">
               <label className="form-label">Type*</label>
               <select
@@ -355,7 +355,7 @@ const AppointmentManagement = ({ role }) => {
                 <option value="Emergency">Emergency</option>
               </select>
             </div>
-            
+
             <div className="form-group">
               <label className="form-label">Status*</label>
               <select
@@ -373,7 +373,7 @@ const AppointmentManagement = ({ role }) => {
                 <option value="In-progress">In-progress</option>
               </select>
             </div>
-            
+
             <div className="form-group">
               <label className="form-label">Reason</label>
               <input
@@ -384,7 +384,7 @@ const AppointmentManagement = ({ role }) => {
                 className="form-input"
               />
             </div>
-            
+
             <div className="form-group">
               <label className="form-label">Notes</label>
               <textarea
@@ -395,7 +395,7 @@ const AppointmentManagement = ({ role }) => {
                 rows="3"
               ></textarea>
             </div>
-            
+
             <div className="flex justify-end mt-6">
               <button
                 type="button"
@@ -423,7 +423,7 @@ const AppointmentManagement = ({ role }) => {
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
           <h2 className="text-xl font-bold mb-4">Edit Appointment</h2>
-          
+
           <form onSubmit={submitEditAppointment}>
             <div className="form-group">
               <label className="form-label">Patient*</label>
@@ -442,7 +442,7 @@ const AppointmentManagement = ({ role }) => {
                 ))}
               </select>
             </div>
-            
+
             <div className="form-group">
               <label className="form-label">Appointment Date*</label>
               <input
@@ -454,7 +454,7 @@ const AppointmentManagement = ({ role }) => {
                 required
               />
             </div>
-            
+
             <div className="form-group">
               <label className="form-label">Type*</label>
               <select
@@ -471,7 +471,7 @@ const AppointmentManagement = ({ role }) => {
                 <option value="Emergency">Emergency</option>
               </select>
             </div>
-            
+
             <div className="form-group">
               <label className="form-label">Status*</label>
               <select
@@ -489,7 +489,7 @@ const AppointmentManagement = ({ role }) => {
                 <option value="In-progress">In-progress</option>
               </select>
             </div>
-            
+
             <div className="form-group">
               <label className="form-label">Reason</label>
               <input
@@ -500,7 +500,7 @@ const AppointmentManagement = ({ role }) => {
                 className="form-input"
               />
             </div>
-            
+
             <div className="form-group">
               <label className="form-label">Notes</label>
               <textarea
@@ -511,7 +511,7 @@ const AppointmentManagement = ({ role }) => {
                 rows="3"
               ></textarea>
             </div>
-            
+
             <div className="flex justify-end mt-6">
               <button
                 type="button"
@@ -537,7 +537,7 @@ const AppointmentManagement = ({ role }) => {
     <div className="appointment-management">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-800">Appointment Management</h1>
-        <button 
+        <button
           onClick={handleAddAppointment}
           className="btn btn-primary flex items-center"
         >
@@ -557,13 +557,13 @@ const AppointmentManagement = ({ role }) => {
           <input
             type="text"
             placeholder="Search appointments..."
-            className="form-input pl-10 w-full"
+            className="form-input pl-12 w-full"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
-          <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+          <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
         </div>
-        
+
         <div className="flex space-x-2 w-full sm:w-auto justify-end">
           <select
             value={filterStatus}
@@ -607,7 +607,7 @@ const AppointmentManagement = ({ role }) => {
           {viewMode === 'today' ? renderTodayAppointments() : renderAppointmentList()}
         </>
       )}
-      
+
       {showAddModal && renderAddAppointmentModal()}
       {showEditModal && renderEditAppointmentModal()}
     </div>

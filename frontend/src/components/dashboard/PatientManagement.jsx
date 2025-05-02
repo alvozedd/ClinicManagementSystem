@@ -120,7 +120,7 @@ const PatientManagement = ({ role, selectedPatient, onSelectPatient, onBackToPat
       await apiService.updatePatient(currentPatient._id, formData);
       setShowEditModal(false);
       fetchPatients();
-      
+
       // If we're editing the currently selected patient, update it
       if (selectedPatient && selectedPatient._id === currentPatient._id) {
         onSelectPatient({
@@ -134,7 +134,7 @@ const PatientManagement = ({ role, selectedPatient, onSelectPatient, onBackToPat
     }
   };
 
-  const filteredPatients = patients.filter(patient => 
+  const filteredPatients = patients.filter(patient =>
     patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     patient.phone.includes(searchTerm)
   );
@@ -159,8 +159,8 @@ const PatientManagement = ({ role, selectedPatient, onSelectPatient, onBackToPat
     return (
       <div className={viewMode === 'grid' ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" : "space-y-4"}>
         {filteredPatients.map(patient => (
-          <div 
-            key={patient._id} 
+          <div
+            key={patient._id}
             className={`dashboard-card p-4 cursor-pointer hover:shadow-md transition-all ${
               viewMode === 'list' ? "flex items-center justify-between" : ""
             }`}
@@ -174,7 +174,7 @@ const PatientManagement = ({ role, selectedPatient, onSelectPatient, onBackToPat
                     <p className="text-sm text-gray-500">Age: {calculateAge(patient.year_of_birth)}</p>
                   </div>
                   <span className={`badge ${
-                    patient.gender === 'Male' ? 'badge-blue' : 
+                    patient.gender === 'Male' ? 'badge-blue' :
                     patient.gender === 'Female' ? 'badge-red' : 'badge-gray'
                   }`}>
                     {patient.gender}
@@ -231,7 +231,7 @@ const PatientManagement = ({ role, selectedPatient, onSelectPatient, onBackToPat
                 </div>
                 <div className="flex items-center">
                   <span className={`badge mr-3 ${
-                    patient.gender === 'Male' ? 'badge-blue' : 
+                    patient.gender === 'Male' ? 'badge-blue' :
                     patient.gender === 'Female' ? 'badge-red' : 'badge-gray'
                   }`}>
                     {patient.gender}
@@ -412,7 +412,7 @@ const PatientManagement = ({ role, selectedPatient, onSelectPatient, onBackToPat
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
           <h2 className="text-xl font-bold mb-4">Add New Patient</h2>
-          
+
           <form onSubmit={submitAddPatient}>
             <div className="form-group">
               <label className="form-label">Full Name*</label>
@@ -425,7 +425,7 @@ const PatientManagement = ({ role, selectedPatient, onSelectPatient, onBackToPat
                 required
               />
             </div>
-            
+
             <div className="form-group">
               <label className="form-label">Gender*</label>
               <select
@@ -441,7 +441,7 @@ const PatientManagement = ({ role, selectedPatient, onSelectPatient, onBackToPat
                 <option value="Other">Other</option>
               </select>
             </div>
-            
+
             <div className="form-group">
               <label className="form-label">Phone Number*</label>
               <input
@@ -453,7 +453,7 @@ const PatientManagement = ({ role, selectedPatient, onSelectPatient, onBackToPat
                 required
               />
             </div>
-            
+
             <div className="form-group">
               <label className="form-label">Year of Birth</label>
               <input
@@ -466,7 +466,7 @@ const PatientManagement = ({ role, selectedPatient, onSelectPatient, onBackToPat
                 max={new Date().getFullYear()}
               />
             </div>
-            
+
             <div className="form-group">
               <label className="form-label">Next of Kin Name*</label>
               <input
@@ -478,7 +478,7 @@ const PatientManagement = ({ role, selectedPatient, onSelectPatient, onBackToPat
                 required
               />
             </div>
-            
+
             <div className="form-group">
               <label className="form-label">Next of Kin Relationship*</label>
               <input
@@ -490,7 +490,7 @@ const PatientManagement = ({ role, selectedPatient, onSelectPatient, onBackToPat
                 required
               />
             </div>
-            
+
             <div className="form-group">
               <label className="form-label">Next of Kin Phone*</label>
               <input
@@ -502,7 +502,7 @@ const PatientManagement = ({ role, selectedPatient, onSelectPatient, onBackToPat
                 required
               />
             </div>
-            
+
             <div className="flex justify-end mt-6">
               <button
                 type="button"
@@ -530,7 +530,7 @@ const PatientManagement = ({ role, selectedPatient, onSelectPatient, onBackToPat
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
           <h2 className="text-xl font-bold mb-4">Edit Patient</h2>
-          
+
           <form onSubmit={submitEditPatient}>
             <div className="form-group">
               <label className="form-label">Full Name*</label>
@@ -543,7 +543,7 @@ const PatientManagement = ({ role, selectedPatient, onSelectPatient, onBackToPat
                 required
               />
             </div>
-            
+
             <div className="form-group">
               <label className="form-label">Gender*</label>
               <select
@@ -559,7 +559,7 @@ const PatientManagement = ({ role, selectedPatient, onSelectPatient, onBackToPat
                 <option value="Other">Other</option>
               </select>
             </div>
-            
+
             <div className="form-group">
               <label className="form-label">Phone Number*</label>
               <input
@@ -571,7 +571,7 @@ const PatientManagement = ({ role, selectedPatient, onSelectPatient, onBackToPat
                 required
               />
             </div>
-            
+
             <div className="form-group">
               <label className="form-label">Year of Birth</label>
               <input
@@ -584,7 +584,7 @@ const PatientManagement = ({ role, selectedPatient, onSelectPatient, onBackToPat
                 max={new Date().getFullYear()}
               />
             </div>
-            
+
             <div className="form-group">
               <label className="form-label">Next of Kin Name*</label>
               <input
@@ -596,7 +596,7 @@ const PatientManagement = ({ role, selectedPatient, onSelectPatient, onBackToPat
                 required
               />
             </div>
-            
+
             <div className="form-group">
               <label className="form-label">Next of Kin Relationship*</label>
               <input
@@ -608,7 +608,7 @@ const PatientManagement = ({ role, selectedPatient, onSelectPatient, onBackToPat
                 required
               />
             </div>
-            
+
             <div className="form-group">
               <label className="form-label">Next of Kin Phone*</label>
               <input
@@ -620,7 +620,7 @@ const PatientManagement = ({ role, selectedPatient, onSelectPatient, onBackToPat
                 required
               />
             </div>
-            
+
             <div className="flex justify-end mt-6">
               <button
                 type="button"
@@ -650,7 +650,7 @@ const PatientManagement = ({ role, selectedPatient, onSelectPatient, onBackToPat
         <>
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-2xl font-bold text-gray-800">Patient Management</h1>
-            <button 
+            <button
               onClick={handleAddPatient}
               className="btn btn-primary flex items-center"
             >
@@ -670,13 +670,13 @@ const PatientManagement = ({ role, selectedPatient, onSelectPatient, onBackToPat
               <input
                 type="text"
                 placeholder="Search patients..."
-                className="form-input pl-10 w-full"
+                className="form-input pl-12 w-full"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
-              <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
             </div>
-            
+
             <div className="flex space-x-2 w-full sm:w-auto justify-end">
               <button
                 onClick={() => setViewMode('grid')}
@@ -702,7 +702,7 @@ const PatientManagement = ({ role, selectedPatient, onSelectPatient, onBackToPat
           )}
         </>
       )}
-      
+
       {showAddModal && renderAddPatientModal()}
       {showEditModal && renderEditPatientModal()}
     </div>
