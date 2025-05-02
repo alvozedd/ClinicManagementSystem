@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
-import { FaUserPlus, FaSearch, FaEdit, FaTrash, FaArrowLeft, FaPhone, FaEnvelope, FaFileMedical, FaCalendarAlt } from 'react-icons/fa';
+import { FaUserPlus, FaSearch, FaEdit, FaTrash, FaArrowLeft, FaPhone, FaEnvelope, FaFileMedical, FaCalendarAlt, FaThLarge, FaList } from 'react-icons/fa';
 import apiService from '../../utils/apiService';
+import Modal from '../common/Modal';
+import PatientForm from './PatientForm';
+import PatientView from './PatientView';
 import './DashboardStyles.css';
 
 const PatientManagement = ({ role, selectedPatient, onSelectPatient, onBackToPatients }) => {
@@ -304,88 +307,14 @@ const PatientManagement = ({ role, selectedPatient, onSelectPatient, onBackToPat
     if (!selectedPatient) return null;
 
     return (
-      <div className="patient-detail">
-        <div className="flex items-center mb-6">
-          <button
-            onClick={onBackToPatients}
-            className="mr-3 text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
-          >
-            <FaArrowLeft />
-          </button>
-          <h2 className="text-2xl font-bold text-gray-800 dark:text-white">{selectedPatient.name}</h2>
-        </div>
+      <PatientView
+        patient={selectedPatient}
+        onBackToPatients={onBackToPatients}
+      />
+    );
+  };
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-          <div className="glass-card p-4 rounded-lg">
-            <h3 className="font-semibold text-gray-700 dark:text-white mb-3">Personal Information</h3>
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <span className="text-gray-600 dark:text-gray-300">Gender:</span>
-                <span className="font-medium dark:text-white">{selectedPatient.gender}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600 dark:text-gray-300">Age:</span>
-                <span className="font-medium dark:text-white">{calculateAge(selectedPatient.year_of_birth)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600 dark:text-gray-300">Phone:</span>
-                <span className="font-medium dark:text-white">{selectedPatient.phone}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600 dark:text-gray-300">Added by:</span>
-                <span className="font-medium capitalize dark:text-white">{selectedPatient.createdBy || 'Unknown'}</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="glass-card p-4 rounded-lg">
-            <h3 className="font-semibold text-gray-700 dark:text-white mb-3">Next of Kin</h3>
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <span className="text-gray-600 dark:text-gray-300">Name:</span>
-                <span className="font-medium dark:text-white">{selectedPatient.next_of_kin_name}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600 dark:text-gray-300">Relationship:</span>
-                <span className="font-medium dark:text-white">{selectedPatient.next_of_kin_relationship}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600 dark:text-gray-300">Phone:</span>
-                <span className="font-medium dark:text-white">{selectedPatient.next_of_kin_phone}</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="glass-card p-4 rounded-lg">
-            <h3 className="font-semibold text-gray-700 dark:text-white mb-3">Actions</h3>
-            <div className="space-y-2">
-              <button
-                onClick={() => handleEditPatient(selectedPatient)}
-                className="w-full btn btn-outline-primary flex items-center justify-center dark:text-blue-300 dark:border-blue-500 dark:hover:bg-blue-900/30"
-              >
-                <FaEdit className="mr-2" />
-                Edit Patient
-              </button>
-              {role === 'doctor' && (
-                <button
-                  onClick={() => handleDeletePatient(selectedPatient._id)}
-                  className="w-full btn btn-outline btn-danger flex items-center justify-center dark:text-red-300 dark:border-red-500 dark:hover:bg-red-900/30"
-                >
-                  <FaTrash className="mr-2" />
-                  Delete Patient
-                </button>
-              )}
-              <button
-                className="w-full btn btn-outline-primary flex items-center justify-center dark:text-blue-300 dark:border-blue-500 dark:hover:bg-blue-900/30"
-              >
-                <FaPhone className="mr-2" />
-                Call Patient
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {role === 'doctor' && (
+  {role === 'doctor' && (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
               <div className="glass-card p-4 rounded-lg">
