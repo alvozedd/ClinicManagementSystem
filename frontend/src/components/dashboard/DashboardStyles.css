@@ -562,3 +562,112 @@ body.dark-mode {
 :root.dark-mode .icon-button:hover {
   background-color: rgba(255, 255, 255, 0.1);
 }
+
+/* Queue Management Styles */
+.queue-item {
+  transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.queue-item.dragging {
+  background-color: var(--highlight-bg);
+  border-color: var(--highlight-border);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transform: scale(1.02);
+  z-index: 10;
+}
+
+.queue-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 9999px;
+  font-weight: 600;
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+:root.dark-mode .queue-number {
+  background-color: #1e40af;
+  color: #dbeafe;
+}
+
+.queue-completed {
+  opacity: 0.7;
+  background-color: #f3f4f6;
+}
+
+:root.dark-mode .queue-completed {
+  background-color: #1f2937;
+}
+
+.queue-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.queue-action-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 9999px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.queue-action-complete {
+  background-color: #d1fae5;
+  color: #065f46;
+}
+
+.queue-action-complete:hover {
+  background-color: #a7f3d0;
+}
+
+.queue-action-remove {
+  background-color: #fee2e2;
+  color: #b91c1c;
+}
+
+.queue-action-remove:hover {
+  background-color: #fecaca;
+}
+
+.queue-action-add {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.queue-action-add:hover {
+  background-color: #bfdbfe;
+}
+
+:root.dark-mode .queue-action-complete {
+  background-color: #065f46;
+  color: #d1fae5;
+}
+
+:root.dark-mode .queue-action-complete:hover {
+  background-color: #047857;
+}
+
+:root.dark-mode .queue-action-remove {
+  background-color: #b91c1c;
+  color: #fee2e2;
+}
+
+:root.dark-mode .queue-action-remove:hover {
+  background-color: #dc2626;
+}
+
+:root.dark-mode .queue-action-add {
+  background-color: #1e40af;
+  color: #dbeafe;
+}
+
+:root.dark-mode .queue-action-add:hover {
+  background-color: #1d4ed8;
+}

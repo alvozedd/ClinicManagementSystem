@@ -16,6 +16,8 @@ const appointmentRoutes = require('./routes/appointmentRoutes');
 const diagnosisRoutes = require('./routes/diagnosisRoutes');
 const contentRoutes = require('./routes/contentRoutes');
 const integratedAppointmentRoutes = require('./routes/integratedAppointmentRoutes');
+const uploadRoutes = require('./routes/uploadRoutes');
+const queueRoutes = require('./routes/queueRoutes');
 const testRoutes = require('./routes/testRoutes');
 
 // Load environment variables
@@ -162,6 +164,8 @@ app.use('/api/appointments', appointmentRoutes);
 app.use('/api/diagnoses', diagnosisRoutes);
 app.use('/api/content', contentRoutes);
 app.use('/api/integrated-appointments', integratedAppointmentRoutes);
+app.use('/api/uploads', uploadRoutes);
+app.use('/api/queue', queueRoutes);
 
 // Test routes - no authentication required
 app.use('/', testRoutes);
@@ -263,6 +267,14 @@ app.delete('/users/:id', (req, res) => {
 app.post('/users/login', (req, res) => {
   console.log('Received login request at /users/login, forwarding to controller directly');
 
+  // Set CORS headers explicitly for this route
+  const origin = req.headers.origin;
+  if (origin) {
+    res.header('Access-Control-Allow-Origin', origin);
+    res.header('Access-Control-Allow-Credentials', 'true');
+    console.log(`Setting explicit CORS headers for login route, origin: ${origin}`);
+  }
+
   // Import the controller directly
   const { authUser } = require('./controllers/userController');
   // Call the controller function directly
@@ -273,6 +285,14 @@ app.post('/users/login', (req, res) => {
 app.post('/users/refresh-token', (req, res) => {
   console.log('Received refresh token request at /users/refresh-token, forwarding to controller directly');
 
+  // Set CORS headers explicitly for this route
+  const origin = req.headers.origin;
+  if (origin) {
+    res.header('Access-Control-Allow-Origin', origin);
+    res.header('Access-Control-Allow-Credentials', 'true');
+    console.log(`Setting explicit CORS headers for refresh token route, origin: ${origin}`);
+  }
+
   // Import the controller directly
   const { refreshToken } = require('./controllers/userController');
   // Call the controller function directly
@@ -282,6 +302,15 @@ app.post('/users/refresh-token', (req, res) => {
 // Logout route
 app.post('/users/logout', (req, res) => {
   console.log('Received logout request at /users/logout, forwarding to controller directly');
+
+  // Set CORS headers explicitly for this route
+  const origin = req.headers.origin;
+  if (origin) {
+    res.header('Access-Control-Allow-Origin', origin);
+    res.header('Access-Control-Allow-Credentials', 'true');
+    console.log(`Setting explicit CORS headers for logout route, origin: ${origin}`);
+  }
+
   // Import the controller directly
   const { logoutUser } = require('./controllers/userController');
   // Call the controller function directly
@@ -596,6 +625,91 @@ app.delete('/diagnoses/:id', (req, res) => {
 
 // Content routes - Use the router instead of direct controller calls
 app.use('/api/content', require('./routes/contentRoutes'));
+
+// File upload routes
+app.post('/uploads', addCorsHeaders, (req, res) => {
+  console.log('Received POST request at /uploads, forwarding to controller directly');
+  // Import multer and configure it
+  const multer = require('multer');
+  const path = require('path');
+  const { v4: uuidv4 } = require('uuid');
+
+  // Configure multer storage
+  const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, path.join(__dirname, './uploads'));
+    },
+    filename: function (req, file, cb) {
+      // Generate a unique filename with original extension
+      const fileExt = path.extname(file.originalname);
+      const fileName = `${uuidv4()}${fileExt}`;
+      cb(null, fileName);
+    }
+  });
+
+  // File filter to only allow certain file types
+  const fileFilter = (req, file, cb) => {
+    // Accept images, PDFs, and common document formats
+    const allowedFileTypes = [
+      'image/jpeg',
+      'image/png',
+      'image/gif',
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'text/plain'
+    ];
+
+    if (allowedFileTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Invalid file type. Only images, PDFs, and documents are allowed.'), false);
+    }
+  };
+
+  // Configure multer upload
+  const upload = multer({
+    storage: storage,
+    fileFilter: fileFilter,
+    limits: {
+      fileSize: 5 * 1024 * 1024 // 5MB file size limit
+    }
+  });
+
+  // Import the controller directly
+  const { uploadFile } = require('./controllers/uploadController');
+  // Add authentication middleware manually
+  const { protect, doctor } = require('./middleware/authMiddleware');
+
+  // Process the upload
+  upload.single('file')(req, res, (err) => {
+    if (err) {
+      console.error('Multer error:', err);
+      return res.status(400).json({ message: err.message });
+    }
+
+    // Call middleware then controller
+    protect(req, res, () => {
+      // Only doctors can upload files
+      if (req.user && (req.user.role === 'doctor' || req.user.role === 'admin')) {
+        uploadFile(req, res);
+      } else {
+        res.status(403);
+        throw new Error('Not authorized as a doctor');
+      }
+    });
+  });
+});
+
+app.get('/uploads/:filename', addCorsHeaders, (req, res) => {
+  console.log('Received GET request at /uploads/:filename, forwarding to controller directly');
+  // Import the controller directly
+  const { getFile } = require('./controllers/uploadController');
+  // Add authentication middleware manually
+  const { protect } = require('./middleware/authMiddleware');
+  // Call middleware then controller
+  protect(req, res, () => getFile(req, res));
+});
 
 // Fallback content route for direct API access without /api prefix
 app.get('/content', (req, res) => {

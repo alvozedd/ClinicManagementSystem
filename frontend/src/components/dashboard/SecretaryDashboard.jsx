@@ -1,15 +1,27 @@
 import { useState, useEffect, useContext } from 'react';
-import { FaUserPlus, FaCalendarPlus, FaSearch, FaEdit, FaTrash, FaPhone, FaEnvelope } from 'react-icons/fa';
+import { useLocation } from 'react-router-dom';
+import { FaUserPlus, FaCalendarPlus, FaSearch, FaEdit, FaTrash, FaPhone, FaEnvelope, FaCalendarAlt } from 'react-icons/fa';
 import DashboardLayout from './DashboardLayout';
 import AuthContext from '../../context/AuthContext';
 import apiService from '../../utils/apiService';
 import PatientManagement from './PatientManagement';
 import AppointmentManagement from './AppointmentManagement';
+import CalendarManagement from './CalendarManagement';
+import QueueManagement from './QueueManagement';
 import './DashboardStyles.css';
 
 const SecretaryDashboard = () => {
   const { userInfo } = useContext(AuthContext);
-  const [activeTab, setActiveTab] = useState('patients');
+  const location = useLocation();
+
+  // Get tab from URL query parameter or default to 'patients'
+  const getInitialTab = () => {
+    const params = new URLSearchParams(location.search);
+    const tab = params.get('tab');
+    return tab && ['patients', 'appointments', 'calendar', 'queue'].includes(tab) ? tab : 'patients';
+  };
+
+  const [activeTab, setActiveTab] = useState(getInitialTab());
   const [patients, setPatients] = useState([]);
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -17,6 +29,15 @@ const SecretaryDashboard = () => {
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
 
+  // Update active tab when URL changes
+  useEffect(() => {
+    const newTab = getInitialTab();
+    if (newTab !== activeTab) {
+      setActiveTab(newTab);
+    }
+  }, [location.search]);
+
+  // Fetch data based on active tab
   useEffect(() => {
     if (activeTab === 'patients') {
       fetchPatients();
@@ -70,7 +91,7 @@ const SecretaryDashboard = () => {
             <div>
               <h3 className="text-lg font-semibold text-blue-800">Today's Appointments</h3>
               <p className="text-3xl font-bold text-blue-600 mt-2">
-                {appointments.filter(apt => 
+                {appointments.filter(apt =>
                   new Date(apt.appointment_date).toDateString() === new Date().toDateString()
                 ).length}
               </p>
@@ -99,16 +120,24 @@ const SecretaryDashboard = () => {
   return (
     <DashboardLayout activeTab={activeTab} setActiveTab={setActiveTab} role="secretary">
       {activeTab === 'patients' && (
-        <PatientManagement 
+        <PatientManagement
           role="secretary"
           selectedPatient={selectedPatient}
           onSelectPatient={handlePatientSelect}
           onBackToPatients={handleBackToPatients}
         />
       )}
-      
+
       {activeTab === 'appointments' && (
         <AppointmentManagement role="secretary" />
+      )}
+
+      {activeTab === 'calendar' && (
+        <CalendarManagement role="secretary" />
+      )}
+
+      {activeTab === 'queue' && (
+        <QueueManagement role="secretary" />
       )}
     </DashboardLayout>
   );

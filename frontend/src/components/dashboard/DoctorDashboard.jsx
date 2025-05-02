@@ -1,12 +1,14 @@
 import { useState, useEffect, useContext } from 'react';
 import { useLocation } from 'react-router-dom';
-import { FaUserPlus, FaCalendarPlus, FaSearch, FaEdit, FaTrash, FaFileMedical, FaPhone, FaEnvelope } from 'react-icons/fa';
+import { FaUserPlus, FaCalendarPlus, FaSearch, FaEdit, FaTrash, FaFileMedical, FaPhone, FaEnvelope, FaCalendarAlt } from 'react-icons/fa';
 import DashboardLayout from './DashboardLayout';
 import AuthContext from '../../context/AuthContext';
 import apiService from '../../utils/apiService';
 import PatientManagement from './PatientManagement';
 import AppointmentManagement from './AppointmentManagement';
 import NotesManagement from './NotesManagement';
+import CalendarManagement from './CalendarManagement';
+import QueueManagement from './QueueManagement';
 import './DashboardStyles.css';
 
 const DoctorDashboard = () => {
@@ -17,7 +19,7 @@ const DoctorDashboard = () => {
   const getInitialTab = () => {
     const params = new URLSearchParams(location.search);
     const tab = params.get('tab');
-    return tab && ['patients', 'appointments', 'notes'].includes(tab) ? tab : 'patients';
+    return tab && ['patients', 'appointments', 'notes', 'calendar', 'queue'].includes(tab) ? tab : 'patients';
   };
 
   const [activeTab, setActiveTab] = useState(getInitialTab());
@@ -149,6 +151,14 @@ const DoctorDashboard = () => {
 
       {activeTab === 'notes' && (
         <NotesManagement />
+      )}
+
+      {activeTab === 'calendar' && (
+        <CalendarManagement role="doctor" />
+      )}
+
+      {activeTab === 'queue' && (
+        <QueueManagement role="doctor" />
       )}
     </DashboardLayout>
   );

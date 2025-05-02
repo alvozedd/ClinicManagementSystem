@@ -1,7 +1,7 @@
 import { useState, useContext, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import AuthContext from '../../context/AuthContext';
-import { FaHome, FaSignOutAlt, FaUser, FaCalendarAlt, FaUsers, FaCog, FaFileAlt, FaClipboardList } from 'react-icons/fa';
+import { FaHome, FaSignOutAlt, FaUser, FaCalendarAlt, FaUsers, FaCog, FaFileAlt, FaClipboardList, FaListOl } from 'react-icons/fa';
 import './DashboardStyles.css';
 import DarkModeToggle from './DarkModeToggle';
 
@@ -25,7 +25,9 @@ const DashboardLayout = ({ children, activeTab, setActiveTab, role }) => {
   const getNavItems = () => {
     const commonItems = [
       { id: 'patients', label: 'Patients', icon: <FaUsers className="text-blue-500" /> },
-      { id: 'appointments', label: 'Appointments', icon: <FaCalendarAlt className="text-green-500" /> },
+      { id: 'appointments', label: 'Appointments', icon: <FaCalendarAlt className="text-green-600 dark:text-green-400" /> },
+      { id: 'queue', label: 'Queue', icon: <FaListOl className="text-amber-500" /> },
+      { id: 'calendar', label: 'Calendar', icon: <FaCalendarAlt className="text-purple-500" /> },
     ];
 
     if (role === 'admin') {
@@ -115,8 +117,10 @@ const DashboardLayout = ({ children, activeTab, setActiveTab, role }) => {
                       }}
                       className={`w-full flex items-center p-3 rounded-lg transition-colors ${
                         activeTab === item.id
-                          ? 'bg-blue-50 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300'
-                          : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50'
+                          ? 'bg-blue-50 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300 font-medium'
+                          : item.id === 'appointments'
+                            ? 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700/50 font-medium'
+                            : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50'
                       }`}
                     >
                       <span className="mr-3">{item.icon}</span>
