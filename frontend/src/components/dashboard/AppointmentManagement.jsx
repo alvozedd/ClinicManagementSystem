@@ -204,8 +204,9 @@ const AppointmentManagement = ({ role }) => {
     // Store the appointment ID in sessionStorage
     sessionStorage.setItem('selectedAppointmentForNote', appointmentId);
 
-    // Redirect to the Notes tab
-    window.location.href = '/dashboard/doctor?tab=notes';
+    // Redirect to the Notes tab using the correct URL format
+    const currentPath = window.location.pathname;
+    window.location.href = `${currentPath}?tab=notes`;
   };
 
   const submitAddAppointment = async (e) => {

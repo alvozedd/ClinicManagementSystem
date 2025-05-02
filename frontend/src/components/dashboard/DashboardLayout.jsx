@@ -1,5 +1,5 @@
 import { useState, useContext, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import AuthContext from '../../context/AuthContext';
 import { FaHome, FaSignOutAlt, FaUser, FaCalendarAlt, FaUsers, FaCog, FaFileAlt, FaClipboardList } from 'react-icons/fa';
 import './DashboardStyles.css';
@@ -7,6 +7,7 @@ import './DashboardStyles.css';
 const DashboardLayout = ({ children, activeTab, setActiveTab, role }) => {
   const { userInfo, logout } = useContext(AuthContext);
   const navigate = useNavigate();
+  const location = useLocation();
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -105,6 +106,9 @@ const DashboardLayout = ({ children, activeTab, setActiveTab, role }) => {
                     <button
                       onClick={() => {
                         setActiveTab(item.id);
+                        // Update URL with tab parameter
+                        const currentPath = location.pathname;
+                        navigate(`${currentPath}?tab=${item.id}`);
                         if (isMobile) setMenuOpen(false);
                       }}
                       className={`w-full flex items-center p-3 rounded-lg transition-colors ${
