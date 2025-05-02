@@ -1017,14 +1017,52 @@ const apiService = {
 
   // Diagnosis endpoints
   getDiagnoses: async () => {
-    const response = await fetch(`${API_URL}/diagnoses`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        ...authHeader(),
-      },
-    });
-    return handleResponse(response);
+    try {
+      console.log('Fetching diagnoses with auth headers:', authHeader());
+
+      // Try direct Railway URL first (most reliable)
+      try {
+        console.log('First attempt - Using direct Railway URL for diagnoses');
+        const response = await fetch('https://clinicmanagementsystem-production-081b.up.railway.app/diagnoses', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            ...authHeader(),
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+          },
+          mode: 'cors',
+          cache: 'no-cache'
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log(`Successfully fetched ${data.length} diagnoses with direct Railway URL`);
+          return data;
+        } else {
+          console.warn(`Railway URL attempt failed with status: ${response.status}`);
+        }
+      } catch (railwayError) {
+        console.warn('Railway URL attempt failed with error:', railwayError);
+      }
+
+      // Fall back to secureFetch
+      return await secureFetch(`${API_URL}/diagnoses`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeader(),
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        },
+        credentials: 'include'
+      });
+    } catch (error) {
+      console.error('Error fetching diagnoses:', error);
+      return []; // Return empty array instead of throwing
+    }
   },
 
   // Notes endpoints
@@ -1138,60 +1176,95 @@ const apiService = {
   },
 
   getDiagnosisByAppointmentId: async (appointmentId) => {
-    const response = await fetch(`${API_URL}/diagnoses/appointment/${appointmentId}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        ...authHeader(),
-      },
-    });
-    return handleResponse(response);
+    try {
+      console.log(`Fetching diagnoses for appointment ID: ${appointmentId}`);
+      return await secureFetch(`${API_URL}/diagnoses/appointment/${appointmentId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeader(),
+          'Cache-Control': 'no-cache, no-store, must-revalidate'
+        },
+        credentials: 'include'
+      });
+    } catch (error) {
+      console.error(`Error fetching diagnoses for appointment ${appointmentId}:`, error);
+      return []; // Return empty array instead of throwing
+    }
   },
 
   getDiagnosesByPatientId: async (patientId) => {
-    const response = await fetch(`${API_URL}/patients/${patientId}/diagnoses`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        ...authHeader(),
-      },
-    });
-    return handleResponse(response);
+    try {
+      console.log(`Fetching diagnoses for patient ID: ${patientId}`);
+      return await secureFetch(`${API_URL}/patients/${patientId}/diagnoses`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeader(),
+          'Cache-Control': 'no-cache, no-store, must-revalidate'
+        },
+        credentials: 'include'
+      });
+    } catch (error) {
+      console.error(`Error fetching diagnoses for patient ${patientId}:`, error);
+      return []; // Return empty array instead of throwing
+    }
   },
 
   createDiagnosis: async (diagnosisData) => {
-    const response = await fetch(`${API_URL}/diagnoses`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...authHeader(),
-      },
-      body: JSON.stringify(diagnosisData),
-    });
-    return handleResponse(response);
+    try {
+      console.log('Creating diagnosis with data:', diagnosisData);
+      return await secureFetch(`${API_URL}/diagnoses`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeader(),
+          'Cache-Control': 'no-cache, no-store, must-revalidate'
+        },
+        body: JSON.stringify(diagnosisData),
+        credentials: 'include'
+      });
+    } catch (error) {
+      console.error('Error creating diagnosis:', error);
+      throw error; // Rethrow for create operations
+    }
   },
 
   updateDiagnosis: async (id, diagnosisData) => {
-    const response = await fetch(`${API_URL}/diagnoses/${id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        ...authHeader(),
-      },
-      body: JSON.stringify(diagnosisData),
-    });
-    return handleResponse(response);
+    try {
+      console.log(`Updating diagnosis ${id} with data:`, diagnosisData);
+      return await secureFetch(`${API_URL}/diagnoses/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeader(),
+          'Cache-Control': 'no-cache, no-store, must-revalidate'
+        },
+        body: JSON.stringify(diagnosisData),
+        credentials: 'include'
+      });
+    } catch (error) {
+      console.error(`Error updating diagnosis ${id}:`, error);
+      throw error; // Rethrow for update operations
+    }
   },
 
   deleteDiagnosis: async (id) => {
-    const response = await fetch(`${API_URL}/diagnoses/${id}`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        ...authHeader(),
-      },
-    });
-    return handleResponse(response);
+    try {
+      console.log(`Deleting diagnosis ${id}`);
+      return await secureFetch(`${API_URL}/diagnoses/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeader(),
+          'Cache-Control': 'no-cache, no-store, must-revalidate'
+        },
+        credentials: 'include'
+      });
+    } catch (error) {
+      console.error(`Error deleting diagnosis ${id}:`, error);
+      throw error; // Rethrow for delete operations
+    }
   },
 
   // User management endpoints (for admin)

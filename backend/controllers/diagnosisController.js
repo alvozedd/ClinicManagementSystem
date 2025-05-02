@@ -5,7 +5,7 @@ const Diagnosis = require('../models/diagnosisModel');
 // @route   POST /api/diagnoses
 // @access  Private/Doctor
 const createDiagnosis = asyncHandler(async (req, res) => {
-  const { appointment_id, diagnosis_text, treatment_plan, follow_up_instructions, medications } = req.body;
+  const { appointment_id, diagnosis_text, treatment_plan, follow_up_instructions, medications, files } = req.body;
 
   console.log('Creating diagnosis with data:', req.body);
 
@@ -29,6 +29,7 @@ const createDiagnosis = asyncHandler(async (req, res) => {
       treatment_plan: treatment_plan || '',
       follow_up_instructions: follow_up_instructions || '',
       medications: medications || [],
+      files: files || [],
       created_by_user_id: req.user._id,
     });
 
@@ -191,6 +192,11 @@ const updateDiagnosis = asyncHandler(async (req, res) => {
     // Update medications if provided
     if (req.body.medications) {
       diagnosis.medications = req.body.medications;
+    }
+
+    // Update files if provided
+    if (req.body.files) {
+      diagnosis.files = req.body.files;
     }
 
     const updatedDiagnosis = await diagnosis.save();

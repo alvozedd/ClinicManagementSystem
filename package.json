@@ -24,6 +24,7 @@
     "framer-motion": "^12.9.2",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.0.1",
-    "node-fetch": "^2.7.0"
+    "node-fetch": "^2.7.0",
+    "react-pdf": "^9.2.1"
   }
 }

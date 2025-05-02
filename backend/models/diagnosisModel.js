@@ -37,6 +37,18 @@ const diagnosisSchema = mongoose.Schema(
       type: String,
     },
     medications: [medicationSchema],
+    files: [
+      {
+        file_id: String,
+        filename: String,
+        originalname: String,
+        mimetype: String,
+        uploaded_at: {
+          type: Date,
+          default: Date.now
+        }
+      }
+    ],
     created_by_user_id: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,

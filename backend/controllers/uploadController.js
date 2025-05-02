@@ -26,7 +26,7 @@ const uploadFile = asyncHandler(async (req, res) => {
   }
 
   // Get the appointment ID from the request body
-  const { appointment_id } = req.body;
+  const { appointment_id, diagnosis_id } = req.body;
 
   if (!appointment_id) {
     res.status(400);
@@ -34,7 +34,6 @@ const uploadFile = asyncHandler(async (req, res) => {
   }
 
   // Create a record in the database if needed
-  // For now, we'll just return the file information
   const fileInfo = {
     originalname: req.file.originalname,
     filename: req.file.filename,
@@ -42,11 +41,44 @@ const uploadFile = asyncHandler(async (req, res) => {
     size: req.file.size,
     mimetype: req.file.mimetype,
     appointment_id,
+    diagnosis_id: diagnosis_id || null,
     uploaded_by: req.user._id,
     uploaded_at: new Date()
   };
 
   logger.info(`File uploaded: ${req.file.filename} for appointment ${appointment_id}`);
+
+  // If diagnosis_id is provided, update the diagnosis with the file information
+  if (diagnosis_id) {
+    try {
+      const Diagnosis = require('../models/diagnosisModel');
+      const diagnosis = await Diagnosis.findById(diagnosis_id);
+
+      if (diagnosis) {
+        // Add the file to the diagnosis files array
+        const fileData = {
+          file_id: req.file.filename,
+          filename: req.file.filename,
+          originalname: req.file.originalname,
+          mimetype: req.file.mimetype,
+          uploaded_at: new Date()
+        };
+
+        // Initialize files array if it doesn't exist
+        if (!diagnosis.files) {
+          diagnosis.files = [];
+        }
+
+        diagnosis.files.push(fileData);
+        await diagnosis.save();
+
+        logger.info(`File linked to diagnosis ${diagnosis_id}`);
+      }
+    } catch (error) {
+      logger.error(`Error linking file to diagnosis: ${error.message}`);
+      // Continue even if linking fails - we still want to return the file info
+    }
+  }
 
   res.status(201).json(fileInfo);
 });

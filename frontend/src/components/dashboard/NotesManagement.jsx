@@ -1,9 +1,12 @@
-import { useState, useEffect } from 'react';
-import { FaFileMedical, FaSearch, FaEdit, FaTrash, FaDownload, FaUpload, FaFilter, FaPills } from 'react-icons/fa';
+import { useState, useEffect, useContext } from 'react';
+import { FaFileMedical, FaSearch, FaEdit, FaTrash, FaDownload, FaUpload, FaFilter, FaPills, FaFile, FaEye, FaSignOutAlt } from 'react-icons/fa';
+import AuthContext from '../../context/AuthContext';
 import apiService from '../../utils/apiService';
+import PDFViewer from '../common/PDFViewer';
 import './DashboardStyles.css';
 
 const NotesManagement = () => {
+  const { logout } = useContext(AuthContext);
   const [notes, setNotes] = useState([]);
   const [appointments, setAppointments] = useState([]);
   const [patients, setPatients] = useState([]);
@@ -16,6 +19,7 @@ const NotesManagement = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [currentNote, setCurrentNote] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
+  const [viewingPDF, setViewingPDF] = useState(null);
 
   // Form state for adding/editing notes
   const [formData, setFormData] = useState({
@@ -61,12 +65,27 @@ const NotesManagement = () => {
   const fetchNotes = async () => {
     try {
       const data = await apiService.getDiagnoses();
-      setNotes(data);
-      setError(null);
-      return data;
+      console.log('Fetched diagnoses data:', data);
+
+      if (Array.isArray(data)) {
+        setNotes(data);
+        setError(null);
+        return data;
+      } else {
+        console.error('Unexpected data format:', data);
+        setError('Received invalid data format from server. Please try again or contact support.');
+        return [];
+      }
     } catch (err) {
       console.error('Error fetching notes:', err);
-      setError('Failed to load notes. Please try again.');
+
+      // Check if it's an authentication error
+      if (err.status === 401 || (typeof err === 'string' && err.includes('401'))) {
+        setError('Authentication error. Please log out and log back in to refresh your session.');
+      } else {
+        setError('Failed to load notes. Please try again.');
+      }
+
       return [];
     }
   };
@@ -223,19 +242,11 @@ const NotesManagement = () => {
   const handleEditNote = (note) => {
     setCurrentNote(note);
 
-    // Parse the diagnosis text to extract structured data if available
-    let diagnosisText = note.diagnosis_text;
-    let treatmentPlan = '';
-    let followUp = '';
-    let medications = [];
-
-    // Check if the diagnosis text contains structured data
-    if (note.diagnosis && typeof note.diagnosis === 'object') {
-      diagnosisText = note.diagnosis.text || diagnosisText;
-      treatmentPlan = note.diagnosis.treatment_plan || '';
-      followUp = note.diagnosis.follow_up_instructions || '';
-      medications = note.diagnosis.medications || [];
-    }
+    // Get the diagnosis data
+    let diagnosisText = note.diagnosis_text || '';
+    let treatmentPlan = note.treatment_plan || '';
+    let followUp = note.follow_up_instructions || '';
+    let medications = note.medications || [];
 
     setFormData({
       appointment_id: note.appointment_id._id || note.appointment_id,
@@ -287,10 +298,30 @@ const NotesManagement = () => {
           const uploadFormData = new FormData();
           uploadFormData.append('file', selectedFile);
           uploadFormData.append('appointment_id', noteData.appointment_id);
+          uploadFormData.append('diagnosis_id', createdNote._id);
 
           console.log('Uploading file for appointment:', noteData.appointment_id);
           const uploadResult = await apiService.uploadFile(uploadFormData);
           console.log('File uploaded successfully:', uploadResult);
+
+          // Update the note with the file information
+          if (uploadResult && createdNote && createdNote._id) {
+            // Link the file to the note
+            const fileData = {
+              file_id: uploadResult._id || uploadResult.filename,
+              filename: uploadResult.filename,
+              originalname: uploadResult.originalname,
+              mimetype: uploadResult.mimetype
+            };
+
+            // Update the note with the file information
+            await apiService.updateDiagnosis(createdNote._id, {
+              ...noteData,
+              files: [fileData]
+            });
+
+            console.log('Note updated with file information');
+          }
         } catch (uploadError) {
           console.error('Error uploading file:', uploadError);
           setError('Note was saved but file upload failed. Please try again.');
@@ -329,10 +360,33 @@ const NotesManagement = () => {
           const uploadFormData = new FormData();
           uploadFormData.append('file', selectedFile);
           uploadFormData.append('appointment_id', noteData.appointment_id);
+          uploadFormData.append('diagnosis_id', currentNote._id);
 
           console.log('Uploading file for appointment:', noteData.appointment_id);
           const uploadResult = await apiService.uploadFile(uploadFormData);
           console.log('File uploaded successfully:', uploadResult);
+
+          // Update the note with the file information
+          if (uploadResult && currentNote && currentNote._id) {
+            // Get existing files or initialize empty array
+            const existingFiles = currentNote.files || [];
+
+            // Add the new file
+            const fileData = {
+              file_id: uploadResult._id || uploadResult.filename,
+              filename: uploadResult.filename,
+              originalname: uploadResult.originalname,
+              mimetype: uploadResult.mimetype
+            };
+
+            // Update the note with the file information
+            await apiService.updateDiagnosis(currentNote._id, {
+              ...noteData,
+              files: [...existingFiles, fileData]
+            });
+
+            console.log('Note updated with file information');
+          }
         } catch (uploadError) {
           console.error('Error uploading file:', uploadError);
           setError('Note was updated but file upload failed. Please try again.');
@@ -349,6 +403,9 @@ const NotesManagement = () => {
 
   // Filter notes based on search term, patient filter, and appointment filter
   const filteredNotes = notes.filter(note => {
+    // Check if note has valid appointment_id
+    if (!note.appointment_id) return false;
+
     const patientName = note.appointment_id && note.appointment_id.patient_id &&
       typeof note.appointment_id.patient_id === 'object'
         ? note.appointment_id.patient_id.name
@@ -493,14 +550,46 @@ const NotesManagement = () => {
                 {note.diagnosis_text}
               </p>
             </div>
-            {note.diagnosis && note.diagnosis.medications && note.diagnosis.medications.length > 0 && (
+            {note.medications && note.medications.length > 0 && (
               <div className="mt-2">
                 <p className="text-xs font-medium text-gray-700 dark:text-white">Medications:</p>
                 <div className="flex flex-wrap gap-1 mt-1">
-                  {note.diagnosis.medications.map((med, index) => (
+                  {note.medications.map((med, index) => (
                     <span key={index} className="badge badge-blue text-xs dark:bg-blue-700 dark:text-white">
                       {med.name}
                     </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Display attached files */}
+            {note.files && note.files.length > 0 && (
+              <div className="mt-3 border-t pt-2 border-gray-200 dark:border-gray-700">
+                <p className="text-xs font-medium text-gray-700 dark:text-white mb-1">Attachments:</p>
+                <div className="flex flex-wrap gap-2">
+                  {note.files.map((file, index) => (
+                    <div key={index} className="flex items-center space-x-2">
+                      <button
+                        onClick={() => setViewingPDF({
+                          url: `${import.meta.env.VITE_API_URL}/uploads/${file.filename}`,
+                          name: file.originalname || file.filename
+                        })}
+                        className="flex items-center text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                        title="View PDF"
+                      >
+                        <FaEye className="mr-1" />
+                        {file.originalname || file.filename}
+                      </button>
+                      <a
+                        href={`${import.meta.env.VITE_API_URL}/uploads/${file.filename}`}
+                        download
+                        className="text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                        title="Download"
+                      >
+                        <FaDownload />
+                      </a>
+                    </div>
                   ))}
                 </div>
               </div>
@@ -896,6 +985,14 @@ const NotesManagement = () => {
                 Go to the Appointments tab to create an appointment first, then mark it as completed before adding notes.
               </p>
             )}
+            {error.includes('Authentication error') && (
+              <button
+                onClick={logout}
+                className="mt-2 flex items-center px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 text-sm"
+              >
+                <FaSignOutAlt className="mr-1" /> Log Out & Refresh Session
+              </button>
+            )}
           </div>
           <button
             onClick={() => setError(null)}
@@ -949,6 +1046,15 @@ const NotesManagement = () => {
 
       {showAddModal && renderAddNoteModal()}
       {showEditModal && renderEditNoteModal()}
+
+      {/* PDF Viewer */}
+      {viewingPDF && (
+        <PDFViewer
+          fileUrl={viewingPDF.url}
+          fileName={viewingPDF.name}
+          onClose={() => setViewingPDF(null)}
+        />
+      )}
     </div>
   );
 };
