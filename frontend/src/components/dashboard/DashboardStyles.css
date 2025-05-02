@@ -542,6 +542,12 @@ body.dark-mode {
   background-color: rgba(219, 234, 254, 0.3);
 }
 
+.completed-appointment {
+  opacity: 0.75;
+  background-color: rgba(209, 250, 229, 0.15);
+  border-left: 3px solid #10b981;
+}
+
 .queue-number, .ticket-number {
   display: flex;
   align-items: center;
@@ -754,6 +760,11 @@ body.dark-mode {
 :root.dark-mode .queue-item.dragging {
   border-color: #60a5fa;
   background-color: rgba(30, 64, 175, 0.3);
+}
+
+:root.dark-mode .completed-appointment {
+  background-color: rgba(6, 95, 70, 0.1);
+  border-left: 3px solid #059669;
 }
 
 :root.dark-mode .btn-icon {

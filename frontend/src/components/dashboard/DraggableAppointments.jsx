@@ -27,11 +27,27 @@ const DraggableAppointments = ({ role }) => {
           return appointmentDate === today;
         });
 
-        // Add ticket numbers to appointments
-        const appointmentsWithTickets = todayAppointments.map((appointment, index) => ({
-          ...appointment,
-          ticketNumber: index + 1
-        }));
+        // Sort appointments - completed ones at the bottom
+        const sortedAppointments = [...todayAppointments].sort((a, b) => {
+          if (a.status === 'Completed' && b.status !== 'Completed') return 1;
+          if (a.status !== 'Completed' && b.status === 'Completed') return -1;
+          return 0;
+        });
+
+        // Add ticket numbers only to scheduled appointments
+        let ticketCounter = 1;
+        const appointmentsWithTickets = sortedAppointments.map(appointment => {
+          if (appointment.status === 'Scheduled') {
+            return {
+              ...appointment,
+              ticketNumber: ticketCounter++
+            };
+          }
+          return {
+            ...appointment,
+            ticketNumber: null
+          };
+        });
 
         setAppointments(appointmentsWithTickets);
       } catch (err) {
@@ -67,11 +83,20 @@ const DraggableAppointments = ({ role }) => {
       const [removed] = newAppointments.splice(source.index, 1);
       newAppointments.splice(destination.index, 0, removed);
 
-      // Update ticket numbers
-      const updatedAppointments = newAppointments.map((appointment, index) => ({
-        ...appointment,
-        ticketNumber: index + 1
-      }));
+      // Update ticket numbers only for scheduled appointments
+      let ticketCounter = 1;
+      const updatedAppointments = newAppointments.map(appointment => {
+        if (appointment.status === 'Scheduled') {
+          return {
+            ...appointment,
+            ticketNumber: ticketCounter++
+          };
+        }
+        return {
+          ...appointment,
+          ticketNumber: null
+        };
+      });
 
       setAppointments(updatedAppointments);
 
@@ -102,12 +127,33 @@ const DraggableAppointments = ({ role }) => {
         status: 'Completed'
       });
 
-      // Update local state
-      setAppointments(appointments.map(appointment =>
+      // Update local state and resort
+      const updatedAppointments = appointments.map(appointment =>
         appointment._id === appointmentId
-          ? { ...appointment, status: 'Completed' }
+          ? { ...appointment, status: 'Completed', ticketNumber: null }
           : appointment
-      ));
+      );
+
+      // Sort to move completed to bottom
+      const sortedAppointments = [...updatedAppointments].sort((a, b) => {
+        if (a.status === 'Completed' && b.status !== 'Completed') return 1;
+        if (a.status !== 'Completed' && b.status === 'Completed') return -1;
+        return 0;
+      });
+
+      // Reassign ticket numbers
+      let ticketCounter = 1;
+      const finalAppointments = sortedAppointments.map(appointment => {
+        if (appointment.status === 'Scheduled') {
+          return {
+            ...appointment,
+            ticketNumber: ticketCounter++
+          };
+        }
+        return appointment;
+      });
+
+      setAppointments(finalAppointments);
     } catch (err) {
       console.error('Error completing appointment:', err);
       setError('Failed to complete appointment. Please try again.');
@@ -151,7 +197,12 @@ const DraggableAppointments = ({ role }) => {
     const isCompleted = appointment.status === 'Completed';
 
     return (
-      <Draggable key={appointment._id} draggableId={appointment._id} index={index}>
+      <Draggable
+        key={appointment._id}
+        draggableId={appointment._id}
+        index={index}
+        isDragDisabled={appointment.status === 'Completed'}
+      >
         {(provided, snapshot) => (
           <div
             ref={provided.innerRef}
