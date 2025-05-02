@@ -184,6 +184,11 @@
   transition: border-color 0.2s ease;
 }
 
+.form-input::placeholder {
+  color: #6b7280;
+  opacity: 1;
+}
+
 .form-input:focus {
   outline: none;
   border-color: #3b82f6;

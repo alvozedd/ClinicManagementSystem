@@ -163,7 +163,7 @@ const PatientManagement = ({ role, selectedPatient, onSelectPatient, onBackToPat
             key={patient._id}
             className={`dashboard-card p-4 cursor-pointer hover:shadow-md transition-all ${
               viewMode === 'list' ? "flex items-center justify-between" : ""
-            }`}
+            } ${patient.createdBy === 'visitor' ? 'visitor-appointment' : ''}`}
             onClick={() => onSelectPatient(patient)}
           >
             {viewMode === 'grid' ? (
