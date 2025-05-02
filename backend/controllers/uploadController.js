@@ -3,10 +3,23 @@ const path = require('path');
 const fs = require('fs');
 const logger = require('../utils/logger');
 
+// Ensure uploads directory exists
+const ensureUploadsDir = () => {
+  const uploadDir = path.join(__dirname, '../uploads');
+  if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+    logger.info(`Created uploads directory at ${uploadDir}`);
+  }
+  return uploadDir;
+};
+
 // @desc    Upload a file
 // @route   POST /api/uploads
 // @access  Private/Doctor
 const uploadFile = asyncHandler(async (req, res) => {
+  // Ensure uploads directory exists
+  ensureUploadsDir();
+
   if (!req.file) {
     res.status(400);
     throw new Error('No file uploaded');
@@ -42,6 +55,9 @@ const uploadFile = asyncHandler(async (req, res) => {
 // @route   GET /api/uploads/:filename
 // @access  Private
 const getFile = asyncHandler(async (req, res) => {
+  // Ensure uploads directory exists
+  ensureUploadsDir();
+
   const filename = req.params.filename;
   const filePath = path.join(__dirname, '../uploads', filename);
 
@@ -59,6 +75,9 @@ const getFile = asyncHandler(async (req, res) => {
 // @route   DELETE /api/uploads/:filename
 // @access  Private/Doctor
 const deleteFile = asyncHandler(async (req, res) => {
+  // Ensure uploads directory exists
+  ensureUploadsDir();
+
   const filename = req.params.filename;
   const filePath = path.join(__dirname, '../uploads', filename);
 

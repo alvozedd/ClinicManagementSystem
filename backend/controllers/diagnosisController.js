@@ -9,22 +9,40 @@ const createDiagnosis = asyncHandler(async (req, res) => {
 
   console.log('Creating diagnosis with data:', req.body);
 
+  // Validate required fields
+  if (!appointment_id) {
+    res.status(400);
+    throw new Error('Appointment ID is required');
+  }
+
+  if (!diagnosis_text) {
+    res.status(400);
+    throw new Error('Diagnosis text is required');
+  }
+
   // No longer check for existing diagnosis - allow multiple diagnoses per appointment
 
-  const diagnosis = await Diagnosis.create({
-    appointment_id,
-    diagnosis_text,
-    treatment_plan,
-    follow_up_instructions,
-    medications,
-    created_by_user_id: req.user._id,
-  });
+  try {
+    const diagnosis = await Diagnosis.create({
+      appointment_id,
+      diagnosis_text,
+      treatment_plan: treatment_plan || '',
+      follow_up_instructions: follow_up_instructions || '',
+      medications: medications || [],
+      created_by_user_id: req.user._id,
+    });
 
-  if (diagnosis) {
-    res.status(201).json(diagnosis);
-  } else {
+    if (diagnosis) {
+      console.log('Diagnosis created successfully:', diagnosis);
+      res.status(201).json(diagnosis);
+    } else {
+      res.status(400);
+      throw new Error('Invalid diagnosis data');
+    }
+  } catch (error) {
+    console.error('Error creating diagnosis:', error);
     res.status(400);
-    throw new Error('Invalid diagnosis data');
+    throw new Error(`Failed to create diagnosis: ${error.message}`);
   }
 });
 
@@ -149,33 +167,40 @@ const getDiagnosisById = asyncHandler(async (req, res) => {
 // @route   PUT /api/diagnoses/:id
 // @access  Private/Doctor
 const updateDiagnosis = asyncHandler(async (req, res) => {
-  const diagnosis = await Diagnosis.findById(req.params.id);
+  try {
+    const diagnosis = await Diagnosis.findById(req.params.id);
 
-  if (!diagnosis) {
-    res.status(404);
-    throw new Error('Diagnosis not found');
+    if (!diagnosis) {
+      res.status(404);
+      throw new Error('Diagnosis not found');
+    }
+
+    // Check if user is authorized to update this diagnosis
+    if (req.user.role === 'doctor' && diagnosis.created_by_user_id.toString() !== req.user._id.toString()) {
+      res.status(403);
+      throw new Error('Not authorized to update this diagnosis');
+    }
+
+    console.log('Updating diagnosis with data:', req.body);
+
+    // Update all fields
+    diagnosis.diagnosis_text = req.body.diagnosis_text || diagnosis.diagnosis_text;
+    diagnosis.treatment_plan = req.body.treatment_plan !== undefined ? req.body.treatment_plan : diagnosis.treatment_plan;
+    diagnosis.follow_up_instructions = req.body.follow_up_instructions !== undefined ? req.body.follow_up_instructions : diagnosis.follow_up_instructions;
+
+    // Update medications if provided
+    if (req.body.medications) {
+      diagnosis.medications = req.body.medications;
+    }
+
+    const updatedDiagnosis = await diagnosis.save();
+    console.log('Diagnosis updated successfully:', updatedDiagnosis);
+    res.json(updatedDiagnosis);
+  } catch (error) {
+    console.error('Error updating diagnosis:', error);
+    res.status(400);
+    throw new Error(`Failed to update diagnosis: ${error.message}`);
   }
-
-  // Check if user is authorized to update this diagnosis
-  if (req.user.role === 'doctor' && diagnosis.created_by_user_id.toString() !== req.user._id.toString()) {
-    res.status(403);
-    throw new Error('Not authorized to update this diagnosis');
-  }
-
-  console.log('Updating diagnosis with data:', req.body);
-
-  // Update all fields
-  diagnosis.diagnosis_text = req.body.diagnosis_text || diagnosis.diagnosis_text;
-  diagnosis.treatment_plan = req.body.treatment_plan !== undefined ? req.body.treatment_plan : diagnosis.treatment_plan;
-  diagnosis.follow_up_instructions = req.body.follow_up_instructions !== undefined ? req.body.follow_up_instructions : diagnosis.follow_up_instructions;
-
-  // Update medications if provided
-  if (req.body.medications) {
-    diagnosis.medications = req.body.medications;
-  }
-
-  const updatedDiagnosis = await diagnosis.save();
-  res.json(updatedDiagnosis);
 });
 
 // @desc    Delete diagnosis

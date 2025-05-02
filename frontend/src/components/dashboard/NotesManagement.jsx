@@ -278,15 +278,23 @@ const NotesManagement = () => {
 
       console.log('Submitting note with data:', noteData);
 
-      await apiService.createDiagnosis(noteData);
+      const createdNote = await apiService.createDiagnosis(noteData);
+      console.log('Note created successfully:', createdNote);
 
       // If there's a file, upload it
       if (selectedFile) {
-        const formData = new FormData();
-        formData.append('file', selectedFile);
-        formData.append('appointment_id', noteData.appointment_id);
+        try {
+          const uploadFormData = new FormData();
+          uploadFormData.append('file', selectedFile);
+          uploadFormData.append('appointment_id', noteData.appointment_id);
 
-        await apiService.uploadFile(formData);
+          console.log('Uploading file for appointment:', noteData.appointment_id);
+          const uploadResult = await apiService.uploadFile(uploadFormData);
+          console.log('File uploaded successfully:', uploadResult);
+        } catch (uploadError) {
+          console.error('Error uploading file:', uploadError);
+          setError('Note was saved but file upload failed. Please try again.');
+        }
       }
 
       setShowAddModal(false);
@@ -312,15 +320,23 @@ const NotesManagement = () => {
 
       console.log('Updating note with data:', noteData);
 
-      await apiService.updateDiagnosis(currentNote._id, noteData);
+      const updatedNote = await apiService.updateDiagnosis(currentNote._id, noteData);
+      console.log('Note updated successfully:', updatedNote);
 
       // If there's a file, upload it
       if (selectedFile) {
-        const formData = new FormData();
-        formData.append('file', selectedFile);
-        formData.append('appointment_id', noteData.appointment_id);
+        try {
+          const uploadFormData = new FormData();
+          uploadFormData.append('file', selectedFile);
+          uploadFormData.append('appointment_id', noteData.appointment_id);
 
-        await apiService.uploadFile(formData);
+          console.log('Uploading file for appointment:', noteData.appointment_id);
+          const uploadResult = await apiService.uploadFile(uploadFormData);
+          console.log('File uploaded successfully:', uploadResult);
+        } catch (uploadError) {
+          console.error('Error uploading file:', uploadError);
+          setError('Note was updated but file upload failed. Please try again.');
+        }
       }
 
       setShowEditModal(false);

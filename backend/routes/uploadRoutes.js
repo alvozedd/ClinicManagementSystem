@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
 const { protect, doctor } = require('../middleware/authMiddleware');
 const { uploadFile, getFile, deleteFile } = require('../controllers/uploadController');
@@ -9,7 +10,12 @@ const { uploadFile, getFile, deleteFile } = require('../controllers/uploadContro
 // Configure multer storage
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, path.join(__dirname, '../uploads'));
+    // Create uploads directory if it doesn't exist
+    const uploadDir = path.join(__dirname, '../uploads');
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    cb(null, uploadDir);
   },
   filename: function (req, file, cb) {
     // Generate a unique filename with original extension
@@ -23,15 +29,15 @@ const storage = multer.diskStorage({
 const fileFilter = (req, file, cb) => {
   // Accept images, PDFs, and common document formats
   const allowedFileTypes = [
-    'image/jpeg', 
-    'image/png', 
-    'image/gif', 
+    'image/jpeg',
+    'image/png',
+    'image/gif',
     'application/pdf',
     'application/msword',
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
     'text/plain'
   ];
-  
+
   if (allowedFileTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {
@@ -40,7 +46,7 @@ const fileFilter = (req, file, cb) => {
 };
 
 // Configure multer upload
-const upload = multer({ 
+const upload = multer({
   storage: storage,
   fileFilter: fileFilter,
   limits: {

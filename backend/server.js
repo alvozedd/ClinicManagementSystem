@@ -3,6 +3,7 @@ const dotenv = require('dotenv');
 const cookieParser = require('cookie-parser');
 const helmet = require('helmet');
 const connectDB = require('./config/db');
+const fs = require('fs');
 const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 const { enforceHttps, addSecurityHeaders, secureCoookieSettings } = require('./middleware/securityMiddleware');
 // CSRF middleware completely removed
@@ -637,7 +638,12 @@ app.post('/uploads', addCorsHeaders, (req, res) => {
   // Configure multer storage
   const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-      cb(null, path.join(__dirname, './uploads'));
+      // Create uploads directory if it doesn't exist
+      const uploadDir = path.join(__dirname, 'uploads');
+      if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
+      }
+      cb(null, uploadDir);
     },
     filename: function (req, file, cb) {
       // Generate a unique filename with original extension
