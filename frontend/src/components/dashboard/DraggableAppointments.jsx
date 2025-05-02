@@ -10,8 +10,8 @@ const DraggableAppointments = ({ role }) => {
   const [error, setError] = useState(null);
 
   // Fetch today's appointments
-  useEffect(() => {
-    const fetchAppointments = async () => {
+  // Function to fetch appointments
+  const fetchAppointments = async () => {
       try {
         setLoading(true);
 
@@ -58,6 +58,7 @@ const DraggableAppointments = ({ role }) => {
       }
     };
 
+  useEffect(() => {
     fetchAppointments();
 
     // Refresh appointments every 30 seconds
@@ -83,9 +84,16 @@ const DraggableAppointments = ({ role }) => {
       const [removed] = newAppointments.splice(source.index, 1);
       newAppointments.splice(destination.index, 0, removed);
 
+      // Sort to keep completed appointments at the bottom
+      const sortedAppointments = [...newAppointments].sort((a, b) => {
+        if (a.status === 'Completed' && b.status !== 'Completed') return 1;
+        if (a.status !== 'Completed' && b.status === 'Completed') return -1;
+        return 0;
+      });
+
       // Update ticket numbers only for scheduled appointments
       let ticketCounter = 1;
-      const updatedAppointments = newAppointments.map(appointment => {
+      const updatedAppointments = sortedAppointments.map(appointment => {
         if (appointment.status === 'Scheduled') {
           return {
             ...appointment,
@@ -122,7 +130,7 @@ const DraggableAppointments = ({ role }) => {
   // Mark appointment as completed
   const handleCompleteAppointment = async (appointmentId) => {
     try {
-      // Update appointment status
+      // Update appointment status in the backend
       await apiService.updateAppointment(appointmentId, {
         status: 'Completed'
       });
@@ -150,10 +158,18 @@ const DraggableAppointments = ({ role }) => {
             ticketNumber: ticketCounter++
           };
         }
-        return appointment;
+        return {
+          ...appointment,
+          ticketNumber: null
+        };
       });
 
       setAppointments(finalAppointments);
+
+      // Fetch appointments again after a short delay to ensure backend changes are reflected
+      setTimeout(() => {
+        fetchAppointments();
+      }, 1000);
     } catch (err) {
       console.error('Error completing appointment:', err);
       setError('Failed to complete appointment. Please try again.');
@@ -162,8 +178,16 @@ const DraggableAppointments = ({ role }) => {
 
   // Handle edit appointment
   const handleEditAppointment = (appointmentId) => {
-    // Implement edit functionality or navigate to edit page
-    console.log('Edit appointment:', appointmentId);
+    // Navigate to the main appointments tab with edit modal open
+    const appointment = appointments.find(apt => apt._id === appointmentId);
+    if (appointment) {
+      // Store the appointment ID in sessionStorage to be picked up by AppointmentManagement
+      sessionStorage.setItem('editAppointmentId', appointmentId);
+
+      // Redirect to the appointments tab
+      const currentPath = window.location.pathname;
+      window.location.href = `${currentPath}?tab=appointments&view=all&edit=true`;
+    }
   };
 
   // Handle add notes

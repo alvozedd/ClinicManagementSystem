@@ -45,6 +45,30 @@ const AppointmentManagement = ({ role }) => {
   useEffect(() => {
     fetchAppointments();
     fetchPatients();
+
+    // Check if we need to open the edit modal based on URL parameters or sessionStorage
+    const params = new URLSearchParams(window.location.search);
+    const shouldEdit = params.get('edit') === 'true';
+    const editAppointmentId = sessionStorage.getItem('editAppointmentId');
+
+    if (shouldEdit && editAppointmentId) {
+      // Clear the sessionStorage item to prevent reopening on refresh
+      sessionStorage.removeItem('editAppointmentId');
+
+      // Fetch the appointment and open the edit modal
+      const openEditModal = async () => {
+        try {
+          const appointment = await apiService.getAppointmentById(editAppointmentId);
+          if (appointment) {
+            handleEditAppointment(appointment);
+          }
+        } catch (err) {
+          console.error('Error fetching appointment for edit:', err);
+        }
+      };
+
+      openEditModal();
+    }
   }, []);
 
   const fetchAppointments = async () => {

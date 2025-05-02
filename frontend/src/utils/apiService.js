@@ -498,6 +498,21 @@ const apiService = {
   },
 
   // Appointment endpoints
+  getAppointmentById: async (id) => {
+    try {
+      console.log(`Fetching appointment with ID: ${id}`);
+      return await makeApiRequest(`/appointments/${id}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+    } catch (error) {
+      console.error(`Error fetching appointment with ID ${id}:`, error);
+      throw error;
+    }
+  },
+
   getAppointments: async () => {
     try {
       console.log('Fetching appointments');
