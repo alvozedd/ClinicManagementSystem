@@ -755,15 +755,15 @@ const NotesManagement = () => {
 
       <div className="flex flex-col gap-3 mb-4">
         <div className="flex flex-col sm:flex-row justify-between items-center gap-3">
-          <div className="relative w-full sm:w-auto">
+          <div className="search-input-container w-full sm:w-auto">
             <input
               type="text"
               placeholder="Search notes..."
-              className="form-input pl-14 w-full"
+              className="form-input w-full"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
-            <FaSearch className="absolute left-5 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <FaSearch className="search-icon" />
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
@@ -786,11 +786,11 @@ const NotesManagement = () => {
         <div className="bg-gray-50 p-3 rounded-lg">
           <h3 className="text-sm font-medium text-gray-700 mb-2">Search by Appointment</h3>
           <div className="flex flex-col sm:flex-row gap-3">
-            <div className="relative w-full">
+            <div className="search-input-container w-full">
               <input
                 type="text"
                 placeholder="Search appointments..."
-                className="form-input pl-14 w-full"
+                className="form-input w-full"
                 onChange={(e) => {
                   const searchTerm = e.target.value.toLowerCase();
                   if (searchTerm === '') {
@@ -809,7 +809,7 @@ const NotesManagement = () => {
                   }
                 }}
               />
-              <FaSearch className="absolute left-5 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <FaSearch className="search-icon" />
             </div>
 
             <select

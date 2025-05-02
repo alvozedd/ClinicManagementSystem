@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import AuthContext from '../../context/AuthContext';
 import { FaHome, FaSignOutAlt, FaUser, FaCalendarAlt, FaUsers, FaCog, FaFileAlt, FaClipboardList } from 'react-icons/fa';
 import './DashboardStyles.css';
+import DarkModeToggle from './DarkModeToggle';
 
 const DashboardLayout = ({ children, activeTab, setActiveTab, role }) => {
   const { userInfo, logout } = useContext(AuthContext);
@@ -71,7 +72,8 @@ const DashboardLayout = ({ children, activeTab, setActiveTab, role }) => {
             <div className="text-lg font-semibold text-blue-600">UroHealth</div>
           </div>
           <div className="flex items-center">
-            <div className="text-sm mr-2 text-gray-600">{userInfo?.name}</div>
+            <DarkModeToggle />
+            <div className="text-sm mx-2 text-gray-600">{userInfo?.name}</div>
             <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold">
               {userInfo?.name?.charAt(0) || 'U'}
             </div>
@@ -126,6 +128,10 @@ const DashboardLayout = ({ children, activeTab, setActiveTab, role }) => {
             </nav>
 
             <div className="sidebar-footer mt-auto pt-4 border-t border-gray-200">
+              <div className="flex items-center justify-between mb-3 px-3">
+                <span className="text-sm text-gray-500">Theme</span>
+                <DarkModeToggle />
+              </div>
               <button
                 onClick={handleLogout}
                 className="w-full flex items-center p-3 text-red-500 hover:bg-red-50 rounded-lg transition-colors"

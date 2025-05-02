@@ -459,15 +459,15 @@ const AppointmentManagement = ({ role }) => {
           <form onSubmit={submitAddAppointment}>
             <div className="form-group">
               <label className="form-label">Patient*</label>
-              <div className="relative">
+              <div className="search-input-container mb-2">
                 <input
                   type="text"
                   placeholder="Search patients..."
-                  className="form-input pl-14 mb-2"
+                  className="form-input"
                   value={patientSearchTerm}
                   onChange={handlePatientSearch}
                 />
-                <FaSearch className="absolute left-5 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <FaSearch className="search-icon" />
               </div>
 
               {filteredPatients.length > 0 && (
@@ -722,15 +722,15 @@ const AppointmentManagement = ({ role }) => {
           <form onSubmit={submitEditAppointment}>
             <div className="form-group">
               <label className="form-label">Patient*</label>
-              <div className="relative">
+              <div className="search-input-container mb-2">
                 <input
                   type="text"
                   placeholder="Search patients..."
-                  className="form-input pl-14 mb-2"
+                  className="form-input"
                   value={patientSearchTerm}
                   onChange={handlePatientSearch}
                 />
-                <FaSearch className="absolute left-5 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <FaSearch className="search-icon" />
               </div>
 
               {filteredPatients.length > 0 && (
@@ -873,15 +873,15 @@ const AppointmentManagement = ({ role }) => {
       )}
 
       <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-3">
-        <div className="relative w-full sm:w-auto">
+        <div className="search-input-container w-full sm:w-auto">
           <input
             type="text"
             placeholder="Search appointments..."
-            className="form-input pl-14 w-full"
+            className="form-input w-full"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
-          <FaSearch className="absolute left-5 top-1/2 transform -translate-y-1/2 text-gray-400" />
+          <FaSearch className="search-icon" />
         </div>
 
         <div className="flex space-x-2 w-full sm:w-auto justify-end">

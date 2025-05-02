@@ -660,15 +660,15 @@ const PatientManagement = ({ role, selectedPatient, onSelectPatient, onBackToPat
           )}
 
           <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-3">
-            <div className="relative w-full sm:w-auto">
+            <div className="search-input-container w-full sm:w-auto">
               <input
                 type="text"
                 placeholder="Search patients..."
-                className="form-input pl-14 w-full"
+                className="form-input w-full"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
-              <FaSearch className="absolute left-5 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <FaSearch className="search-icon" />
             </div>
 
             <div className="flex space-x-2 w-full sm:w-auto justify-end">

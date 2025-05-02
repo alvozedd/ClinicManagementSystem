@@ -1,10 +1,46 @@
 /* Dashboard Styles */
 
+:root {
+  /* Light mode colors */
+  --bg-primary: #f9fafb;
+  --bg-secondary: #ffffff;
+  --bg-card: rgba(255, 255, 255, 0.8);
+  --text-primary: #1f2937;
+  --text-secondary: #4b5563;
+  --text-muted: #6b7280;
+  --border-color: #d1d5db;
+  --input-bg: #ffffff;
+  --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --highlight-bg: #F0F7FF;
+  --highlight-border: #3B82F6;
+}
+
+/* Dark mode */
+:root.dark-mode {
+  --bg-primary: #111827;
+  --bg-secondary: #1f2937;
+  --bg-card: rgba(31, 41, 55, 0.8);
+  --text-primary: #f9fafb;
+  --text-secondary: #e5e7eb;
+  --text-muted: #9ca3af;
+  --border-color: #374151;
+  --input-bg: #374151;
+  --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --highlight-bg: #1e3a8a;
+  --highlight-border: #60a5fa;
+}
+
+/* Apply dark mode to the entire app */
+body.dark-mode {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
 .dashboard-container {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  background-color: #f9fafb;
+  background-color: var(--bg-primary);
 }
 
 .dashboard-layout {
@@ -14,8 +50,8 @@
 
 .dashboard-sidebar {
   width: 260px;
-  background-color: white;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  background-color: var(--bg-secondary);
+  box-shadow: var(--card-shadow);
   z-index: 10;
   transition: all 0.3s ease;
 }
@@ -27,26 +63,27 @@
 }
 
 .content-container {
-  background: rgba(255, 255, 255, 0.9);
+  background: var(--bg-secondary);
   backdrop-filter: blur(10px);
   border-radius: 0.5rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--card-shadow);
   min-height: calc(100vh - 2rem);
 }
 
 /* Card styles */
 .dashboard-card {
-  background: rgba(255, 255, 255, 0.8);
+  background: var(--bg-card);
   backdrop-filter: blur(10px);
   border-radius: 0.5rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  box-shadow: var(--card-shadow);
   transition: all 0.3s ease;
-  border: 1px solid rgba(226, 232, 240, 0.8);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
 }
 
 .visitor-appointment {
-  background-color: #F0F7FF;
-  border-left: 3px solid #3B82F6;
+  background-color: var(--highlight-bg);
+  border-left: 3px solid var(--highlight-border);
 }
 
 .dashboard-card:hover {
@@ -177,16 +214,34 @@
 .form-input {
   width: 100%;
   padding: 0.5rem 0.75rem;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--border-color);
   border-radius: 0.375rem;
-  background-color: white;
-  color: #1f2937;
+  background-color: var(--input-bg);
+  color: var(--text-primary);
   transition: border-color 0.2s ease;
 }
 
 .form-input::placeholder {
-  color: #6b7280;
+  color: var(--text-muted);
   opacity: 1;
+}
+
+/* Fix search icon positioning */
+.search-input-container {
+  position: relative;
+}
+
+.search-input-container input {
+  padding-left: 2.5rem; /* Increased left padding */
+}
+
+.search-icon {
+  position: absolute;
+  left: 0.75rem; /* Positioned further left */
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none; /* Ensures the icon doesn't interfere with input */
 }
 
 .form-input:focus {
@@ -311,4 +366,60 @@
 .badge-gray {
   background-color: #f3f4f6;
   color: #4b5563;
+}
+
+/* Dark mode adjustments */
+:root.dark-mode .badge-blue {
+  background-color: #1e3a8a;
+  color: #bfdbfe;
+}
+
+:root.dark-mode .badge-green {
+  background-color: #064e3b;
+  color: #a7f3d0;
+}
+
+:root.dark-mode .badge-yellow {
+  background-color: #78350f;
+  color: #fef3c7;
+}
+
+:root.dark-mode .badge-red {
+  background-color: #991b1b;
+  color: #fee2e2;
+}
+
+:root.dark-mode .badge-pink {
+  background-color: #831843;
+  color: #fbcfe8;
+}
+
+:root.dark-mode .badge-gray {
+  background-color: #374151;
+  color: #f3f4f6;
+}
+
+:root.dark-mode .btn-outline-primary {
+  color: #60a5fa;
+  border-color: #60a5fa;
+}
+
+:root.dark-mode .btn-outline-primary:hover {
+  background-color: #60a5fa;
+  color: #111827;
+}
+
+:root.dark-mode .btn-primary {
+  background-color: #60a5fa;
+  border-color: #60a5fa;
+  color: #111827;
+}
+
+:root.dark-mode .btn-primary:hover {
+  background-color: #93c5fd;
+  border-color: #93c5fd;
+}
+
+:root.dark-mode .icon-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
 }
