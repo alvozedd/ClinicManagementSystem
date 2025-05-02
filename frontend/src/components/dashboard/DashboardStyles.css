@@ -44,6 +44,11 @@
   border: 1px solid rgba(226, 232, 240, 0.8);
 }
 
+.visitor-appointment {
+  background-color: #F0F7FF;
+  border-left: 3px solid #3B82F6;
+}
+
 .dashboard-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -87,11 +92,11 @@
     right: 0;
     z-index: 20;
   }
-  
+
   .dashboard-main {
     padding-top: 4rem;
   }
-  
+
   .sidebar-content {
     overflow-y: auto;
   }
@@ -291,6 +296,11 @@
 .badge-red {
   background-color: #fee2e2;
   color: #b91c1c;
+}
+
+.badge-pink {
+  background-color: #FFC0CB;
+  color: #9B2C3D;
 }
 
 .badge-gray {

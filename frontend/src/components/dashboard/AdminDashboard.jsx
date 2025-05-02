@@ -151,11 +151,11 @@ const AdminDashboard = () => {
             <input
               type="text"
               placeholder="Search users..."
-              className="form-input pl-12"
+              className="form-input pl-14"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
-            <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <FaSearch className="absolute left-5 top-1/2 transform -translate-y-1/2 text-gray-400" />
           </div>
         </div>
 

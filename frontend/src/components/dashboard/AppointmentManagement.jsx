@@ -557,11 +557,11 @@ const AppointmentManagement = ({ role }) => {
           <input
             type="text"
             placeholder="Search appointments..."
-            className="form-input pl-12 w-full"
+            className="form-input pl-14 w-full"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
-          <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
+          <FaSearch className="absolute left-5 top-1/2 transform -translate-y-1/2 text-gray-400" />
         </div>
 
         <div className="flex space-x-2 w-full sm:w-auto justify-end">
