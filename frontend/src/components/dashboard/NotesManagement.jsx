@@ -35,34 +35,39 @@ const NotesManagement = () => {
   });
 
   useEffect(() => {
-    fetchNotes();
-    fetchAppointments();
-    fetchPatients();
+    const fetchData = async () => {
+      setLoading(true);
+      await Promise.all([
+        fetchNotes(),
+        fetchAppointments(),
+        fetchPatients()
+      ]);
+      setLoading(false);
 
-    // Check if there's a selected appointment from the appointments page
-    const selectedAppointmentId = sessionStorage.getItem('selectedAppointmentForNote');
-    if (selectedAppointmentId) {
-      // Clear the session storage to prevent it from persisting across page refreshes
-      sessionStorage.removeItem('selectedAppointmentForNote');
+      // Check if there's a selected appointment from the appointments page
+      const selectedAppointmentId = sessionStorage.getItem('selectedAppointmentForNote');
+      if (selectedAppointmentId) {
+        // Clear the session storage to prevent it from persisting across page refreshes
+        sessionStorage.removeItem('selectedAppointmentForNote');
 
-      // Set a small delay to ensure appointments are loaded
-      setTimeout(() => {
+        // Open the Add Note form with the selected appointment
         handleAddNoteForAppointment(selectedAppointmentId);
-      }, 500);
-    }
+      }
+    };
+
+    fetchData();
   }, []);
 
   const fetchNotes = async () => {
-    setLoading(true);
     try {
       const data = await apiService.getDiagnoses();
       setNotes(data);
       setError(null);
+      return data;
     } catch (err) {
       console.error('Error fetching notes:', err);
       setError('Failed to load notes. Please try again.');
-    } finally {
-      setLoading(false);
+      return [];
     }
   };
 
@@ -74,8 +79,10 @@ const NotesManagement = () => {
         appointment => appointment.status === 'Completed' || appointment.status === 'In-progress'
       );
       setAppointments(completedAppointments);
+      return completedAppointments;
     } catch (err) {
       console.error('Error fetching appointments:', err);
+      return [];
     }
   };
 
@@ -83,8 +90,10 @@ const NotesManagement = () => {
     try {
       const data = await apiService.getPatients();
       setPatients(data);
+      return data;
     } catch (err) {
       console.error('Error fetching patients:', err);
+      return [];
     }
   };
 
@@ -145,9 +154,20 @@ const NotesManagement = () => {
     setShowAddModal(true);
   };
 
-  const handleAddNoteForAppointment = (appointmentId) => {
+  const handleAddNoteForAppointment = async (appointmentId) => {
     // Find the appointment in the appointments array
-    const appointment = appointments.find(app => app._id === appointmentId);
+    let appointment = appointments.find(app => app._id === appointmentId);
+
+    // If appointment not found in the current list, try to fetch it directly
+    if (!appointment) {
+      try {
+        // Refresh appointments list to make sure we have the latest data
+        await fetchAppointments();
+        appointment = appointments.find(app => app._id === appointmentId);
+      } catch (err) {
+        console.error('Error refreshing appointments:', err);
+      }
+    }
 
     if (appointment) {
       setFormData({
@@ -733,44 +753,78 @@ const NotesManagement = () => {
         </div>
       )}
 
-      <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-3">
-        <div className="relative w-full sm:w-auto">
-          <input
-            type="text"
-            placeholder="Search notes..."
-            className="form-input pl-14 w-full"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-          <FaSearch className="absolute left-5 top-1/2 transform -translate-y-1/2 text-gray-400" />
+      <div className="flex flex-col gap-3 mb-4">
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-3">
+          <div className="relative w-full sm:w-auto">
+            <input
+              type="text"
+              placeholder="Search notes..."
+              className="form-input pl-14 w-full"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <FaSearch className="absolute left-5 top-1/2 transform -translate-y-1/2 text-gray-400" />
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+            <select
+              value={filterPatient}
+              onChange={(e) => setFilterPatient(e.target.value)}
+              className="form-input w-full"
+            >
+              <option value="all">All Patients</option>
+              {patients.map(patient => (
+                <option key={patient._id} value={patient._id}>
+                  {patient.name}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-          <select
-            value={filterPatient}
-            onChange={(e) => setFilterPatient(e.target.value)}
-            className="form-input w-full"
-          >
-            <option value="all">All Patients</option>
-            {patients.map(patient => (
-              <option key={patient._id} value={patient._id}>
-                {patient.name}
-              </option>
-            ))}
-          </select>
+        {/* Appointment Search Section */}
+        <div className="bg-gray-50 p-3 rounded-lg">
+          <h3 className="text-sm font-medium text-gray-700 mb-2">Search by Appointment</h3>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="relative w-full">
+              <input
+                type="text"
+                placeholder="Search appointments..."
+                className="form-input pl-14 w-full"
+                onChange={(e) => {
+                  const searchTerm = e.target.value.toLowerCase();
+                  if (searchTerm === '') {
+                    setFilterAppointment('all');
+                  } else {
+                    // Find matching appointment
+                    const matchingAppointment = appointments.find(appointment => {
+                      const patientName = getPatientName(appointment).toLowerCase();
+                      const appointmentDate = new Date(appointment.appointment_date).toLocaleDateString().toLowerCase();
+                      return patientName.includes(searchTerm) || appointmentDate.includes(searchTerm);
+                    });
 
-          <select
-            value={filterAppointment}
-            onChange={(e) => setFilterAppointment(e.target.value)}
-            className="form-input w-full"
-          >
-            <option value="all">All Appointments</option>
-            {appointments.map(appointment => (
-              <option key={appointment._id} value={appointment._id}>
-                {getPatientName(appointment)} - {new Date(appointment.appointment_date).toLocaleDateString()}
-              </option>
-            ))}
-          </select>
+                    if (matchingAppointment) {
+                      setFilterAppointment(matchingAppointment._id);
+                    }
+                  }
+                }}
+              />
+              <FaSearch className="absolute left-5 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            </div>
+
+            <select
+              value={filterAppointment}
+              onChange={(e) => setFilterAppointment(e.target.value)}
+              className="form-input w-full sm:w-auto"
+            >
+              <option value="all">All Appointments</option>
+              {appointments.map(appointment => (
+                <option key={appointment._id} value={appointment._id}>
+                  {getPatientName(appointment)} - {new Date(appointment.appointment_date).toLocaleDateString()}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
 
