@@ -3,7 +3,6 @@ import { FaCalendarPlus, FaSearch, FaEdit, FaTrash, FaUserPlus, FaCheck, FaNotes
 import apiService from '../../utils/apiService';
 import './DashboardStyles.css';
 import DraggableAppointments from './DraggableAppointments';
-import QueueList from './QueueList';
 
 const AppointmentManagement = ({ role }) => {
   const [appointments, setAppointments] = useState([]);
@@ -1081,13 +1080,6 @@ const AppointmentManagement = ({ role }) => {
             <FaUserClock className="mr-1" />
             Draggable Appointments
           </button>
-          <button
-            onClick={() => setViewMode('queue')}
-            className={`tab-button ${viewMode === 'queue' ? 'active' : ''} relative`}
-          >
-            <FaUserClock className="mr-1" />
-            Queue Management
-          </button>
           <div className="flex items-center ml-auto">
             {(viewMode === 'today' || viewMode === 'all') && (
               <div className="flex border rounded overflow-hidden mr-4">
@@ -1128,8 +1120,7 @@ const AppointmentManagement = ({ role }) => {
         <>
           {viewMode === 'today' ? renderTodayAppointments() :
            viewMode === 'all' ? renderAppointmentList() :
-           viewMode === 'draggable' ? <DraggableAppointments role={role} /> :
-           viewMode === 'queue' ? <QueueList role={role} /> : null}
+           viewMode === 'draggable' ? <DraggableAppointments role={role} /> : null}
         </>
       )}
 
