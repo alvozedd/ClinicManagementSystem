@@ -267,20 +267,16 @@ const NotesManagement = () => {
   const submitAddNote = async (e) => {
     e.preventDefault();
     try {
-      // Create structured diagnosis data
-      const diagnosisData = {
-        text: formData.diagnosis_text,
+      // Create note data with all fields
+      const noteData = {
+        appointment_id: formData.appointment_id,
+        diagnosis_text: formData.diagnosis_text,
         treatment_plan: formData.treatment_plan,
         follow_up_instructions: formData.follow_up,
         medications: formData.medications
       };
 
-      // Create note with structured data
-      const noteData = {
-        appointment_id: formData.appointment_id,
-        diagnosis_text: formData.diagnosis_text,
-        diagnosis: diagnosisData
-      };
+      console.log('Submitting note with data:', noteData);
 
       await apiService.createDiagnosis(noteData);
 
@@ -305,20 +301,16 @@ const NotesManagement = () => {
   const submitEditNote = async (e) => {
     e.preventDefault();
     try {
-      // Create structured diagnosis data
-      const diagnosisData = {
-        text: formData.diagnosis_text,
+      // Create note data with all fields
+      const noteData = {
+        appointment_id: formData.appointment_id,
+        diagnosis_text: formData.diagnosis_text,
         treatment_plan: formData.treatment_plan,
         follow_up_instructions: formData.follow_up,
         medications: formData.medications
       };
 
-      // Create note with structured data
-      const noteData = {
-        appointment_id: formData.appointment_id,
-        diagnosis_text: formData.diagnosis_text,
-        diagnosis: diagnosisData
-      };
+      console.log('Updating note with data:', noteData);
 
       await apiService.updateDiagnosis(currentNote._id, noteData);
 

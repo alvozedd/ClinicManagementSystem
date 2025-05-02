@@ -5,13 +5,18 @@ const Diagnosis = require('../models/diagnosisModel');
 // @route   POST /api/diagnoses
 // @access  Private/Doctor
 const createDiagnosis = asyncHandler(async (req, res) => {
-  const { appointment_id, diagnosis_text } = req.body;
+  const { appointment_id, diagnosis_text, treatment_plan, follow_up_instructions, medications } = req.body;
+
+  console.log('Creating diagnosis with data:', req.body);
 
   // No longer check for existing diagnosis - allow multiple diagnoses per appointment
 
   const diagnosis = await Diagnosis.create({
     appointment_id,
     diagnosis_text,
+    treatment_plan,
+    follow_up_instructions,
+    medications,
     created_by_user_id: req.user._id,
   });
 
@@ -157,7 +162,17 @@ const updateDiagnosis = asyncHandler(async (req, res) => {
     throw new Error('Not authorized to update this diagnosis');
   }
 
+  console.log('Updating diagnosis with data:', req.body);
+
+  // Update all fields
   diagnosis.diagnosis_text = req.body.diagnosis_text || diagnosis.diagnosis_text;
+  diagnosis.treatment_plan = req.body.treatment_plan !== undefined ? req.body.treatment_plan : diagnosis.treatment_plan;
+  diagnosis.follow_up_instructions = req.body.follow_up_instructions !== undefined ? req.body.follow_up_instructions : diagnosis.follow_up_instructions;
+
+  // Update medications if provided
+  if (req.body.medications) {
+    diagnosis.medications = req.body.medications;
+  }
 
   const updatedDiagnosis = await diagnosis.save();
   res.json(updatedDiagnosis);

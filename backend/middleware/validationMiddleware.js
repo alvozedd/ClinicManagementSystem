@@ -240,7 +240,7 @@ const validateAppointmentCreation = (req, res, next) => {
 
 // Validation middleware for diagnosis creation
 const validateDiagnosisCreation = (req, res, next) => {
-  const { appointment_id, diagnosis_text } = req.body;
+  const { appointment_id, diagnosis_text, treatment_plan, follow_up_instructions, medications } = req.body;
   const errors = [];
 
   // Validate appointment_id
@@ -257,6 +257,31 @@ const validateDiagnosisCreation = (req, res, next) => {
     errors.push('Diagnosis text must be less than 2000 characters');
   }
 
+  // Validate treatment_plan if provided
+  if (treatment_plan && treatment_plan.length > 2000) {
+    errors.push('Treatment plan must be less than 2000 characters');
+  }
+
+  // Validate follow_up_instructions if provided
+  if (follow_up_instructions && follow_up_instructions.length > 2000) {
+    errors.push('Follow-up instructions must be less than 2000 characters');
+  }
+
+  // Validate medications if provided
+  if (medications && Array.isArray(medications)) {
+    medications.forEach((med, index) => {
+      if (!med.name || med.name.trim() === '') {
+        errors.push(`Medication #${index + 1}: Name is required`);
+      }
+      if (!med.dosage || med.dosage.trim() === '') {
+        errors.push(`Medication #${index + 1}: Dosage is required`);
+      }
+      if (!med.frequency || med.frequency.trim() === '') {
+        errors.push(`Medication #${index + 1}: Frequency is required`);
+      }
+    });
+  }
+
   // If there are validation errors, return them
   if (errors.length > 0) {
     return res.status(400).json({ errors });
@@ -264,6 +289,18 @@ const validateDiagnosisCreation = (req, res, next) => {
 
   // Sanitize inputs
   req.body.diagnosis_text = sanitizeString(diagnosis_text);
+  if (treatment_plan) req.body.treatment_plan = sanitizeString(treatment_plan);
+  if (follow_up_instructions) req.body.follow_up_instructions = sanitizeString(follow_up_instructions);
+
+  // Sanitize medications
+  if (medications && Array.isArray(medications)) {
+    req.body.medications = medications.map(med => ({
+      name: sanitizeString(med.name),
+      dosage: sanitizeString(med.dosage),
+      frequency: sanitizeString(med.frequency),
+      duration: med.duration ? sanitizeString(med.duration) : undefined
+    }));
+  }
 
   next();
 };

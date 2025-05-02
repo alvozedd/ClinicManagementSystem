@@ -937,6 +937,20 @@ const apiService = {
     try {
       console.log('Reordering appointments with data:', appointmentOrder);
 
+      // Store the order in localStorage first for immediate persistence
+      // This ensures the order is saved even if the API calls fail
+      const appointmentsInOrder = appointmentOrder.map(item => ({
+        id: item.id,
+        position: item.position
+      }));
+
+      // Save to sessionStorage to persist across page refreshes but not across sessions
+      // This helps with the first-time reordering issue
+      sessionStorage.setItem('appointmentOrder', JSON.stringify(appointmentsInOrder));
+
+      // Also save to localStorage for longer persistence
+      localStorage.setItem('appointmentOrder', JSON.stringify(appointmentsInOrder));
+
       // Try multiple approaches to reorder appointments
       try {
         // First try: with direct Railway URL
@@ -991,16 +1005,8 @@ const apiService = {
         console.warn('Second attempt failed with error:', secondError);
       }
 
-      // If all attempts fail, update the appointments in localStorage as a fallback
+      // If all attempts fail, we've already saved to localStorage as a fallback
       console.log('All API attempts failed, using localStorage fallback for appointment order');
-
-      // Store the order in localStorage
-      const appointmentsInOrder = appointmentOrder.map(item => ({
-        id: item.id,
-        position: item.position
-      }));
-
-      localStorage.setItem('appointmentOrder', JSON.stringify(appointmentsInOrder));
 
       // Return a mock success response
       return {

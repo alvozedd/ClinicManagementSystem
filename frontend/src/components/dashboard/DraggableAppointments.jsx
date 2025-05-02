@@ -27,17 +27,33 @@ const DraggableAppointments = ({ role }) => {
         return appointmentDate === today;
       });
 
-      // Check if there's a saved order in localStorage
-      const savedOrder = localStorage.getItem('appointmentOrder');
+      // Check if there's a saved order in sessionStorage first (for current session)
       let customOrder = null;
+      const sessionSavedOrder = sessionStorage.getItem('appointmentOrder');
 
-      if (savedOrder && userHasReordered) {
+      if (sessionSavedOrder && userHasReordered) {
         try {
-          customOrder = JSON.parse(savedOrder);
-          console.log('Using saved appointment order from localStorage');
+          customOrder = JSON.parse(sessionSavedOrder);
+          console.log('Using saved appointment order from sessionStorage');
         } catch (e) {
-          console.error('Error parsing saved appointment order:', e);
-          localStorage.removeItem('appointmentOrder');
+          console.error('Error parsing saved appointment order from sessionStorage:', e);
+          sessionStorage.removeItem('appointmentOrder');
+        }
+      }
+
+      // If no order in sessionStorage, check localStorage
+      if (!customOrder && userHasReordered) {
+        const localSavedOrder = localStorage.getItem('appointmentOrder');
+        if (localSavedOrder) {
+          try {
+            customOrder = JSON.parse(localSavedOrder);
+            console.log('Using saved appointment order from localStorage');
+            // Copy to sessionStorage for current session
+            sessionStorage.setItem('appointmentOrder', localSavedOrder);
+          } catch (e) {
+            console.error('Error parsing saved appointment order from localStorage:', e);
+            localStorage.removeItem('appointmentOrder');
+          }
         }
       }
 
@@ -58,6 +74,18 @@ const DraggableAppointments = ({ role }) => {
           const posB = positionMap.get(b._id) || Number.MAX_SAFE_INTEGER;
           return posA - posB;
         });
+
+        // Update the saved order if we have new appointments that aren't in the saved order
+        const newOrderNeeded = sortedAppointments.some(appt => !positionMap.has(appt._id));
+        if (newOrderNeeded) {
+          console.log('Updating saved order with new appointments');
+          const updatedOrder = sortedAppointments.map((appointment, idx) => ({
+            id: appointment._id,
+            position: idx + 1
+          }));
+          sessionStorage.setItem('appointmentOrder', JSON.stringify(updatedOrder));
+          localStorage.setItem('appointmentOrder', JSON.stringify(updatedOrder));
+        }
       } else {
         // Default sorting - completed ones at the bottom
         sortedAppointments = [...todayAppointments].sort((a, b) => {
@@ -98,16 +126,31 @@ const DraggableAppointments = ({ role }) => {
     // Initial fetch of appointments
     fetchAppointments();
 
-    // Check if there's a saved order in localStorage
-    const savedOrder = localStorage.getItem('appointmentOrder');
-    if (savedOrder) {
+    // Check if there's a saved order in sessionStorage first (for current session)
+    const sessionSavedOrder = sessionStorage.getItem('appointmentOrder');
+    if (sessionSavedOrder) {
       try {
-        const parsedOrder = JSON.parse(savedOrder);
-        console.log('Found saved appointment order in localStorage:', parsedOrder);
+        const parsedOrder = JSON.parse(sessionSavedOrder);
+        console.log('Found saved appointment order in sessionStorage:', parsedOrder);
         setUserHasReordered(true);
       } catch (e) {
-        console.error('Error parsing saved appointment order:', e);
-        localStorage.removeItem('appointmentOrder');
+        console.error('Error parsing saved appointment order from sessionStorage:', e);
+        sessionStorage.removeItem('appointmentOrder');
+      }
+    } else {
+      // If not in sessionStorage, check localStorage (for persistence across sessions)
+      const localSavedOrder = localStorage.getItem('appointmentOrder');
+      if (localSavedOrder) {
+        try {
+          const parsedOrder = JSON.parse(localSavedOrder);
+          console.log('Found saved appointment order in localStorage:', parsedOrder);
+          // Copy to sessionStorage for current session
+          sessionStorage.setItem('appointmentOrder', localSavedOrder);
+          setUserHasReordered(true);
+        } catch (e) {
+          console.error('Error parsing saved appointment order from localStorage:', e);
+          localStorage.removeItem('appointmentOrder');
+        }
       }
     }
 
@@ -494,7 +537,9 @@ const DraggableAppointments = ({ role }) => {
 
   // Reset the custom order and fetch appointments with default order
   const resetOrder = () => {
+    // Clear both localStorage and sessionStorage
     localStorage.removeItem('appointmentOrder');
+    sessionStorage.removeItem('appointmentOrder');
     setUserHasReordered(false);
     fetchAppointments();
     setError(null);

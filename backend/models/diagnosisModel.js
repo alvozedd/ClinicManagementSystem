@@ -1,5 +1,24 @@
 const mongoose = require('mongoose');
 
+// Define the medication schema
+const medicationSchema = mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+  },
+  dosage: {
+    type: String,
+    required: true,
+  },
+  frequency: {
+    type: String,
+    required: true,
+  },
+  duration: {
+    type: String,
+  },
+});
+
 const diagnosisSchema = mongoose.Schema(
   {
     appointment_id: {
@@ -11,6 +30,13 @@ const diagnosisSchema = mongoose.Schema(
       type: String,
       required: true,
     },
+    treatment_plan: {
+      type: String,
+    },
+    follow_up_instructions: {
+      type: String,
+    },
+    medications: [medicationSchema],
     created_by_user_id: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,
