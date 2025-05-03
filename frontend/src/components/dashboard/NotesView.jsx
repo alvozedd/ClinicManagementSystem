@@ -19,27 +19,48 @@ const NotesView = ({ patientId, appointmentId }) => {
   const [currentNote, setCurrentNote] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
-  const { userInfo } = useSelector((state) => state.auth);
+  const { userInfo } = useSelector((state) => state.auth || {});
+  // Default role to empty string if userInfo is null
+  const userRole = userInfo?.role || '';
 
   // Fetch notes when component mounts or when patientId/appointmentId changes
   useEffect(() => {
     const fetchNotes = async () => {
       try {
         setLoading(true);
-        let fetchedNotes;
-        
+        setError(null); // Clear any previous errors
+        let fetchedNotes = [];
+
         if (patientId) {
-          fetchedNotes = await apiService.getNotesByPatientId(patientId);
+          try {
+            fetchedNotes = await apiService.getNotesByPatientId(patientId);
+          } catch (err) {
+            console.error('Error fetching notes by patient ID:', err);
+            fetchedNotes = []; // Use empty array on error
+          }
         } else if (appointmentId) {
-          fetchedNotes = await apiService.getNotesByAppointmentId(appointmentId);
+          try {
+            fetchedNotes = await apiService.getNotesByAppointmentId(appointmentId);
+          } catch (err) {
+            console.error('Error fetching notes by appointment ID:', err);
+            fetchedNotes = []; // Use empty array on error
+          }
         } else {
-          fetchedNotes = await apiService.getNotes();
+          try {
+            fetchedNotes = await apiService.getNotes();
+          } catch (err) {
+            console.error('Error fetching all notes:', err);
+            fetchedNotes = []; // Use empty array on error
+          }
         }
-        
-        setNotes(fetchedNotes);
+
+        // Ensure we always have an array, even if the API returns null or undefined
+        setNotes(Array.isArray(fetchedNotes) ? fetchedNotes : []);
         setLoading(false);
       } catch (err) {
-        setError(err.message || 'Failed to fetch notes');
+        console.error('Error in fetchNotes:', err);
+        setError('Failed to fetch notes. Please try again later.');
+        setNotes([]); // Set empty array on error
         setLoading(false);
       }
     };
@@ -49,13 +70,13 @@ const NotesView = ({ patientId, appointmentId }) => {
 
   // Filter notes based on search term and category
   const filteredNotes = notes.filter(note => {
-    const matchesSearch = searchTerm === '' || 
+    const matchesSearch = searchTerm === '' ||
       note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       note.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (note.tags && note.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())));
-    
+
     const matchesCategory = filterCategory === '' || note.category === filterCategory;
-    
+
     return matchesSearch && matchesCategory;
   });
 
@@ -87,7 +108,7 @@ const NotesView = ({ patientId, appointmentId }) => {
     try {
       setLoading(true);
       await apiService.createNote(noteData);
-      
+
       // Refresh notes list
       let fetchedNotes;
       if (patientId) {
@@ -97,7 +118,7 @@ const NotesView = ({ patientId, appointmentId }) => {
       } else {
         fetchedNotes = await apiService.getNotes();
       }
-      
+
       setNotes(fetchedNotes);
       setShowAddModal(false);
       setLoading(false);
@@ -112,7 +133,7 @@ const NotesView = ({ patientId, appointmentId }) => {
     try {
       setLoading(true);
       await apiService.updateNote(currentNote._id, noteData);
-      
+
       // Refresh notes list
       let fetchedNotes;
       if (patientId) {
@@ -122,7 +143,7 @@ const NotesView = ({ patientId, appointmentId }) => {
       } else {
         fetchedNotes = await apiService.getNotes();
       }
-      
+
       setNotes(fetchedNotes);
       setShowEditModal(false);
       setCurrentNote(null);
@@ -138,7 +159,7 @@ const NotesView = ({ patientId, appointmentId }) => {
     try {
       setLoading(true);
       await apiService.deleteNote(currentNote._id);
-      
+
       // Refresh notes list
       let fetchedNotes;
       if (patientId) {
@@ -148,7 +169,7 @@ const NotesView = ({ patientId, appointmentId }) => {
       } else {
         fetchedNotes = await apiService.getNotes();
       }
-      
+
       setNotes(fetchedNotes);
       setShowDeleteModal(false);
       setCurrentNote(null);
@@ -181,7 +202,7 @@ const NotesView = ({ patientId, appointmentId }) => {
     <div className="notes-view">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-800 dark:text-white">Notes</h1>
-        {userInfo.role === 'doctor' && (
+        {userRole === 'doctor' && (
           <button
             onClick={handleAddNote}
             className="btn btn-primary flex items-center dark:bg-blue-700 dark:hover:bg-blue-600"
@@ -212,7 +233,7 @@ const NotesView = ({ patientId, appointmentId }) => {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        
+
         <div className="relative w-full md:w-64">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
             <FaFilter className="text-gray-400" />
@@ -266,11 +287,11 @@ const NotesView = ({ patientId, appointmentId }) => {
                     {note.category}
                   </span>
                 </div>
-                
+
                 <p className="text-gray-600 dark:text-gray-300 text-sm mb-3 line-clamp-3">
                   {note.content}
                 </p>
-                
+
                 {note.tags && note.tags.length > 0 && (
                   <div className="flex items-center mb-3 flex-wrap">
                     <FaTags className="text-gray-400 mr-2" />
@@ -284,7 +305,7 @@ const NotesView = ({ patientId, appointmentId }) => {
                     ))}
                   </div>
                 )}
-                
+
                 <div className="flex justify-between items-center text-xs text-gray-500 dark:text-gray-400">
                   <div>
                     {note.created_by_user_id && note.created_by_user_id.name && (
@@ -294,7 +315,7 @@ const NotesView = ({ patientId, appointmentId }) => {
                   <div>{formatDate(note.createdAt)}</div>
                 </div>
               </div>
-              
+
               <div className="bg-gray-50 dark:bg-gray-700 px-4 py-2 flex justify-end space-x-2">
                 <button
                   onClick={() => handleViewNote(note)}
@@ -303,18 +324,18 @@ const NotesView = ({ patientId, appointmentId }) => {
                 >
                   <FaEye />
                 </button>
-                
+
                 {note.attachments && note.attachments.length > 0 && (
                   <button
-                    onClick={() => window.open(`${process.env.REACT_APP_API_URL}/uploads/${note.attachments[0].filename}`, '_blank')}
+                    onClick={() => window.open(`${import.meta.env.VITE_API_URL || 'https://clinicmanagementsystem-production-081b.up.railway.app'}/uploads/${note.attachments[0].filename}`, '_blank')}
                     className="btn-icon btn-download"
                     title="Download Attachment"
                   >
                     <FaDownload />
                   </button>
                 )}
-                
-                {userInfo.role === 'doctor' && (
+
+                {userRole === 'doctor' && (
                   <>
                     <button
                       onClick={() => handleEditNote(note)}
@@ -391,16 +412,16 @@ const NotesView = ({ patientId, appointmentId }) => {
               <span className={`text-xs px-2 py-1 rounded-full ${getCategoryColor(currentNote.category)}`}>
                 {currentNote.category}
               </span>
-              
+
               <div className="text-sm text-gray-500 dark:text-gray-400">
                 {formatDate(currentNote.createdAt)}
               </div>
             </div>
-            
+
             <div className="mb-6 whitespace-pre-wrap text-gray-800 dark:text-white">
               {currentNote.content}
             </div>
-            
+
             {currentNote.tags && currentNote.tags.length > 0 && (
               <div className="mb-4">
                 <h4 className="text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">Tags:</h4>
@@ -416,7 +437,7 @@ const NotesView = ({ patientId, appointmentId }) => {
                 </div>
               </div>
             )}
-            
+
             {currentNote.attachments && currentNote.attachments.length > 0 && (
               <div className="mb-4">
                 <h4 className="text-sm font-semibold mb-2 text-gray-700 dark:text-gray-300">Attachments:</h4>
@@ -424,7 +445,7 @@ const NotesView = ({ patientId, appointmentId }) => {
                   {currentNote.attachments.map((attachment, index) => (
                     <li key={index} className="flex items-center">
                       <a
-                        href={`${process.env.REACT_APP_API_URL}/uploads/${attachment.filename}`}
+                        href={`${import.meta.env.VITE_API_URL || 'https://clinicmanagementsystem-production-081b.up.railway.app'}/uploads/${attachment.filename}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-blue-500 hover:underline flex items-center"
@@ -437,7 +458,7 @@ const NotesView = ({ patientId, appointmentId }) => {
                 </ul>
               </div>
             )}
-            
+
             <div className="text-sm text-gray-500 dark:text-gray-400">
               {currentNote.created_by_user_id && currentNote.created_by_user_id.name && (
                 <div>Created by: {currentNote.created_by_user_id.name}</div>
@@ -448,7 +469,7 @@ const NotesView = ({ patientId, appointmentId }) => {
                 </div>
               )}
             </div>
-            
+
             <div className="mt-6 flex justify-end space-x-2">
               <button
                 onClick={() => {
@@ -459,8 +480,8 @@ const NotesView = ({ patientId, appointmentId }) => {
               >
                 Close
               </button>
-              
-              {userInfo.role === 'doctor' && (
+
+              {userRole === 'doctor' && (
                 <button
                   onClick={() => {
                     setShowViewModal(false);
@@ -490,7 +511,7 @@ const NotesView = ({ patientId, appointmentId }) => {
             <p className="mb-4 text-gray-700 dark:text-gray-300">
               Are you sure you want to delete this note? This action cannot be undone.
             </p>
-            
+
             <div className="flex justify-end space-x-2">
               <button
                 onClick={() => {

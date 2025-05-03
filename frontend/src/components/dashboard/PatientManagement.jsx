@@ -160,7 +160,8 @@ const PatientManagement = ({ role, selectedPatient, onSelectPatient, onBackToPat
 
   // Fetch patient notes
   const fetchPatientNotes = async (patientId) => {
-    if (!patientId || role !== 'doctor') return;
+    // Only fetch notes if we have a patient ID and the user is a doctor
+    if (!patientId || (role && role !== 'doctor')) return;
 
     try {
       setLoadingNotes(true);
