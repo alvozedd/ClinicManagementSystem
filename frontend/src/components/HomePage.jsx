@@ -5,12 +5,15 @@ import { loadContent, getContentValue } from '../utils/contentUtils';
 import { initScrollAnimations, addVisibleClass } from '../utils/scrollAnimations';
 import { FaBars, FaTimes } from 'react-icons/fa';
 import EnhancedContact from './EnhancedContact';
+import WaveBackground from './WaveBackground';
+import BackgroundImageLoader from './BackgroundImageLoader';
 import './GlassEffects.css';
 import '../styles/animations.css';
 import '../styles/fallbackAnimations.css';
 import '../styles/textAnimations.css';
 import '../styles/backgroundFixes.css'; // Import background fixes for mobile
 import '../styles/mobileBackgroundFix.css'; // Additional mobile background fixes
+import '../styles/WaveStyles.css'; // Import wave background styles
 import PageLoader from './PageLoader';
 // Removed framer-motion import as animations are no longer needed
 
@@ -214,27 +217,68 @@ function HomePage() {
     }
   };
 
+  // State for wave effect
+  const [useWaveEffect, setUseWaveEffect] = useState(true);
+
+  // Check device capabilities on mount
+  useEffect(() => {
+    // Simple performance check
+    const checkPerformance = () => {
+      // Check if device is mobile
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+      // Check if browser supports WebGL
+      const canvas = document.createElement('canvas');
+      const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+      const hasWebGL = !!gl;
+
+      // Disable wave effect if WebGL is not supported or on mobile devices
+      if (!hasWebGL || isMobile) {
+        setUseWaveEffect(false);
+      }
+
+      // Check for reduced motion preference
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        setUseWaveEffect(false);
+      }
+    };
+
+    checkPerformance();
+  }, []);
+
   return (
     <>
       {/* Add style tag for responsive background */}
       <style dangerouslySetInnerHTML={{ __html: responsiveBackgroundStyles }} />
 
-      <PageLoader backgroundImage="/backgroundimg/Theone.jpeg">
-        <div className="text-gray-800 responsive-bg bg-image" style={{
+      {/* Wave Background */}
+      {useWaveEffect && (
+        <div className="wave-container">
+          <WaveBackground qualityLevel="high" />
+        </div>
+      )}
+
+      {/* Background Image Loader - only used if wave effect is disabled */}
+      <BackgroundImageLoader useWaveEffect={useWaveEffect} />
+
+      <PageLoader backgroundImage={useWaveEffect ? null : "/backgroundimg/Theone.jpeg"}>
+        <div className={`text-gray-800 wave-content-overlay ${!useWaveEffect ? 'responsive-bg bg-image' : ''}`} style={{
           scrollBehavior: 'smooth',
-          backgroundImage: "url('/backgroundimg/Theone.jpeg')", /* Use same image for all devices */
-          backgroundSize: "cover", /* Always use cover for all screen sizes */
-          backgroundPosition: "center center", /* Center position for all devices */
-          backgroundAttachment: window.innerWidth <= 768 ? "scroll" : "fixed", /* Use scroll for mobile */
-          backgroundRepeat: "no-repeat",
+          ...(useWaveEffect ? {} : {
+            backgroundImage: "url('/backgroundimg/Theone.jpeg')", /* Use same image for all devices */
+            backgroundSize: "cover", /* Always use cover for all screen sizes */
+            backgroundPosition: "center center", /* Center position for all devices */
+            backgroundAttachment: window.innerWidth <= 768 ? "scroll" : "fixed", /* Use scroll for mobile */
+            backgroundRepeat: "no-repeat",
+            WebkitBackgroundSize: "cover", /* Safari/Chrome */
+            MozBackgroundSize: "cover", /* Firefox */
+            OBackgroundSize: "cover", /* Opera */
+          }),
           minHeight: "100vh",
           height: "100%",
           width: "100%",
           overflowX: "hidden", /* Prevent horizontal scrolling on mobile */
           position: "relative", /* For overlay positioning */
-          WebkitBackgroundSize: "cover", /* Safari/Chrome */
-          MozBackgroundSize: "cover", /* Firefox */
-          OBackgroundSize: "cover", /* Opera */
           marginBottom: 0, /* Ensure no bottom margin */
           paddingBottom: 0 /* Ensure no bottom padding */
         }}>
