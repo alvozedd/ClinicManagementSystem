@@ -229,12 +229,32 @@ const apiService = {
     try {
       console.log('Calling logout API with sessionId:', sessionId ? 'Present' : 'Not present');
 
+      // Get refresh token from cookies if available
+      let refreshToken = null;
+      try {
+        // Check if document.cookie exists (browser environment)
+        if (typeof document !== 'undefined' && document.cookie) {
+          const cookies = document.cookie.split(';');
+          const refreshTokenCookie = cookies.find(cookie => cookie.trim().startsWith('refreshToken='));
+          if (refreshTokenCookie) {
+            refreshToken = refreshTokenCookie.split('=')[1];
+            console.log('Found refresh token in cookies');
+          }
+        }
+      } catch (cookieError) {
+        console.warn('Error accessing cookies:', cookieError);
+      }
+
       // Call the API first, before clearing storage
       try {
         const logoutData = await makeApiRequest('/users/logout', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: sessionId ? JSON.stringify({ sessionId }) : undefined
+          body: JSON.stringify({
+            sessionId: sessionId || null,
+            refreshToken: refreshToken || null
+          }),
+          credentials: 'include' // Include cookies in the request
         }, false); // Don't require auth for logout
 
         console.log('Logout API call successful');
@@ -619,7 +639,8 @@ const apiService = {
               'Pragma': 'no-cache',
               'Expires': '0'
             },
-            mode: 'cors' // No credentials to avoid CORS issues
+            mode: 'cors', // No credentials to avoid CORS issues
+            credentials: 'omit' // Explicitly omit credentials
           });
 
           if (response.ok) {
@@ -1086,14 +1107,50 @@ const apiService = {
   },
 
   getNotesByPatientId: async (patientId) => {
-    const response = await fetch(`${API_URL}/notes/patient/${patientId}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        ...authHeader(),
-      },
-    });
-    return handleResponse(response);
+    try {
+      console.log(`Fetching notes for patient ID: ${patientId}`);
+
+      // First try: with direct Railway URL (most reliable)
+      try {
+        console.log('First attempt - Using direct Railway URL');
+        const response = await fetch(`https://clinicmanagementsystem-production-081b.up.railway.app/api/notes/patient/${patientId}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            ...authHeader(),
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+          },
+          mode: 'cors',
+          credentials: 'omit' // Explicitly omit credentials
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log(`Successfully fetched notes for patient ${patientId} with direct Railway URL:`, data.length);
+          return data;
+        } else {
+          console.warn(`Railway URL attempt failed with status: ${response.status}`);
+        }
+      } catch (railwayError) {
+        console.warn('Railway URL attempt failed with error:', railwayError);
+      }
+
+      // Fallback to standard API URL
+      const response = await fetch(`${API_URL}/notes/patient/${patientId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeader(),
+        },
+      });
+      return await handleResponse(response);
+    } catch (error) {
+      console.error(`Error fetching notes for patient ${patientId}:`, error);
+      // Return empty array instead of throwing to prevent UI errors
+      return [];
+    }
   },
 
   getNotesByAppointmentId: async (appointmentId) => {

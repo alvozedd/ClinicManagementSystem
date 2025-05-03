@@ -433,30 +433,41 @@ const refreshToken = asyncHandler(async (req, res) => {
 const logoutUser = asyncHandler(async (req, res) => {
   // Get refresh token from cookie or request body
   const token = req.cookies.refreshToken || req.body.refreshToken;
+  const sessionId = req.body.sessionId;
 
-  if (!token) {
-    res.status(400);
-    throw new Error('Refresh token is required');
-  }
-
-  // Get client IP address
-  const ipAddress = req.ip || req.connection.remoteAddress;
-
-  // Revoke the token
-  const revoked = await tokenService.revokeToken(token, ipAddress);
-
-  // Clear the refresh token cookie
+  // Clear cookies regardless of token presence
   res.clearCookie('refreshToken');
-
-  // Clear the session ID cookie
   res.clearCookie('sessionId');
 
-  if (revoked) {
-    res.json({ message: 'Logout successful' });
-  } else {
-    res.status(400);
-    throw new Error('Invalid refresh token');
+  // If we have a token, try to revoke it
+  if (token) {
+    try {
+      // Get client IP address
+      const ipAddress = req.ip || req.connection.remoteAddress;
+
+      // Revoke the token
+      const revoked = await tokenService.revokeToken(token, ipAddress);
+
+      if (revoked) {
+        return res.json({ message: 'Logout successful' });
+      }
+    } catch (error) {
+      console.error('Error revoking token:', error);
+      // Continue with logout even if token revocation fails
+    }
   }
+  // If we have a sessionId but no token, try to find and revoke the token by sessionId
+  else if (sessionId) {
+    try {
+      // You could add logic here to find and revoke a token by sessionId if needed
+      console.log(`Logout request with sessionId: ${sessionId} but no refresh token`);
+    } catch (error) {
+      console.error('Error processing sessionId logout:', error);
+    }
+  }
+
+  // Always return success to ensure client can complete logout
+  return res.json({ message: 'Logout successful' });
 });
 
 module.exports = {

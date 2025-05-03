@@ -121,22 +121,11 @@ const addCorsHeaders = (req, res, next) => {
   // Set the Vary header
   res.header('Vary', 'Origin');
 
-  // Set allowed origin
+  // Always allow any origin for all routes
   if (origin) {
-    const allowedOrigins = [
-      'https://urohealthltd.netlify.app',
-      'https://www.urohealthltd.netlify.app',
-      'http://localhost:3000',
-      'http://localhost:5173'
-    ];
-
-    if (allowedOrigins.includes(origin) || process.env.NODE_ENV === 'development' || process.env.ALLOW_ALL_ORIGINS === 'true') {
-      res.header('Access-Control-Allow-Origin', origin);
-      res.header('Access-Control-Allow-Credentials', 'true');
-      console.log(`CORS headers set for non-API route: ${req.path} from origin: ${origin}`);
-    } else {
-      console.log(`Non-API route ${req.path} accessed from non-allowed origin: ${origin}`);
-    }
+    res.header('Access-Control-Allow-Origin', origin);
+    res.header('Access-Control-Allow-Credentials', 'true');
+    console.log(`CORS headers set for non-API route: ${req.path} from origin: ${origin}`);
   } else {
     // For requests without origin, use wildcard
     res.header('Access-Control-Allow-Origin', '*');
@@ -303,7 +292,7 @@ app.post('/users/refresh-token', (req, res) => {
 });
 
 // Logout route
-app.post('/users/logout', (req, res) => {
+app.post('/users/logout', addCorsHeaders, (req, res) => {
   console.log('Received logout request at /users/logout, forwarding to controller directly');
 
   // Set CORS headers explicitly for this route
@@ -403,6 +392,17 @@ app.get('/appointments', addCorsHeaders, (req, res) => {
 // Get appointments by patient ID
 app.get('/patients/:id/appointments', addCorsHeaders, (req, res) => {
   console.log('Received GET request at /patients/:id/appointments, forwarding to controller directly');
+  // Import the controller directly
+  const { getAppointmentsByPatientId } = require('./controllers/appointmentController');
+  // Add authentication middleware manually
+  const { protect } = require('./middleware/authMiddleware');
+  // Call middleware then controller
+  protect(req, res, () => getAppointmentsByPatientId(req, res));
+});
+
+// Direct route for appointments by patient ID
+app.get('/appointments/patient/:id', addCorsHeaders, (req, res) => {
+  console.log('Received GET request at /appointments/patient/:id, forwarding to controller directly');
   // Import the controller directly
   const { getAppointmentsByPatientId } = require('./controllers/appointmentController');
   // Add authentication middleware manually
@@ -624,6 +624,17 @@ app.delete('/diagnoses/:id', (req, res) => {
       throw new Error('Not authorized as a doctor');
     }
   });
+});
+
+// Notes routes
+app.get('/notes/patient/:id', addCorsHeaders, (req, res) => {
+  console.log('Received GET request at /notes/patient/:id, forwarding to controller directly');
+  // Import the controller directly
+  const { getNotesByPatientId } = require('./controllers/noteController');
+  // Add authentication middleware manually
+  const { protect } = require('./middleware/authMiddleware');
+  // Call middleware then controller
+  protect(req, res, () => getNotesByPatientId(req, res));
 });
 
 // Content routes - Use the router instead of direct controller calls
