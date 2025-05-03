@@ -13,4 +13,12 @@ export default defineConfig({
   define: {
     'process.env.USE_3D': JSON.stringify('true'),
   },
+  // Use the 3D index file
+  appType: 'spa',
+  root: './',
+  publicDir: 'public',
+  base: '/',
+  optimizeDeps: {
+    include: ['react', 'react-dom', 'three', '@react-three/fiber', '@react-three/drei']
+  },
 })
