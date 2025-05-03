@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev3d": "vite --config vite.config.3d.js",
     "build": "vite build",
+    "build3d": "vite build --config vite.config.3d.js",
     "lint": "eslint .",
     "preview": "vite preview",
     "clean": "rm -rf node_modules && rm -f package-lock.json && npm install"
