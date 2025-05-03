@@ -282,21 +282,23 @@ function HomePage() {
           marginBottom: 0, /* Ensure no bottom margin */
           paddingBottom: 0 /* Ensure no bottom padding */
         }}>
-      {/* Header with background image */}
-      <div className="text-white fixed top-0 left-0 right-0 z-50 backdrop-blur-[1px]">
-        <div className="max-w-6xl mx-auto px-4">
+      {/* Modern Header with glass effect */}
+      <div className="text-white fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-[#000830]/80 shadow-lg">
+        <div className="max-w-7xl mx-auto px-4">
           {/* Header */}
-          <header className="flex justify-between items-center py-3 relative z-10">
+          <header className="flex justify-between items-center py-4 relative z-10">
             <div>
               <Link
                 to="/"
-                className="text-lg md:text-xl font-bold text-white cursor-pointer hover:text-blue-200 transition-colors flex items-center group tracking-wide"
+                className="text-xl md:text-2xl font-bold text-white cursor-pointer hover:text-blue-300 transition-colors flex items-center group tracking-tight"
                 onClick={() => {
                   setShowBookingForm(false);
                   setBookingSuccess(false);
                 }}
               >
-                <span className="text-blue-300">Uro</span>Health
+                <span className="bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent pr-1">Uro</span>
+                <span className="text-white">Health</span>
+                <div className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-400 to-blue-600 group-hover:w-full transition-all duration-300"></div>
               </Link>
             </div>
 
@@ -304,7 +306,7 @@ function HomePage() {
             <div className="md:hidden">
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="text-white p-2 focus:outline-none focus:ring-2 focus:ring-gray-300 rounded-md bg-gray-800/20 backdrop-blur-sm"
+                className="text-white p-2 focus:outline-none focus:ring-2 focus:ring-blue-400 rounded-md bg-blue-600/20 backdrop-blur-sm"
                 aria-expanded={mobileMenuOpen}
                 aria-label="Toggle menu"
               >
@@ -322,7 +324,7 @@ function HomePage() {
                     document.getElementById('services').scrollIntoView({ behavior: 'smooth' });
                   }, 100);
                 }}
-                className="text-white hover:text-blue-200 transition-colors relative text-sm after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 hover:after:w-full after:bg-blue-200 after:transition-all after:duration-300"
+                className="text-white hover:text-blue-300 transition-colors relative text-base font-medium after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 hover:after:w-full after:bg-blue-400 after:transition-all after:duration-300"
               >Services</button>
               <button
                 onClick={() => {
@@ -332,28 +334,29 @@ function HomePage() {
                     document.getElementById('contact').scrollIntoView({ behavior: 'smooth' });
                   }, 100);
                 }}
-                className="text-white hover:text-blue-200 transition-colors relative text-sm after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 hover:after:w-full after:bg-blue-200 after:transition-all after:duration-300"
+                className="text-white hover:text-blue-300 transition-colors relative text-base font-medium after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 hover:after:w-full after:bg-blue-400 after:transition-all after:duration-300"
               >Contact</button>
               <Link
                 to="/login"
-                className="bg-white text-blue-800 hover:bg-blue-100 p-2 rounded-lg text-sm font-medium transition duration-200 flex items-center justify-center transform hover:scale-105 user-icon-button"
+                className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white px-5 py-2 rounded-lg text-base font-medium transition duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-blue-500/20 transform hover:-translate-y-0.5"
                 aria-label="Staff Login"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
+                Login
               </Link>
             </div>
           </header>
 
-          {/* Mobile menu dropdown */}
+          {/* Mobile menu dropdown - modern glass effect */}
           {mobileMenuOpen && (
             <div
               ref={menuRef}
-              className="md:hidden bg-gray-800/70 backdrop-blur-sm rounded-b-lg py-2 absolute left-0 right-0 z-50 transition-all duration-300 ease-in-out border-t border-gray-700/50"
+              className="md:hidden bg-[#000830]/90 backdrop-blur-md rounded-b-lg py-3 absolute left-0 right-0 z-50 transition-all duration-300 ease-in-out border-t border-blue-800/50 shadow-lg"
               style={{top: '100%'}}
             >
-              <div className="flex flex-col space-y-2 px-4 py-2">
+              <div className="flex flex-col space-y-3 px-4 py-2">
                 <button
                   onClick={() => {
                     setMobileMenuOpen(false);
@@ -363,8 +366,13 @@ function HomePage() {
                       document.getElementById('services').scrollIntoView({ behavior: 'smooth' });
                     }, 100);
                   }}
-                  className="text-white hover:text-gray-300 transition-colors text-left py-2 border-b border-gray-700/30"
-                >Services</button>
+                  className="text-white hover:text-blue-300 transition-colors text-left py-3 border-b border-blue-800/30 flex items-center"
+                >
+                  <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                  </svg>
+                  Services
+                </button>
                 <button
                   onClick={() => {
                     setMobileMenuOpen(false);
@@ -374,14 +382,19 @@ function HomePage() {
                       document.getElementById('contact').scrollIntoView({ behavior: 'smooth' });
                     }, 100);
                   }}
-                  className="text-white hover:text-gray-300 transition-colors text-left py-2 border-b border-gray-700/30"
-                >Contact</button>
+                  className="text-white hover:text-blue-300 transition-colors text-left py-3 border-b border-blue-800/30 flex items-center"
+                >
+                  <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                  </svg>
+                  Contact
+                </button>
                 <Link
                   to="/login"
-                  className="flex items-center text-white hover:text-gray-300 transition-colors py-2"
+                  className="flex items-center text-white hover:text-blue-300 transition-colors py-3"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                   </svg>
                   Staff Login
@@ -670,146 +683,187 @@ function HomePage() {
               {/* Home content */}
               <div className="text-center text-white relative overflow-hidden" style={{ height: "100vh" }}>
 
-                {/* Very subtle background overlay */}
-                <div className="absolute inset-0 bg-gradient-to-b from-blue-900/5 to-transparent"></div>
+                {/* Dark background overlay with gradient */}
+                <div className="absolute inset-0 bg-gradient-to-b from-[#000830] via-[#001060] to-[#0040C0]"></div>
 
-                {/* Hero Section - Blue Background */}
-                <div className="max-w-4xl mx-auto text-center relative px-4 sm:px-6 h-screen flex flex-col justify-center items-center z-10">
-                  <div className="transform translate-y-[-12vh]">
-                    <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4 text-white hero-title">
-                      {getContentValue(content, 'homepage', 'Hero', 'Hero Title', 'UroHealth Central Ltd')}
-                    </h1>
-                    <p className="text-xl sm:text-2xl md:text-3xl mb-2 text-white font-light hero-subtitle">
+                {/* Decorative elements */}
+                <div className="absolute inset-0 overflow-hidden">
+                  {/* Glowing orb in top right */}
+                  <div className="absolute top-[10%] right-[10%] w-64 h-64 rounded-full bg-blue-500 opacity-20 blur-3xl"></div>
+
+                  {/* Horizontal light strip */}
+                  <div className="absolute top-[30%] left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-400 to-transparent opacity-70"></div>
+
+                  {/* Vertical light strip */}
+                  <div className="absolute top-0 bottom-0 right-[25%] w-px bg-gradient-to-b from-transparent via-blue-400 to-transparent opacity-50"></div>
+                </div>
+
+                {/* Hero Section - Dark Background with Modern Elements */}
+                <div className="max-w-5xl mx-auto text-center relative px-4 sm:px-6 h-screen flex flex-col justify-center items-center z-10">
+                  <div className="transform translate-y-[-8vh]">
+                    <div className="mb-6 inline-block">
+                      <div className="h-1 w-20 bg-gradient-to-r from-blue-400 to-blue-600 mx-auto mb-6"></div>
+                      <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-4 sm:mb-6 text-white hero-title tracking-tight">
+                        {getContentValue(content, 'homepage', 'Hero', 'Hero Title', 'UroHealth Central Ltd')}
+                      </h1>
+                      <div className="h-1 w-20 bg-gradient-to-r from-blue-600 to-blue-400 mx-auto mt-6"></div>
+                    </div>
+
+                    <p className="text-xl sm:text-2xl md:text-3xl mb-3 text-blue-200 font-light hero-subtitle">
                       {getContentValue(content, 'homepage', 'Hero', 'Hero Subtitle', 'Specialist Urological Care')}
                     </p>
-                    <p className="text-sm sm:text-base md:text-lg mb-6 sm:mb-8 leading-relaxed text-white max-w-xl mx-auto hero-description">
+
+                    <p className="text-base sm:text-lg md:text-xl mb-8 sm:mb-10 leading-relaxed text-gray-300 max-w-2xl mx-auto hero-description">
                       {getContentValue(content, 'homepage', 'Hero', 'Hero Description', '20+ years of specialized medical excellence')}
                     </p>
-                    <div className="flex flex-row justify-center gap-5 sm:gap-8 mt-6 sm:mt-8">
-                      <div className="relative w-36 sm:w-auto">
-                        <button
-                          onClick={() => {
-                            setShowBookingForm(true);
-                            window.scrollTo({ top: 0, behavior: 'smooth' });
-                          }}
-                          className="bg-white text-blue-700 hover:bg-blue-50 px-6 sm:px-8 py-3 rounded-full font-medium transition duration-300 text-sm sm:text-base flex items-center justify-center gap-2 w-full relative z-10 shadow-md book-now-button"
-                        >
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                          </svg>
-                          Book Now
-                        </button>
-                      </div>
+
+                    <div className="flex flex-col sm:flex-row justify-center gap-4 sm:gap-6 mt-8 sm:mt-10">
+                      <button
+                        onClick={() => {
+                          setShowBookingForm(true);
+                          window.scrollTo({ top: 0, behavior: 'smooth' });
+                        }}
+                        className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white px-8 sm:px-10 py-4 rounded-lg font-medium transition duration-300 text-base sm:text-lg flex items-center justify-center gap-3 shadow-lg hover:shadow-blue-500/20 transform hover:-translate-y-1 book-now-button"
+                      >
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                        Book Appointment
+                      </button>
+
                       <button
                         onClick={() => window.location.href = 'tel:+254722396296'}
-                        className="bg-blue-700 hover:bg-blue-800 text-white px-6 sm:px-8 py-3 rounded-full font-medium transition duration-300 text-sm sm:text-base flex items-center justify-center gap-2 w-36 sm:w-auto shadow-md pulse-animation call-us-button"
+                        className="bg-transparent border-2 border-blue-400 hover:border-blue-300 text-blue-300 hover:text-blue-200 px-8 sm:px-10 py-4 rounded-lg font-medium transition duration-300 text-base sm:text-lg flex items-center justify-center gap-3 shadow-lg hover:shadow-blue-500/10 transform hover:-translate-y-1 call-us-button"
                       >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
                         </svg>
-                        Call Us
+                        Call Us Now
                       </button>
+                    </div>
+
+                    {/* Scroll indicator */}
+                    <div className="absolute bottom-12 left-1/2 transform -translate-x-1/2 flex flex-col items-center opacity-70 hover:opacity-100 transition-opacity cursor-pointer" onClick={() => document.getElementById('services').scrollIntoView({ behavior: 'smooth' })}>
+                      <span className="text-sm text-blue-200 mb-2">Scroll Down</span>
+                      <div className="w-6 h-10 border-2 border-blue-300 rounded-full flex justify-center pt-1">
+                        <div className="w-1 h-2 bg-blue-300 rounded-full animate-bounce"></div>
+                      </div>
                     </div>
                   </div>
                 </div>
-
               </div>
               {/* End of blue background section */}
 
               {/* White background sections */}
               <div className="bg-white">
                 {/* Services Section */}
-                <div id="services" className="bg-blue-600 text-white py-16 sm:py-20 md:py-24 w-full relative overflow-hidden">
-                  <div className="max-w-5xl mx-auto px-4">
-                    <div className="text-center mb-12 relative">
-                      <div className="bg-gradient-to-r from-white/30 via-white/50 to-white/30 h-1 w-24 mx-auto mb-4"></div>
-                      <h3 className="text-3xl md:text-4xl font-bold text-white mb-4 text-center relative inline-block services-title">
+                <div id="services" className="bg-[#000830] text-white py-20 sm:py-24 md:py-28 w-full relative overflow-hidden">
+                  {/* Background elements */}
+                  <div className="absolute inset-0 overflow-hidden">
+                    {/* Diagonal line */}
+                    <div className="absolute top-0 bottom-0 left-[15%] w-px bg-gradient-to-b from-transparent via-blue-400 to-transparent opacity-30 transform rotate-12"></div>
+
+                    {/* Glowing circle */}
+                    <div className="absolute bottom-[10%] left-[5%] w-48 h-48 rounded-full bg-blue-600 opacity-10 blur-3xl"></div>
+
+                    {/* Grid pattern */}
+                    <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIHN0cm9rZT0iIzE4MmE4MCIgc3Ryb2tlLXdpZHRoPSIwLjUiIG9wYWNpdHk9IjAuMSI+PHBhdGggZD0iTTMwIDYwVjBNNjAgMzBIME0wIDAgNjAgNjBNNjAgMCAwIDYwIi8+PC9nPjwvZz48L3N2Zz4=')] opacity-20"></div>
+                  </div>
+
+                  <div className="max-w-6xl mx-auto px-4 relative z-10">
+                    <div className="text-center mb-16 relative">
+                      <span className="text-blue-400 text-sm font-semibold tracking-wider uppercase mb-3 inline-block">What We Offer</span>
+                      <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 text-center relative inline-block">
                         Our Services
-                        <div className="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-blue-200 to-white transform scale-x-0 transition-transform duration-300 group-hover:scale-x-100"></div>
-                      </h3>
-                      <p className="text-lg md:text-xl text-blue-100 mb-2 max-w-3xl mx-auto services-subtitle">
+                      </h2>
+                      <div className="h-1 w-24 bg-gradient-to-r from-blue-500 to-blue-300 mx-auto mb-6"></div>
+                      <p className="text-xl text-blue-200 max-w-3xl mx-auto services-subtitle">
                         {getContentValue(content, 'homepage', 'About', 'About Text', 'We provide comprehensive urological care with state-of-the-art technology and personalized treatment plans.')}
                       </p>
-                      <div className="h-1 w-16 bg-gradient-to-r from-blue-200 to-white mx-auto mt-4"></div>
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8 px-4 sm:px-0 relative z-10 services-grid">
-                      <div className="true-glass-card p-8 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col items-center text-center border border-white/10 hover:border-white/30 h-full group service-card relative overflow-hidden">
-                        <div className="card-perimeter-animation absolute inset-0"></div>
-                        <div className="card-light-effect"></div>
-                        <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent w-[200%]"></div>
-                        <div className="absolute inset-0 bg-gradient-to-r from-transparent to-white/5 w-[200%]"></div>
-                        <div className="bg-white/20 p-5 rounded-full mb-6 group-hover:bg-white/30 transition-all duration-300">
-                          <svg className="w-14 h-14 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10 relative z-10">
+                      {/* Service Card 1 */}
+                      <div className="bg-gradient-to-br from-[#001060] to-[#000830] p-8 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 flex flex-col h-full border border-blue-900/50 hover:border-blue-700/50 group relative overflow-hidden">
+                        {/* Card highlight effect */}
+                        <div className="absolute inset-0 bg-gradient-to-tr from-blue-600/0 via-blue-600/0 to-blue-600/0 opacity-0 group-hover:opacity-20 transition-opacity duration-700"></div>
+
+                        {/* Icon container */}
+                        <div className="bg-gradient-to-br from-blue-600 to-blue-400 p-4 rounded-xl w-16 h-16 flex items-center justify-center mb-6 shadow-lg group-hover:shadow-blue-500/20 transition-all duration-300 group-hover:scale-110">
+                          <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                           </svg>
                         </div>
-                        <h4 className="text-2xl font-semibold mb-4 text-white">
+
+                        <h3 className="text-2xl font-bold mb-4 text-white group-hover:text-blue-300 transition-colors duration-300">
                           {getContentValue(content, 'services', 'Consultations', 'Title', 'Consultations')}
-                        </h4>
-                        <p className="text-blue-100 text-lg leading-relaxed mb-6">
+                        </h3>
+
+                        <p className="text-blue-200 text-lg leading-relaxed mb-8 flex-grow">
                           {getContentValue(content, 'services', 'Consultations', 'Description', 'Comprehensive evaluation and diagnosis of urological conditions by our expert consultants.')}
                         </p>
-                        <div className="mt-auto">
-                          <div className="mb-6 flex items-center justify-center text-white">
-                            <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                            <span className="text-lg">{getContentValue(content, 'services', 'Consultations', 'Feature', '30-60 minutes')}</span>
-                          </div>
+
+                        <div className="flex items-center text-blue-300 mt-auto">
+                          <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                          </svg>
+                          <span>{getContentValue(content, 'services', 'Consultations', 'Feature', '30-60 minutes')}</span>
                         </div>
                       </div>
 
-                      <div className="true-glass-card p-8 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col items-center text-center border border-white/20 hover:border-white/40 h-full group relative overflow-hidden service-card">
-                        <div className="card-perimeter-animation absolute inset-0"></div>
-                        <div className="card-light-effect"></div>
-                        <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent w-[200%]"></div>
-                        <div className="absolute inset-0 bg-gradient-to-r from-transparent to-white/5 w-[200%]"></div>
-                        <div className="absolute top-0 right-0 w-24 h-24 bg-white opacity-5 rounded-full -mr-8 -mt-8"></div>
-                        <div className="absolute bottom-0 left-0 w-24 h-24 bg-white opacity-5 rounded-full -ml-8 -mb-8"></div>
-                        <div className="bg-white/30 p-5 rounded-full mb-6 group-hover:bg-white/40 transition-all duration-300 relative z-10">
-                          <svg className="w-14 h-14 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      {/* Service Card 2 */}
+                      <div className="bg-gradient-to-br from-[#001060] to-[#000830] p-8 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 flex flex-col h-full border border-blue-900/50 hover:border-blue-700/50 group relative overflow-hidden">
+                        {/* Card highlight effect */}
+                        <div className="absolute inset-0 bg-gradient-to-tr from-blue-600/0 via-blue-600/0 to-blue-600/0 opacity-0 group-hover:opacity-20 transition-opacity duration-700"></div>
+
+                        {/* Icon container */}
+                        <div className="bg-gradient-to-br from-blue-600 to-blue-400 p-4 rounded-xl w-16 h-16 flex items-center justify-center mb-6 shadow-lg group-hover:shadow-blue-500/20 transition-all duration-300 group-hover:scale-110">
+                          <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                           </svg>
                         </div>
-                        <h4 className="text-2xl font-semibold mb-4 text-white relative z-10">
+
+                        <h3 className="text-2xl font-bold mb-4 text-white group-hover:text-blue-300 transition-colors duration-300">
                           {getContentValue(content, 'services', 'Diagnostics', 'Title', 'Diagnostics')}
-                        </h4>
-                        <p className="text-blue-100 mb-6 text-lg leading-relaxed relative z-10">
+                        </h3>
+
+                        <p className="text-blue-200 text-lg leading-relaxed mb-8 flex-grow">
                           {getContentValue(content, 'services', 'Diagnostics', 'Description', 'Advanced diagnostic procedures including ultrasound, cystoscopy, and urodynamic studies.')}
                         </p>
-                        <div className="mt-auto relative z-10">
-                          <div className="mb-6 flex items-center justify-center text-white">
-                            <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
-                            </svg>
-                            <span className="text-lg">{getContentValue(content, 'services', 'Diagnostics', 'Feature', 'Accurate Results')}</span>
-                          </div>
+
+                        <div className="flex items-center text-blue-300 mt-auto">
+                          <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                          </svg>
+                          <span>{getContentValue(content, 'services', 'Diagnostics', 'Feature', 'Accurate Results')}</span>
                         </div>
                       </div>
 
-                      <div className="true-glass-card p-8 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col items-center text-center border border-white/10 hover:border-white/30 h-full group service-card relative overflow-hidden">
-                        <div className="card-perimeter-animation absolute inset-0"></div>
-                        <div className="card-light-effect"></div>
-                        <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-transparent w-[200%]"></div>
-                        <div className="absolute inset-0 bg-gradient-to-r from-transparent to-white/5 w-[200%]"></div>
-                        <div className="bg-white/20 p-5 rounded-full mb-6 group-hover:bg-white/30 transition-all duration-300">
-                          <svg className="w-14 h-14 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      {/* Service Card 3 */}
+                      <div className="bg-gradient-to-br from-[#001060] to-[#000830] p-8 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 flex flex-col h-full border border-blue-900/50 hover:border-blue-700/50 group relative overflow-hidden">
+                        {/* Card highlight effect */}
+                        <div className="absolute inset-0 bg-gradient-to-tr from-blue-600/0 via-blue-600/0 to-blue-600/0 opacity-0 group-hover:opacity-20 transition-opacity duration-700"></div>
+
+                        {/* Icon container */}
+                        <div className="bg-gradient-to-br from-blue-600 to-blue-400 p-4 rounded-xl w-16 h-16 flex items-center justify-center mb-6 shadow-lg group-hover:shadow-blue-500/20 transition-all duration-300 group-hover:scale-110">
+                          <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
                           </svg>
                         </div>
-                        <h4 className="text-2xl font-semibold mb-4 text-white">
+
+                        <h3 className="text-2xl font-bold mb-4 text-white group-hover:text-blue-300 transition-colors duration-300">
                           {getContentValue(content, 'services', 'Treatments', 'Title', 'Treatments')}
-                        </h4>
-                        <p className="text-blue-100 text-lg leading-relaxed mb-6">
+                        </h3>
+
+                        <p className="text-blue-200 text-lg leading-relaxed mb-8 flex-grow">
                           {getContentValue(content, 'services', 'Treatments', 'Description', 'Comprehensive treatment options for various urological conditions, from medication to surgical interventions.')}
                         </p>
-                        <div className="mt-auto">
-                          <div className="mb-6 flex items-center justify-center text-white">
-                            <svg className="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                            </svg>
-                            <span className="text-lg">{getContentValue(content, 'services', 'Treatments', 'Feature', 'Personalized Care')}</span>
-                          </div>
+
+                        <div className="flex items-center text-blue-300 mt-auto">
+                          <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                          </svg>
+                          <span>{getContentValue(content, 'services', 'Treatments', 'Feature', 'Personalized Care')}</span>
                         </div>
                       </div>
                     </div>
@@ -825,68 +879,97 @@ function HomePage() {
           )}
         </main>
 
-        {/* Footer */}
-        <footer className="py-8 bg-blue-600 text-white relative overflow-hidden">
-          <div className="max-w-5xl mx-auto px-4">
-            <div className="flex flex-col md:flex-row justify-between mb-8 fade-in-element">
-              <div className="mb-8 md:mb-0 md:w-1/3">
-                <h3 className="text-xl font-bold mb-4 text-white">UroHealth Central Ltd</h3>
-                <p className="text-blue-100 mb-4 max-w-xs">
+        {/* Modern Footer with Dark Theme */}
+        <footer className="py-16 bg-gradient-to-b from-[#000830] to-[#000620] text-white relative overflow-hidden">
+          {/* Background elements */}
+          <div className="absolute inset-0 overflow-hidden">
+            {/* Diagonal line */}
+            <div className="absolute top-0 bottom-0 right-[15%] w-px bg-gradient-to-b from-transparent via-blue-400 to-transparent opacity-20 transform -rotate-12"></div>
+
+            {/* Grid pattern */}
+            <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIHN0cm9rZT0iIzE4MmE4MCIgc3Ryb2tlLXdpZHRoPSIwLjUiIG9wYWNpdHk9IjAuMSI+PHBhdGggZD0iTTMwIDYwVjBNNjAgMzBIME0wIDAgNjAgNjBNNjAgMCAwIDYwIi8+PC9nPjwvZz48L3N2Zz4=')] opacity-10"></div>
+          </div>
+
+          <div className="max-w-6xl mx-auto px-4 relative z-10">
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-10 mb-12">
+              {/* Logo and About */}
+              <div className="md:col-span-5">
+                <div className="flex items-center mb-6">
+                  <h3 className="text-2xl font-bold">
+                    <span className="bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent pr-1">Uro</span>
+                    <span className="text-white">Health</span>
+                  </h3>
+                </div>
+
+                <p className="text-blue-200 mb-6 text-lg leading-relaxed">
                   {content.footer?.['UroHealth Central Ltd']?.find(item => item.label === 'About Text')?.value ||
                    'Providing specialized urological care with a patient-centered approach since 2010.'}
                 </p>
-                <div className="h-1 w-24 bg-blue-500/30 rounded-full mb-4"></div>
+
+                <div className="h-1 w-20 bg-gradient-to-r from-blue-600 to-blue-400 rounded-full mb-6"></div>
               </div>
 
-              <div className="md:w-2/3 md:pl-10">
-
-                <div>
-                  <h4 className="text-lg font-semibold mb-4 text-white">Contact</h4>
-                  <ul className="space-y-4 text-sm text-blue-100">
+              {/* Contact Information */}
+              <div className="md:col-span-7">
+                <h4 className="text-xl font-bold mb-6 text-white">Contact Information</h4>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  {/* Contact Items */}
+                  <ul className="space-y-5">
                     {content.footer?.['Contact']?.filter(item => item.visible)?.map(contactItem => (
-                      <li key={contactItem.id} className="footer-contact-item flex items-start">
+                      <li key={contactItem.id} className="flex items-start group">
                         {contactItem.label === 'Address' && (
                           <>
-                            <svg className="w-4 h-4 mr-3 mt-0.5 text-blue-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                            </svg>
-                            <span>{contactItem.value}</span>
+                            <div className="bg-blue-900/30 p-2 rounded-lg text-blue-400 mr-4 group-hover:bg-blue-800/50 transition-colors">
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                              </svg>
+                            </div>
+                            <div>
+                              <p className="text-sm text-blue-300 mb-1">Our Location</p>
+                              <p className="text-white">{contactItem.value}</p>
+                            </div>
                           </>
                         )}
                         {contactItem.label === 'Phone' && (
                           <>
-                            <svg className="w-4 h-4 mr-3 mt-0.5 text-blue-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
-                            </svg>
+                            <div className="bg-blue-900/30 p-2 rounded-lg text-blue-400 mr-4 group-hover:bg-blue-800/50 transition-colors">
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                              </svg>
+                            </div>
                             <div>
-                              <a href={`tel:${contactItem.value.replace(/\s+/g, '')}`} className="hover:text-white transition-colors">
+                              <p className="text-sm text-blue-300 mb-1">Phone Number</p>
+                              <a href={`tel:${contactItem.value.replace(/\s+/g, '')}`} className="text-white hover:text-blue-300 transition-colors flex items-center">
                                 {contactItem.value}
+                                <span className="ml-2 bg-blue-600 hover:bg-blue-500 text-xs px-2 py-1 rounded-md transition-colors inline-flex items-center">
+                                  <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                                  </svg>
+                                  Call
+                                </span>
                               </a>
-                              <button
-                                className="ml-2 bg-blue-700 hover:bg-blue-600 text-xs px-2 py-1 rounded transition-colors"
-                                onClick={() => window.location.href = `tel:${contactItem.value.replace(/\s+/g, '')}`}
-                              >
-                                Call
-                              </button>
                             </div>
                           </>
                         )}
                         {contactItem.label === 'Email' && (
                           <>
-                            <svg className="w-4 h-4 mr-3 mt-0.5 text-blue-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                            </svg>
+                            <div className="bg-blue-900/30 p-2 rounded-lg text-blue-400 mr-4 group-hover:bg-blue-800/50 transition-colors">
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                              </svg>
+                            </div>
                             <div>
-                              <a href={`mailto:${contactItem.value}`} className="hover:text-white transition-colors">
+                              <p className="text-sm text-blue-300 mb-1">Email Address</p>
+                              <a href={`mailto:${contactItem.value}`} className="text-white hover:text-blue-300 transition-colors flex items-center">
                                 {contactItem.value}
+                                <span className="ml-2 bg-blue-600 hover:bg-blue-500 text-xs px-2 py-1 rounded-md transition-colors inline-flex items-center">
+                                  <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                                  </svg>
+                                  Email
+                                </span>
                               </a>
-                              <button
-                                className="ml-2 bg-blue-700 hover:bg-blue-600 text-xs px-2 py-1 rounded transition-colors"
-                                onClick={() => window.location.href = `mailto:${contactItem.value}`}
-                              >
-                                Email
-                              </button>
                             </div>
                           </>
                         )}
@@ -897,15 +980,16 @@ function HomePage() {
               </div>
             </div>
 
-            <div className="pt-6 border-t border-blue-700">
+            {/* Bottom section with copyright and links */}
+            <div className="pt-8 border-t border-blue-900/50">
               <div className="flex flex-col md:flex-row justify-between items-center">
-                <p className="text-sm text-blue-200 mb-4 md:mb-0">
+                <p className="text-blue-300 mb-4 md:mb-0">
                   {content.footer?.['Legal']?.find(item => item.label === 'Copyright')?.value ||
                    `© ${new Date().getFullYear()} UroHealth Central Ltd. All rights reserved.`}
                 </p>
                 <div className="flex space-x-6">
                   {content.footer?.['Legal']?.filter(item => item.type === 'link' && item.visible)?.map(link => (
-                    <a key={link.id} href={link.url} className="text-sm text-blue-200 hover:text-white transition-colors">
+                    <a key={link.id} href={link.url} className="text-blue-300 hover:text-white transition-colors">
                       {link.label}
                     </a>
                   ))}
