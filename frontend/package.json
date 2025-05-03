@@ -11,6 +11,7 @@
     "clean": "rm -rf node_modules && rm -f package-lock.json && npm install"
   },
   "dependencies": {
+    "@react-three/drei": "^10.0.7",
     "@react-three/fiber": "^9.1.2",
     "@reduxjs/toolkit": "^2.7.0",
     "axios": "^1.9.0",
