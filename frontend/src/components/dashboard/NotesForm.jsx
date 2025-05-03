@@ -9,11 +9,15 @@ const NotesForm = ({ onSubmit, onCancel, note, isEditing, patientId, appointment
     appointment_id: '',
     title: '',
     content: '',
+    diagnosis_text: '',
+    treatment_plan: '',
+    follow_up: '',
+    medications: [],
     category: 'General',
     tags: [],
     is_private: false
   });
-  
+
   const [patients, setPatients] = useState([]);
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -27,15 +31,20 @@ const NotesForm = ({ onSubmit, onCancel, note, isEditing, patientId, appointment
     const fetchData = async () => {
       try {
         setLoading(true);
-        
+        setError(null); // Clear any previous errors
+
         // If editing, populate form with note data
         if (isEditing && note) {
           setFormData({
-            patient_id: note.patient_id._id || note.patient_id,
-            appointment_id: note.appointment_id ? note.appointment_id._id || note.appointment_id : '',
-            title: note.title,
-            content: note.content,
-            category: note.category,
+            patient_id: note.patient_id?._id || note.patient_id || '',
+            appointment_id: note.appointment_id ? note.appointment_id?._id || note.appointment_id : '',
+            title: note.title || '',
+            content: note.content || '',
+            diagnosis_text: note.diagnosis_text || '',
+            treatment_plan: note.treatment_plan || '',
+            follow_up: note.follow_up_instructions || '',
+            medications: note.medications || [],
+            category: note.category || 'General',
             tags: note.tags || [],
             is_private: note.is_private || false
           });
@@ -44,29 +53,42 @@ const NotesForm = ({ onSubmit, onCancel, note, isEditing, patientId, appointment
           if (patientId) {
             setFormData(prev => ({ ...prev, patient_id: patientId }));
           }
-          
+
           // If appointmentId is provided, set it in the form
           if (appointmentId) {
             setFormData(prev => ({ ...prev, appointment_id: appointmentId }));
           }
         }
-        
+
         // Fetch patients if not editing or if patientId is not provided
         if (!isEditing || !patientId) {
-          const fetchedPatients = await apiService.getPatients();
-          setPatients(fetchedPatients);
+          try {
+            const fetchedPatients = await apiService.getPatients();
+            setPatients(Array.isArray(fetchedPatients) ? fetchedPatients : []);
+          } catch (err) {
+            console.error('Error fetching patients:', err);
+            setPatients([]);
+          }
         }
-        
+
         // Fetch appointments for the selected patient if not editing or if appointmentId is not provided
         if ((!isEditing || !appointmentId) && (patientId || (isEditing && note && note.patient_id))) {
-          const patId = patientId || (note && note.patient_id._id) || (note && note.patient_id);
-          const fetchedAppointments = await apiService.getAppointmentsByPatientId(patId);
-          setAppointments(fetchedAppointments);
+          try {
+            const patId = patientId || (note && note.patient_id?._id) || (note && note.patient_id);
+            if (patId) {
+              const fetchedAppointments = await apiService.getAppointmentsByPatientId(patId);
+              setAppointments(Array.isArray(fetchedAppointments) ? fetchedAppointments : []);
+            }
+          } catch (err) {
+            console.error('Error fetching appointments:', err);
+            setAppointments([]);
+          }
         }
-        
+
         setLoading(false);
       } catch (err) {
-        setError(err.message || 'Failed to load data');
+        console.error('Error in fetchData:', err);
+        setError('Failed to load data. Please try again later.');
         setLoading(false);
       }
     };
@@ -78,15 +100,29 @@ const NotesForm = ({ onSubmit, onCancel, note, isEditing, patientId, appointment
   const handlePatientChange = async (e) => {
     const selectedPatientId = e.target.value;
     setFormData(prev => ({ ...prev, patient_id: selectedPatientId, appointment_id: '' }));
-    
+
     // Fetch appointments for the selected patient
     try {
       setLoading(true);
-      const fetchedAppointments = await apiService.getAppointmentsByPatientId(selectedPatientId);
-      setAppointments(fetchedAppointments);
+      setError(null); // Clear any previous errors
+
+      if (selectedPatientId) {
+        try {
+          const fetchedAppointments = await apiService.getAppointmentsByPatientId(selectedPatientId);
+          setAppointments(Array.isArray(fetchedAppointments) ? fetchedAppointments : []);
+        } catch (err) {
+          console.error('Error fetching appointments for patient:', err);
+          setAppointments([]);
+        }
+      } else {
+        setAppointments([]);
+      }
+
       setLoading(false);
     } catch (err) {
-      setError(err.message || 'Failed to load appointments');
+      console.error('Error in handlePatientChange:', err);
+      setError('Failed to load appointments. Please try again.');
+      setAppointments([]);
       setLoading(false);
     }
   };
@@ -135,7 +171,7 @@ const NotesForm = ({ onSubmit, onCancel, note, isEditing, patientId, appointment
         e.target.value = null;
         return;
       }
-      
+
       // Check file type
       const allowedTypes = [
         'image/jpeg',
@@ -148,14 +184,14 @@ const NotesForm = ({ onSubmit, onCancel, note, isEditing, patientId, appointment
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         'text/plain'
       ];
-      
+
       if (!allowedTypes.includes(file.type)) {
         setFileError('Invalid file type. Only images, PDFs, and common document formats are allowed.');
         setSelectedFile(null);
         e.target.value = null;
         return;
       }
-      
+
       setSelectedFile(file);
       setFileError(null);
     }
@@ -164,10 +200,10 @@ const NotesForm = ({ onSubmit, onCancel, note, isEditing, patientId, appointment
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     try {
       setLoading(true);
-      
+
       // Create or update note
       let noteResponse;
       if (isEditing) {
@@ -175,18 +211,18 @@ const NotesForm = ({ onSubmit, onCancel, note, isEditing, patientId, appointment
       } else {
         noteResponse = await onSubmit(formData);
       }
-      
+
       // If there's a file, upload it
       if (selectedFile && noteResponse) {
         const formDataObj = new FormData();
         formDataObj.append('file', selectedFile);
-        
+
         // Use the note ID from the response if available, otherwise use the current note ID
         const noteId = noteResponse._id || (note && note._id);
-        
+
         await apiService.uploadNoteAttachment(noteId, formDataObj);
       }
-      
+
       setLoading(false);
       onCancel(); // Close the form
     } catch (err) {
@@ -202,7 +238,7 @@ const NotesForm = ({ onSubmit, onCancel, note, isEditing, patientId, appointment
           {error}
         </div>
       )}
-      
+
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
           <label className="block text-gray-700 dark:text-gray-300 mb-2">
@@ -224,7 +260,7 @@ const NotesForm = ({ onSubmit, onCancel, note, isEditing, patientId, appointment
             ))}
           </select>
         </div>
-        
+
         <div className="mb-4">
           <label className="block text-gray-700 dark:text-gray-300 mb-2">
             Appointment
@@ -244,7 +280,7 @@ const NotesForm = ({ onSubmit, onCancel, note, isEditing, patientId, appointment
             ))}
           </select>
         </div>
-        
+
         <div className="mb-4">
           <label className="block text-gray-700 dark:text-gray-300 mb-2">
             Title <span className="text-red-500">*</span>
@@ -260,23 +296,134 @@ const NotesForm = ({ onSubmit, onCancel, note, isEditing, patientId, appointment
             placeholder="Note title"
           />
         </div>
-        
+
         <div className="mb-4">
           <label className="block text-gray-700 dark:text-gray-300 mb-2">
-            Content <span className="text-red-500">*</span>
+            Diagnosis/Notes <span className="text-red-500">*</span>
           </label>
           <textarea
-            name="content"
-            value={formData.content}
+            name="diagnosis_text"
+            value={formData.diagnosis_text}
             onChange={handleChange}
             className="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-            rows={6}
+            rows={4}
             required
             maxLength={5000}
-            placeholder="Note content"
+            placeholder="Enter diagnosis or general notes"
           ></textarea>
         </div>
-        
+
+        <div className="mb-4">
+          <label className="block text-gray-700 dark:text-gray-300 mb-2">
+            Treatment Plan
+          </label>
+          <textarea
+            name="treatment_plan"
+            value={formData.treatment_plan}
+            onChange={handleChange}
+            className="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+            rows={3}
+            maxLength={2000}
+            placeholder="Enter treatment plan details"
+          ></textarea>
+        </div>
+
+        <div className="mb-4">
+          <label className="block text-gray-700 dark:text-gray-300 mb-2">
+            Follow-up Instructions
+          </label>
+          <textarea
+            name="follow_up"
+            value={formData.follow_up}
+            onChange={handleChange}
+            className="w-full p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+            rows={2}
+            maxLength={1000}
+            placeholder="Enter follow-up instructions"
+          ></textarea>
+        </div>
+
+        <div className="mb-4">
+          <label className="block text-gray-700 dark:text-gray-300 mb-2">
+            Medications
+          </label>
+          <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg border border-gray-200 dark:border-gray-700">
+            {formData.medications.map((med, index) => (
+              <div key={index} className="flex items-center mb-2 bg-white dark:bg-gray-700 p-2 rounded-md">
+                <div className="flex-grow grid grid-cols-4 gap-2">
+                  <div className="col-span-1">{med.name}</div>
+                  <div className="col-span-1">{med.dosage}</div>
+                  <div className="col-span-1">{med.frequency}</div>
+                  <div className="col-span-1">{med.duration}</div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const updatedMeds = [...formData.medications];
+                    updatedMeds.splice(index, 1);
+                    setFormData(prev => ({ ...prev, medications: updatedMeds }));
+                  }}
+                  className="text-red-500 hover:text-red-700 ml-2"
+                >
+                  <FaTimes />
+                </button>
+              </div>
+            ))}
+            <div className="grid grid-cols-4 gap-2 mt-2">
+              <input
+                type="text"
+                placeholder="Medication name"
+                className="p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white col-span-1"
+                id="med-name"
+              />
+              <input
+                type="text"
+                placeholder="Dosage (e.g., 10mg)"
+                className="p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white col-span-1"
+                id="med-dosage"
+              />
+              <input
+                type="text"
+                placeholder="Frequency (e.g., twice daily)"
+                className="p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white col-span-1"
+                id="med-frequency"
+              />
+              <input
+                type="text"
+                placeholder="Duration (e.g., 7 days)"
+                className="p-2 border rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white col-span-1"
+                id="med-duration"
+              />
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                const name = document.getElementById('med-name').value.trim();
+                const dosage = document.getElementById('med-dosage').value.trim();
+                const frequency = document.getElementById('med-frequency').value.trim();
+                const duration = document.getElementById('med-duration').value.trim();
+
+                if (name) {
+                  const newMed = { name, dosage, frequency, duration };
+                  setFormData(prev => ({
+                    ...prev,
+                    medications: [...prev.medications, newMed]
+                  }));
+
+                  // Clear inputs
+                  document.getElementById('med-name').value = '';
+                  document.getElementById('med-dosage').value = '';
+                  document.getElementById('med-frequency').value = '';
+                  document.getElementById('med-duration').value = '';
+                }
+              }}
+              className="mt-2 bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600 w-full"
+            >
+              Add Medication
+            </button>
+          </div>
+        </div>
+
         <div className="mb-4">
           <label className="block text-gray-700 dark:text-gray-300 mb-2">
             Category
@@ -295,7 +442,7 @@ const NotesForm = ({ onSubmit, onCancel, note, isEditing, patientId, appointment
             <option value="Other">Other</option>
           </select>
         </div>
-        
+
         <div className="mb-4">
           <label className="block text-gray-700 dark:text-gray-300 mb-2">
             Tags
@@ -322,7 +469,7 @@ const NotesForm = ({ onSubmit, onCancel, note, isEditing, patientId, appointment
               <FaPlus />
             </button>
           </div>
-          
+
           {formData.tags.length > 0 && (
             <div className="mt-2 flex flex-wrap">
               {formData.tags.map((tag, index) => (
@@ -343,7 +490,7 @@ const NotesForm = ({ onSubmit, onCancel, note, isEditing, patientId, appointment
             </div>
           )}
         </div>
-        
+
         <div className="mb-4">
           <label className="block text-gray-700 dark:text-gray-300 mb-2">
             Attachment
@@ -375,7 +522,7 @@ const NotesForm = ({ onSubmit, onCancel, note, isEditing, patientId, appointment
             Max file size: 10MB. Allowed formats: Images, PDF, DOC, DOCX, XLS, XLSX, TXT
           </p>
         </div>
-        
+
         <div className="mb-4">
           <label className="flex items-center text-gray-700 dark:text-gray-300">
             <input
@@ -388,7 +535,7 @@ const NotesForm = ({ onSubmit, onCancel, note, isEditing, patientId, appointment
             Private note (only visible to doctors)
           </label>
         </div>
-        
+
         <div className="flex justify-end space-x-2 mt-6">
           <button
             type="button"
