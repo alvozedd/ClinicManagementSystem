@@ -9,8 +9,8 @@ import './styles/mobileButtonFixes.css'
 import './styles/darkMode.css'
 import './styles/mobileBackgroundFix.css'
 import './styles/3DStyles.css'
-// import App3D from './App3D.jsx'
-import SimpleScene from './components/3D/SimpleScene'
+import App3D from './App3D.jsx'
+// import SimpleScene from './components/3D/SimpleScene'
 import { AuthProvider } from './context/AuthContext'
 import store from './store/store'
 
@@ -18,7 +18,7 @@ createRoot(document.getElementById('root')).render(
   <StrictMode>
     <Provider store={store}>
       <AuthProvider>
-        <SimpleScene />
+        <App3D />
       </AuthProvider>
     </Provider>
   </StrictMode>,
