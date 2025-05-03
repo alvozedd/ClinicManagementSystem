@@ -9,9 +9,6 @@ const EnhancedContact = ({ content, getContentValue }) => {
 
   return (
     <div id="contact" className="bg-white text-gray-800 py-16 sm:py-20 md:py-24 w-full relative">
-      {/* Subtle background pattern */}
-      <div className="absolute inset-0 subtle-pattern"></div>
-      <div className="absolute inset-0 gradient-bg"></div>
 
       <div className="max-w-6xl mx-auto px-4 relative z-10">
         <div className="text-center mb-12 animate-fade-in">

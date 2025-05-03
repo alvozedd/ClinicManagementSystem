@@ -719,20 +719,7 @@ function HomePage() {
               {/* White background sections */}
               <div className="bg-white">
                 {/* Services Section */}
-                <div id="services" className="services-bg text-white py-16 sm:py-20 md:py-24 w-full relative overflow-hidden" onMouseMove={(e) => {
-                    const mouseGlow = document.querySelector('.services-mouse-glow');
-                    if (mouseGlow) {
-                      mouseGlow.style.opacity = '1';
-                      mouseGlow.style.left = `${e.pageX}px`;
-                      mouseGlow.style.top = `${e.pageY}px`;
-                    }
-                  }} onMouseLeave={() => {
-                    const mouseGlow = document.querySelector('.services-mouse-glow');
-                    if (mouseGlow) {
-                      mouseGlow.style.opacity = '0';
-                    }
-                  }}>
-                  <div className="services-mouse-glow mouse-glow"></div>
+                <div id="services" className="bg-blue-600 text-white py-16 sm:py-20 md:py-24 w-full relative overflow-hidden">
                   <div className="max-w-5xl mx-auto px-4">
                     <div className="text-center mb-12 relative">
                       <div className="bg-gradient-to-r from-white/30 via-white/50 to-white/30 h-1 w-24 mx-auto mb-4"></div>
