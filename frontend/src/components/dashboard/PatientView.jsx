@@ -28,17 +28,36 @@ const PatientView = ({ patient, onBackToPatients }) => {
   // Use context userInfo if available, otherwise use Redux userInfo
   const userInfo = contextUserInfo || reduxUserInfo || { role: 'visitor' };
 
+  // Reset activeTab to 'biodata' if secretary tries to access 'notes' tab
+  useEffect(() => {
+    if (userInfo?.role !== 'doctor' && activeTab === 'notes') {
+      setActiveTab('biodata');
+    }
+  }, [userInfo?.role, activeTab]);
+
   // Fetch patient appointments when component mounts or patient changes
   useEffect(() => {
     const fetchAppointments = async () => {
       if (patient && patient._id) {
         try {
           setLoadingAppointments(true);
-          const fetchedAppointments = await apiService.getAppointmentsByPatientId(patient._id);
-          setAppointments(fetchedAppointments);
+          setError(null); // Clear any previous errors
+          let fetchedAppointments = [];
+
+          try {
+            fetchedAppointments = await apiService.getAppointmentsByPatientId(patient._id);
+          } catch (err) {
+            console.error('Error fetching appointments:', err);
+            fetchedAppointments = []; // Use empty array on error
+          }
+
+          // Ensure we always have an array, even if the API returns null or undefined
+          setAppointments(Array.isArray(fetchedAppointments) ? fetchedAppointments : []);
           setLoadingAppointments(false);
         } catch (err) {
-          console.error('Error fetching appointments:', err);
+          console.error('Error in fetchAppointments:', err);
+          setError('Failed to fetch appointments. Please try again later.');
+          setAppointments([]); // Set empty array on error
           setLoadingAppointments(false);
         }
       }
@@ -237,16 +256,18 @@ const PatientView = ({ patient, onBackToPatients }) => {
           >
             Appointments
           </button>
-          <button
-            className={`inline-block p-4 border-b-2 rounded-t-lg ${
-              activeTab === 'notes'
-                ? 'text-blue-600 border-blue-600 dark:text-blue-400 dark:border-blue-400'
-                : 'border-transparent hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300'
-            }`}
-            onClick={() => setActiveTab('notes')}
-          >
-            Notes
-          </button>
+          {userInfo?.role === 'doctor' && (
+            <button
+              className={`inline-block p-4 border-b-2 rounded-t-lg ${
+                activeTab === 'notes'
+                  ? 'text-blue-600 border-blue-600 dark:text-blue-400 dark:border-blue-400'
+                  : 'border-transparent hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300'
+              }`}
+              onClick={() => setActiveTab('notes')}
+            >
+              Notes
+            </button>
+          )}
           {userInfo?.role === 'doctor' && (
             <button
               className={`inline-block p-4 border-b-2 rounded-t-lg ${
@@ -263,7 +284,7 @@ const PatientView = ({ patient, onBackToPatients }) => {
       </div>
 
       {/* Tab Content */}
-      <div className="tab-content">
+      <div className="tab-content relative">
         {activeTab === 'biodata' && (
           <div className="glass-card p-4 rounded-lg">
             <h3 className="font-semibold text-gray-700 dark:text-white mb-4">Patient Biodata</h3>
@@ -343,7 +364,7 @@ const PatientView = ({ patient, onBackToPatients }) => {
         )}
 
         {activeTab === 'appointments' && (
-          <div className="glass-card p-4 rounded-lg bg-white dark:bg-gray-800">
+          <div className="glass-card p-4 rounded-lg">
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-semibold text-gray-700 dark:text-white">Appointments</h3>
               <button
@@ -395,14 +416,14 @@ const PatientView = ({ patient, onBackToPatients }) => {
           </div>
         )}
 
-        {activeTab === 'notes' && (
-          <div className="glass-card p-4 rounded-lg bg-white dark:bg-gray-800">
+        {activeTab === 'notes' && userInfo?.role === 'doctor' && (
+          <div className="glass-card p-4 rounded-lg relative z-10">
             <NotesView patientId={patient._id} />
           </div>
         )}
 
         {activeTab === 'medical' && userInfo?.role === 'doctor' && (
-          <div className="glass-card p-4 rounded-lg">
+          <div className="glass-card p-4 rounded-lg relative z-10">
             <h3 className="font-semibold text-gray-700 dark:text-white mb-4">Medical History</h3>
 
             <div className="mb-6">
