@@ -1,6 +1,6 @@
 :root {
   --dynamic-background-image: url('/backgroundimg/Theone.jpeg'); /* Default fallback */
-  --mobile-background-image: url('/backgroundimg/mobile.jpeg'); /* Mobile fallback */
+  --mobile-background-image: url('/backgroundimg/Theone.jpeg'); /* Use same image for all devices */
 }
 
 .bg-image {
@@ -15,8 +15,12 @@
 /* Mobile background image */
 @media (max-width: 768px) {
   .bg-image {
-    background-image: var(--mobile-background-image);
+    background-image: var(--dynamic-background-image); /* Use same image for all devices */
     background-attachment: scroll;
+    background-position: center center !important;
+    background-size: cover !important;
+    min-height: 100vh !important;
+    height: 100% !important;
   }
 }
 

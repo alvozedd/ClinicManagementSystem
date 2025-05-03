@@ -10,6 +10,7 @@ import '../styles/animations.css';
 import '../styles/fallbackAnimations.css';
 import '../styles/textAnimations.css';
 import '../styles/backgroundFixes.css'; // Import background fixes for mobile
+import '../styles/mobileBackgroundFix.css'; // Additional mobile background fixes
 import PageLoader from './PageLoader';
 // Removed framer-motion import as animations are no longer needed
 
@@ -21,28 +22,23 @@ const responsiveBackgroundStyles = `
     background-position: center center !important;
     background-repeat: no-repeat !important;
     background-attachment: fixed !important;
+    min-height: 100vh !important;
+    height: 100% !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 
-  /* Tablet styles */
+  /* Tablet and mobile styles */
   @media (max-width: 768px) {
     .responsive-bg {
-      background-image: url('/backgroundimg/mobile.jpeg') !important;
+      background-image: url('/backgroundimg/Theone.jpeg') !important; /* Use same image as desktop */
       background-position: center center !important;
       background-size: cover !important;
-      background-attachment: scroll !important;
-    }
-  }
-
-  /* Mobile styles */
-  @media (max-width: 480px) {
-    .responsive-bg {
-      background-image: url('/backgroundimg/mobile.jpeg') !important;
-      background-position: top center !important;
       background-attachment: scroll !important; /* Use scroll instead of fixed for mobile */
-      height: 100% !important;
       min-height: 100vh !important;
-      background-size: 100% auto !important; /* Prevent zooming/pixelation */
-      max-width: 100% !important;
+      height: 100% !important;
+      width: 100% !important;
       overflow-x: hidden !important;
     }
   }
@@ -51,6 +47,7 @@ const responsiveBackgroundStyles = `
   @supports (-webkit-touch-callout: none) {
     .responsive-bg {
       background-attachment: scroll !important; /* Safari fix */
+      min-height: -webkit-fill-available !important;
     }
   }
 
@@ -58,6 +55,21 @@ const responsiveBackgroundStyles = `
   header, nav, .navbar {
     background: transparent !important;
     background-color: transparent !important;
+  }
+
+  /* Fix for white space at bottom */
+  html, body, #root {
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow-x: hidden !important;
+    min-height: 100vh !important;
+    height: 100% !important;
+  }
+
+  /* Ensure footer extends to bottom */
+  footer {
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
   }
 `;
 
@@ -207,15 +219,16 @@ function HomePage() {
       {/* Add style tag for responsive background */}
       <style dangerouslySetInnerHTML={{ __html: responsiveBackgroundStyles }} />
 
-      <PageLoader backgroundImage={window.innerWidth <= 768 ? "/backgroundimg/mobile.jpeg" : "/backgroundimg/Theone.jpeg"}>
+      <PageLoader backgroundImage="/backgroundimg/Theone.jpeg">
         <div className="text-gray-800 responsive-bg bg-image" style={{
           scrollBehavior: 'smooth',
-          backgroundImage: window.innerWidth <= 768 ? "url('/backgroundimg/mobile.jpeg')" : "url('/backgroundimg/Theone.jpeg')",
-          backgroundSize: window.innerWidth <= 768 ? "100% auto" : "cover",
-          backgroundPosition: window.innerWidth <= 768 ? "top center" : "center center", /* Top position for mobile */
+          backgroundImage: "url('/backgroundimg/Theone.jpeg')", /* Use same image for all devices */
+          backgroundSize: "cover", /* Always use cover for all screen sizes */
+          backgroundPosition: "center center", /* Center position for all devices */
           backgroundAttachment: window.innerWidth <= 768 ? "scroll" : "fixed", /* Use scroll for mobile */
           backgroundRepeat: "no-repeat",
           minHeight: "100vh",
+          height: "100%",
           width: "100%",
           overflowX: "hidden", /* Prevent horizontal scrolling on mobile */
           position: "relative", /* For overlay positioning */

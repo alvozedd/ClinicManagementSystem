@@ -9,21 +9,16 @@ const PageLoader = ({ children, backgroundImage }) => {
 
   // Preload the background image
   useEffect(() => {
-    // Determine which background image to use based on screen size
-    const isMobile = window.innerWidth <= 768;
-    const mobileImage = '/backgroundimg/mobile.jpeg';
+    // Use the same image for all devices to avoid white space issues
     const desktopImage = '/backgroundimg/Theone.jpeg';
 
-    // Preload both images
+    // Preload the image
     const imgDesktop = new Image();
     imgDesktop.src = desktopImage;
 
-    const imgMobile = new Image();
-    imgMobile.src = mobileImage;
-
-    // Use the appropriate image based on screen size
+    // Use the image
     const img = new Image();
-    img.src = isMobile ? mobileImage : (backgroundImage || desktopImage);
+    img.src = backgroundImage || desktopImage;
 
     // Add event listener for image load
     img.onload = () => {

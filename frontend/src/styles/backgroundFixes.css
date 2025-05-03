@@ -15,6 +15,7 @@ html, body, #root {
   padding: 0 !important;
   overflow-x: hidden;
   min-height: 100vh;
+  height: 100%;
   /* Removed the blue background color that was causing issues */
 }
 
@@ -40,22 +41,31 @@ footer {
 /* Mobile styles */
 @media (max-width: 767px) {
   .bg-image {
-    background-image: var(--mobile-background-image) !important;
+    background-image: var(--dynamic-background-image) !important; /* Use same image for all devices */
     background-attachment: scroll !important;
     min-height: 100vh !important;
-    background-size: 100% auto !important; /* Ensure image fits width without zooming */
-    background-position: top center !important; /* Position from top */
+    height: 100% !important;
+    background-size: cover !important;
+    background-position: center center !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
   }
 }
 
 /* Small mobile styles */
 @media (max-width: 480px) {
   .bg-image {
-    background-image: var(--mobile-background-image) !important;
-    background-position: top center !important;
-    background-size: 100% auto !important; /* Prevent zooming/pixelation */
+    background-image: var(--dynamic-background-image) !important; /* Use same image for all devices */
+    background-position: center center !important;
+    background-size: cover !important;
     max-width: 100% !important;
     overflow-x: hidden !important;
+    height: 100% !important;
+    min-height: 100vh !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 }
 

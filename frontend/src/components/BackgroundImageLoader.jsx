@@ -3,7 +3,8 @@ import apiService from '../utils/apiService';
 
 function BackgroundImageLoader() {
   const [backgroundImage, setBackgroundImage] = useState('/backgroundimg/Theone.jpeg');
-  const [mobileBackgroundImage, setMobileBackgroundImage] = useState('/backgroundimg/mobile.jpeg');
+  // Use the same image for all devices to avoid white space issues
+  const [mobileBackgroundImage, setMobileBackgroundImage] = useState('/backgroundimg/Theone.jpeg');
 
   useEffect(() => {
     // Force a cache-busting parameter to ensure the image is refreshed
@@ -25,21 +26,12 @@ function BackgroundImageLoader() {
 
     // Add media query listener for responsive background
     const handleScreenSizeChange = () => {
-      if (window.matchMedia('(max-width: 768px)').matches) {
-        console.log('Using mobile background image');
-        // Ensure mobile image is properly loaded
-        const mobileImg = new Image();
-        mobileImg.onload = () => {
-          console.log('Mobile background image loaded successfully');
-          document.documentElement.style.setProperty(
-            '--mobile-background-image',
-            `url(${mobileImageWithCacheBusting})`
-          );
-        };
-        mobileImg.src = mobileImageWithCacheBusting;
-      } else {
-        console.log('Using desktop background image');
-      }
+      // Use the same image for all devices to avoid white space issues
+      console.log('Using same background image for all devices');
+      document.documentElement.style.setProperty(
+        '--mobile-background-image',
+        `url(${imageWithCacheBusting})`
+      );
     };
 
     // Call once on load

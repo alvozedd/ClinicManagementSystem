@@ -1,0 +1,67 @@
+/* Mobile background fixes */
+
+/* Fix for mobile viewport height issues */
+:root {
+  --mobile-vh: 1vh;
+}
+
+@supports (-webkit-touch-callout: none) {
+  :root {
+    --mobile-vh: -webkit-fill-available;
+  }
+}
+
+/* Base styles for all devices */
+html, body, #root {
+  height: 100%;
+  min-height: 100vh;
+  min-height: var(--mobile-vh);
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+/* Fix for background image on mobile */
+.bg-image, .responsive-bg {
+  background-size: cover !important;
+  background-position: center center !important;
+  background-repeat: no-repeat !important;
+  min-height: 100vh !important;
+  min-height: calc(var(--mobile-vh) * 100) !important;
+  height: 100% !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Mobile-specific fixes */
+@media (max-width: 768px) {
+  .bg-image, .responsive-bg {
+    background-attachment: scroll !important;
+    background-image: var(--dynamic-background-image) !important; /* Use same image for all devices */
+    background-position: center center !important;
+    background-size: cover !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Fix for iOS Safari */
+  body {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Ensure content fills the screen */
+  #root > div {
+    min-height: 100vh !important;
+    min-height: calc(var(--mobile-vh) * 100) !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+}
+
+/* Fix for iOS devices */
+@supports (-webkit-touch-callout: none) {
+  .bg-image, .responsive-bg {
+    background-attachment: scroll !important;
+  }
+}

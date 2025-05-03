@@ -18,14 +18,19 @@ const allowedOrigins = [
   'https://urohealthcentral.netlify.app',
   'https://www.urohealthcentral.netlify.app',
   // Railway domain for server-to-server communication
-  'https://clinicmanagementsystem-production-081b.up.railway.app'
+  'https://clinicmanagementsystem-production-081b.up.railway.app',
+  // Add all possible variations of the Netlify domain
+  'https://urohealthltd.netlify.app',
+  'http://urohealthltd.netlify.app',
+  'https://www.urohealthltd.netlify.app',
+  'http://www.urohealthltd.netlify.app'
 ];
 
 // Always allow all origins to fix CORS issues
 const ALLOW_ALL_ORIGINS = true;
 
 // Debug flag to log detailed CORS information
-const DEBUG_CORS = true;
+const DEBUG_CORS = false; // Set to false for production
 
 // Make sure all Netlify domains are included
 if (!allowedOrigins.includes('https://urohealthltd.netlify.app')) {
@@ -94,15 +99,21 @@ const corsMiddleware = (req, res, next) => {
   // Set the Vary header to inform caches that the response varies by Origin
   res.header('Vary', 'Origin');
 
-  // Always allow the requesting origin
-  if (origin) {
-    // Always set the origin to the requesting origin
-    res.header('Access-Control-Allow-Origin', origin);
-    if (DEBUG_CORS) console.log(`Setting Access-Control-Allow-Origin: ${origin}`);
+  // Check if we should allow all origins or just the ones in our list
+  if (ALLOW_ALL_ORIGINS) {
+    // Allow any origin
+    res.header('Access-Control-Allow-Origin', origin || '*');
+    if (DEBUG_CORS) console.log(`Setting Access-Control-Allow-Origin: ${origin || '*'} (all origins allowed)`);
   } else {
-    // No origin in request, set to wildcard
-    res.header('Access-Control-Allow-Origin', '*');
-    if (DEBUG_CORS) console.log('Setting Access-Control-Allow-Origin: *');
+    // Only allow specific origins
+    if (origin && allowedOrigins.includes(origin)) {
+      res.header('Access-Control-Allow-Origin', origin);
+      if (DEBUG_CORS) console.log(`Setting Access-Control-Allow-Origin: ${origin}`);
+    } else {
+      // No origin in request or not in allowed list, set to wildcard
+      res.header('Access-Control-Allow-Origin', '*');
+      if (DEBUG_CORS) console.log('Setting Access-Control-Allow-Origin: * (fallback)');
+    }
   }
 
   // Set credentials to true for all requests
