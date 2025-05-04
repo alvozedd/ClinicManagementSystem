@@ -1,10 +1,25 @@
-import React, { useRef } from 'react'
+import React, { useRef, useState, useEffect } from 'react'
 import { useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 
 // Professional Fluid Blue Wave Background for 3D scene
 export const WaveBackground = () => {
   const mesh = useRef()
+  const [error, setError] = useState(null)
+
+  // Error handling
+  useEffect(() => {
+    const handleError = (event) => {
+      console.error('Three.js error in 3D component:', event.error);
+      setError('Error initializing 3D effect');
+    };
+
+    window.addEventListener('error', handleError);
+
+    return () => {
+      window.removeEventListener('error', handleError);
+    };
+  }, []);
 
   // Create shader material for the fluid wave effect
   const material = useRef(

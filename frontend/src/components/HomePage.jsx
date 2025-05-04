@@ -224,22 +224,26 @@ function HomePage() {
   useEffect(() => {
     // Simple performance check
     const checkPerformance = () => {
-      // Check if device is mobile
-      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-
       // Check if browser supports WebGL
       const canvas = document.createElement('canvas');
       const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
       const hasWebGL = !!gl;
 
-      // Disable wave effect if WebGL is not supported or on mobile devices
-      if (!hasWebGL || isMobile) {
+      // Only disable wave effect if WebGL is not supported
+      if (!hasWebGL) {
+        console.log('WebGL not supported, disabling wave effect');
         setUseWaveEffect(false);
       }
 
       // Check for reduced motion preference
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        console.log('Reduced motion preference detected, disabling wave effect');
         setUseWaveEffect(false);
+      }
+
+      // Log that wave effect is enabled
+      if (hasWebGL && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        console.log('Wave effect enabled');
       }
     };
 

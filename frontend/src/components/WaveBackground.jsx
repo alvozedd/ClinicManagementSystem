@@ -1,4 +1,4 @@
-import React, { useRef } from 'react'
+import React, { useRef, useState, useEffect } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import * as THREE from 'three'
 
@@ -207,6 +207,8 @@ const FluidWaves = () => {
 
 // Main component
 const WaveBackground = ({ qualityLevel = 'high' }) => {
+  const [error, setError] = useState(null);
+
   // Determine geometry detail based on quality
   const getGeometryDetail = () => {
     switch (qualityLevel) {
@@ -217,8 +219,45 @@ const WaveBackground = ({ qualityLevel = 'high' }) => {
     }
   }
 
+  // Error boundary for Three.js
+  useEffect(() => {
+    const handleError = (event) => {
+      console.error('Three.js error:', event.error);
+      setError('Error initializing 3D effect');
+    };
+
+    window.addEventListener('error', handleError);
+
+    return () => {
+      window.removeEventListener('error', handleError);
+    };
+  }, []);
+
+  // If there's an error, show a fallback
+  if (error) {
+    console.error('Rendering fallback due to error:', error);
+    return (
+      <div className="wave-fallback" style={{
+        width: '100%',
+        height: '100%',
+        background: 'linear-gradient(to bottom, #000a20, #0033aa)'
+      }} />
+    );
+  }
+
   return (
-    <Canvas camera={{ position: [0, 0, 5], fov: 60 }}>
+    <Canvas
+      camera={{ position: [0, 0, 5], fov: 60 }}
+      onCreated={({ gl }) => {
+        console.log('Three.js Canvas created successfully');
+        // Set better pixel ratio for performance
+        gl.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      }}
+      onError={(error) => {
+        console.error('Three.js Canvas error:', error);
+        setError(error);
+      }}
+    >
       <color attach="background" args={['#000a20']} /> {/* Very dark blue/black background */}
       <FluidWaves />
     </Canvas>
