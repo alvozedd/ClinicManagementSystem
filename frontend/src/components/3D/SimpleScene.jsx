@@ -1,41 +1,94 @@
-import React, { useRef } from 'react'
-import { Canvas, useFrame } from '@react-three/fiber'
+import React, { useRef, useState, useEffect } from 'react'
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
+import { WaveBackground } from './WaveBackground'
+import { Text3D, Center, Environment } from '@react-three/drei'
 
-// Simple rotating box component
-function Box(props) {
+// Floating text component
+function FloatingText(props) {
   const meshRef = useRef()
+  const { size } = useThree()
 
+  // Gentle floating animation
   useFrame((state, delta) => {
-    meshRef.current.rotation.x += delta * 0.5
-    meshRef.current.rotation.y += delta * 0.2
+    if (meshRef.current) {
+      meshRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.5) * 0.1
+      meshRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.2) * 0.05
+    }
   })
 
   return (
-    <mesh
-      {...props}
-      ref={meshRef}
-    >
-      <boxGeometry args={[2, 2, 2]} />
-      <meshStandardMaterial color="#4080ff" metalness={0.5} roughness={0.2} />
-    </mesh>
+    <group ref={meshRef} {...props}>
+      <Center>
+        <Text3D
+          font="/fonts/inter_regular.json"
+          size={props.size || 0.5}
+          height={0.1}
+          curveSegments={12}
+        >
+          {props.children}
+          <meshStandardMaterial
+            color="#ffffff"
+            emissive="#4080ff"
+            emissiveIntensity={0.5}
+            metalness={0.8}
+            roughness={0.2}
+          />
+        </Text3D>
+      </Center>
+    </group>
   )
 }
 
-// Simple scene with a box
+// Professional clinic scene with fluid wave background
 export default function SimpleScene() {
-  return (
-    <div style={{ width: '100vw', height: '100vh', background: '#000830' }}>
-      <Canvas>
-        <ambientLight intensity={0.5} />
-        <pointLight position={[10, 10, 10]} intensity={1} />
-        <Box position={[0, 0, 0]} />
+  const [loaded, setLoaded] = useState(false)
 
-        {/* Add sphere to confirm 3D is working */}
-        <mesh position={[0, 3, 0]}>
-          <sphereGeometry args={[0.5, 32, 32]} />
-          <meshStandardMaterial color="#ff4080" emissive="#ff4080" emissiveIntensity={0.5} />
-        </mesh>
-      </Canvas>
+  // Simulate loading state
+  useEffect(() => {
+    const timer = setTimeout(() => setLoaded(true), 500)
+    return () => clearTimeout(timer)
+  }, [])
+
+  return (
+    <div style={{ width: '100vw', height: '100vh', background: '#000a20' }}>
+      {!loaded ? (
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100vh',
+          color: '#ffffff',
+          fontSize: '1.5rem'
+        }}>
+          Loading...
+        </div>
+      ) : (
+        <Canvas camera={{ position: [0, 0, 5], fov: 50 }}>
+          {/* Environment lighting */}
+          <ambientLight intensity={0.3} />
+          <pointLight position={[10, 10, 10]} intensity={0.8} />
+          <spotLight position={[0, 10, 0]} intensity={0.5} angle={0.3} penumbra={1} />
+          <Environment preset="city" />
+
+          {/* Fluid wave background */}
+          <WaveBackground />
+
+          {/* Floating clinic name */}
+          <FloatingText position={[0, 1, 0]} size={0.8}>
+            UroHealth
+          </FloatingText>
+
+          {/* Subtitle */}
+          <FloatingText position={[0, 0, 0]} size={0.4}>
+            Central Ltd
+          </FloatingText>
+
+          {/* Tagline */}
+          <FloatingText position={[0, -1, 0]} size={0.25}>
+            Specialist Urological Care
+          </FloatingText>
+        </Canvas>
+      )}
     </div>
   )
 }

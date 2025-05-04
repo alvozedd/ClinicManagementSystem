@@ -7,7 +7,6 @@ import { FaBars, FaTimes } from 'react-icons/fa';
 import EnhancedContact from './EnhancedContact';
 import WaveBackground from './WaveBackground';
 import BackgroundImageLoader from './BackgroundImageLoader';
-import ThreeDEntryPoint from './ThreeDEntryPoint';
 import './GlassEffects.css';
 import '../styles/animations.css';
 import '../styles/fallbackAnimations.css';
@@ -999,9 +998,6 @@ function HomePage() {
             </div>
           </div>
         </footer>
-
-        {/* 3D Experience Entry Point */}
-        <ThreeDEntryPoint />
       </div>
     </div>
       </PageLoader>
