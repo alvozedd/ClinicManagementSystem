@@ -1253,15 +1253,65 @@ const apiService = {
   getDiagnosesByPatientId: async (patientId) => {
     try {
       console.log(`Fetching diagnoses for patient ID: ${patientId}`);
-      return await secureFetch(`${API_URL}/patients/${patientId}/diagnoses`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          ...authHeader(),
-          'Cache-Control': 'no-cache, no-store, must-revalidate'
-        },
-        credentials: 'include'
-      });
+
+      // First try: with direct Railway URL (most reliable)
+      try {
+        console.log('First attempt - Using direct Railway URL for diagnoses');
+        const response = await fetch(`https://clinicmanagementsystem-production-081b.up.railway.app/api/patients/${patientId}/diagnoses`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            ...authHeader(),
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+          },
+          mode: 'cors',
+          credentials: 'omit' // Explicitly omit credentials to avoid CORS issues
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log(`Successfully fetched diagnoses for patient ${patientId} with direct Railway URL:`, data.length);
+          return data;
+        } else {
+          console.warn(`Railway URL attempt failed with status: ${response.status}`);
+        }
+      } catch (railwayError) {
+        console.warn('Railway URL attempt failed with error:', railwayError);
+      }
+
+      // Second try: with API_URL
+      try {
+        return await secureFetch(`${API_URL}/patients/${patientId}/diagnoses`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            ...authHeader(),
+            'Cache-Control': 'no-cache, no-store, must-revalidate'
+          },
+          credentials: 'include'
+        });
+      } catch (error) {
+        console.error(`Error fetching diagnoses for patient ${patientId} with API_URL:`, error);
+
+        // Third try: with diagnoses/patient endpoint as fallback
+        try {
+          console.log('Third attempt - Using diagnoses/patient endpoint');
+          return await secureFetch(`${API_URL}/diagnoses/patient/${patientId}`, {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              ...authHeader(),
+              'Cache-Control': 'no-cache, no-store, must-revalidate'
+            },
+            credentials: 'include'
+          });
+        } catch (thirdError) {
+          console.error(`Error fetching diagnoses with third attempt:`, thirdError);
+          return []; // Return empty array as last resort
+        }
+      }
     } catch (error) {
       console.error(`Error fetching diagnoses for patient ${patientId}:`, error);
       return []; // Return empty array instead of throwing
@@ -1326,86 +1376,321 @@ const apiService = {
 
   // User management endpoints (for admin)
   getUsers: async () => {
-    console.log('Calling getUsers API');
-    return secureFetch(`${API_URL}/users`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        ...authHeader(),
-      },
-      credentials: 'include', // Include cookies for refresh token
-    });
+    try {
+      console.log('Fetching users');
+
+      // Try direct Railway URL first (most reliable)
+      try {
+        console.log('First attempt - Using direct Railway URL for users');
+        const response = await fetch('https://clinicmanagementsystem-production-081b.up.railway.app/api/users', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            ...authHeader(),
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+          },
+          credentials: 'include',
+          mode: 'cors',
+          cache: 'no-cache'
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log(`Successfully fetched ${data.length} users with direct Railway URL`);
+          return data;
+        } else {
+          console.warn(`Railway URL attempt failed with status: ${response.status}`);
+        }
+      } catch (railwayError) {
+        console.warn('Railway URL attempt failed with error:', railwayError);
+      }
+
+      // Fall back to makeApiRequest to try multiple endpoints
+      const usersData = await makeApiRequest('/users', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        }
+      });
+
+      console.log(`Successfully fetched ${usersData.length} users with makeApiRequest`);
+      return usersData;
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      // Return empty array instead of throwing to prevent UI errors
+      return [];
+    }
   },
 
   getUserById: async (id) => {
-    console.log('Calling getUserById API for ID:', id);
-    return secureFetch(`${API_URL}/users/${id}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        ...authHeader(),
-      },
-      credentials: 'include', // Include cookies for refresh token
-    });
+    try {
+      console.log('Fetching user with ID:', id);
+
+      // Try direct Railway URL first (most reliable)
+      try {
+        console.log('First attempt - Using direct Railway URL for user details');
+        const response = await fetch(`https://clinicmanagementsystem-production-081b.up.railway.app/api/users/${id}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            ...authHeader(),
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+          },
+          credentials: 'include',
+          mode: 'cors',
+          cache: 'no-cache'
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Successfully fetched user details with direct Railway URL');
+          return data;
+        } else {
+          console.warn(`Railway URL attempt failed with status: ${response.status}`);
+        }
+      } catch (railwayError) {
+        console.warn('Railway URL attempt failed with error:', railwayError);
+      }
+
+      // Fall back to makeApiRequest to try multiple endpoints
+      const userData = await makeApiRequest(`/users/${id}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        }
+      });
+
+      console.log('Successfully fetched user details with makeApiRequest');
+      return userData;
+    } catch (error) {
+      console.error(`Error fetching user with ID ${id}:`, error);
+      throw error;
+    }
   },
 
   createUser: async (userData) => {
-    console.log('Creating user with data:', userData);
-    const result = await secureFetch(`${API_URL}/users`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...authHeader(),
-      },
-      body: JSON.stringify(userData),
-      credentials: 'include', // Include cookies for refresh token
-    });
-    console.log('Create user response:', result);
-    return result;
+    try {
+      console.log('Creating user with data:', userData);
+
+      // Try direct Railway URL first (most reliable)
+      try {
+        console.log('First attempt - Using direct Railway URL for user creation');
+        const response = await fetch('https://clinicmanagementsystem-production-081b.up.railway.app/api/users', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...authHeader(),
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+          },
+          body: JSON.stringify(userData),
+          credentials: 'include',
+          mode: 'cors',
+          cache: 'no-cache'
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Successfully created user with direct Railway URL:', data);
+          return data;
+        } else {
+          const errorText = await response.text();
+          console.warn(`Railway URL attempt failed with status: ${response.status}`, errorText);
+        }
+      } catch (railwayError) {
+        console.warn('Railway URL attempt failed with error:', railwayError);
+      }
+
+      // Fall back to makeApiRequest to try multiple endpoints
+      const createdUser = await makeApiRequest('/users', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        },
+        body: JSON.stringify(userData)
+      });
+
+      console.log('Successfully created user with makeApiRequest:', createdUser);
+      return createdUser;
+    } catch (error) {
+      console.error('Error creating user:', error);
+      throw error;
+    }
   },
 
   updateUser: async (id, userData) => {
-    console.log('Updating user with ID:', id, 'and data:', userData);
-    const result = await secureFetch(`${API_URL}/users/${id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        ...authHeader(),
-      },
-      body: JSON.stringify(userData),
-      credentials: 'include', // Include cookies for refresh token
-    });
-    console.log('Update user response:', result);
-    return result;
+    try {
+      console.log('Updating user with ID:', id, 'and data:', userData);
+
+      // Try direct Railway URL first (most reliable)
+      try {
+        console.log('First attempt - Using direct Railway URL for user update');
+        const response = await fetch(`https://clinicmanagementsystem-production-081b.up.railway.app/api/users/${id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            ...authHeader(),
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+          },
+          body: JSON.stringify(userData),
+          credentials: 'include',
+          mode: 'cors',
+          cache: 'no-cache'
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Successfully updated user with direct Railway URL:', data);
+          return data;
+        } else {
+          const errorText = await response.text();
+          console.warn(`Railway URL attempt failed with status: ${response.status}`, errorText);
+        }
+      } catch (railwayError) {
+        console.warn('Railway URL attempt failed with error:', railwayError);
+      }
+
+      // Fall back to makeApiRequest to try multiple endpoints
+      const updatedUser = await makeApiRequest(`/users/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        },
+        body: JSON.stringify(userData)
+      });
+
+      console.log('Successfully updated user with makeApiRequest:', updatedUser);
+      return updatedUser;
+    } catch (error) {
+      console.error('Error updating user:', error);
+      throw error;
+    }
   },
 
   deleteUser: async (id) => {
-    console.log('Calling deleteUser API for ID:', id);
-    return secureFetch(`${API_URL}/users/${id}`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        ...authHeader(),
-      },
-      credentials: 'include', // Include cookies for refresh token
-    });
+    try {
+      console.log('Deleting user with ID:', id);
+
+      // Try direct Railway URL first (most reliable)
+      try {
+        console.log('First attempt - Using direct Railway URL for user deletion');
+        const response = await fetch(`https://clinicmanagementsystem-production-081b.up.railway.app/api/users/${id}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            ...authHeader(),
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+          },
+          credentials: 'include',
+          mode: 'cors',
+          cache: 'no-cache'
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Successfully deleted user with direct Railway URL:', data);
+          return data;
+        } else {
+          const errorText = await response.text();
+          console.warn(`Railway URL attempt failed with status: ${response.status}`, errorText);
+        }
+      } catch (railwayError) {
+        console.warn('Railway URL attempt failed with error:', railwayError);
+      }
+
+      // Fall back to makeApiRequest to try multiple endpoints
+      const deleteResult = await makeApiRequest(`/users/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        }
+      });
+
+      console.log('Successfully deleted user with makeApiRequest:', deleteResult);
+      return deleteResult;
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      throw error;
+    }
   },
 
   // Content Management endpoints
   getContent: async (section) => {
     try {
-      const url = section ? `${API_URL}/content?section=${section}` : `${API_URL}/content`;
+      // Always try Railway URL first as it's most reliable
+      const railwayUrl = `https://clinicmanagementsystem-production-081b.up.railway.app/api/content${section ? `?section=${section}` : ''}`;
+      console.log('First attempt - Using direct Railway URL for content:', railwayUrl);
 
-      // For content, we don't want to require authentication
-      // This allows public pages to load content without a token
+      try {
+        const railwayResponse = await fetch(railwayUrl, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+          },
+          mode: 'cors',
+          cache: 'no-cache'
+        });
+
+        console.log('Railway content API response status:', railwayResponse.status);
+
+        if (railwayResponse.ok) {
+          const data = await railwayResponse.json();
+          console.log('Successfully fetched content from Railway URL:', data.length, 'items');
+          return data;
+        } else {
+          console.warn('Railway URL attempt failed with status:', railwayResponse.status);
+        }
+      } catch (railwayError) {
+        console.warn('Railway URL attempt failed with error:', railwayError);
+      }
+
+      // Fall back to API_URL if Railway URL fails
+      const url = section ? `${API_URL}/content?section=${section}` : `${API_URL}/content`;
+      console.log('Second attempt - Fetching content from URL:', url);
+
       const response = await fetch(url, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
         },
+        cache: 'no-cache'
       });
 
-      return handleResponse(response);
+      console.log('Content API response status:', response.status);
+
+      const result = await handleResponse(response);
+      console.log('Content API response data:', result);
+      return result;
     } catch (error) {
       console.error('Error fetching content:', error);
       throw error;

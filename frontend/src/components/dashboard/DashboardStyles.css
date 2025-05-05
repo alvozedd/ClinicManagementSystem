@@ -5,6 +5,7 @@
   --bg-primary: #f9fafb;
   --bg-secondary: #ffffff;
   --bg-card: rgba(255, 255, 255, 0.8);
+  --bg-hover: #f3f4f6;
   --text-primary: #1f2937;
   --text-secondary: #4b5563;
   --text-muted: #6b7280;
@@ -20,6 +21,7 @@
   --bg-primary: #0f172a; /* Darker background */
   --bg-secondary: #1e293b; /* Darker secondary */
   --bg-card: rgba(30, 41, 59, 0.9); /* More opaque for better contrast */
+  --bg-hover: #334155; /* Hover background for dark mode */
   --text-primary: #f8fafc; /* Brighter white text */
   --text-secondary: #e2e8f0; /* Brighter secondary text */
   --text-muted: #cbd5e1; /* Brighter muted text for better contrast */
@@ -35,6 +37,16 @@ body.dark-mode {
   background-color: var(--bg-primary);
   color: var(--text-primary);
 }
+
+/* Utility classes for CSS variables */
+.bg-primary { background-color: var(--bg-primary); }
+.bg-secondary { background-color: var(--bg-secondary); }
+.bg-card { background-color: var(--bg-card); }
+.bg-hover { background-color: var(--bg-hover); }
+.text-primary { color: var(--text-primary); }
+.text-secondary { color: var(--text-secondary); }
+.text-muted { color: var(--text-muted); }
+.divide-border > * + * { border-color: var(--border-color); }
 
 .dashboard-container {
   display: flex;
@@ -240,6 +252,16 @@ body.dark-mode {
   border-radius: 0.375rem;
   font-weight: 500;
   transition: all 0.2s ease;
+}
+
+/* Tab content styles */
+.tab-content {
+  position: relative;
+}
+
+.tab-content > div {
+  position: relative;
+  z-index: 1;
 }
 
 .tab-button.active {
@@ -994,6 +1016,54 @@ body.dark-mode {
 .badge-gray {
   background-color: #f3f4f6;
   color: #4b5563;
+}
+
+/* Content Preview Styles */
+.content-preview {
+  position: sticky;
+  top: 1rem;
+}
+
+.preview-container {
+  border: 1px solid var(--border-color);
+  transition: all 0.3s ease;
+}
+
+.preview-header {
+  position: relative;
+  overflow: hidden;
+}
+
+.preview-header::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
+  pointer-events: none;
+}
+
+.preview-services {
+  position: relative;
+}
+
+:root.dark-mode .preview-container {
+  border-color: #475569;
+  background-color: #1e293b;
+}
+
+:root.dark-mode .preview-header {
+  background: linear-gradient(to right, #1e3a8a, #1e40af);
+}
+
+:root.dark-mode .preview-services h3 {
+  color: #e0f2fe;
+}
+
+:root.dark-mode .preview-services p {
+  color: #94a3b8;
 }
 
 /* Dark mode adjustments */

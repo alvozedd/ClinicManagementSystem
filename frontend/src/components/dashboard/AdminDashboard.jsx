@@ -130,7 +130,7 @@ const AdminDashboard = () => {
     return (
       <div className="users-tab">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">User Management</h1>
+          <h1 className="text-2xl font-bold text-primary">User Management</h1>
           <button
             onClick={handleAddUser}
             className="btn btn-primary flex items-center"
@@ -141,7 +141,7 @@ const AdminDashboard = () => {
         </div>
 
         {error && (
-          <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4">
+          <div className="error-message p-4 mb-4">
             {error}
           </div>
         )}
@@ -155,7 +155,7 @@ const AdminDashboard = () => {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
-            <FaSearch className="absolute left-5 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <FaSearch className="search-icon absolute left-5 top-1/2 transform -translate-y-1/2" />
           </div>
         </div>
 
@@ -165,19 +165,19 @@ const AdminDashboard = () => {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="min-w-full bg-white rounded-lg overflow-hidden">
-              <thead className="bg-gray-100">
+            <table className="min-w-full bg-card rounded-lg overflow-hidden">
+              <thead className="bg-secondary">
                 <tr>
-                  <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                  <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Username</th>
-                  <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                  <th className="py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-                  <th className="py-3 px-4 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  <th className="py-3 px-4 text-left text-xs font-medium text-secondary uppercase tracking-wider">Name</th>
+                  <th className="py-3 px-4 text-left text-xs font-medium text-secondary uppercase tracking-wider">Username</th>
+                  <th className="py-3 px-4 text-left text-xs font-medium text-secondary uppercase tracking-wider">Email</th>
+                  <th className="py-3 px-4 text-left text-xs font-medium text-secondary uppercase tracking-wider">Role</th>
+                  <th className="py-3 px-4 text-right text-xs font-medium text-secondary uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
+              <tbody className="divide-y divide-border">
                 {filteredUsers.map((user) => (
-                  <tr key={user._id} className="hover:bg-gray-50">
+                  <tr key={user._id} className="hover:bg-hover">
                     <td className="py-3 px-4 whitespace-nowrap">{user.name}</td>
                     <td className="py-3 px-4 whitespace-nowrap">{user.username}</td>
                     <td className="py-3 px-4 whitespace-nowrap">{user.email}</td>
@@ -209,7 +209,7 @@ const AdminDashboard = () => {
                 ))}
                 {filteredUsers.length === 0 && (
                   <tr>
-                    <td colSpan="5" className="py-4 text-center text-gray-500">
+                    <td colSpan="5" className="py-4 text-center text-muted">
                       No users found
                     </td>
                   </tr>
@@ -226,7 +226,7 @@ const AdminDashboard = () => {
   const renderAddUserModal = () => {
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+        <div className="bg-card rounded-lg shadow-lg p-6 w-full max-w-md">
           <h2 className="text-xl font-bold mb-4">Add New User</h2>
 
           <form onSubmit={submitAddUser}>
@@ -279,7 +279,7 @@ const AdminDashboard = () => {
                 />
                 <button
                   type="button"
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500"
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-secondary"
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? <FaEyeSlash /> : <FaEye />}
@@ -327,7 +327,7 @@ const AdminDashboard = () => {
   const renderEditUserModal = () => {
     return (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+        <div className="bg-card rounded-lg shadow-lg p-6 w-full max-w-md">
           <h2 className="text-xl font-bold mb-4">Edit User</h2>
 
           <form onSubmit={submitEditUser}>
@@ -379,7 +379,7 @@ const AdminDashboard = () => {
                 />
                 <button
                   type="button"
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500"
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 text-secondary"
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? <FaEyeSlash /> : <FaEye />}
