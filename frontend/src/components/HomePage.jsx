@@ -212,14 +212,14 @@ function HomePage() {
     <>
       {/* Three.js Background with improved visibility */}
       {threeEnabled && (
-        <div className="canvas-container" style={{ zIndex: 0 }}>
+        <div className="canvas-container">
           <ThreeBackground />
         </div>
       )}
 
       {/* Fallback background color if Three.js is disabled */}
       {!threeEnabled && (
-        <div className="fixed inset-0 z-0" style={{ backgroundColor: '#000830' }}></div>
+        <div className="fixed inset-0 z-[-1]" style={{ backgroundColor: '#000830' }}></div>
       )}
 
       {/* Debug info - remove in production */}
