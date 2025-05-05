@@ -161,27 +161,47 @@ function HomePage() {
   };
 
   // Check device capabilities for Three.js
+  const [threeEnabled, setThreeEnabled] = useState(threeJsConfig.enabled);
+
   useEffect(() => {
     // Simple performance check
     const checkPerformance = () => {
-      // Check if device is mobile
-      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-
-      // Check if browser supports WebGL
-      const canvas = document.createElement('canvas');
-      const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-      const hasWebGL = !!gl;
-
-      // Adjust Three.js settings based on device capabilities
-      if (!hasWebGL) {
-        threeJsConfig.enabled = false;
-      } else if (isMobile) {
-        threeJsConfig.quality = 'medium';
+      // Safety check for window object (important for SSR/production builds)
+      if (typeof window === 'undefined') {
+        setThreeEnabled(false);
+        return;
       }
 
-      // Check for reduced motion preference
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        threeJsConfig.enabled = false;
+      try {
+        // Check if device is mobile
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
+        // Check if browser supports WebGL
+        const canvas = document.createElement('canvas');
+        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+        const hasWebGL = !!gl;
+
+        // Adjust Three.js settings based on device capabilities
+        if (!hasWebGL) {
+          console.log('WebGL not supported, disabling Three.js');
+          setThreeEnabled(false);
+        } else if (isMobile) {
+          console.log('Mobile device detected, using medium quality');
+          threeJsConfig.quality = 'medium';
+          setThreeEnabled(true);
+        } else {
+          console.log('Desktop device detected, using high quality');
+          setThreeEnabled(true);
+        }
+
+        // Check for reduced motion preference
+        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          console.log('Reduced motion preference detected, disabling Three.js');
+          setThreeEnabled(false);
+        }
+      } catch (error) {
+        console.error('Error checking performance:', error);
+        setThreeEnabled(false);
       }
     };
 
@@ -191,10 +211,15 @@ function HomePage() {
   return (
     <>
       {/* Three.js Background */}
-      {threeJsConfig.enabled && (
+      {threeEnabled && (
         <div className="canvas-container">
           <ThreeBackground />
         </div>
+      )}
+
+      {/* Fallback background color if Three.js is disabled */}
+      {!threeEnabled && (
+        <div className="fixed inset-0 z-0" style={{ backgroundColor: '#000830' }}></div>
       )}
 
       <PageLoader>
