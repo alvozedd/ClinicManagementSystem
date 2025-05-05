@@ -30,7 +30,7 @@ const allowedOrigins = [
 const ALLOW_ALL_ORIGINS = true;
 
 // Debug flag to log detailed CORS information
-const DEBUG_CORS = false; // Set to false for production
+const DEBUG_CORS = true; // Set to true for debugging
 
 // Make sure all Netlify domains are included
 if (!allowedOrigins.includes('https://urohealthltd.netlify.app')) {

@@ -2,6 +2,9 @@
 import authUtils from './authUtils';
 import { makeApiRequest } from './apiUtils';
 
+// For debugging
+const DEBUG = true;
+
 // Get the API URL from environment variables or use a default
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
@@ -206,6 +209,87 @@ const refreshAccessToken = async () => {
 
 // API methods
 const apiService = {
+  // Content endpoints
+  getContent: async (section = null) => {
+    try {
+      if (DEBUG) console.log(`Fetching content${section ? ` for section: ${section}` : ''}`);
+
+      // Build query string if section is provided
+      const queryString = section ? `?section=${encodeURIComponent(section)}` : '';
+
+      // Try direct Railway URL first (most reliable)
+      try {
+        if (DEBUG) console.log('First attempt - Using direct Railway URL for content');
+        const response = await fetch(`https://clinicmanagementsystem-production-081b.up.railway.app/api/content${queryString}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+          },
+          mode: 'cors',
+          cache: 'no-cache'
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (DEBUG) console.log(`Successfully fetched ${data.length} content items with direct Railway URL`);
+          return data;
+        } else {
+          if (DEBUG) console.warn(`Railway URL attempt failed with status: ${response.status}`);
+        }
+      } catch (railwayError) {
+        if (DEBUG) console.warn('Railway URL attempt failed with error:', railwayError);
+      }
+
+      // Second attempt: Try without API prefix
+      try {
+        if (DEBUG) console.log('Second attempt - Using endpoint without API prefix');
+        const response = await fetch(`https://clinicmanagementsystem-production-081b.up.railway.app/content${queryString}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+          },
+          mode: 'cors',
+          cache: 'no-cache'
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (DEBUG) console.log(`Successfully fetched ${data.length} content items without API prefix`);
+          return data;
+        } else {
+          if (DEBUG) console.warn(`Second attempt failed with status: ${response.status}`);
+        }
+      } catch (secondError) {
+        if (DEBUG) console.warn('Second attempt failed with error:', secondError);
+      }
+
+      // Fall back to makeApiRequest to try multiple endpoints
+      if (DEBUG) console.log('Third attempt - Using makeApiRequest for content');
+      const contentData = await makeApiRequest(`/content${queryString}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        }
+      }, false); // Don't require auth for public content
+
+      if (DEBUG) console.log(`Successfully fetched ${contentData.length} content items with makeApiRequest`);
+      return contentData;
+    } catch (error) {
+      if (DEBUG) console.error('Error fetching content:', error);
+      // Return empty array instead of throwing to prevent UI errors
+      return [];
+    }
+  },
+
   // Auth endpoints
   login: async (username, password) => {
     console.log(`Attempting login with username: ${username}`);

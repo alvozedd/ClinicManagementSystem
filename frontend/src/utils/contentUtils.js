@@ -15,11 +15,8 @@ export const loadContent = async (section = null) => {
     console.log('Loading content from API, section:', section || 'all');
 
     try {
-      if (section) {
-        contentData = await apiService.getContent(section);
-      } else {
-        contentData = await apiService.getContent();
-      }
+      // Use the dedicated getContent method from apiService
+      contentData = await apiService.getContent(section);
 
       // Check if we got valid data
       if (contentData && Array.isArray(contentData) && contentData.length > 0) {
@@ -58,6 +55,7 @@ export const loadContent = async (section = null) => {
       });
 
       console.log('Successfully organized content from API');
+      console.log('Organized content sections:', Object.keys(organizedContent));
       return organizedContent;
     } else {
       // If API call failed or returned empty data, use default content
@@ -84,9 +82,17 @@ export const loadContent = async (section = null) => {
  */
 export const getContentItem = (content, section, category, label) => {
   console.log(`Looking for content item: ${section}.${category}.${label}`);
-  console.log('Content object structure:', Object.keys(content));
 
-  if (!content) {
+  // Debug content object structure
+  if (content) {
+    console.log('Content object structure:', Object.keys(content));
+    // Log each section's categories
+    Object.keys(content).forEach(sect => {
+      if (content[sect]) {
+        console.log(`Section '${sect}' categories:`, Object.keys(content[sect]));
+      }
+    });
+  } else {
     console.log('Content object is null or undefined');
     return null;
   }
@@ -103,6 +109,11 @@ export const getContentItem = (content, section, category, label) => {
 
   const items = content[section][category];
   console.log(`Found ${items.length} items in ${section}.${category}`);
+
+  // Log all items in this category for debugging
+  if (items.length > 0) {
+    console.log(`Items in ${section}.${category}:`, items.map(item => item.label));
+  }
 
   const foundItem = items.find(item => item.label === label && item.visible !== false);
 
@@ -126,10 +137,18 @@ export const getContentItem = (content, section, category, label) => {
  */
 export const getContentValue = (content, section, category, label, defaultValue = '') => {
   console.log(`Getting content value for ${section}.${category}.${label}`);
+
+  // Additional validation and logging
+  if (!content) {
+    console.warn('Content object is null or undefined in getContentValue');
+    console.log(`Using default value for ${section}.${category}.${label}:`, defaultValue);
+    return defaultValue;
+  }
+
   const item = getContentItem(content, section, category, label);
 
   if (item) {
-    console.log(`Found item for ${section}.${category}.${label} from database`);
+    console.log(`Found item for ${section}.${category}.${label} from database:`, item.value);
     return item.value;
   } else {
     console.log(`No item found for ${section}.${category}.${label} in database, using default:`, defaultValue);

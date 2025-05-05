@@ -637,8 +637,9 @@ app.get('/notes/patient/:id', addCorsHeaders, (req, res) => {
   protect(req, res, () => getNotesByPatientId(req, res));
 });
 
-// Content routes - Use the router instead of direct controller calls
-app.use('/api/content', require('./routes/contentRoutes'));
+// Content routes - Use the router for both API and non-API paths
+app.use('/api/content', contentRoutes);
+app.use('/content', contentRoutes);
 
 // File upload routes
 app.post('/uploads', addCorsHeaders, (req, res) => {
