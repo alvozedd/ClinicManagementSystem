@@ -88,11 +88,11 @@ function ThreeBackground() {
           // Very slow diagonal movement
           float diagonalTime = time * 0.1; // Slow down the animation even more
 
-          // Create diagonal wave patterns
-          float wave1 = sin(diagonal * 3.0 + diagonalTime * 0.5) * 0.5 + 0.5;
-          float wave2 = sin(diagonal * 2.0 + diagonalTime * 0.3 + 1.5) * 0.5 + 0.5;
-          float wave3 = sin(diagonal * 1.5 + diagonalTime * 0.2 + 3.0) * 0.5 + 0.5;
-          float wave4 = sin(diagonal * 1.0 + diagonalTime * 0.1 + 4.5) * 0.5 + 0.5;
+          // Create diagonal wave patterns with more pronounced diagonal movement
+          float wave1 = sin(diagonal * 2.5 + diagonalTime * 0.4) * 0.5 + 0.5;
+          float wave2 = sin(diagonal * 2.0 + diagonalTime * 0.3 + 2.0) * 0.5 + 0.5;
+          float wave3 = sin(diagonal * 1.5 + diagonalTime * 0.2 + 4.0) * 0.5 + 0.5;
+          float wave4 = sin(diagonal * 1.0 + diagonalTime * 0.1 + 6.0) * 0.5 + 0.5;
 
           // Add subtle random movement
           float randomMovement = random(position + time * 0.005) * 0.05; // Very subtle random movement
@@ -168,8 +168,8 @@ function ThreeBackground() {
     const animate = () => {
       const elapsedTime = clock.getElapsedTime();
 
-      // Update uniforms - use a very slow animation speed
-      material.uniforms.time.value = elapsedTime * 0.3;
+      // Update uniforms - use an extremely slow animation speed
+      material.uniforms.time.value = elapsedTime * 0.15;
 
       // Render
       renderer.render(scene, camera);
