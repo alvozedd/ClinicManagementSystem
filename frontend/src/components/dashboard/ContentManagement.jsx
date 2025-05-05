@@ -38,6 +38,7 @@ const ContentManagement = () => {
     setLoading(true);
     try {
       const data = await apiService.getAllContent();
+      console.log('Content data received:', data);
 
       // Organize content by section
       const organized = {};
@@ -51,6 +52,7 @@ const ContentManagement = () => {
         }
       });
 
+      console.log('Organized content:', organized);
       setContentSections(organized);
       setError(null);
     } catch (err) {
@@ -99,7 +101,9 @@ const ContentManagement = () => {
   const handleAddItem = async (e) => {
     e.preventDefault();
     try {
-      await apiService.createContent(newContentItem);
+      console.log('Creating new content item:', newContentItem);
+      const result = await apiService.createContent(newContentItem);
+      console.log('Content creation result:', result);
       fetchContent();
       setShowAddModal(false);
       setNewContentItem({
@@ -130,12 +134,19 @@ const ContentManagement = () => {
     }
   };
 
-  const openAddModal = () => {
+  const openAddModal = (category = '', label = '') => {
     setNewContentItem({
       ...newContentItem,
-      section: activeSection
+      section: activeSection,
+      category: category || '',
+      label: label || ''
     });
     setShowAddModal(true);
+  };
+
+  // Helper to add common content items
+  const addCommonContentItem = (category, label) => {
+    openAddModal(category, label);
   };
 
   const renderContentItems = () => {
@@ -144,7 +155,106 @@ const ContentManagement = () => {
     if (items.length === 0) {
       return (
         <div className="text-center py-8 text-gray-500">
-          No content items found for this section.
+          <p className="mb-4">No content items found for this section.</p>
+
+          {activeSection === 'homepage' && (
+            <div className="mb-6 p-4 bg-blue-50 rounded-lg">
+              <h3 className="text-blue-800 font-medium mb-2">Common Homepage Content</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <button
+                  onClick={() => addCommonContentItem('Hero', 'Hero Title')}
+                  className="btn btn-outline-primary text-sm"
+                >
+                  Add Hero Title
+                </button>
+                <button
+                  onClick={() => addCommonContentItem('Hero', 'Hero Subtitle')}
+                  className="btn btn-outline-primary text-sm"
+                >
+                  Add Hero Subtitle
+                </button>
+                <button
+                  onClick={() => addCommonContentItem('Hero', 'Hero Description')}
+                  className="btn btn-outline-primary text-sm"
+                >
+                  Add Hero Description
+                </button>
+                <button
+                  onClick={() => addCommonContentItem('About', 'About Text')}
+                  className="btn btn-outline-primary text-sm"
+                >
+                  Add About Text
+                </button>
+              </div>
+            </div>
+          )}
+
+          {activeSection === 'services' && (
+            <div className="mb-6 p-4 bg-blue-50 rounded-lg">
+              <h3 className="text-blue-800 font-medium mb-2">Common Services Content</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <button
+                  onClick={() => addCommonContentItem('Consultations', 'Title')}
+                  className="btn btn-outline-primary text-sm"
+                >
+                  Add Consultations Title
+                </button>
+                <button
+                  onClick={() => addCommonContentItem('Consultations', 'Description')}
+                  className="btn btn-outline-primary text-sm"
+                >
+                  Add Consultations Description
+                </button>
+                <button
+                  onClick={() => addCommonContentItem('Diagnostics', 'Title')}
+                  className="btn btn-outline-primary text-sm"
+                >
+                  Add Diagnostics Title
+                </button>
+                <button
+                  onClick={() => addCommonContentItem('Diagnostics', 'Description')}
+                  className="btn btn-outline-primary text-sm"
+                >
+                  Add Diagnostics Description
+                </button>
+              </div>
+            </div>
+          )}
+
+          {activeSection === 'contact' && (
+            <div className="mb-6 p-4 bg-blue-50 rounded-lg">
+              <h3 className="text-blue-800 font-medium mb-2">Common Contact Content</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <button
+                  onClick={() => addCommonContentItem('Contact Information', 'Mobile')}
+                  className="btn btn-outline-primary text-sm"
+                >
+                  Add Mobile Number
+                </button>
+                <button
+                  onClick={() => addCommonContentItem('Contact Information', 'Office')}
+                  className="btn btn-outline-primary text-sm"
+                >
+                  Add Office Number
+                </button>
+                <button
+                  onClick={() => addCommonContentItem('Contact Information', 'Email')}
+                  className="btn btn-outline-primary text-sm"
+                >
+                  Add Email
+                </button>
+              </div>
+            </div>
+          )}
+
+          <div className="mt-4">
+            <button
+              onClick={() => openAddModal()}
+              className="btn btn-primary"
+            >
+              Add Custom Content Item
+            </button>
+          </div>
         </div>
       );
     }

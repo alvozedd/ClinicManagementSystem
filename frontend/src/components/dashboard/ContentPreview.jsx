@@ -2,10 +2,14 @@ import React from 'react';
 import { FaCalendarAlt, FaPhone, FaEnvelope, FaMapMarkerAlt } from 'react-icons/fa';
 
 const ContentPreview = ({ activeSection, groupedContent }) => {
+  console.log('ContentPreview rendered with section:', activeSection);
+  console.log('ContentPreview groupedContent:', groupedContent);
   // Helper function to get content value from a specific category and label
   const getContentValue = (category, label, defaultValue = '') => {
     const items = groupedContent[category] || [];
+    console.log(`Looking for ${category}/${label} in:`, items);
     const item = items.find(item => item.label === label && item.visible);
+    console.log(`Found item:`, item);
     return item ? item.value : defaultValue;
   };
 
@@ -24,11 +28,11 @@ const ContentPreview = ({ activeSection, groupedContent }) => {
             {getContentValue('Hero', 'Hero Description', '20+ years of specialized medical excellence')}
           </p>
           <div className="mt-4 flex justify-center gap-4">
-            <button className="bg-blue-600 text-white px-4 py-2 rounded-lg">Book Appointment</button>
-            <button className="border border-blue-400 text-blue-300 px-4 py-2 rounded-lg">Call Us</button>
+            <button className="bg-white text-black px-4 py-2 rounded-lg">Book Appointment</button>
+            <button className="border border-blue-400 text-white px-4 py-2 rounded-lg">Call Us</button>
           </div>
         </div>
-        
+
         <div className="preview-services mb-8">
           <h3 className="text-xl font-bold text-center mb-4 text-blue-800">Our Services</h3>
           <p className="text-center mb-6 text-gray-600">
@@ -58,7 +62,7 @@ const ContentPreview = ({ activeSection, groupedContent }) => {
     return (
       <div className="preview-container bg-gray-100 rounded-lg p-6 shadow-inner">
         <h2 className="text-2xl font-bold text-center mb-6 text-blue-800">Our Services</h2>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {['Consultations', 'Diagnostics', 'Treatments'].map((service) => (
             <div key={service} className="bg-white p-6 rounded-lg shadow-md">
@@ -86,11 +90,11 @@ const ContentPreview = ({ activeSection, groupedContent }) => {
     return (
       <div className="preview-container bg-gray-100 rounded-lg p-6 shadow-inner">
         <h2 className="text-2xl font-bold text-center mb-6 text-blue-800">Contact Us</h2>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="bg-white p-6 rounded-lg shadow-md">
             <h3 className="text-xl font-bold mb-4 text-blue-700">Get In Touch</h3>
-            
+
             <div className="space-y-4">
               <div className="flex items-start">
                 <div className="bg-blue-100 p-2 rounded-lg text-blue-600 mr-3">
@@ -101,7 +105,7 @@ const ContentPreview = ({ activeSection, groupedContent }) => {
                   <p className="text-gray-700">{getContentValue('Contact', 'Phone', '+254 722 396296')}</p>
                 </div>
               </div>
-              
+
               <div className="flex items-start">
                 <div className="bg-blue-100 p-2 rounded-lg text-blue-600 mr-3">
                   <FaEnvelope size={16} />
@@ -111,7 +115,7 @@ const ContentPreview = ({ activeSection, groupedContent }) => {
                   <p className="text-gray-700">{getContentValue('Contact', 'Email', 'info@urohealth.com')}</p>
                 </div>
               </div>
-              
+
               <div className="flex items-start">
                 <div className="bg-blue-100 p-2 rounded-lg text-blue-600 mr-3">
                   <FaMapMarkerAlt size={16} />
@@ -123,7 +127,7 @@ const ContentPreview = ({ activeSection, groupedContent }) => {
               </div>
             </div>
           </div>
-          
+
           <div className="bg-gray-200 p-2 rounded-lg shadow-inner flex items-center justify-center">
             <div className="text-center text-gray-500">
               <FaMapMarkerAlt size={32} className="mx-auto mb-2" />
@@ -148,7 +152,7 @@ const ContentPreview = ({ activeSection, groupedContent }) => {
               {getContentValue('UroHealth Central Ltd', 'About Text', 'Providing specialized urological care with a patient-centered approach since 2010.')}
             </p>
           </div>
-          
+
           <div>
             <h3 className="text-lg font-bold mb-4">Contact Information</h3>
             <div className="space-y-3">
@@ -167,7 +171,7 @@ const ContentPreview = ({ activeSection, groupedContent }) => {
             </div>
           </div>
         </div>
-        
+
         <div className="mt-6 pt-4 border-t border-gray-700">
           <p className="text-gray-400 text-sm">
             {getContentValue('Legal', 'Copyright', `© ${new Date().getFullYear()} UroHealth Central Ltd. All rights reserved.`)}
@@ -186,12 +190,14 @@ const ContentPreview = ({ activeSection, groupedContent }) => {
             <h3 className="text-xl font-bold">
               <span className="text-blue-400">Uro</span>
               <span className="text-white">Health</span>
+              <span className="text-white"> Central Ltd</span>
             </h3>
           </div>
-          
+
           <div className="flex space-x-6">
             <span className="text-gray-300 hover:text-white cursor-pointer">Services</span>
             <span className="text-gray-300 hover:text-white cursor-pointer">Contact</span>
+            <span className="text-gray-300 hover:text-white cursor-pointer">Location</span>
             <span className="text-gray-300 hover:text-white cursor-pointer">Login</span>
           </div>
         </div>
