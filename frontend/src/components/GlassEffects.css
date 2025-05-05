@@ -1,19 +1,21 @@
-/* Frosted Glass Effects */
+/* Frosted Glass Effects - Enhanced for Three.js */
 
 .glass-card {
-  background: rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);
   border: 1px solid rgba(255, 255, 255, 0.18);
   box-shadow: 0 4px 6px 0 rgba(31, 38, 135, 0.05);
+  transition: all 0.3s ease;
 }
 
 .glass-card-blue {
-  background: rgba(219, 234, 254, 0.7); /* Lighter blue */
+  background: rgba(219, 234, 254, 0.5); /* Lighter blue, more transparent */
   backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);
   border: 1px solid rgba(96, 165, 250, 0.18);
   box-shadow: 0 2px 4px 0 rgba(31, 38, 135, 0.05);
+  transition: all 0.3s ease;
 }
 
 .glass-card-green {
@@ -40,9 +42,9 @@
   box-shadow: 0 2px 4px 0 rgba(239, 68, 68, 0.05);
 }
 
-/* True Glass Morphism Effect */
+/* True Glass Morphism Effect - Enhanced for Three.js */
 .true-glass-card {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -121,6 +123,63 @@
   z-index: 1;
   opacity: 0;
   transition: opacity 0.3s ease;
+}
+
+/* Glass Card Service - For service cards with Three.js background */
+.glass-card-service {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7)) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(219, 234, 254, 0.4) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1),
+              0 1px 8px rgba(0, 0, 0, 0.05),
+              0 0 0 1px rgba(255, 255, 255, 0.2) inset !important;
+  transition: all 0.4s ease !important;
+}
+
+.glass-card-service:hover {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.85)) !important;
+  transform: translateY(-5px) !important;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12),
+              0 5px 15px rgba(0, 0, 0, 0.07),
+              0 0 0 1px rgba(255, 255, 255, 0.3) inset !important;
+}
+
+.glass-card-service::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 1rem;
+  padding: 2px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.4), rgba(255,255,255,0));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.glass-card-service:hover::before {
+  opacity: 1;
+}
+
+/* Book Now Button - Simple high contrast */
+.book-now-button {
+  text-shadow: none;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  color: black !important;
+}
+
+/* Call Us Button - Simple high contrast */
+.call-us-button {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  color: white !important;
 }
 
 /* Enhanced Footer Pattern */

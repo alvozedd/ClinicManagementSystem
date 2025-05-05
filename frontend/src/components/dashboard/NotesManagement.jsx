@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from 'react';
-import { FaFileMedical, FaSearch, FaEdit, FaTrash, FaDownload, FaUpload, FaFilter, FaPills, FaFile, FaEye, FaSignOutAlt } from 'react-icons/fa';
+import { FaFileMedical, FaSearch, FaEdit, FaTrash, FaDownload, FaUpload, FaFilter, FaPills, FaFile, FaEye, FaSignOutAlt, FaNotesMedical, FaPrescriptionBottleAlt, FaCalendarCheck, FaFilePdf } from 'react-icons/fa';
 import AuthContext from '../../context/AuthContext';
 import apiService from '../../utils/apiService';
 import PDFViewer from '../common/PDFViewer';
@@ -520,10 +520,10 @@ const NotesManagement = () => {
     }
 
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-4">
         {sortedNotes.map(note => (
           <div key={note._id} className="dashboard-card p-4">
-            <div className="flex items-start justify-between">
+            <div className="flex items-start justify-between mb-3">
               <div>
                 <h3 className="font-semibold text-gray-800 dark:text-white">
                   {note.appointment_id && getPatientName(note.appointment_id)}
@@ -545,55 +545,108 @@ const NotesManagement = () => {
                 </button>
               </div>
             </div>
-            <div className="mt-3">
-              <p className="text-sm text-gray-600 dark:text-white line-clamp-3">
-                {note.diagnosis_text}
-              </p>
-            </div>
-            {note.medications && note.medications.length > 0 && (
-              <div className="mt-2">
-                <p className="text-xs font-medium text-gray-700 dark:text-white">Medications:</p>
-                <div className="flex flex-wrap gap-1 mt-1">
-                  {note.medications.map((med, index) => (
-                    <span key={index} className="badge badge-blue text-xs dark:bg-blue-700 dark:text-white">
-                      {med.name}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
 
-            {/* Display attached files */}
-            {note.files && note.files.length > 0 && (
-              <div className="mt-3 border-t pt-2 border-gray-200 dark:border-gray-700">
-                <p className="text-xs font-medium text-gray-700 dark:text-white mb-1">Attachments:</p>
-                <div className="flex flex-wrap gap-2">
-                  {note.files.map((file, index) => (
-                    <div key={index} className="flex items-center space-x-2">
-                      <button
-                        onClick={() => setViewingPDF({
-                          url: `${import.meta.env.VITE_API_URL}/uploads/${file.filename}`,
-                          name: file.originalname || file.filename
-                        })}
-                        className="flex items-center text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
-                        title="View PDF"
-                      >
-                        <FaEye className="mr-1" />
-                        {file.originalname || file.filename}
-                      </button>
-                      <a
-                        href={`${import.meta.env.VITE_API_URL}/uploads/${file.filename}`}
-                        download
-                        className="text-xs text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
-                        title="Download"
-                      >
-                        <FaDownload />
-                      </a>
-                    </div>
-                  ))}
+            {/* Enhanced note content display */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              {/* Diagnosis/Notes Section */}
+              <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
+                <div className="flex items-center mb-2 text-blue-600 dark:text-blue-400">
+                  <FaNotesMedical className="mr-2" />
+                  <h4 className="font-medium">Diagnosis/Notes</h4>
                 </div>
+                <p className="text-gray-700 dark:text-gray-300 text-sm whitespace-pre-line">
+                  {note.diagnosis_text}
+                </p>
               </div>
-            )}
+
+              {/* Treatment Plan Section - Always show */}
+              <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
+                <div className="flex items-center mb-2 text-green-600 dark:text-green-400">
+                  <FaPrescriptionBottleAlt className="mr-2" />
+                  <h4 className="font-medium">Treatment Plan</h4>
+                </div>
+                <p className="text-gray-700 dark:text-gray-300 text-sm whitespace-pre-line">
+                  {note.treatment_plan || 'No treatment plan specified'}
+                </p>
+              </div>
+
+              {/* Follow-up Section - Always show */}
+              <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
+                <div className="flex items-center mb-2 text-purple-600 dark:text-purple-400">
+                  <FaCalendarCheck className="mr-2" />
+                  <h4 className="font-medium">Follow-up</h4>
+                </div>
+                <p className="text-gray-700 dark:text-gray-300 text-sm whitespace-pre-line">
+                  {note.follow_up_instructions || 'No follow-up instructions specified'}
+                </p>
+              </div>
+
+              {/* Medications Section - Always show */}
+              <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
+                <div className="flex items-center mb-2 text-yellow-600 dark:text-yellow-400">
+                  <FaPrescriptionBottleAlt className="mr-2" />
+                  <h4 className="font-medium">Medications</h4>
+                </div>
+                {note.medications && note.medications.length > 0 ? (
+                  <ul className="list-disc pl-5 text-gray-700 dark:text-gray-300 text-sm">
+                    {note.medications.map((med, idx) => (
+                      <li key={idx}>
+                        <strong>{med.name}</strong>
+                        {med.dosage && ` - ${med.dosage}`}
+                        {med.frequency && `, ${med.frequency}`}
+                        {med.duration && `, ${med.duration}`}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-gray-700 dark:text-gray-300 text-sm">No medications prescribed</p>
+                )}
+              </div>
+
+              {/* Files/Attachments Section - Only show if it exists */}
+              {note.files && note.files.length > 0 && (
+                <div className="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg">
+                  <div className="flex items-center mb-2 text-red-600 dark:text-red-400">
+                    <FaFilePdf className="mr-2" />
+                    <h4 className="font-medium">Files</h4>
+                  </div>
+                  <ul className="text-gray-700 dark:text-gray-300 text-sm">
+                    {note.files.map((file, idx) => (
+                      <li key={idx} className="mb-1 flex items-center justify-between">
+                        <div className="flex items-center">
+                          <FaFileMedical className="mr-1 text-blue-500" />
+                          <span>{file.originalname || file.filename}</span>
+                        </div>
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={() => setViewingPDF({
+                              url: `${import.meta.env.VITE_API_URL}/uploads/${file.filename}`,
+                              name: file.originalname || file.filename
+                            })}
+                            className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                            title="View PDF"
+                          >
+                            <FaEye />
+                          </button>
+                          <a
+                            href={`${import.meta.env.VITE_API_URL}/uploads/${file.filename}`}
+                            download
+                            className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
+                            title="Download"
+                          >
+                            <FaDownload />
+                          </a>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+
+            <div className="border-t border-gray-200 dark:border-gray-700 pt-2 mt-2 text-xs text-gray-500 dark:text-gray-400">
+              <p>Appointment Date: {note.appointment_id && new Date(note.appointment_id.appointment_date).toLocaleDateString()}</p>
+            </div>
           </div>
         ))}
       </div>

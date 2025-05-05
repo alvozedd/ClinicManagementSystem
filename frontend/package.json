@@ -5,16 +5,13 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev3d": "vite --config vite.config.3d.js",
+    "dev-test": "vite --config vite.config.test.js",
     "build": "vite build",
-    "build3d": "vite build --config vite.config.3d.js",
     "lint": "eslint .",
     "preview": "vite preview",
     "clean": "rm -rf node_modules && rm -f package-lock.json && npm install"
   },
   "dependencies": {
-    "@react-three/drei": "^10.0.7",
-    "@react-three/fiber": "^9.1.2",
     "@reduxjs/toolkit": "^2.7.0",
     "axios": "^1.9.0",
     "date-fns": "^4.1.0",

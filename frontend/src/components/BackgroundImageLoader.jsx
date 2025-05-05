@@ -1,24 +1,7 @@
 import { useState, useEffect } from 'react';
 import apiService from '../utils/apiService';
 
-function BackgroundImageLoader({ useWaveEffect = false }) {
-  // If wave effect is active, don't load background image
-  if (useWaveEffect) {
-    // Remove any existing background image
-    useEffect(() => {
-      document.documentElement.style.setProperty('--dynamic-background-image', 'none');
-      document.documentElement.style.setProperty('--mobile-background-image', 'none');
-
-      // Add a class to the body to indicate wave effect is active
-      document.body.classList.add('wave-effect-active');
-
-      return () => {
-        document.body.classList.remove('wave-effect-active');
-      };
-    }, []);
-
-    return null;
-  }
+function BackgroundImageLoader() {
 
   const [backgroundImage, setBackgroundImage] = useState('/backgroundimg/Theone.jpeg');
   // Use the same image for all devices to avoid white space issues

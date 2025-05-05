@@ -61,11 +61,11 @@ const CalendarManagement = ({ role }) => {
   // Get patient name from patient ID
   const getPatientName = (patientId) => {
     if (!patientId) return 'Unknown Patient';
-    
+
     if (typeof patientId === 'object' && patientId.name) {
       return patientId.name;
     }
-    
+
     const patient = patients.find(p => p._id === patientId);
     return patient ? patient.name : 'Unknown Patient';
   };
@@ -106,28 +106,28 @@ const CalendarManagement = ({ role }) => {
 
     const statusStyles = {
       Scheduled: {
-        container: 'bg-green-100',
-        badge: 'bg-green-200 text-green-800'
+        container: 'bg-green-200', // Darker green for better contrast
+        badge: 'bg-green-300 text-green-900 font-semibold' // Darker text and background
       },
       Completed: {
-        container: 'bg-blue-100',
-        badge: 'bg-blue-200 text-blue-800'
+        container: 'bg-blue-200', // Darker blue for better contrast
+        badge: 'bg-blue-300 text-blue-900 font-semibold' // Darker text and background
       },
       Cancelled: {
-        container: 'bg-red-100',
-        badge: 'bg-red-200 text-red-800'
+        container: 'bg-red-200', // Darker red for better contrast
+        badge: 'bg-red-300 text-red-900 font-semibold' // Darker text and background
       },
       'In-progress': {
-        container: 'bg-yellow-100',
-        badge: 'bg-yellow-200 text-yellow-800'
+        container: 'bg-yellow-200', // Darker yellow for better contrast
+        badge: 'bg-yellow-300 text-yellow-900 font-semibold' // Darker text and background
       },
       'No-show': {
-        container: 'bg-gray-100',
-        badge: 'bg-gray-200 text-gray-800'
+        container: 'bg-gray-200', // Darker gray for better contrast
+        badge: 'bg-gray-300 text-gray-900 font-semibold' // Darker text and background
       },
       Rescheduled: {
-        container: 'bg-purple-100',
-        badge: 'bg-purple-200 text-purple-800'
+        container: 'bg-purple-200', // Darker purple for better contrast
+        badge: 'bg-purple-300 text-purple-900 font-semibold' // Darker text and background
       }
     };
 
@@ -139,10 +139,10 @@ const CalendarManagement = ({ role }) => {
     return (
       <div
         className={`p-2 rounded ${style.container} ${isVisitorCreated ? 'border-l-2 border-amber-500' : ''}`}
-        style={{ overflow: 'visible' }}
+        style={{ overflow: 'visible', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }}
       >
-        <div className="font-medium text-sm text-black">{getPatientName(appointment.patient_id)}</div>
-        <div className="text-sm text-black">{appointment.reason || appointment.type || 'Consultation'}</div>
+        <div className="font-semibold text-sm text-black">{getPatientName(appointment.patient_id)}</div>
+        <div className="text-sm text-black font-medium">{appointment.reason || appointment.type || 'Consultation'}</div>
         <div className="flex justify-between items-center mt-1">
           <span className={`text-xs px-1 py-0.5 rounded-full ${style.badge}`}>
             {status}
@@ -167,7 +167,7 @@ const CalendarManagement = ({ role }) => {
   const handleSelectEvent = (event) => {
     const appointment = event.resource;
     if (!appointment) return;
-    
+
     setSelectedAppointment(appointment);
     setShowEditModal(true);
   };
@@ -175,7 +175,7 @@ const CalendarManagement = ({ role }) => {
   // Handle selecting a slot (empty time) on the calendar
   const handleSelectSlot = ({ start }) => {
     const formattedDate = start.toISOString().split('T')[0];
-    
+
     // Create a new appointment
     setSelectedAppointment({
       _id: null,
@@ -186,7 +186,7 @@ const CalendarManagement = ({ role }) => {
       type: 'Consultation',
       reason: ''
     });
-    
+
     setShowAddModal(true);
   };
 

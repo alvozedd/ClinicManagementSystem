@@ -181,13 +181,14 @@ function DoctorCalendarView({ appointments, onDiagnoseAppointment, onViewPatient
           eventPropGetter={(event) => ({
             className: 'calendar-event',
             style: {
-              backgroundColor: event.resource?.status === 'Completed' ? '#DBEAFE' : // lighter blue
-                             event.resource?.status === 'Scheduled' ? '#D1FAE5' : // lighter green
-                             event.resource?.status === 'Cancelled' ? '#FEE2E2' : // lighter red
-                             event.resource?.status === 'Pending' ? '#FEF3C7' : // lighter amber
-                             event.resource?.status === 'Rescheduled' ? '#EDE9FE' : // lighter purple
-                             '#F3F4F6', // lighter gray
-              color: '#000000' // ensure text is black for contrast
+              backgroundColor: event.resource?.status === 'Completed' ? '#93c5fd' : // darker blue for better contrast
+                             event.resource?.status === 'Scheduled' ? '#6ee7b7' : // darker green for better contrast
+                             event.resource?.status === 'Cancelled' ? '#fca5a5' : // darker red for better contrast
+                             event.resource?.status === 'Pending' ? '#fcd34d' : // darker amber for better contrast
+                             event.resource?.status === 'Rescheduled' ? '#c4b5fd' : // darker purple for better contrast
+                             '#d1d5db', // darker gray for better contrast
+              color: '#000000', // ensure text is black for contrast
+              fontWeight: '600' // bolder text for better readability
             }
           })}
         />

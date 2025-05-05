@@ -924,7 +924,7 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
           </div>
         </div>
       ) : activeTab === 'diagnoses' && userRole === 'doctor' ? (
-        <div className="p-1">
+        <div className="p-1 bg-white rounded-lg shadow-sm">
           <PatientDiagnosesTab
             patient={patient}
             appointments={appointments}
@@ -934,7 +934,7 @@ function SimplifiedPatientView({ patient, appointments, onClose, onUpdatePatient
           />
         </div>
       ) : activeTab === 'appointments' ? (
-        <div className="p-3">
+        <div className="p-3 bg-white rounded-lg shadow-sm">
           {/* Appointments List */}
           <div>
             <div className="flex justify-between items-center mb-3">

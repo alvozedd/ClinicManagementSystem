@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { FaEdit, FaSave, FaTimes, FaPlus, FaTrash } from 'react-icons/fa';
+import { FaEdit, FaSave, FaTimes, FaPlus, FaTrash, FaDesktop, FaEye, FaEyeSlash } from 'react-icons/fa';
 import apiService from '../../utils/apiService';
+import ContentPreview from './ContentPreview';
 import './DashboardStyles.css';
 
 const ContentManagement = () => {
@@ -37,19 +38,19 @@ const ContentManagement = () => {
     setLoading(true);
     try {
       const data = await apiService.getAllContent();
-      
+
       // Organize content by section
       const organized = {};
       sections.forEach(section => {
         organized[section.id] = [];
       });
-      
+
       data.forEach(item => {
         if (organized[item.section]) {
           organized[item.section].push(item);
         }
       });
-      
+
       setContentSections(organized);
       setError(null);
     } catch (err) {
@@ -139,7 +140,7 @@ const ContentManagement = () => {
 
   const renderContentItems = () => {
     const items = contentSections[activeSection] || [];
-    
+
     if (items.length === 0) {
       return (
         <div className="text-center py-8 text-gray-500">
@@ -177,7 +178,7 @@ const ContentManagement = () => {
                           className="form-input"
                         />
                       </div>
-                      
+
                       {editingItem.type === 'text' && (
                         <div className="form-group">
                           <label className="form-label">Value</label>
@@ -190,7 +191,7 @@ const ContentManagement = () => {
                           />
                         </div>
                       )}
-                      
+
                       {editingItem.type === 'longtext' && (
                         <div className="form-group">
                           <label className="form-label">Value</label>
@@ -203,7 +204,7 @@ const ContentManagement = () => {
                           ></textarea>
                         </div>
                       )}
-                      
+
                       {editingItem.type === 'link' && (
                         <div className="form-group">
                           <label className="form-label">URL</label>
@@ -216,7 +217,7 @@ const ContentManagement = () => {
                           />
                         </div>
                       )}
-                      
+
                       <div className="form-group">
                         <label className="form-label flex items-center">
                           <input
@@ -229,7 +230,7 @@ const ContentManagement = () => {
                           Visible
                         </label>
                       </div>
-                      
+
                       <div className="flex justify-end space-x-2">
                         <button
                           onClick={handleCancelEdit}
@@ -301,7 +302,7 @@ const ContentManagement = () => {
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
           <h2 className="text-xl font-bold mb-4">Add New Content Item</h2>
-          
+
           <form onSubmit={handleAddItem}>
             <div className="form-group">
               <label className="form-label">Section</label>
@@ -317,7 +318,7 @@ const ContentManagement = () => {
                 ))}
               </select>
             </div>
-            
+
             <div className="form-group">
               <label className="form-label">Category</label>
               <input
@@ -330,7 +331,7 @@ const ContentManagement = () => {
                 placeholder="e.g., Hero, About, Services"
               />
             </div>
-            
+
             <div className="form-group">
               <label className="form-label">Type</label>
               <select
@@ -347,7 +348,7 @@ const ContentManagement = () => {
                 <option value="html">HTML</option>
               </select>
             </div>
-            
+
             <div className="form-group">
               <label className="form-label">Label</label>
               <input
@@ -360,7 +361,7 @@ const ContentManagement = () => {
                 placeholder="e.g., Hero Title, About Text"
               />
             </div>
-            
+
             {newContentItem.type !== 'link' && (
               <div className="form-group">
                 <label className="form-label">Value</label>
@@ -385,7 +386,7 @@ const ContentManagement = () => {
                 )}
               </div>
             )}
-            
+
             {newContentItem.type === 'link' && (
               <div className="form-group">
                 <label className="form-label">URL</label>
@@ -399,7 +400,7 @@ const ContentManagement = () => {
                 />
               </div>
             )}
-            
+
             <div className="form-group">
               <label className="form-label">Order</label>
               <input
@@ -411,7 +412,7 @@ const ContentManagement = () => {
                 required
               />
             </div>
-            
+
             <div className="form-group">
               <label className="form-label flex items-center">
                 <input
@@ -424,7 +425,7 @@ const ContentManagement = () => {
                 Visible
               </label>
             </div>
-            
+
             <div className="flex justify-end mt-6">
               <button
                 type="button"
@@ -446,17 +447,44 @@ const ContentManagement = () => {
     );
   };
 
+  // Group content items by category for the current section
+  const getGroupedContent = () => {
+    const items = contentSections[activeSection] || [];
+    const groupedItems = {};
+
+    items.forEach(item => {
+      if (!groupedItems[item.category]) {
+        groupedItems[item.category] = [];
+      }
+      groupedItems[item.category].push(item);
+    });
+
+    return groupedItems;
+  };
+
+  const [showPreview, setShowPreview] = useState(false);
+
   return (
     <div className="content-management">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-800">Content Management</h1>
-        <button 
-          onClick={openAddModal}
-          className="btn btn-primary flex items-center"
-        >
-          <FaPlus className="mr-2" />
-          Add Content
-        </button>
+        <div className="flex space-x-2">
+          <button
+            onClick={() => setShowPreview(!showPreview)}
+            className="btn btn-secondary flex items-center"
+            title={showPreview ? "Hide Preview" : "Show Preview"}
+          >
+            <FaDesktop className="mr-2" />
+            {showPreview ? "Hide Preview" : "Show Preview"}
+          </button>
+          <button
+            onClick={openAddModal}
+            className="btn btn-primary flex items-center"
+          >
+            <FaPlus className="mr-2" />
+            Add Content
+          </button>
+        </div>
       </div>
 
       {error && (
@@ -479,13 +507,28 @@ const ContentManagement = () => {
         </div>
       </div>
 
-      {loading ? (
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Content Editor */}
+        <div className={showPreview ? "" : "lg:col-span-2"}>
+          {loading ? (
+            <div className="flex justify-center items-center h-64">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+            </div>
+          ) : (
+            renderContentItems()
+          )}
         </div>
-      ) : (
-        renderContentItems()
-      )}
+
+        {/* Content Preview */}
+        {showPreview && (
+          <div className="sticky top-4">
+            <ContentPreview
+              activeSection={activeSection}
+              groupedContent={getGroupedContent()}
+            />
+          </div>
+        )}
+      </div>
 
       {showAddModal && renderAddModal()}
     </div>
