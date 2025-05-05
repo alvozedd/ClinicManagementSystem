@@ -1971,6 +1971,73 @@ const apiService = {
     }
   },
 
+  // Content Management for Admin
+  getAllContent: async () => {
+    try {
+      if (DEBUG) console.log('Fetching all content for admin');
+      return await apiService.getContent();
+    } catch (error) {
+      if (DEBUG) console.error('Error fetching all content:', error);
+      return [];
+    }
+  },
+
+  createContent: async (contentData) => {
+    try {
+      if (DEBUG) console.log('Creating content item:', contentData);
+
+      return await secureFetch(`${API_URL}/content`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeader(),
+        },
+        body: JSON.stringify(contentData),
+        credentials: 'include'
+      });
+    } catch (error) {
+      if (DEBUG) console.error('Error creating content:', error);
+      throw error;
+    }
+  },
+
+  updateContent: async (id, contentData) => {
+    try {
+      if (DEBUG) console.log('Updating content item:', id, contentData);
+
+      return await secureFetch(`${API_URL}/content/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeader(),
+        },
+        body: JSON.stringify(contentData),
+        credentials: 'include'
+      });
+    } catch (error) {
+      if (DEBUG) console.error('Error updating content:', error);
+      throw error;
+    }
+  },
+
+  deleteContent: async (id) => {
+    try {
+      if (DEBUG) console.log('Deleting content item:', id);
+
+      return await secureFetch(`${API_URL}/content/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeader(),
+        },
+        credentials: 'include'
+      });
+    } catch (error) {
+      if (DEBUG) console.error('Error deleting content:', error);
+      throw error;
+    }
+  },
+
   // File upload for notes
   uploadFile: async (formData) => {
     try {

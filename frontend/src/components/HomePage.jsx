@@ -210,9 +210,9 @@ function HomePage() {
 
   return (
     <>
-      {/* Three.js Background */}
+      {/* Three.js Background with improved visibility */}
       {threeEnabled && (
-        <div className="canvas-container">
+        <div className="canvas-container" style={{ zIndex: 0 }}>
           <ThreeBackground />
         </div>
       )}
@@ -221,6 +221,11 @@ function HomePage() {
       {!threeEnabled && (
         <div className="fixed inset-0 z-0" style={{ backgroundColor: '#000830' }}></div>
       )}
+
+      {/* Debug info - remove in production */}
+      <div className="fixed bottom-0 right-0 bg-black bg-opacity-50 text-white p-2 text-xs z-50">
+        Three.js: {threeEnabled ? 'Enabled' : 'Disabled'}
+      </div>
 
       <PageLoader>
         <div className="content-overlay" style={{

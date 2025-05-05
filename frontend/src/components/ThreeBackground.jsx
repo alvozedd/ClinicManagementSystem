@@ -1,5 +1,6 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import * as THREE from 'three';
+import '../styles/ThreeStyles.css';
 
 function ThreeBackground() {
   const mountRef = useRef(null);
@@ -125,7 +126,24 @@ function ThreeBackground() {
     };
   }, []);
 
-  return <div ref={mountRef} className="absolute inset-0 z-0" style={{ backgroundColor: '#000830' }} />;
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    // Set loaded state after component mounts
+    setIsLoaded(true);
+    console.log('ThreeBackground component mounted');
+  }, []);
+
+  return (
+    <div
+      ref={mountRef}
+      className={`absolute inset-0 z-0 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
+      style={{
+        backgroundColor: '#000830',
+        transition: 'opacity 0.5s ease-in-out'
+      }}
+    />
+  );
 }
 
 export default ThreeBackground;

@@ -6,8 +6,9 @@
   left: 0;
   width: 100%;
   height: 100vh;
-  z-index: -1;
+  z-index: 0; /* Changed from -1 to 0 to ensure visibility */
   overflow: hidden;
+  pointer-events: none; /* Allow clicks to pass through */
 }
 
 /* Ensure canvas is full screen */
