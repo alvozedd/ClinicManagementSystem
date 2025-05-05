@@ -23,26 +23,25 @@ export const loadContent = async (section = null) => {
         console.log('Successfully loaded content from API, items count:', contentData.length);
         apiSuccess = true;
       } else {
-        console.warn('API returned empty or invalid content data, will use fallback');
+        console.warn('API returned empty or invalid content data');
       }
     } catch (apiError) {
-      console.error('Error fetching content from API, will use fallback:', apiError);
+      console.error('Error fetching content from API:', apiError);
     }
-
-    // Create a base content structure with all sections
-    const organizedContent = {
-      header: {},
-      footer: {},
-      homepage: {},
-      services: {},
-      contact: {}
-    };
 
     // If API call succeeded and returned valid data, organize it
     if (apiSuccess) {
       console.log('Organizing content data from API');
 
-      // Add API content to the organized structure
+      // Organize content by section and category
+      const organizedContent = {
+        header: {},
+        footer: {},
+        homepage: {},
+        services: {},
+        contact: {}
+      };
+
       contentData.forEach(item => {
         if (!organizedContent[item.section]) {
           organizedContent[item.section] = {};
@@ -57,46 +56,19 @@ export const loadContent = async (section = null) => {
 
       console.log('Successfully organized content from API');
       console.log('Organized content sections:', Object.keys(organizedContent));
+      return organizedContent;
+    } else {
+      // If API call failed or returned empty data, use default content
+      console.warn('Using default content as fallback');
+      const fallbackContent = section ? { [section]: defaultContent[section] } : defaultContent;
+      console.log('Fallback content sections:', Object.keys(fallbackContent));
+      return fallbackContent;
     }
-
-    // Always merge with default content to ensure we have fallbacks for everything
-    console.log('Merging with default content for complete data set');
-
-    // Merge with default content
-    Object.keys(defaultContent).forEach(section => {
-      if (!organizedContent[section]) {
-        organizedContent[section] = {};
-      }
-
-      Object.keys(defaultContent[section]).forEach(category => {
-        if (!organizedContent[section][category]) {
-          organizedContent[section][category] = [...defaultContent[section][category]];
-        } else {
-          // Check if we're missing any items from default content
-          const existingLabels = organizedContent[section][category].map(item => item.label);
-
-          defaultContent[section][category].forEach(defaultItem => {
-            if (!existingLabels.includes(defaultItem.label)) {
-              organizedContent[section][category].push(defaultItem);
-            }
-          });
-        }
-      });
-    });
-
-    // If a specific section was requested, return only that section
-    if (section) {
-      console.log(`Returning only requested section: ${section}`);
-      return { [section]: organizedContent[section] || defaultContent[section] || {} };
-    }
-
-    console.log('Returning complete content with fallbacks');
-    return organizedContent;
   } catch (error) {
     // If any unexpected error occurs, use default content
     console.error('Unexpected error in loadContent, using default content:', error);
-    console.log('Returning complete default content');
-    return section ? { [section]: defaultContent[section] || {} } : defaultContent;
+    const fallbackContent = section ? { [section]: defaultContent[section] } : defaultContent;
+    return fallbackContent;
   }
 };
 
@@ -109,42 +81,47 @@ export const loadContent = async (section = null) => {
  * @returns {Object|null} - The content item or null if not found
  */
 export const getContentItem = (content, section, category, label) => {
-  // Reduce logging to avoid console spam
-  // console.log(`Looking for content item: ${section}.${category}.${label}`);
+  console.log(`Looking for content item: ${section}.${category}.${label}`);
 
-  // Handle missing content object
-  if (!content) {
-    console.warn('Content object is null or undefined in getContentItem');
+  // Debug content object structure
+  if (content) {
+    console.log('Content object structure:', Object.keys(content));
+    // Log each section's categories
+    Object.keys(content).forEach(sect => {
+      if (content[sect]) {
+        console.log(`Section '${sect}' categories:`, Object.keys(content[sect]));
+      }
+    });
+  } else {
+    console.log('Content object is null or undefined');
     return null;
   }
 
-  // Handle missing section
   if (!content[section]) {
-    // console.warn(`Section '${section}' not found in content`);
+    console.log(`Section '${section}' not found in content`);
     return null;
   }
 
-  // Handle missing category
   if (!content[section][category]) {
-    // console.warn(`Category '${category}' not found in section '${section}'`);
+    console.log(`Category '${category}' not found in section '${section}'`);
     return null;
   }
 
   const items = content[section][category];
+  console.log(`Found ${items.length} items in ${section}.${category}`);
 
-  // Handle empty items array
-  if (!items || !Array.isArray(items) || items.length === 0) {
-    // console.warn(`No items found in ${section}.${category}`);
-    return null;
+  // Log all items in this category for debugging
+  if (items.length > 0) {
+    console.log(`Items in ${section}.${category}:`, items.map(item => item.label));
   }
 
-  // Find the item with matching label that is not explicitly hidden
   const foundItem = items.find(item => item.label === label && item.visible !== false);
 
-  // Only log on success to reduce console spam
-  // if (foundItem) {
-  //   console.log(`Found matching item for ${section}.${category}.${label}`);
-  // }
+  if (foundItem) {
+    console.log(`Found matching item for ${section}.${category}.${label}:`, foundItem);
+  } else {
+    console.log(`No matching item found for ${section}.${category}.${label}`);
+  }
 
   return foundItem || null;
 };
@@ -159,36 +136,22 @@ export const getContentItem = (content, section, category, label) => {
  * @returns {string} - The content value or default value
  */
 export const getContentValue = (content, section, category, label, defaultValue = '') => {
-  // Reduce logging to avoid console spam
   console.log(`Getting content value for ${section}.${category}.${label}`);
 
-  // Handle missing content object
+  // Additional validation and logging
   if (!content) {
     console.warn('Content object is null or undefined in getContentValue');
     console.log(`Using default value for ${section}.${category}.${label}:`, defaultValue);
     return defaultValue;
   }
 
-  // Handle missing section
-  if (!content[section]) {
-    console.warn(`Section '${section}' not found in content, using default value`);
-    return defaultValue;
-  }
-
-  // Handle missing category
-  if (!content[section][category]) {
-    console.warn(`Category '${category}' not found in section '${section}', using default value`);
-    return defaultValue;
-  }
-
-  // Try to find the item
   const item = getContentItem(content, section, category, label);
 
-  if (item && item.value) {
-    // Only log on success to reduce console spam
+  if (item) {
+    console.log(`Found item for ${section}.${category}.${label} from database:`, item.value);
     return item.value;
   } else {
-    console.log(`No item found for ${section}.${category}.${label}, using default:`, defaultValue);
+    console.log(`No item found for ${section}.${category}.${label} in database, using default:`, defaultValue);
     return defaultValue;
   }
 };

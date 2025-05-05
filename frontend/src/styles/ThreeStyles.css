@@ -8,7 +8,7 @@
   bottom: 0;
   width: 100vw;
   height: 100vh;
-  z-index: -1; /* Set to -1 to ensure it's behind content but still visible */
+  z-index: -1; /* Set to -1 to be behind content but still visible */
   overflow: hidden;
   pointer-events: none; /* Allow clicks to pass through */
   opacity: 1 !important; /* Force visibility */

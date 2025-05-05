@@ -19,39 +19,9 @@ function LoginForm() {
     const checkConnection = async () => {
       try {
         setDbStatus({ connected: null, checking: true });
-
-        // First attempt - try to connect
         const result = await testDatabaseConnection();
         const isConnected = result && result.status === 'ok';
-
-        if (isConnected) {
-          setDbStatus({ connected: true, checking: false });
-          return;
-        }
-
-        // If first attempt fails, try again after a short delay
-        // This helps in case of temporary network issues
-        setTimeout(async () => {
-          try {
-            const retryResult = await testDatabaseConnection();
-            const retryConnected = retryResult && retryResult.status === 'ok';
-            setDbStatus({ connected: retryConnected, checking: false });
-          } catch (retryErr) {
-            console.error('Error on retry checking database connection:', retryErr);
-
-            // If we're in development mode, assume connected for better UX
-            const isDevelopment = process.env.NODE_ENV === 'development' ||
-                                 window.location.hostname === 'localhost' ||
-                                 window.location.hostname === '127.0.0.1';
-
-            if (isDevelopment) {
-              console.log('In development mode, showing database as connected for better UX');
-              setDbStatus({ connected: true, checking: false, isDevelopmentMode: true });
-            } else {
-              setDbStatus({ connected: false, checking: false });
-            }
-          }
-        }, 2000); // Retry after 2 seconds
+        setDbStatus({ connected: isConnected, checking: false });
       } catch (err) {
         console.error('Error checking database connection:', err);
         setDbStatus({ connected: false, checking: false });
@@ -353,19 +323,9 @@ function LoginForm() {
                 )}
               </div>
               <span className={`text-xs font-medium ${dbStatus.checking ? 'text-yellow-700' : dbStatus.connected ? 'text-green-700' : 'text-red-700'}`}>
-                {dbStatus.checking ? 'Checking connection...' :
-                 dbStatus.connected ?
-                   (dbStatus.isDevelopmentMode ? 'Development mode' : 'Database connected') :
-                   'Database disconnected'}
+                {dbStatus.checking ? 'Checking connection...' : dbStatus.connected ? 'Database connected' : 'Database disconnected'}
               </span>
             </div>
-            {!dbStatus.checking && !dbStatus.connected && (
-              <div className="mt-1">
-                <span className="text-xs text-gray-600">
-                  You can still log in with existing credentials
-                </span>
-              </div>
-            )}
           </div>
         </div>
       </div>

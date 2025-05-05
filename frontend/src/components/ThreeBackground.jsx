@@ -82,53 +82,40 @@ function ThreeBackground() {
         void main() {
           vec2 position = vUv * 2.0 - 1.0;
 
-          // Diagonal direction - combine x and y for diagonal movement
-          float diagonal = (position.x + position.y) * 0.7071; // 0.7071 is 1/sqrt(2) for normalization
+          // Create more complex noise patterns
+          float noise1 = sin(position.x * 3.0 + time * 0.5) * 0.15;
+          float noise2 = sin(position.y * 4.0 + time * 0.3) * 0.15;
+          float noise3 = sin(position.x * position.y * 2.0 + time * 0.7) * 0.1;
 
-          // Very slow diagonal movement
-          float diagonalTime = time * 0.1; // Slow down the animation even more
+          // Random movement
+          float randomMovement = random(position + time * 0.01) * 0.1;
 
-          // Create diagonal wave patterns with more pronounced diagonal movement
-          float wave1 = sin(diagonal * 2.5 + diagonalTime * 0.4) * 0.5 + 0.5;
-          float wave2 = sin(diagonal * 2.0 + diagonalTime * 0.3 + 2.0) * 0.5 + 0.5;
-          float wave3 = sin(diagonal * 1.5 + diagonalTime * 0.2 + 4.0) * 0.5 + 0.5;
-          float wave4 = sin(diagonal * 1.0 + diagonalTime * 0.1 + 6.0) * 0.5 + 0.5;
+          // Combined noise
+          float noise = noise1 + noise2 + noise3 + randomMovement;
 
-          // Add subtle random movement
-          float randomMovement = random(position + time * 0.005) * 0.05; // Very subtle random movement
-          wave1 += randomMovement;
-          wave2 += randomMovement;
-          wave3 += randomMovement;
-          wave4 += randomMovement;
+          // Define our colors
+          vec3 darkBlue = vec3(0.0, 0.03, 0.18);    // Dark blue
+          vec3 mediumBlue = vec3(0.0, 0.15, 0.3);   // Medium blue
+          vec3 brightBlue = vec3(0.0, 0.2, 0.4);    // Brighter blue
+          vec3 greenAccent = vec3(0.0, 0.25, 0.2);  // Green accent
+          vec3 black = vec3(0.0, 0.0, 0.0);         // Black
 
-          // Define our colors for the sequence: blue -> dark -> green -> dark -> blue
-          vec3 blue1 = vec3(0.0, 0.15, 0.4);      // First blue (deeper blue)
-          vec3 blue2 = vec3(0.0, 0.2, 0.5);       // Second blue (brighter blue)
-          vec3 darkColor = vec3(0.0, 0.02, 0.1);  // Dark (almost black)
-          vec3 greenColor = vec3(0.0, 0.25, 0.2); // Green (more vibrant)
+          // Create complex color mixing
+          float yPos = position.y + noise;
+          float xPos = position.x + noise;
 
-          // Create the color sequence using the waves
-          // Each wave controls the transition between two colors
-          vec3 color;
+          // Base gradient
+          float baseGradient = smoothstep(-1.0, 1.0, yPos);
 
-          // Start with dark color
-          color = darkColor;
+          // Create patterns for different colors
+          float pattern1 = sin(xPos * 5.0 + time) * sin(yPos * 5.0 + time * 0.7);
+          float pattern2 = cos(xPos * 3.0 - time * 0.5) * cos(yPos * 7.0 - time * 0.2);
 
-          // Transition: dark -> blue1
-          color = mix(color, blue1, smoothstep(0.4, 0.6, wave1));
-
-          // Transition: blue1 -> darkColor
-          color = mix(color, darkColor, smoothstep(0.4, 0.6, wave2));
-
-          // Transition: darkColor -> greenColor
-          color = mix(color, greenColor, smoothstep(0.4, 0.6, wave3));
-
-          // Transition: greenColor -> darkColor -> blue2
-          color = mix(color, mix(darkColor, blue2, smoothstep(0.3, 0.7, wave1)), smoothstep(0.4, 0.6, wave4));
-
-          // Add subtle vignette effect
-          float vignette = length(position * 0.8);
-          color = mix(color, darkColor, smoothstep(0.5, 1.5, vignette));
+          // Mix colors based on patterns
+          vec3 color = mix(black, darkBlue, baseGradient);
+          color = mix(color, mediumBlue, smoothstep(0.3, 0.7, pattern1 + 0.5));
+          color = mix(color, brightBlue, smoothstep(0.4, 0.6, pattern2 + 0.5));
+          color = mix(color, greenAccent, smoothstep(0.7, 0.9, abs(pattern1 * pattern2)));
 
           gl_FragColor = vec4(color, 1.0);
         }
@@ -168,8 +155,8 @@ function ThreeBackground() {
     const animate = () => {
       const elapsedTime = clock.getElapsedTime();
 
-      // Update uniforms - use an extremely slow animation speed
-      material.uniforms.time.value = elapsedTime * 0.15;
+      // Update uniforms
+      material.uniforms.time.value = elapsedTime * 0.5;
 
       // Render
       renderer.render(scene, camera);
@@ -216,7 +203,7 @@ function ThreeBackground() {
   return (
     <div
       ref={mountRef}
-      className={`fixed inset-0 z-[-1] w-screen h-screen ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
+      className={`fixed inset-0 z-0 w-full h-full ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
       style={{
         backgroundColor: '#000830',
         transition: 'opacity 0.5s ease-in-out',
@@ -224,15 +211,9 @@ function ThreeBackground() {
         right: 0,
         top: 0,
         bottom: 0,
-        width: '100vw',
-        height: '100vh',
-        minWidth: '100vw',
-        minHeight: '100vh',
         margin: 0,
         padding: 0,
-        overflow: 'hidden',
-        pointerEvents: 'none', // Allow clicks to pass through
-        position: 'fixed'
+        overflow: 'hidden'
       }}
     />
   );

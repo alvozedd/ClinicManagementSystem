@@ -16,7 +16,7 @@ import '../styles/darkRectangleFix.css'; // Import dark rectangle fix
 
 // Three.js configuration
 const threeJsConfig = {
-  enabled: true,  // Enable Three.js by default
+  enabled: false,  // Disable Three.js for testing
   quality: 'high' // Quality level: 'low', 'medium', 'high'
 };
 
@@ -221,13 +221,10 @@ function HomePage() {
           bottom: 0,
           width: '100vw',
           height: '100vh',
-          minWidth: '100vw',
-          minHeight: '100vh',
           margin: 0,
           padding: 0,
           overflow: 'hidden',
-          backgroundColor: '#000830',
-          zIndex: -1 // Ensure it's behind all content but still visible
+          backgroundColor: '#000830'
         }}>
           <ThreeBackground />
         </div>
@@ -237,6 +234,7 @@ function HomePage() {
       {!threeEnabled && (
         <div className="fixed inset-0 z-[-1] w-screen h-screen" style={{
           backgroundColor: '#000830',
+          position: 'fixed',
           left: 0,
           right: 0,
           top: 0,
@@ -247,9 +245,7 @@ function HomePage() {
           height: '100vh',
           minWidth: '100vw',
           minHeight: '100vh',
-          overflow: 'hidden',
-          pointerEvents: 'none', // Allow clicks to pass through
-          position: 'fixed'
+          overflow: 'hidden'
         }}></div>
       )}
 
@@ -267,8 +263,7 @@ function HomePage() {
           overflowX: "hidden", /* Prevent horizontal scrolling on mobile */
           position: "relative", /* For overlay positioning */
           marginBottom: 0, /* Ensure no bottom margin */
-          paddingBottom: 0, /* Ensure no bottom padding */
-          zIndex: 1 /* Ensure content is above background */
+          paddingBottom: 0 /* Ensure no bottom padding */
         }}>
       {/* Modern Header with glass effect */}
       <div className="text-white fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-[#000830]/70 shadow-lg">
