@@ -1,7 +1,7 @@
 import { useContext, useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import AuthContext from './context/AuthContext'
-import HomePage from './components/HomePage'
+import NewHomePage from './components/NewHomePage'
 import LoginForm from './components/LoginForm'
 import ProtectedRoute from './components/ProtectedRoute'
 import AdminDashboard from './components/dashboard/AdminDashboard'
@@ -35,7 +35,7 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<HomePage />} />
+        <Route path="/" element={<NewHomePage />} />
         <Route path="/login" element={<LoginForm />} />
 
         {/* Admin Dashboard */}
