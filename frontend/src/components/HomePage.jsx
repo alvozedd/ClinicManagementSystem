@@ -1,12 +1,11 @@
-import { useState, useEffect, useRef, Suspense, lazy } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import apiService from '../utils/apiService';
 import { loadContent, getContentValue } from '../utils/contentUtils';
 import { initScrollAnimations, addVisibleClass } from '../utils/scrollAnimations';
 import { FaBars, FaTimes } from 'react-icons/fa';
 import EnhancedContact from './EnhancedContact';
-// Lazy load ThreeBackground for better performance
-const ThreeBackground = lazy(() => import('./ThreeBackground'));
+import ThreeBackground from './ThreeBackground';
 import PageLoader from './PageLoader';
 import './GlassEffects.css';
 import '../styles/animations.css';
@@ -193,11 +192,9 @@ function HomePage() {
     <>
       {/* Three.js Background */}
       {threeJsConfig.enabled && (
-        <Suspense fallback={null}>
-          <div className="canvas-container">
-            <ThreeBackground />
-          </div>
-        </Suspense>
+        <div className="canvas-container">
+          <ThreeBackground />
+        </div>
       )}
 
       <PageLoader>
