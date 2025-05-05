@@ -224,7 +224,8 @@ function HomePage() {
           margin: 0,
           padding: 0,
           overflow: 'hidden',
-          backgroundColor: '#000830'
+          backgroundColor: '#000830',
+          zIndex: -10 // Ensure it's behind all content
         }}>
           <ThreeBackground />
         </div>
@@ -232,7 +233,7 @@ function HomePage() {
 
       {/* Fallback background color if Three.js is disabled */}
       {!threeEnabled && (
-        <div className="fixed inset-0 z-[-1] w-full h-full" style={{
+        <div className="fixed inset-0 z-[-10] w-full h-full" style={{
           backgroundColor: '#000830',
           left: 0,
           right: 0,
@@ -241,7 +242,8 @@ function HomePage() {
           margin: 0,
           padding: 0,
           width: '100vw',
-          height: '100vh'
+          height: '100vh',
+          pointerEvents: 'none' // Allow clicks to pass through
         }}></div>
       )}
 
@@ -259,7 +261,8 @@ function HomePage() {
           overflowX: "hidden", /* Prevent horizontal scrolling on mobile */
           position: "relative", /* For overlay positioning */
           marginBottom: 0, /* Ensure no bottom margin */
-          paddingBottom: 0 /* Ensure no bottom padding */
+          paddingBottom: 0, /* Ensure no bottom padding */
+          zIndex: 1 /* Ensure content is above background */
         }}>
       {/* Modern Header with glass effect */}
       <div className="text-white fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-[#000830]/70 shadow-lg">
