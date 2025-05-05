@@ -1,0 +1,33 @@
+/* Three.js specific styles */
+
+.canvas-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  z-index: -1;
+  overflow: hidden;
+}
+
+/* Ensure canvas is full screen */
+.canvas-container canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Optimize for mobile */
+@media (max-width: 768px) {
+  .canvas-container {
+    height: 100vh;
+    height: calc(var(--vh, 1vh) * 100);
+  }
+}
+
+/* Fix for iOS */
+@supports (-webkit-touch-callout: none) {
+  .canvas-container {
+    height: -webkit-fill-available;
+  }
+}

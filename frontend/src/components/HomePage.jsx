@@ -1,80 +1,24 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, Suspense, lazy } from 'react';
 import { Link } from 'react-router-dom';
 import apiService from '../utils/apiService';
 import { loadContent, getContentValue } from '../utils/contentUtils';
 import { initScrollAnimations, addVisibleClass } from '../utils/scrollAnimations';
 import { FaBars, FaTimes } from 'react-icons/fa';
 import EnhancedContact from './EnhancedContact';
-import WaveBackground from './WaveBackground';
-import BackgroundImageLoader from './BackgroundImageLoader';
+// Lazy load ThreeBackground for better performance
+const ThreeBackground = lazy(() => import('./ThreeBackground'));
+import PageLoader from './PageLoader';
 import './GlassEffects.css';
 import '../styles/animations.css';
 import '../styles/fallbackAnimations.css';
 import '../styles/textAnimations.css';
-import '../styles/backgroundFixes.css'; // Import background fixes for mobile
-import '../styles/mobileBackgroundFix.css'; // Additional mobile background fixes
-import '../styles/WaveStyles.css'; // Import wave background styles
-import PageLoader from './PageLoader';
-// Removed framer-motion import as animations are no longer needed
+import '../styles/ThreeStyles.css'; // Import Three.js styles
 
-// Add custom CSS for responsive background image
-const responsiveBackgroundStyles = `
-  /* Base styles for all devices */
-  .responsive-bg {
-    background-size: cover !important;
-    background-position: center center !important;
-    background-repeat: no-repeat !important;
-    background-attachment: fixed !important;
-    min-height: 100vh !important;
-    height: 100% !important;
-    width: 100% !important;
-    margin: 0 !important;
-    padding: 0 !important;
-  }
-
-  /* Tablet and mobile styles */
-  @media (max-width: 768px) {
-    .responsive-bg {
-      background-image: url('/backgroundimg/Theone.jpeg') !important; /* Use same image as desktop */
-      background-position: center center !important;
-      background-size: cover !important;
-      background-attachment: scroll !important; /* Use scroll instead of fixed for mobile */
-      min-height: 100vh !important;
-      height: 100% !important;
-      width: 100% !important;
-      overflow-x: hidden !important;
-    }
-  }
-
-  /* Fix for iOS devices */
-  @supports (-webkit-touch-callout: none) {
-    .responsive-bg {
-      background-attachment: scroll !important; /* Safari fix */
-      min-height: -webkit-fill-available !important;
-    }
-  }
-
-  /* Remove any background from navbar */
-  header, nav, .navbar {
-    background: transparent !important;
-    background-color: transparent !important;
-  }
-
-  /* Fix for white space at bottom */
-  html, body, #root {
-    margin: 0 !important;
-    padding: 0 !important;
-    overflow-x: hidden !important;
-    min-height: 100vh !important;
-    height: 100% !important;
-  }
-
-  /* Ensure footer extends to bottom */
-  footer {
-    margin-bottom: 0 !important;
-    padding-bottom: 0 !important;
-  }
-`;
+// Three.js configuration
+const threeJsConfig = {
+  enabled: true,  // Enable Three.js by default
+  quality: 'high' // Quality level: 'low', 'medium', 'high'
+};
 
 function HomePage() {
   const [showBookingForm, setShowBookingForm] = useState(false);
@@ -217,33 +161,28 @@ function HomePage() {
     }
   };
 
-  // State for wave effect
-  const [useWaveEffect, setUseWaveEffect] = useState(true);
-
-  // Check device capabilities on mount
+  // Check device capabilities for Three.js
   useEffect(() => {
     // Simple performance check
     const checkPerformance = () => {
+      // Check if device is mobile
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+
       // Check if browser supports WebGL
       const canvas = document.createElement('canvas');
       const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
       const hasWebGL = !!gl;
 
-      // Only disable wave effect if WebGL is not supported
+      // Adjust Three.js settings based on device capabilities
       if (!hasWebGL) {
-        console.log('WebGL not supported, disabling wave effect');
-        setUseWaveEffect(false);
+        threeJsConfig.enabled = false;
+      } else if (isMobile) {
+        threeJsConfig.quality = 'medium';
       }
 
       // Check for reduced motion preference
       if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        console.log('Reduced motion preference detected, disabling wave effect');
-        setUseWaveEffect(false);
-      }
-
-      // Log that wave effect is enabled
-      if (hasWebGL && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-        console.log('Wave effect enabled');
+        threeJsConfig.enabled = false;
       }
     };
 
@@ -252,32 +191,18 @@ function HomePage() {
 
   return (
     <>
-      {/* Add style tag for responsive background */}
-      <style dangerouslySetInnerHTML={{ __html: responsiveBackgroundStyles }} />
-
-      {/* Wave Background */}
-      {useWaveEffect && (
-        <div className="wave-container">
-          <WaveBackground qualityLevel="high" />
-        </div>
+      {/* Three.js Background */}
+      {threeJsConfig.enabled && (
+        <Suspense fallback={null}>
+          <div className="canvas-container">
+            <ThreeBackground />
+          </div>
+        </Suspense>
       )}
 
-      {/* Background Image Loader - only used if wave effect is disabled */}
-      <BackgroundImageLoader useWaveEffect={useWaveEffect} />
-
-      <PageLoader backgroundImage={useWaveEffect ? null : "/backgroundimg/Theone.jpeg"}>
-        <div className={`text-gray-800 wave-content-overlay ${!useWaveEffect ? 'responsive-bg bg-image' : ''}`} style={{
+      <PageLoader>
+        <div className="content-overlay" style={{
           scrollBehavior: 'smooth',
-          ...(useWaveEffect ? {} : {
-            backgroundImage: "url('/backgroundimg/Theone.jpeg')", /* Use same image for all devices */
-            backgroundSize: "cover", /* Always use cover for all screen sizes */
-            backgroundPosition: "center center", /* Center position for all devices */
-            backgroundAttachment: window.innerWidth <= 768 ? "scroll" : "fixed", /* Use scroll for mobile */
-            backgroundRepeat: "no-repeat",
-            WebkitBackgroundSize: "cover", /* Safari/Chrome */
-            MozBackgroundSize: "cover", /* Firefox */
-            OBackgroundSize: "cover", /* Opera */
-          }),
           minHeight: "100vh",
           height: "100%",
           width: "100%",
@@ -287,7 +212,7 @@ function HomePage() {
           paddingBottom: 0 /* Ensure no bottom padding */
         }}>
       {/* Modern Header with glass effect */}
-      <div className="text-white fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-[#000830]/80 shadow-lg">
+      <div className="text-white fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-[#000830]/70 shadow-lg">
         <div className="max-w-7xl mx-auto px-4">
           {/* Header */}
           <header className="flex justify-between items-center py-4 relative z-10">
@@ -342,13 +267,12 @@ function HomePage() {
               >Contact</button>
               <Link
                 to="/login"
-                className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white px-5 py-2 rounded-lg text-base font-medium transition duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-blue-500/20 transform hover:-translate-y-0.5"
+                className="bg-gradient-to-r from-blue-700 to-blue-600 hover:from-blue-600 hover:to-blue-500 text-white p-2.5 rounded-full text-base font-medium transition duration-300 flex items-center justify-center shadow-md hover:shadow-blue-500/20 transform hover:-translate-y-0.5"
                 aria-label="Staff Login"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
-                Login
               </Link>
             </div>
           </header>
@@ -395,13 +319,14 @@ function HomePage() {
                 </button>
                 <Link
                   to="/login"
-                  className="flex items-center text-white hover:text-blue-300 transition-colors py-3"
+                  className="flex items-center justify-center text-white hover:text-blue-300 transition-colors py-3"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                  </svg>
-                  Staff Login
+                  <div className="bg-blue-700/50 p-2 rounded-full">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                  </div>
                 </Link>
               </div>
             </div>
@@ -453,9 +378,9 @@ function HomePage() {
                       appointmentReason: '',
                     });
                   }}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-5 sm:px-6 py-2 rounded-md font-medium text-sm sm:text-base shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-1 w-full md:w-auto transform hover:translate-y-[-2px]"
+                  className="bg-white hover:bg-gray-100 px-5 sm:px-6 py-2 rounded-md font-medium text-sm sm:text-base shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-1 w-full md:w-auto transform hover:translate-y-[-2px] book-now-button"
                 >
-                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <svg className="w-4 h-4 mr-1 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h2a1 1 0 001-1v-7m-6 0a1 1 0 00-1 1v3"></path>
                   </svg>
                   Return to Home
@@ -658,7 +583,7 @@ function HomePage() {
 
                   <button
                     type="submit"
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-5 sm:px-6 py-2 rounded-md font-medium text-sm sm:text-base order-1 sm:order-2 shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-1 transform hover:translate-y-[-2px]"
+                    className="bg-white hover:bg-gray-100 px-5 sm:px-6 py-2 rounded-md font-medium text-sm sm:text-base order-1 sm:order-2 shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-1 transform hover:translate-y-[-2px] book-now-button"
                     disabled={loading}
                   >
                     {loading ? (
@@ -671,7 +596,7 @@ function HomePage() {
                       </>
                     ) : (
                       <>
-                        <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <svg className="w-4 h-4 mr-1 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                         </svg>
                         Book Appointment
@@ -687,8 +612,7 @@ function HomePage() {
               {/* Home content */}
               <div className="text-center text-white relative overflow-hidden" style={{ height: "100vh" }}>
 
-                {/* Dark background overlay with gradient */}
-                <div className="absolute inset-0 bg-gradient-to-b from-[#000830] via-[#001060] to-[#0040C0]"></div>
+                {/* No background overlay needed - Three.js provides the background */}
 
                 {/* Decorative elements */}
                 <div className="absolute inset-0 overflow-hidden">
@@ -727,9 +651,9 @@ function HomePage() {
                           setShowBookingForm(true);
                           window.scrollTo({ top: 0, behavior: 'smooth' });
                         }}
-                        className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white px-8 sm:px-10 py-4 rounded-lg font-medium transition duration-300 text-base sm:text-lg flex items-center justify-center gap-3 shadow-lg hover:shadow-blue-500/20 transform hover:-translate-y-1 book-now-button"
+                        className="bg-white hover:bg-gray-100 px-8 sm:px-10 py-3 rounded-lg font-semibold transition duration-200 text-base sm:text-lg flex items-center justify-center gap-3 book-now-button"
                       >
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <svg className="w-5 h-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                         </svg>
                         Book Appointment
@@ -737,58 +661,56 @@ function HomePage() {
 
                       <button
                         onClick={() => window.location.href = 'tel:+254722396296'}
-                        className="bg-transparent border-2 border-blue-400 hover:border-blue-300 text-blue-300 hover:text-blue-200 px-8 sm:px-10 py-4 rounded-lg font-medium transition duration-300 text-base sm:text-lg flex items-center justify-center gap-3 shadow-lg hover:shadow-blue-500/10 transform hover:-translate-y-1 call-us-button"
+                        className="bg-blue-900/40 hover:bg-blue-900/60 text-white px-8 sm:px-10 py-3 rounded-lg font-semibold transition duration-200 text-base sm:text-lg flex items-center justify-center gap-3 call-us-button"
                       >
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
                         </svg>
                         Call Us Now
                       </button>
                     </div>
 
-                    {/* Scroll indicator */}
-                    <div className="absolute bottom-12 left-1/2 transform -translate-x-1/2 flex flex-col items-center opacity-70 hover:opacity-100 transition-opacity cursor-pointer" onClick={() => document.getElementById('services').scrollIntoView({ behavior: 'smooth' })}>
-                      <span className="text-sm text-blue-200 mb-2">Scroll Down</span>
-                      <div className="w-6 h-10 border-2 border-blue-300 rounded-full flex justify-center pt-1">
-                        <div className="w-1 h-2 bg-blue-300 rounded-full animate-bounce"></div>
-                      </div>
-                    </div>
+                    {/* Scroll indicator removed */}
                   </div>
                 </div>
               </div>
               {/* End of blue background section */}
 
-              {/* White background sections */}
+              {/* White background sections with Three.js effects */}
               <div className="bg-white">
                 {/* Services Section */}
-                <div id="services" className="bg-[#000830] text-white py-20 sm:py-24 md:py-28 w-full relative overflow-hidden">
+                <div id="services" className="bg-gradient-to-br from-blue-50 to-white text-[#000830] py-20 sm:py-24 md:py-28 w-full relative overflow-hidden">
                   {/* Background elements */}
                   <div className="absolute inset-0 overflow-hidden">
-                    {/* Diagonal line */}
+                    {/* Diagonal lines */}
                     <div className="absolute top-0 bottom-0 left-[15%] w-px bg-gradient-to-b from-transparent via-blue-400 to-transparent opacity-30 transform rotate-12"></div>
+                    <div className="absolute top-0 bottom-0 right-[25%] w-px bg-gradient-to-b from-transparent via-blue-400 to-transparent opacity-30 transform -rotate-12"></div>
 
-                    {/* Glowing circle */}
-                    <div className="absolute bottom-[10%] left-[5%] w-48 h-48 rounded-full bg-blue-600 opacity-10 blur-3xl"></div>
+                    {/* Horizontal lines */}
+                    <div className="absolute top-[20%] left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-400 to-transparent opacity-30"></div>
+                    <div className="absolute bottom-[30%] left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-400 to-transparent opacity-30"></div>
 
-                    {/* Grid pattern */}
-                    <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIHN0cm9rZT0iIzE4MmE4MCIgc3Ryb2tlLXdpZHRoPSIwLjUiIG9wYWNpdHk9IjAuMSI+PHBhdGggZD0iTTMwIDYwVjBNNjAgMzBIME0wIDAgNjAgNjBNNjAgMCAwIDYwIi8+PC9nPjwvZz48L3N2Zz4=')] opacity-20"></div>
+                    {/* Glowing circles */}
+                    <div className="absolute top-[15%] right-[10%] w-64 h-64 rounded-full bg-blue-600 opacity-5 blur-3xl"></div>
+                    <div className="absolute bottom-[10%] left-[5%] w-48 h-48 rounded-full bg-blue-600 opacity-5 blur-3xl"></div>
+                    <div className="absolute top-[40%] left-[30%] w-32 h-32 rounded-full bg-green-500 opacity-5 blur-3xl"></div>
                   </div>
 
                   <div className="max-w-6xl mx-auto px-4 relative z-10">
                     <div className="text-center mb-16 relative">
-                      <span className="text-blue-400 text-sm font-semibold tracking-wider uppercase mb-3 inline-block">What We Offer</span>
-                      <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 text-center relative inline-block">
+                      <span className="text-blue-600 text-sm font-semibold tracking-wider uppercase mb-3 inline-block">What We Offer</span>
+                      <h2 className="text-4xl md:text-5xl font-bold text-[#000830] mb-6 text-center relative inline-block">
                         Our Services
                       </h2>
-                      <div className="h-1 w-24 bg-gradient-to-r from-blue-500 to-blue-300 mx-auto mb-6"></div>
-                      <p className="text-xl text-blue-200 max-w-3xl mx-auto services-subtitle">
+                      <div className="h-1 w-24 bg-gradient-to-r from-blue-600 to-blue-400 mx-auto mb-6"></div>
+                      <p className="text-xl text-[#001060] max-w-3xl mx-auto services-subtitle">
                         {getContentValue(content, 'homepage', 'About', 'About Text', 'We provide comprehensive urological care with state-of-the-art technology and personalized treatment plans.')}
                       </p>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-10 relative z-10">
                       {/* Service Card 1 */}
-                      <div className="bg-gradient-to-br from-[#001060] to-[#000830] p-8 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 flex flex-col h-full border border-blue-900/50 hover:border-blue-700/50 group relative overflow-hidden">
+                      <div className="bg-white/80 backdrop-blur-md p-8 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 flex flex-col h-full border border-blue-200 hover:border-blue-400 group relative overflow-hidden glass-card-service">
                         {/* Card highlight effect */}
                         <div className="absolute inset-0 bg-gradient-to-tr from-blue-600/0 via-blue-600/0 to-blue-600/0 opacity-0 group-hover:opacity-20 transition-opacity duration-700"></div>
 
@@ -799,15 +721,15 @@ function HomePage() {
                           </svg>
                         </div>
 
-                        <h3 className="text-2xl font-bold mb-4 text-white group-hover:text-blue-300 transition-colors duration-300">
+                        <h3 className="text-2xl font-bold mb-4 text-[#000830] group-hover:text-blue-600 transition-colors duration-300">
                           {getContentValue(content, 'services', 'Consultations', 'Title', 'Consultations')}
                         </h3>
 
-                        <p className="text-blue-200 text-lg leading-relaxed mb-8 flex-grow">
+                        <p className="text-gray-700 text-lg leading-relaxed mb-8 flex-grow">
                           {getContentValue(content, 'services', 'Consultations', 'Description', 'Comprehensive evaluation and diagnosis of urological conditions by our expert consultants.')}
                         </p>
 
-                        <div className="flex items-center text-blue-300 mt-auto">
+                        <div className="flex items-center text-blue-600 mt-auto">
                           <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                           </svg>
@@ -816,7 +738,7 @@ function HomePage() {
                       </div>
 
                       {/* Service Card 2 */}
-                      <div className="bg-gradient-to-br from-[#001060] to-[#000830] p-8 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 flex flex-col h-full border border-blue-900/50 hover:border-blue-700/50 group relative overflow-hidden">
+                      <div className="bg-white/80 backdrop-blur-md p-8 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 flex flex-col h-full border border-blue-200 hover:border-blue-400 group relative overflow-hidden glass-card-service">
                         {/* Card highlight effect */}
                         <div className="absolute inset-0 bg-gradient-to-tr from-blue-600/0 via-blue-600/0 to-blue-600/0 opacity-0 group-hover:opacity-20 transition-opacity duration-700"></div>
 
@@ -827,15 +749,15 @@ function HomePage() {
                           </svg>
                         </div>
 
-                        <h3 className="text-2xl font-bold mb-4 text-white group-hover:text-blue-300 transition-colors duration-300">
+                        <h3 className="text-2xl font-bold mb-4 text-[#000830] group-hover:text-blue-600 transition-colors duration-300">
                           {getContentValue(content, 'services', 'Diagnostics', 'Title', 'Diagnostics')}
                         </h3>
 
-                        <p className="text-blue-200 text-lg leading-relaxed mb-8 flex-grow">
+                        <p className="text-gray-700 text-lg leading-relaxed mb-8 flex-grow">
                           {getContentValue(content, 'services', 'Diagnostics', 'Description', 'Advanced diagnostic procedures including ultrasound, cystoscopy, and urodynamic studies.')}
                         </p>
 
-                        <div className="flex items-center text-blue-300 mt-auto">
+                        <div className="flex items-center text-blue-600 mt-auto">
                           <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
                           </svg>
@@ -844,7 +766,7 @@ function HomePage() {
                       </div>
 
                       {/* Service Card 3 */}
-                      <div className="bg-gradient-to-br from-[#001060] to-[#000830] p-8 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 flex flex-col h-full border border-blue-900/50 hover:border-blue-700/50 group relative overflow-hidden">
+                      <div className="bg-white/80 backdrop-blur-md p-8 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-500 flex flex-col h-full border border-blue-200 hover:border-blue-400 group relative overflow-hidden glass-card-service">
                         {/* Card highlight effect */}
                         <div className="absolute inset-0 bg-gradient-to-tr from-blue-600/0 via-blue-600/0 to-blue-600/0 opacity-0 group-hover:opacity-20 transition-opacity duration-700"></div>
 
@@ -855,15 +777,15 @@ function HomePage() {
                           </svg>
                         </div>
 
-                        <h3 className="text-2xl font-bold mb-4 text-white group-hover:text-blue-300 transition-colors duration-300">
+                        <h3 className="text-2xl font-bold mb-4 text-[#000830] group-hover:text-blue-600 transition-colors duration-300">
                           {getContentValue(content, 'services', 'Treatments', 'Title', 'Treatments')}
                         </h3>
 
-                        <p className="text-blue-200 text-lg leading-relaxed mb-8 flex-grow">
+                        <p className="text-gray-700 text-lg leading-relaxed mb-8 flex-grow">
                           {getContentValue(content, 'services', 'Treatments', 'Description', 'Comprehensive treatment options for various urological conditions, from medication to surgical interventions.')}
                         </p>
 
-                        <div className="flex items-center text-blue-300 mt-auto">
+                        <div className="flex items-center text-blue-600 mt-auto">
                           <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                           </svg>
@@ -1004,7 +926,7 @@ function HomePage() {
         </footer>
       </div>
     </div>
-      </PageLoader>
+    </PageLoader>
     </>
   );
 }
