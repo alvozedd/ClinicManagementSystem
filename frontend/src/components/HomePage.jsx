@@ -12,6 +12,7 @@ import '../styles/animations.css';
 import '../styles/fallbackAnimations.css';
 import '../styles/textAnimations.css';
 import '../styles/ThreeStyles.css'; // Import Three.js styles
+import '../styles/darkRectangleFix.css'; // Import dark rectangle fix
 
 // Three.js configuration
 const threeJsConfig = {
@@ -212,14 +213,36 @@ function HomePage() {
     <>
       {/* Three.js Background with improved visibility */}
       {threeEnabled && (
-        <div className="canvas-container">
+        <div className="canvas-container" style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          width: '100vw',
+          height: '100vh',
+          margin: 0,
+          padding: 0,
+          overflow: 'hidden',
+          backgroundColor: '#000830'
+        }}>
           <ThreeBackground />
         </div>
       )}
 
       {/* Fallback background color if Three.js is disabled */}
       {!threeEnabled && (
-        <div className="fixed inset-0 z-[-1]" style={{ backgroundColor: '#000830' }}></div>
+        <div className="fixed inset-0 z-[-1] w-full h-full" style={{
+          backgroundColor: '#000830',
+          left: 0,
+          right: 0,
+          top: 0,
+          bottom: 0,
+          margin: 0,
+          padding: 0,
+          width: '100vw',
+          height: '100vh'
+        }}></div>
       )}
 
       {/* Debug info - remove in production */}

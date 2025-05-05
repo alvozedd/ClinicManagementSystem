@@ -8,6 +8,7 @@ import './styles/buttonStyleFixes.css' // Import specific button style fixes
 import './styles/mobileButtonFixes.css' // Import mobile button fixes
 import './styles/darkMode.css' // Import dark mode styles
 import './styles/mobileBackgroundFix.css' // Import mobile background fixes
+import './styles/darkRectangleFix.css' // Import dark rectangle fix
 import App from './App.jsx'
 import { AuthProvider } from './context/AuthContext'
 import store from './store/store'

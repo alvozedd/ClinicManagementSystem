@@ -23,7 +23,12 @@ const allowedOrigins = [
   'https://urohealthltd.netlify.app',
   'http://urohealthltd.netlify.app',
   'https://www.urohealthltd.netlify.app',
-  'http://www.urohealthltd.netlify.app'
+  'http://www.urohealthltd.netlify.app',
+  // Add any other domains that might be used
+  'https://urohealth.netlify.app',
+  'https://www.urohealth.netlify.app',
+  'http://urohealth.netlify.app',
+  'http://www.urohealth.netlify.app'
 ];
 
 // Always allow all origins to fix CORS issues

@@ -32,8 +32,19 @@ function ThreeBackground() {
       antialias: true,
       alpha: true
     });
-    renderer.setSize(window.innerWidth, window.innerHeight);
+
+    // Make sure renderer covers the entire screen
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    renderer.setSize(width, height);
     renderer.setClearColor(0x000830, 1);
+    renderer.domElement.style.width = '100vw';
+    renderer.domElement.style.height = '100vh';
+    renderer.domElement.style.position = 'fixed';
+    renderer.domElement.style.left = '0';
+    renderer.domElement.style.top = '0';
+    renderer.domElement.style.margin = '0';
+    renderer.domElement.style.padding = '0';
 
     // Add renderer to DOM
     if (mountRef.current) {
@@ -123,6 +134,15 @@ function ThreeBackground() {
       camera.updateProjectionMatrix();
 
       renderer.setSize(width, height);
+
+      // Update renderer element styles
+      renderer.domElement.style.width = '100vw';
+      renderer.domElement.style.height = '100vh';
+      renderer.domElement.style.position = 'fixed';
+      renderer.domElement.style.left = '0';
+      renderer.domElement.style.top = '0';
+      renderer.domElement.style.margin = '0';
+      renderer.domElement.style.padding = '0';
     };
 
     window.addEventListener('resize', handleResize);
@@ -183,10 +203,17 @@ function ThreeBackground() {
   return (
     <div
       ref={mountRef}
-      className={`absolute inset-0 z-0 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
+      className={`fixed inset-0 z-0 w-full h-full ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
       style={{
         backgroundColor: '#000830',
-        transition: 'opacity 0.5s ease-in-out'
+        transition: 'opacity 0.5s ease-in-out',
+        left: 0,
+        right: 0,
+        top: 0,
+        bottom: 0,
+        margin: 0,
+        padding: 0,
+        overflow: 'hidden'
       }}
     />
   );

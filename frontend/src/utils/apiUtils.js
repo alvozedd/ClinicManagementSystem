@@ -18,14 +18,16 @@ export const makeApiRequest = async (path, options = {}, requiresAuth = true) =>
     Object.assign(headers, authHeaders);
   }
 
-  // Define endpoints to try in order - ALWAYS prioritize Railway in production and development
+  // Define endpoints to try in order - Prioritize local server for development
   const endpoints = [
-    // Direct Railway URL (most reliable)
-    `https://clinicmanagementsystem-production-081b.up.railway.app${path}`,
+    // Local server (most reliable for development)
+    `http://localhost:5000${path}`,
     // Standard API URL
     `${API_URL}${path}`,
     // API URL without /api prefix
-    `${API_URL.replace('/api', '')}${path}`
+    `${API_URL.replace('/api', '')}${path}`,
+    // Direct Railway URL (fallback)
+    `https://clinicmanagementsystem-production-081b.up.railway.app${path}`
   ];
 
   // Always use the endpoints in the defined order
@@ -46,11 +48,44 @@ export const makeApiRequest = async (path, options = {}, requiresAuth = true) =>
 
       console.log(`Making request to: ${urlWithTimestamp}`);
 
+      // First try with credentials
+      try {
+        console.log(`Trying with credentials: include`);
+        const response = await fetch(urlWithTimestamp, {
+          ...options,
+          headers,
+          mode: 'cors',
+          credentials: 'include',
+          cache: 'no-cache'
+        });
+
+        if (response.ok) {
+          const contentType = response.headers.get('content-type');
+          if (contentType && contentType.includes('application/json')) {
+            const data = await response.json();
+            console.log(`Request successful with endpoint: ${endpoint} (with credentials)`);
+            return data;
+          } else {
+            const text = await response.text();
+            console.log(`Request successful with non-JSON response: ${text.substring(0, 100)}... (with credentials)`);
+            return text;
+          }
+        } else {
+          console.warn(`Request with credentials failed with status ${response.status} at ${endpoint}`);
+          // Continue to try without credentials
+        }
+      } catch (credentialsError) {
+        console.warn(`Error with credentials at endpoint ${endpoint}:`, credentialsError);
+        // Continue to try without credentials
+      }
+
+      // Then try without credentials
+      console.log(`Trying without credentials`);
       const response = await fetch(urlWithTimestamp, {
         ...options,
         headers,
         mode: 'cors',
-        credentials: 'include',
+        credentials: 'omit',
         cache: 'no-cache'
       });
 

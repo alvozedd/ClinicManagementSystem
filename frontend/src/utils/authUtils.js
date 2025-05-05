@@ -110,20 +110,64 @@ export const isSessionValid = () => {
  * @returns {boolean} - True if token is expired or invalid, false otherwise
  */
 export const isTokenExpired = (token) => {
-  if (!token) return true;
+  if (!token) {
+    console.log('No token provided, considering expired');
+    return true;
+  }
 
   try {
+    // Validate token format
+    if (!token.includes('.') || token.split('.').length !== 3) {
+      console.error('Invalid token format');
+      return true;
+    }
+
     // Get the expiration time from the token (JWT tokens are base64 encoded)
     const base64Url = token.split('.')[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => {
-      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-    }).join(''));
+    if (!base64Url) {
+      console.error('Invalid token structure - missing payload');
+      return true;
+    }
 
-    const { exp } = JSON.parse(jsonPayload);
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+
+    // Safely decode base64
+    let decodedString;
+    try {
+      decodedString = atob(base64);
+    } catch (e) {
+      console.error('Error decoding base64:', e);
+      return true;
+    }
+
+    // Convert to UTF-8 string
+    const jsonPayload = decodeURIComponent(
+      decodedString.split('').map(c => {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join('')
+    );
+
+    // Parse JSON payload
+    const payload = JSON.parse(jsonPayload);
+    const { exp } = payload;
+
+    if (!exp) {
+      console.error('Token does not contain expiration time');
+      return true;
+    }
 
     // Check if the token is expired
-    return Date.now() >= exp * 1000;
+    const now = Date.now() / 1000; // Convert to seconds
+    const isExpired = now >= exp;
+
+    if (isExpired) {
+      console.log('Token is expired. Current time:', new Date(now * 1000).toISOString(),
+                 'Expiration time:', new Date(exp * 1000).toISOString());
+    } else {
+      console.log('Token is valid. Expires in:', Math.round((exp - now) / 60), 'minutes');
+    }
+
+    return isExpired;
   } catch (error) {
     console.error('Error checking token expiration:', error);
     return true;

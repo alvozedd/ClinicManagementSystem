@@ -294,15 +294,80 @@ const apiService = {
   login: async (username, password) => {
     console.log(`Attempting login with username: ${username}`);
     try {
-      // Use makeApiRequest to try multiple endpoints
-      const loginData = await makeApiRequest('/users/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
-      }, false); // Don't require auth for login
+      // Try multiple approaches to handle potential CORS issues
 
-      console.log('Login successful');
-      return loginData;
+      // Approach 1: Use makeApiRequest to try multiple endpoints
+      try {
+        console.log('Login approach 1: Using makeApiRequest');
+        const loginData = await makeApiRequest('/users/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        }, false); // Don't require auth for login
+
+        console.log('Login successful with approach 1');
+        return loginData;
+      } catch (error) {
+        console.warn('Login approach 1 failed:', error);
+      }
+
+      // Approach 2: Try direct fetch to local server
+      try {
+        console.log('Login approach 2: Direct fetch to local server');
+        const response = await fetch('http://localhost:5000/api/users/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+          },
+          body: JSON.stringify({ username, password }),
+          mode: 'cors',
+          cache: 'no-cache'
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Login successful with approach 2');
+          return data;
+        } else {
+          console.warn('Login approach 2 failed with status:', response.status);
+        }
+      } catch (error) {
+        console.warn('Login approach 2 failed with error:', error);
+      }
+
+      // Approach 3: Try direct fetch to Railway
+      try {
+        console.log('Login approach 3: Direct fetch to Railway');
+        const response = await fetch('https://clinicmanagementsystem-production-081b.up.railway.app/api/users/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+          },
+          body: JSON.stringify({ username, password }),
+          mode: 'cors',
+          cache: 'no-cache'
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Login successful with approach 3');
+          return data;
+        } else {
+          console.warn('Login approach 3 failed with status:', response.status);
+        }
+      } catch (error) {
+        console.warn('Login approach 3 failed with error:', error);
+      }
+
+      // If all approaches failed, throw an error
+      console.error('All login approaches failed');
+      throw new Error('Invalid username or password');
     } catch (error) {
       console.error('Login error:', error);
       throw new Error('Invalid username or password');

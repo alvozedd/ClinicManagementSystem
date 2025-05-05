@@ -4,32 +4,82 @@
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
   height: 100vh;
   z-index: -1; /* Set to -1 to be behind content but still visible */
   overflow: hidden;
   pointer-events: none; /* Allow clicks to pass through */
   opacity: 1 !important; /* Force visibility */
+  margin: 0;
+  padding: 0;
+  background-color: #000830; /* Fallback color */
 }
 
 /* Ensure canvas is full screen */
 .canvas-container canvas {
   display: block;
-  width: 100%;
-  height: 100%;
+  width: 100vw !important;
+  height: 100vh !important;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: 0;
+  padding: 0;
 }
 
 /* Optimize for mobile */
 @media (max-width: 768px) {
   .canvas-container {
-    height: 100vh;
-    height: calc(var(--vh, 1vh) * 100);
+    width: 100vw !important;
+    height: 100vh !important;
+    height: calc(var(--vh, 1vh) * 100) !important;
+    left: 0 !important;
+    right: 0 !important;
+    top: 0 !important;
+    bottom: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .canvas-container canvas {
+    width: 100vw !important;
+    height: 100vh !important;
+    height: calc(var(--vh, 1vh) * 100) !important;
+    left: 0 !important;
+    right: 0 !important;
+    top: 0 !important;
+    bottom: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 }
 
 /* Fix for iOS */
 @supports (-webkit-touch-callout: none) {
   .canvas-container {
-    height: -webkit-fill-available;
+    height: -webkit-fill-available !important;
+    width: 100vw !important;
+    left: 0 !important;
+    right: 0 !important;
+    top: 0 !important;
+    bottom: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .canvas-container canvas {
+    height: -webkit-fill-available !important;
+    width: 100vw !important;
+    left: 0 !important;
+    right: 0 !important;
+    top: 0 !important;
+    bottom: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 }

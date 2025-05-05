@@ -2,7 +2,7 @@ import { useState, useContext, useEffect } from 'react';
 import { Navigate, Link } from 'react-router-dom';
 import AuthContext from '../context/AuthContext';
 import authUtils from '../utils/authUtils';
-import { testDatabaseConnection, getTestUsers } from '../utils/dbConnectionTest';
+import { testDatabaseConnection } from '../utils/dbConnectionTest';
 import './GlassEffects.css';
 
 function LoginForm() {
@@ -10,23 +10,21 @@ function LoginForm() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [dbConnected, setDbConnected] = useState(null);
-  const [testUsers, setTestUsers] = useState([]);
-  const [showTestUsers, setShowTestUsers] = useState(false);
+  const [dbStatus, setDbStatus] = useState({ connected: null, checking: true });
 
   const { userInfo, login } = useContext(AuthContext);
 
   useEffect(() => {
     // Test database connection on component mount
     const checkConnection = async () => {
-      const isConnected = await testDatabaseConnection();
-      setDbConnected(isConnected);
-
-      if (isConnected) {
-        const users = await getTestUsers();
-        if (users && users.length > 0) {
-          setTestUsers(users);
-        }
+      try {
+        setDbStatus({ connected: null, checking: true });
+        const result = await testDatabaseConnection();
+        const isConnected = result && result.status === 'ok';
+        setDbStatus({ connected: isConnected, checking: false });
+      } catch (err) {
+        console.error('Error checking database connection:', err);
+        setDbStatus({ connected: false, checking: false });
       }
     };
 
@@ -107,11 +105,40 @@ function LoginForm() {
         }
       }
 
-      // Approach 3: Try with Railway deployed backend directly (with credentials)
+      // Approach 3: Try with local server directly
       if (!loginSuccess) {
         try {
-          console.log('Approach 3: Direct fetch to Railway backend');
-          const response = await fetch('https://clinicmanagementsystem-production-081b.up.railway.app/users/login', {
+          console.log('Approach 3: Direct fetch to local server');
+          const response = await fetch('http://localhost:5000/api/users/login', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Cache-Control': 'no-cache, no-store, must-revalidate',
+              'Pragma': 'no-cache',
+              'Expires': '0'
+            },
+            body: JSON.stringify({ username, password }),
+            mode: 'cors',
+            cache: 'no-cache'
+          });
+
+          if (response.ok) {
+            userData = await response.json();
+            console.log('Login successful with approach 3');
+            loginSuccess = true;
+          } else {
+            console.log('Approach 3 failed with status:', response.status);
+          }
+        } catch (error) {
+          console.warn('Approach 3 failed with error:', error);
+        }
+      }
+
+      // Approach 4: Try with Railway deployed backend directly (with credentials)
+      if (!loginSuccess) {
+        try {
+          console.log('Approach 4: Direct fetch to Railway backend with credentials');
+          const response = await fetch('https://clinicmanagementsystem-production-081b.up.railway.app/api/users/login', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -128,13 +155,13 @@ function LoginForm() {
 
           if (response.ok) {
             userData = await response.json();
-            console.log('Login successful with approach 3');
+            console.log('Login successful with approach 4');
             loginSuccess = true;
           } else {
-            console.log('Approach 3 failed with status:', response.status);
+            console.log('Approach 4 failed with status:', response.status);
           }
         } catch (error) {
-          console.warn('Approach 3 failed with error:', error);
+          console.warn('Approach 4 failed with error:', error);
         }
       }
 
@@ -288,48 +315,18 @@ function LoginForm() {
 
           {/* Database Connection Status */}
           <div className="mt-4 text-center">
-            <div className="text-xs text-gray-500 mb-1">Database Connection Status:</div>
-            <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs ${dbConnected === null ? 'bg-gray-100 text-gray-600' : dbConnected ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-              <span className={`w-2 h-2 rounded-full mr-1 ${dbConnected === null ? 'bg-gray-400' : dbConnected ? 'bg-green-500' : 'bg-red-500'}`}></span>
-              {dbConnected === null ? 'Checking...' : dbConnected ? 'Connected' : 'Disconnected'}
+            <div className="flex items-center justify-center gap-2">
+              <div className="relative inline-flex">
+                <div className={`w-3 h-3 rounded-full ${dbStatus.checking ? 'bg-yellow-400' : dbStatus.connected ? 'bg-green-500' : 'bg-red-500'}`}></div>
+                {dbStatus.checking && (
+                  <div className="absolute inset-0 rounded-full animate-ping bg-yellow-400 opacity-75"></div>
+                )}
+              </div>
+              <span className={`text-xs font-medium ${dbStatus.checking ? 'text-yellow-700' : dbStatus.connected ? 'text-green-700' : 'text-red-700'}`}>
+                {dbStatus.checking ? 'Checking connection...' : dbStatus.connected ? 'Database connected' : 'Database disconnected'}
+              </span>
             </div>
           </div>
-
-          {/* Test Users */}
-          {testUsers.length > 0 && (
-            <div className="mt-4 text-center">
-              <button
-                type="button"
-                className="text-xs text-blue-600 hover:text-blue-800 underline"
-                onClick={() => setShowTestUsers(!showTestUsers)}
-              >
-                {showTestUsers ? 'Hide Test Users' : 'Show Test Users'}
-              </button>
-
-              {showTestUsers && (
-                <div className="mt-2 text-xs bg-gray-50 p-2 rounded text-left">
-                  <div className="font-medium mb-1">Available Test Users:</div>
-                  <ul className="space-y-1">
-                    {testUsers.map((user, index) => (
-                      <li key={index} className="flex justify-between">
-                        <span>{user.username || user.email}</span>
-                        <button
-                          type="button"
-                          className="text-blue-600 hover:text-blue-800 text-xs"
-                          onClick={() => {
-                            setUsername(user.username || user.email);
-                            setPassword(user.password || 'password123');
-                          }}
-                        >
-                          Use
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-          )}
         </div>
       </div>
     </div>
