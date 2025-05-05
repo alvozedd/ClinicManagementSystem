@@ -221,11 +221,13 @@ function HomePage() {
           bottom: 0,
           width: '100vw',
           height: '100vh',
+          minWidth: '100vw',
+          minHeight: '100vh',
           margin: 0,
           padding: 0,
           overflow: 'hidden',
           backgroundColor: '#000830',
-          zIndex: -10 // Ensure it's behind all content
+          zIndex: -1 // Ensure it's behind all content but still visible
         }}>
           <ThreeBackground />
         </div>
@@ -233,7 +235,7 @@ function HomePage() {
 
       {/* Fallback background color if Three.js is disabled */}
       {!threeEnabled && (
-        <div className="fixed inset-0 z-[-10] w-full h-full" style={{
+        <div className="fixed inset-0 z-[-1] w-screen h-screen" style={{
           backgroundColor: '#000830',
           left: 0,
           right: 0,
@@ -243,7 +245,11 @@ function HomePage() {
           padding: 0,
           width: '100vw',
           height: '100vh',
-          pointerEvents: 'none' // Allow clicks to pass through
+          minWidth: '100vw',
+          minHeight: '100vh',
+          overflow: 'hidden',
+          pointerEvents: 'none', // Allow clicks to pass through
+          position: 'fixed'
         }}></div>
       )}
 

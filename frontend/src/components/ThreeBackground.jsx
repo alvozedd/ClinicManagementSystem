@@ -216,7 +216,7 @@ function ThreeBackground() {
   return (
     <div
       ref={mountRef}
-      className={`fixed inset-0 z-[-10] w-full h-full ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
+      className={`fixed inset-0 z-[-1] w-screen h-screen ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
       style={{
         backgroundColor: '#000830',
         transition: 'opacity 0.5s ease-in-out',
@@ -224,10 +224,15 @@ function ThreeBackground() {
         right: 0,
         top: 0,
         bottom: 0,
+        width: '100vw',
+        height: '100vh',
+        minWidth: '100vw',
+        minHeight: '100vh',
         margin: 0,
         padding: 0,
         overflow: 'hidden',
-        pointerEvents: 'none' // Allow clicks to pass through
+        pointerEvents: 'none', // Allow clicks to pass through
+        position: 'fixed'
       }}
     />
   );
