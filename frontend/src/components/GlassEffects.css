@@ -1,11 +1,11 @@
 /* Frosted Glass Effects - Enhanced for Three.js */
 
 .glass-card {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);
   border: 1px solid rgba(255, 255, 255, 0.18);
-  box-shadow: 0 4px 6px 0 rgba(31, 38, 135, 0.05);
+  box-shadow: 0 4px 15px 0 rgba(31, 38, 135, 0.1);
   transition: all 0.3s ease;
 }
 
@@ -127,14 +127,16 @@
 
 /* Glass Card Service - For service cards with Three.js background */
 .glass-card-service {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7)) !important;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.85)) !important;
   backdrop-filter: blur(10px) !important;
   -webkit-backdrop-filter: blur(10px) !important;
-  border: 1px solid rgba(219, 234, 254, 0.4) !important;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1),
-              0 1px 8px rgba(0, 0, 0, 0.05),
-              0 0 0 1px rgba(255, 255, 255, 0.2) inset !important;
+  border: 1px solid rgba(59, 130, 246, 0.3) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15),
+              0 1px 8px rgba(0, 0, 0, 0.1),
+              0 0 0 1px rgba(255, 255, 255, 0.3) inset !important;
   transition: all 0.4s ease !important;
+  width: 100% !important;
+  display: block !important;
 }
 
 .glass-card-service:hover {
@@ -170,16 +172,35 @@
 .book-now-button {
   text-shadow: none;
   letter-spacing: 0.5px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   color: black !important;
+  background-color: white;
+  border: none;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.book-now-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
 }
 
 /* Call Us Button - Simple high contrast */
 .call-us-button {
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  text-shadow: none;
   letter-spacing: 0.5px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   color: white !important;
+  background-color: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.call-us-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: white;
+  transform: translateY(-2px);
 }
 
 /* Enhanced Footer Pattern */

@@ -1,5 +1,8 @@
 const asyncHandler = require('../middleware/asyncHandler');
 const Appointment = require('../models/appointmentModel');
+const User = require('../models/userModel');
+const Notification = require('../models/notificationModel');
+const Patient = require('../models/patientModel');
 
 // @desc    Create a new appointment
 // @route   POST /api/appointments
@@ -45,6 +48,51 @@ const createAppointment = asyncHandler(async (req, res) => {
   const appointment = await Appointment.create(appointmentData);
 
   if (appointment) {
+    // Get patient details for notification message
+    const patient = await Patient.findById(patient_id);
+    const patientName = patient ? patient.name : 'A patient';
+
+    // Create notifications for all doctors and secretaries
+    try {
+      // Find all doctors
+      const doctors = await User.find({ role: 'doctor' });
+      // Find all secretaries
+      const secretaries = await User.find({ role: 'secretary' });
+
+      // Create notifications for doctors
+      for (const doctor of doctors) {
+        await Notification.create({
+          recipient_id: doctor._id,
+          type: 'appointment_created',
+          title: 'New Appointment',
+          message: `${patientName} has booked an appointment for ${new Date(appointment_date).toLocaleDateString()}.`,
+          related_id: appointment._id,
+          related_model: 'Appointment',
+          created_by: appointmentData.createdBy,
+          created_by_user_id: req.user ? req.user._id : null,
+        });
+      }
+
+      // Create notifications for secretaries
+      for (const secretary of secretaries) {
+        await Notification.create({
+          recipient_id: secretary._id,
+          type: 'appointment_created',
+          title: 'New Appointment',
+          message: `${patientName} has booked an appointment for ${new Date(appointment_date).toLocaleDateString()}.`,
+          related_id: appointment._id,
+          related_model: 'Appointment',
+          created_by: appointmentData.createdBy,
+          created_by_user_id: req.user ? req.user._id : null,
+        });
+      }
+
+      console.log(`Created notifications for ${doctors.length} doctors and ${secretaries.length} secretaries`);
+    } catch (error) {
+      console.error('Error creating notifications:', error);
+      // Don't throw error, just log it - we still want to return the appointment
+    }
+
     res.status(201).json(appointment);
   } else {
     res.status(400);
@@ -122,6 +170,58 @@ const updateAppointment = asyncHandler(async (req, res) => {
     }
 
     const updatedAppointment = await appointment.save();
+
+    // Create notifications for status changes
+    if (req.body.status && req.body.status !== appointment.status) {
+      try {
+        // Get patient details for notification message
+        const patient = await Patient.findById(appointment.patient_id);
+        const patientName = patient ? patient.name : 'A patient';
+
+        // Find all doctors and secretaries
+        const doctors = await User.find({ role: 'doctor' });
+        const secretaries = await User.find({ role: 'secretary' });
+
+        // Create notifications for doctors
+        for (const doctor of doctors) {
+          // Skip notification for the user who made the change
+          if (req.user && doctor._id.toString() === req.user._id.toString()) continue;
+
+          await Notification.create({
+            recipient_id: doctor._id,
+            type: 'appointment_updated',
+            title: 'Appointment Status Updated',
+            message: `${patientName}'s appointment status has been changed to ${req.body.status}.`,
+            related_id: appointment._id,
+            related_model: 'Appointment',
+            created_by: req.user ? req.user.role : 'system',
+            created_by_user_id: req.user ? req.user._id : null,
+          });
+        }
+
+        // Create notifications for secretaries
+        for (const secretary of secretaries) {
+          // Skip notification for the user who made the change
+          if (req.user && secretary._id.toString() === req.user._id.toString()) continue;
+
+          await Notification.create({
+            recipient_id: secretary._id,
+            type: 'appointment_updated',
+            title: 'Appointment Status Updated',
+            message: `${patientName}'s appointment status has been changed to ${req.body.status}.`,
+            related_id: appointment._id,
+            related_model: 'Appointment',
+            created_by: req.user ? req.user.role : 'system',
+            created_by_user_id: req.user ? req.user._id : null,
+          });
+        }
+
+        console.log(`Created status update notifications for ${doctors.length} doctors and ${secretaries.length} secretaries`);
+      } catch (error) {
+        console.error('Error creating status update notifications:', error);
+        // Don't throw error, just log it - we still want to return the appointment
+      }
+    }
 
     // Populate patient information before returning
     const populatedAppointment = await Appointment.findById(updatedAppointment._id).populate('patient_id', 'name');

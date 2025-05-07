@@ -1,4 +1,4 @@
-/* Simplified Animation styles for UroHealth Central website */
+/* Enhanced Animation styles for UroHealth Central website */
 
 /* Base animation classes */
 .animate-on-scroll {
@@ -20,6 +20,90 @@
 @keyframes simpleFadeIn {
   0% { opacity: 0; }
   100% { opacity: 1; }
+}
+
+/* Slow bounce animation for scroll indicator */
+.animate-bounce-slow {
+  animation: bounceSlow 2s ease-in-out infinite;
+}
+
+@keyframes bounceSlow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+/* Staggered fade-in animations */
+.stagger-fade-in > * {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.stagger-fade-in.animated > *:nth-child(1) {
+  transition-delay: 0.1s;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.stagger-fade-in.animated > *:nth-child(2) {
+  transition-delay: 0.2s;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.stagger-fade-in.animated > *:nth-child(3) {
+  transition-delay: 0.3s;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.stagger-fade-in.animated > *:nth-child(4) {
+  transition-delay: 0.4s;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.stagger-fade-in.animated > *:nth-child(5) {
+  transition-delay: 0.5s;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Pulse animation for CTA buttons */
+.pulse-animation {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+  }
+}
+
+/* Slow pulse animation for background elements */
+.animate-pulse-slow {
+  animation: pulseSlow 6s ease-in-out infinite alternate;
+}
+
+@keyframes pulseSlow {
+  0% {
+    opacity: 0.2;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.3;
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 0.25;
+    transform: scale(1);
+  }
 }
 
 /* Footer spacing fix */

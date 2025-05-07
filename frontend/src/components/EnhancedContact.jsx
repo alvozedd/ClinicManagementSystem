@@ -8,7 +8,7 @@ import { motion } from 'framer-motion';
 const EnhancedContact = ({ content, getContentValue }) => {
 
   return (
-    <div id="contact" className="bg-[#000830] text-white py-20 sm:py-24 md:py-28 w-full relative overflow-hidden">
+    <div id="contact" className="bg-[#000830] text-white py-20 sm:py-24 md:py-28 w-full relative overflow-hidden min-h-screen flex items-center">
       {/* Background elements */}
       <div className="absolute inset-0 overflow-hidden">
         {/* Diagonal line */}

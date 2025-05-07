@@ -108,6 +108,13 @@ export const getContentItem = (content, section, category, label) => {
   }
 
   const items = content[section][category];
+
+  // Check if items is an array
+  if (!Array.isArray(items)) {
+    console.log(`Items in ${section}.${category} is not an array`);
+    return null;
+  }
+
   console.log(`Found ${items.length} items in ${section}.${category}`);
 
   // Log all items in this category for debugging
@@ -115,15 +122,21 @@ export const getContentItem = (content, section, category, label) => {
     console.log(`Items in ${section}.${category}:`, items.map(item => item.label));
   }
 
-  const foundItem = items.find(item => item.label === label && item.visible !== false);
+  // Try to find the item with the matching label
+  try {
+    const foundItem = items.find(item => item.label === label && item.visible !== false);
 
-  if (foundItem) {
-    console.log(`Found matching item for ${section}.${category}.${label}:`, foundItem);
-  } else {
-    console.log(`No matching item found for ${section}.${category}.${label}`);
+    if (foundItem) {
+      console.log(`Found matching item for ${section}.${category}.${label}:`, foundItem);
+    } else {
+      console.log(`No matching item found for ${section}.${category}.${label}`);
+    }
+
+    return foundItem || null;
+  } catch (error) {
+    console.error(`Error finding item for ${section}.${category}.${label}:`, error);
+    return null;
   }
-
-  return foundItem || null;
 };
 
 /**
@@ -141,6 +154,27 @@ export const getContentValue = (content, section, category, label, defaultValue 
   // Additional validation and logging
   if (!content) {
     console.warn('Content object is null or undefined in getContentValue');
+    console.log(`Using default value for ${section}.${category}.${label}:`, defaultValue);
+    return defaultValue;
+  }
+
+  // Check if section exists
+  if (!content[section]) {
+    console.warn(`Section '${section}' not found in content`);
+    console.log(`Using default value for ${section}.${category}.${label}:`, defaultValue);
+    return defaultValue;
+  }
+
+  // Check if category exists
+  if (!content[section][category]) {
+    console.warn(`Category '${category}' not found in section '${section}'`);
+    console.log(`Using default value for ${section}.${category}.${label}:`, defaultValue);
+    return defaultValue;
+  }
+
+  // Check if category is an array
+  if (!Array.isArray(content[section][category])) {
+    console.warn(`Category '${category}' in section '${section}' is not an array`);
     console.log(`Using default value for ${section}.${category}.${label}:`, defaultValue);
     return defaultValue;
   }

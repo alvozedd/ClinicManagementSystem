@@ -2073,6 +2073,75 @@ const apiService = {
       console.error('Error getting file:', error);
       throw error;
     }
+  },
+
+  // Notification endpoints
+  getNotifications: async () => {
+    try {
+      console.log('Fetching notifications');
+      return await secureFetch(`${API_URL}/notifications`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeader(),
+        },
+        credentials: 'include'
+      });
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+      return []; // Return empty array instead of throwing
+    }
+  },
+
+  getUnreadNotificationCount: async () => {
+    try {
+      console.log('Fetching unread notification count');
+      return await secureFetch(`${API_URL}/notifications/unread-count`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeader(),
+        },
+        credentials: 'include'
+      });
+    } catch (error) {
+      console.error('Error fetching unread notification count:', error);
+      return { count: 0 }; // Return zero count instead of throwing
+    }
+  },
+
+  markNotificationAsRead: async (notificationId) => {
+    try {
+      console.log('Marking notification as read:', notificationId);
+      return await secureFetch(`${API_URL}/notifications/${notificationId}/read`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeader(),
+        },
+        credentials: 'include'
+      });
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+      throw error;
+    }
+  },
+
+  markAllNotificationsAsRead: async () => {
+    try {
+      console.log('Marking all notifications as read');
+      return await secureFetch(`${API_URL}/notifications/mark-all-read`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeader(),
+        },
+        credentials: 'include'
+      });
+    } catch (error) {
+      console.error('Error marking all notifications as read:', error);
+      throw error;
+    }
   }
 };
 

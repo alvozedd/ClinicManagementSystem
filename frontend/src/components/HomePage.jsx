@@ -16,7 +16,7 @@ import '../styles/darkRectangleFix.css'; // Import dark rectangle fix
 
 // Three.js configuration
 const threeJsConfig = {
-  enabled: false,  // Disable Three.js for testing
+  enabled: true,  // Enable Three.js for the beautiful background
   quality: 'high' // Quality level: 'low', 'medium', 'high'
 };
 
@@ -249,10 +249,7 @@ function HomePage() {
         }}></div>
       )}
 
-      {/* Debug info - remove in production */}
-      <div className="fixed bottom-0 right-0 bg-black bg-opacity-50 text-white p-2 text-xs z-50">
-        Three.js: {threeEnabled ? 'Enabled' : 'Disabled'}
-      </div>
+      {/* Debug info removed for production */}
 
       <PageLoader>
         <div className="content-overlay" style={{
@@ -691,11 +688,11 @@ function HomePage() {
                       <div className="h-1 w-20 bg-gradient-to-r from-blue-600 to-blue-400 mx-auto mt-6"></div>
                     </div>
 
-                    <p className="text-xl sm:text-2xl md:text-3xl mb-3 text-blue-200 font-light hero-subtitle">
+                    <p className="text-xl sm:text-2xl md:text-3xl mb-3 text-white font-light hero-subtitle">
                       {getContentValue(content, 'homepage', 'Hero', 'Hero Subtitle', 'Specialist Urological Care')}
                     </p>
 
-                    <p className="text-base sm:text-lg md:text-xl mb-8 sm:mb-10 leading-relaxed text-gray-300 max-w-2xl mx-auto hero-description">
+                    <p className="text-base sm:text-lg md:text-xl mb-8 sm:mb-10 leading-relaxed text-white max-w-2xl mx-auto hero-description">
                       {getContentValue(content, 'homepage', 'Hero', 'Hero Description', '20+ years of specialized medical excellence')}
                     </p>
 
@@ -705,7 +702,7 @@ function HomePage() {
                           setShowBookingForm(true);
                           window.scrollTo({ top: 0, behavior: 'smooth' });
                         }}
-                        className="bg-white hover:bg-gray-100 px-8 sm:px-10 py-3 rounded-lg font-semibold transition duration-200 text-base sm:text-lg flex items-center justify-center gap-3 book-now-button"
+                        className="bg-white hover:bg-gray-100 px-8 sm:px-10 py-3 rounded-md font-medium transition duration-200 text-base sm:text-lg flex items-center justify-center gap-2 book-now-button"
                       >
                         <svg className="w-5 h-5 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
@@ -715,7 +712,7 @@ function HomePage() {
 
                       <button
                         onClick={() => window.location.href = 'tel:+254722396296'}
-                        className="bg-blue-900/40 hover:bg-blue-900/60 text-white px-8 sm:px-10 py-3 rounded-lg font-semibold transition duration-200 text-base sm:text-lg flex items-center justify-center gap-3 call-us-button"
+                        className="border border-white/50 hover:border-white px-8 sm:px-10 py-3 rounded-md font-medium transition duration-200 text-base sm:text-lg flex items-center justify-center gap-2 call-us-button"
                       >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
@@ -733,7 +730,7 @@ function HomePage() {
               {/* White background sections with Three.js effects */}
               <div className="bg-white">
                 {/* Services Section */}
-                <div id="services" className="bg-gradient-to-br from-blue-50 to-white text-[#000830] py-20 sm:py-24 md:py-28 w-full relative overflow-hidden">
+                <div id="services" className="bg-gradient-to-br from-blue-50 to-white text-[#000830] py-20 sm:py-24 md:py-28 w-full relative overflow-hidden min-h-screen flex items-center">
                   {/* Background elements */}
                   <div className="absolute inset-0 overflow-hidden">
                     {/* Diagonal lines */}
@@ -883,7 +880,7 @@ function HomePage() {
 
                 <p className="text-blue-200 mb-6 text-lg leading-relaxed">
                   {content.footer?.['UroHealth Central Ltd']?.find(item => item.label === 'About Text')?.value ||
-                   'Providing specialized urological care with a patient-centered approach since 2010.'}
+                   'Providing specialized urological care with state-of-the-art technology and personalized treatment plans.'}
                 </p>
 
                 <div className="h-1 w-20 bg-gradient-to-r from-blue-600 to-blue-400 rounded-full mb-6"></div>

@@ -1,6 +1,8 @@
 const asyncHandler = require('express-async-handler');
 const IntegratedAppointment = require('../models/integratedAppointmentModel');
 const Patient = require('../models/patientModel');
+const User = require('../models/userModel');
+const Notification = require('../models/notificationModel');
 const mongoose = require('mongoose');
 const logger = require('../utils/logger');
 
@@ -68,6 +70,50 @@ const createAppointment = asyncHandler(async (req, res) => {
   const appointment = await IntegratedAppointment.create(appointmentData);
 
   if (appointment) {
+    // Create notifications for all doctors and secretaries
+    try {
+      // Find all doctors
+      const doctors = await User.find({ role: 'doctor' });
+      // Find all secretaries
+      const secretaries = await User.find({ role: 'secretary' });
+
+      const patientName = patient ? patient.name : 'A patient';
+      const appointmentDate = new Date(scheduled_date).toLocaleDateString();
+
+      // Create notifications for doctors
+      for (const doctor of doctors) {
+        await Notification.create({
+          recipient_id: doctor._id,
+          type: 'appointment_created',
+          title: 'New Appointment',
+          message: `${patientName} has booked an appointment for ${appointmentDate}.`,
+          related_id: appointment._id,
+          related_model: 'IntegratedAppointment',
+          created_by: appointmentData.createdBy,
+          created_by_user_id: req.user ? req.user._id : null,
+        });
+      }
+
+      // Create notifications for secretaries
+      for (const secretary of secretaries) {
+        await Notification.create({
+          recipient_id: secretary._id,
+          type: 'appointment_created',
+          title: 'New Appointment',
+          message: `${patientName} has booked an appointment for ${appointmentDate}.`,
+          related_id: appointment._id,
+          related_model: 'IntegratedAppointment',
+          created_by: appointmentData.createdBy,
+          created_by_user_id: req.user ? req.user._id : null,
+        });
+      }
+
+      logger.info(`Created notifications for ${doctors.length} doctors and ${secretaries.length} secretaries`);
+    } catch (error) {
+      logger.error('Error creating notifications:', error);
+      // Don't throw error, just log it - we still want to return the appointment
+    }
+
     // Populate patient information
     const populatedAppointment = await IntegratedAppointment.findById(appointment._id)
       .populate('patient_id', 'name gender phone year_of_birth');
@@ -246,6 +292,34 @@ const checkInPatient = asyncHandler(async (req, res) => {
 
   try {
     await appointment.checkIn();
+
+    // Create notifications for doctors
+    try {
+      const patient = await Patient.findById(appointment.patient_id);
+      const patientName = patient ? patient.name : 'A patient';
+
+      // Find all doctors
+      const doctors = await User.find({ role: 'doctor' });
+
+      // Create notifications for doctors
+      for (const doctor of doctors) {
+        await Notification.create({
+          recipient_id: doctor._id,
+          type: 'appointment_updated',
+          title: 'Patient Checked In',
+          message: `${patientName} has checked in for their appointment.`,
+          related_id: appointment._id,
+          related_model: 'IntegratedAppointment',
+          created_by: req.user ? req.user.role : 'system',
+          created_by_user_id: req.user ? req.user._id : null,
+        });
+      }
+
+      logger.info(`Created check-in notifications for ${doctors.length} doctors`);
+    } catch (notificationError) {
+      logger.error('Error creating check-in notifications:', notificationError);
+      // Don't throw error, just log it
+    }
 
     // Get the updated appointment with populated fields
     const updatedAppointment = await IntegratedAppointment.findById(req.params.id)

@@ -1,11 +1,21 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import apiService from '../utils/apiService';
 import { loadContent, getContentValue } from '../utils/contentUtils';
 import { FaBars, FaTimes } from 'react-icons/fa';
 import EnhancedContact from './EnhancedContact';
+import EnhancedServices from './EnhancedServices';
+import EnhancedHero from './EnhancedHero';
 import PageLoader from './PageLoader';
+import StandardBackground from './WaveBackground';
+import GradientBackground from './GradientBackground';
 import '../styles/animations.css';
+import '../styles/textAnimations.css';
+import '../styles/fallbackAnimations.css';
+import '../styles/glassEffects.css';
+import '../styles/ThreeStyles.css';
+import '../components/GlassEffects.css';
+import { setupScrollAnimations } from '../utils/animationUtils';
 
 function NewHomePage() {
   const [showBookingForm, setShowBookingForm] = useState(false);
@@ -25,15 +35,281 @@ function NewHomePage() {
   useEffect(() => {
     const fetchContent = async () => {
       try {
+        setLoading(true);
         const organizedContent = await loadContent();
-        setContent(organizedContent);
         console.log("Content loaded successfully:", organizedContent);
+
+        // Ensure we have content for the services section
+        if (!organizedContent.services || !organizedContent.services.Main) {
+          console.warn('Services content missing, adding default content');
+          const updatedContent = {
+            ...organizedContent,
+            services: {
+              ...organizedContent.services,
+              Main: [
+                {
+                  id: 'services-main-1',
+                  section: 'services',
+                  category: 'Main',
+                  label: 'Title',
+                  value: 'Our Services',
+                  visible: true
+                },
+                {
+                  id: 'services-main-2',
+                  section: 'services',
+                  category: 'Main',
+                  label: 'Subtitle',
+                  value: 'What We Offer',
+                  visible: true
+                },
+                {
+                  id: 'services-main-3',
+                  section: 'services',
+                  category: 'Main',
+                  label: 'Description',
+                  value: 'We provide comprehensive urological care with a focus on patient comfort and the latest medical technologies.',
+                  visible: true
+                }
+              ],
+              Consultations: [
+                {
+                  id: 'services-consult-1',
+                  section: 'services',
+                  category: 'Consultations',
+                  label: 'Title',
+                  value: 'Consultations',
+                  visible: true
+                },
+                {
+                  id: 'services-consult-2',
+                  section: 'services',
+                  category: 'Consultations',
+                  label: 'Description',
+                  value: 'Comprehensive evaluation and diagnosis of urological conditions by our expert consultants.',
+                  visible: true
+                },
+                {
+                  id: 'services-consult-3',
+                  section: 'services',
+                  category: 'Consultations',
+                  label: 'Feature',
+                  value: '30-60 minutes',
+                  visible: true
+                }
+              ],
+              Diagnostics: [
+                {
+                  id: 'services-diag-1',
+                  section: 'services',
+                  category: 'Diagnostics',
+                  label: 'Title',
+                  value: 'Diagnostics',
+                  visible: true
+                },
+                {
+                  id: 'services-diag-2',
+                  section: 'services',
+                  category: 'Diagnostics',
+                  label: 'Description',
+                  value: 'Advanced diagnostic procedures including ultrasound, cystoscopy, and urodynamic studies.',
+                  visible: true
+                },
+                {
+                  id: 'services-diag-3',
+                  section: 'services',
+                  category: 'Diagnostics',
+                  label: 'Feature',
+                  value: 'Accurate Results',
+                  visible: true
+                }
+              ],
+              Treatments: [
+                {
+                  id: 'services-treat-1',
+                  section: 'services',
+                  category: 'Treatments',
+                  label: 'Title',
+                  value: 'Treatments',
+                  visible: true
+                },
+                {
+                  id: 'services-treat-2',
+                  section: 'services',
+                  category: 'Treatments',
+                  label: 'Description',
+                  value: 'Comprehensive treatment options for various urological conditions, from medication to surgical interventions.',
+                  visible: true
+                },
+                {
+                  id: 'services-treat-3',
+                  section: 'services',
+                  category: 'Treatments',
+                  label: 'Feature',
+                  value: 'Personalized Care',
+                  visible: true
+                }
+              ]
+            }
+          };
+          setContent(updatedContent);
+        } else {
+          setContent(organizedContent);
+        }
       } catch (err) {
         console.error('Error in content loading process:', err);
+        // Set default content on error
+        setContent({
+          homepage: {
+            Hero: [
+              {
+                id: 'homepage-hero-1',
+                section: 'homepage',
+                category: 'Hero',
+                label: 'Hero Title',
+                value: 'UroHealth Central Ltd',
+                visible: true
+              },
+              {
+                id: 'homepage-hero-2',
+                section: 'homepage',
+                category: 'Hero',
+                label: 'Hero Subtitle',
+                value: 'Specialist Urological Care',
+                visible: true
+              },
+              {
+                id: 'homepage-hero-3',
+                section: 'homepage',
+                category: 'Hero',
+                label: 'Hero Description',
+                value: '',
+                visible: false
+              }
+            ]
+          },
+          services: {
+            Main: [
+              {
+                id: 'services-main-1',
+                section: 'services',
+                category: 'Main',
+                label: 'Title',
+                value: 'Our Services',
+                visible: true
+              },
+              {
+                id: 'services-main-2',
+                section: 'services',
+                category: 'Main',
+                label: 'Subtitle',
+                value: 'What We Offer',
+                visible: true
+              },
+              {
+                id: 'services-main-3',
+                section: 'services',
+                category: 'Main',
+                label: 'Description',
+                value: 'We provide comprehensive urological care with a focus on patient comfort and the latest medical technologies.',
+                visible: true
+              }
+            ],
+            Consultations: [
+              {
+                id: 'services-consult-1',
+                section: 'services',
+                category: 'Consultations',
+                label: 'Title',
+                value: 'Consultations',
+                visible: true
+              },
+              {
+                id: 'services-consult-2',
+                section: 'services',
+                category: 'Consultations',
+                label: 'Description',
+                value: 'Comprehensive evaluation and diagnosis of urological conditions by our expert consultants.',
+                visible: true
+              },
+              {
+                id: 'services-consult-3',
+                section: 'services',
+                category: 'Consultations',
+                label: 'Feature',
+                value: '30-60 minutes',
+                visible: true
+              }
+            ],
+            Diagnostics: [
+              {
+                id: 'services-diag-1',
+                section: 'services',
+                category: 'Diagnostics',
+                label: 'Title',
+                value: 'Diagnostics',
+                visible: true
+              },
+              {
+                id: 'services-diag-2',
+                section: 'services',
+                category: 'Diagnostics',
+                label: 'Description',
+                value: 'Advanced diagnostic procedures including ultrasound, cystoscopy, and urodynamic studies.',
+                visible: true
+              },
+              {
+                id: 'services-diag-3',
+                section: 'services',
+                category: 'Diagnostics',
+                label: 'Feature',
+                value: 'Accurate Results',
+                visible: true
+              }
+            ],
+            Treatments: [
+              {
+                id: 'services-treat-1',
+                section: 'services',
+                category: 'Treatments',
+                label: 'Title',
+                value: 'Treatments',
+                visible: true
+              },
+              {
+                id: 'services-treat-2',
+                section: 'services',
+                category: 'Treatments',
+                label: 'Description',
+                value: 'Comprehensive treatment options for various urological conditions, from medication to surgical interventions.',
+                visible: true
+              },
+              {
+                id: 'services-treat-3',
+                section: 'services',
+                category: 'Treatments',
+                label: 'Feature',
+                value: 'Personalized Care',
+                visible: true
+              }
+            ]
+          }
+        });
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchContent();
+  }, []);
+
+  // Initialize scroll animations
+  useEffect(() => {
+    // Setup scroll animations when component mounts
+    const cleanup = setupScrollAnimations();
+
+    // Return cleanup function to remove event listeners when component unmounts
+    return cleanup;
   }, []);
 
   // Form data for both patient and appointment
@@ -111,14 +387,14 @@ function NewHomePage() {
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Header */}
-      <header className="bg-blue-900 text-white shadow-md">
+      <header className="bg-transparent text-white z-10 relative">
         <div className="container mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
             <Link to="/" className="text-2xl font-bold">
               <span className="text-blue-300">Uro</span>
               <span>Health</span>
             </Link>
-            
+
             {/* Mobile menu button */}
             <div className="md:hidden">
               <button
@@ -128,37 +404,37 @@ function NewHomePage() {
                 {mobileMenuOpen ? <FaTimes size={20} /> : <FaBars size={20} />}
               </button>
             </div>
-            
+
             {/* Desktop navigation */}
             <nav className="hidden md:flex space-x-6">
-              <a 
-                href="#services" 
+              <a
+                href="#services"
                 className="hover:text-blue-300 transition-colors"
               >
                 Services
               </a>
-              <a 
-                href="#contact" 
+              <a
+                href="#contact"
                 className="hover:text-blue-300 transition-colors"
               >
                 Contact
               </a>
-              <Link 
-                to="/login" 
+              <Link
+                to="/login"
                 className="bg-blue-700 hover:bg-blue-600 px-4 py-2 rounded-md"
               >
                 Staff Login
               </Link>
             </nav>
           </div>
-          
+
           {/* Mobile menu */}
           {mobileMenuOpen && (
             <nav className="mt-4 pb-4 md:hidden">
               <ul className="space-y-3">
                 <li>
-                  <a 
-                    href="#services" 
+                  <a
+                    href="#services"
                     className="block hover:text-blue-300 transition-colors"
                     onClick={() => setMobileMenuOpen(false)}
                   >
@@ -166,8 +442,8 @@ function NewHomePage() {
                   </a>
                 </li>
                 <li>
-                  <a 
-                    href="#contact" 
+                  <a
+                    href="#contact"
                     className="block hover:text-blue-300 transition-colors"
                     onClick={() => setMobileMenuOpen(false)}
                   >
@@ -175,8 +451,8 @@ function NewHomePage() {
                   </a>
                 </li>
                 <li>
-                  <Link 
-                    to="/login" 
+                  <Link
+                    to="/login"
                     className="block bg-blue-700 hover:bg-blue-600 px-4 py-2 rounded-md w-full text-center mt-2"
                     onClick={() => setMobileMenuOpen(false)}
                   >
@@ -190,11 +466,13 @@ function NewHomePage() {
       </header>
 
       <PageLoader>
-        <main>
+        <main className="">
           {bookingSuccess ? (
             /* Success message */
-            <div className="py-12 bg-white">
-              <div className="max-w-2xl mx-auto bg-white rounded-xl shadow-lg p-8 text-center">
+            <div className="min-h-screen flex items-center justify-center bg-transparent relative">
+              <StandardBackground />
+              <div className="absolute inset-0 bg-gradient-to-b from-black/10 to-transparent z-[1]"></div>
+              <div className="max-w-2xl mx-auto bg-white rounded-xl shadow-lg p-8 text-center my-12 w-full mx-4 sm:mx-auto relative z-20">
                 <h2 className="text-3xl font-bold text-blue-700 mb-4">Booking Confirmed!</h2>
                 <div className="bg-green-50 p-5 rounded-xl mb-5 border border-green-200">
                   <p className="mb-3">Thank you for your booking. Your appointment has been scheduled for <strong>{formData.appointmentDate}</strong>.</p>
@@ -222,8 +500,10 @@ function NewHomePage() {
             </div>
           ) : showBookingForm ? (
             /* Booking form */
-            <div className="py-12 bg-white">
-              <div className="max-w-2xl mx-auto bg-white rounded-xl shadow-lg p-8">
+            <div className="min-h-screen flex items-center justify-center bg-transparent relative">
+              <GradientBackground />
+              <div className="absolute inset-0 bg-gradient-to-b from-black/10 to-transparent z-[1]"></div>
+              <div className="max-w-2xl mx-auto bg-white rounded-xl shadow-lg p-8 my-12 w-full mx-4 sm:mx-auto relative z-20">
                 <div className="text-center mb-6">
                   <h2 className="text-2xl font-bold text-blue-700">Book Your Appointment</h2>
                 </div>
@@ -425,158 +705,20 @@ function NewHomePage() {
           ) : (
             <>
               {/* Hero Section */}
-              <section className="bg-blue-900 text-white py-16">
-                <div className="container mx-auto px-4 text-center">
-                  <h1 className="text-4xl md:text-5xl font-bold mb-6">
-                    {getContentValue(content, 'homepage', 'Hero', 'Hero Title', 'UroHealth Central Ltd')}
-                  </h1>
-                  <p className="text-2xl md:text-3xl mb-4 text-blue-200">
-                    {getContentValue(content, 'homepage', 'Hero', 'Hero Subtitle', 'Specialist Urological Care')}
-                  </p>
-                  <p className="text-xl mb-8 text-gray-300 max-w-3xl mx-auto">
-                    {getContentValue(content, 'homepage', 'Hero', 'Hero Description', '20+ years of specialized medical excellence')}
-                  </p>
-                  <div className="flex flex-col sm:flex-row justify-center gap-4">
-                    <button
-                      onClick={() => {
-                        setShowBookingForm(true);
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                      }}
-                      className="bg-white text-blue-900 hover:bg-gray-100 px-8 py-3 rounded-lg font-semibold text-lg"
-                    >
-                      Book Appointment
-                    </button>
-                    <a
-                      href="#contact"
-                      className="bg-blue-700 hover:bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold text-lg"
-                    >
-                      Contact Us
-                    </a>
-                  </div>
-                </div>
-              </section>
-
-              {/* Doctor Section */}
-              <section className="py-16 bg-white">
-                <div className="container mx-auto px-4 text-center">
-                  <h2 className="text-3xl font-bold mb-8 text-blue-900">Our Specialist</h2>
-                  <div className="max-w-3xl mx-auto bg-blue-50 p-8 rounded-lg shadow-md">
-                    <h3 className="text-2xl font-bold text-blue-800 mb-4">
-                      {getContentValue(content, 'homepage', 'Doctor', 'Doctor Name', 'DR. PAUL MUCHAI MBUGUA - CONSULTANT SURGEON & UROLOGIST')}
-                    </h3>
-                    <p className="text-gray-700 mb-6">
-                      {getContentValue(content, 'homepage', 'About', 'About Text', 'We provide comprehensive urological care with state-of-the-art technology and personalized treatment plans.')}
-                    </p>
-                  </div>
-                </div>
-              </section>
+              <EnhancedHero
+                content={content}
+                getContentValue={getContentValue}
+                onBookAppointment={() => {
+                  setShowBookingForm(true);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+              />
 
               {/* Services Section */}
-              <section id="services" className="py-16 bg-gray-100">
-                <div className="container mx-auto px-4">
-                  <h2 className="text-3xl font-bold mb-12 text-center text-blue-900">Our Services</h2>
-                  <div className="grid md:grid-cols-3 gap-8">
-                    <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
-                      <h3 className="text-xl font-bold mb-3 text-blue-800">
-                        {getContentValue(content, 'services', 'Consultations', 'Title', 'Consultations')}
-                      </h3>
-                      <p className="text-gray-700 mb-4">
-                        {getContentValue(content, 'services', 'Consultations', 'Description', 'Comprehensive evaluation and diagnosis of urological conditions by our expert consultants.')}
-                      </p>
-                      <div className="text-blue-600 font-medium">
-                        {getContentValue(content, 'services', 'Consultations', 'Feature', '30-60 minutes')}
-                      </div>
-                    </div>
-                    
-                    <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
-                      <h3 className="text-xl font-bold mb-3 text-blue-800">
-                        {getContentValue(content, 'services', 'Diagnostics', 'Title', 'Diagnostics')}
-                      </h3>
-                      <p className="text-gray-700 mb-4">
-                        {getContentValue(content, 'services', 'Diagnostics', 'Description', 'Advanced diagnostic procedures including ultrasound, cystoscopy, and urodynamic studies.')}
-                      </p>
-                      <div className="text-blue-600 font-medium">
-                        {getContentValue(content, 'services', 'Diagnostics', 'Feature', 'Accurate Results')}
-                      </div>
-                    </div>
-                    
-                    <div className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
-                      <h3 className="text-xl font-bold mb-3 text-blue-800">
-                        {getContentValue(content, 'services', 'Treatments', 'Title', 'Treatments')}
-                      </h3>
-                      <p className="text-gray-700 mb-4">
-                        {getContentValue(content, 'services', 'Treatments', 'Description', 'Comprehensive treatment options for various urological conditions, from medication to surgical interventions.')}
-                      </p>
-                      <div className="text-blue-600 font-medium">
-                        {getContentValue(content, 'services', 'Treatments', 'Feature', 'Personalized Care')}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </section>
+              <EnhancedServices content={content} getContentValue={getContentValue} />
 
               {/* Contact Section */}
-              <section id="contact" className="py-16 bg-white">
-                <div className="container mx-auto px-4">
-                  <h2 className="text-3xl font-bold mb-12 text-center text-blue-900">
-                    {getContentValue(content, 'contact', 'Main', 'Title', 'CONTACT US')}
-                  </h2>
-                  
-                  <div className="grid md:grid-cols-2 gap-8">
-                    <div className="bg-blue-50 p-6 rounded-lg shadow-md">
-                      <h3 className="text-xl font-bold mb-4 text-blue-800">Contact Information</h3>
-                      
-                      <div className="space-y-4">
-                        <div>
-                          <h4 className="font-semibold text-blue-700">Address:</h4>
-                          <p className="text-gray-700">
-                            {getContentValue(content, 'contact', 'Location', 'Address Line 1', '1st Floor, Gatemu House,')} <br />
-                            {getContentValue(content, 'contact', 'Location', 'Address Line 2', 'Kimathi Way,')} <br />
-                            {getContentValue(content, 'contact', 'Location', 'Address Line 3', 'Nyeri, Kenya')}
-                          </p>
-                        </div>
-                        
-                        <div>
-                          <h4 className="font-semibold text-blue-700">Phone:</h4>
-                          <p className="text-gray-700">
-                            Mobile: {getContentValue(content, 'contact', 'Contact Information', 'Mobile', '0722 396 296')} <br />
-                            Office: {getContentValue(content, 'contact', 'Contact Information', 'Office', '0733 398 296')}
-                          </p>
-                        </div>
-                        
-                        <div>
-                          <h4 className="font-semibold text-blue-700">Email:</h4>
-                          <p className="text-gray-700">
-                            {getContentValue(content, 'contact', 'Contact Information', 'Email', 'info@urohealthcentral.com')}
-                          </p>
-                        </div>
-                        
-                        <div>
-                          <h4 className="font-semibold text-blue-700">Office Hours:</h4>
-                          <p className="text-gray-700">
-                            {getContentValue(content, 'contact', 'Office Hours', 'Weekday Hours', 'Monday - Friday: 8:00 AM - 5:00 PM')} <br />
-                            {getContentValue(content, 'contact', 'Office Hours', 'Saturday Hours', 'Saturday: By appointment')} <br />
-                            {getContentValue(content, 'contact', 'Office Hours', 'Sunday Hours', 'Sunday: Closed')}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="bg-white rounded-lg shadow-md overflow-hidden h-96">
-                      <iframe 
-                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3989.7575147797297!2d36.95016937386752!3d-0.42171763541068937!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x18285f1e0b8e0b9d%3A0x9d0d2c271d23c1d0!2sGatemu%20House%2C%20Nyeri!5e0!3m2!1sen!2ske!4v1682345678901!5m2!1sen!2ske" 
-                        width="100%" 
-                        height="100%" 
-                        style={{ border: 0 }} 
-                        allowFullScreen="" 
-                        loading="lazy" 
-                        referrerPolicy="no-referrer-when-downgrade"
-                        title="UroHealth Central Ltd Location"
-                      ></iframe>
-                    </div>
-                  </div>
-                </div>
-              </section>
+              <EnhancedContact content={content} getContentValue={getContentValue} />
             </>
           )}
         </main>
@@ -591,7 +733,7 @@ function NewHomePage() {
                   {getContentValue(content, 'footer', 'UroHealth Central Ltd', 'About Text', 'Providing specialized urological care with a patient-centered approach since 2010.')}
                 </p>
               </div>
-              
+
               <div>
                 <h3 className="text-xl font-bold mb-4">Contact</h3>
                 <p className="text-blue-200">
@@ -604,7 +746,7 @@ function NewHomePage() {
                   Email: {getContentValue(content, 'footer', 'Contact', 'Email', 'info@urohealthcentral.com')}
                 </p>
               </div>
-              
+
               <div>
                 <h3 className="text-xl font-bold mb-4">Quick Links</h3>
                 <ul className="space-y-2">
@@ -632,7 +774,7 @@ function NewHomePage() {
                 </ul>
               </div>
             </div>
-            
+
             <div className="border-t border-blue-800 mt-8 pt-6 text-center text-blue-300">
               <p>&copy; {new Date().getFullYear()} UroHealth Central Ltd. All rights reserved.</p>
             </div>

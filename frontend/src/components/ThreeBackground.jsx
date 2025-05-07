@@ -82,40 +82,47 @@ function ThreeBackground() {
         void main() {
           vec2 position = vUv * 2.0 - 1.0;
 
-          // Create more complex noise patterns
-          float noise1 = sin(position.x * 3.0 + time * 0.5) * 0.15;
-          float noise2 = sin(position.y * 4.0 + time * 0.3) * 0.15;
-          float noise3 = sin(position.x * position.y * 2.0 + time * 0.7) * 0.1;
+          // Create more complex noise patterns with slower movement
+          float noise1 = sin(position.x * 3.0 + time * 0.3) * 0.15;
+          float noise2 = sin(position.y * 4.0 + time * 0.2) * 0.15;
+          float noise3 = sin(position.x * position.y * 2.0 + time * 0.4) * 0.1;
 
-          // Random movement
-          float randomMovement = random(position + time * 0.01) * 0.1;
+          // Random movement (reduced for more subtle effect)
+          float randomMovement = random(position + time * 0.005) * 0.08;
 
           // Combined noise
           float noise = noise1 + noise2 + noise3 + randomMovement;
 
-          // Define our colors
-          vec3 darkBlue = vec3(0.0, 0.03, 0.18);    // Dark blue
-          vec3 mediumBlue = vec3(0.0, 0.15, 0.3);   // Medium blue
-          vec3 brightBlue = vec3(0.0, 0.2, 0.4);    // Brighter blue
-          vec3 greenAccent = vec3(0.0, 0.25, 0.2);  // Green accent
-          vec3 black = vec3(0.0, 0.0, 0.0);         // Black
+          // Define our colors - enhanced for better contrast and depth
+          vec3 darkBlue = vec3(0.0, 0.03, 0.18);      // Deep dark blue
+          vec3 mediumBlue = vec3(0.0, 0.12, 0.28);    // Medium blue
+          vec3 brightBlue = vec3(0.0, 0.18, 0.38);    // Brighter blue
+          vec3 greenAccent = vec3(0.0, 0.22, 0.2);    // Green accent
+          vec3 black = vec3(0.0, 0.01, 0.08);         // Near black (not pure black)
 
           // Create complex color mixing
-          float yPos = position.y + noise;
-          float xPos = position.x + noise;
+          float yPos = position.y + noise * 0.8;
+          float xPos = position.x + noise * 0.8;
 
-          // Base gradient
-          float baseGradient = smoothstep(-1.0, 1.0, yPos);
+          // Base gradient - enhanced for better vertical transition
+          float baseGradient = smoothstep(-1.2, 1.0, yPos);
 
           // Create patterns for different colors
-          float pattern1 = sin(xPos * 5.0 + time) * sin(yPos * 5.0 + time * 0.7);
-          float pattern2 = cos(xPos * 3.0 - time * 0.5) * cos(yPos * 7.0 - time * 0.2);
+          float pattern1 = sin(xPos * 4.0 + time * 0.3) * sin(yPos * 4.0 + time * 0.4);
+          float pattern2 = cos(xPos * 3.0 - time * 0.3) * cos(yPos * 6.0 - time * 0.1);
+
+          // Additional diagonal pattern for more depth
+          float diagonalPattern = sin((xPos + yPos) * 3.0 + time * 0.2) * 0.5 + 0.5;
 
           // Mix colors based on patterns
           vec3 color = mix(black, darkBlue, baseGradient);
           color = mix(color, mediumBlue, smoothstep(0.3, 0.7, pattern1 + 0.5));
           color = mix(color, brightBlue, smoothstep(0.4, 0.6, pattern2 + 0.5));
-          color = mix(color, greenAccent, smoothstep(0.7, 0.9, abs(pattern1 * pattern2)));
+          color = mix(color, greenAccent, smoothstep(0.7, 0.9, diagonalPattern * abs(pattern1 * pattern2)));
+
+          // Add subtle vignette effect
+          float vignette = 1.0 - smoothstep(0.5, 1.5, length(position));
+          color = mix(color * 0.8, color, vignette);
 
           gl_FragColor = vec4(color, 1.0);
         }

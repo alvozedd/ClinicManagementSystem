@@ -7,6 +7,7 @@ import ProtectedRoute from './components/ProtectedRoute'
 import AdminDashboard from './components/dashboard/AdminDashboard'
 import DoctorDashboard from './components/dashboard/DoctorDashboard'
 import SecretaryDashboard from './components/dashboard/SecretaryDashboard'
+import TestComponent from './components/TestComponent'
 import './components/GlassEffects.css'
 import './components/dashboard/DashboardStyles.css'
 
@@ -36,6 +37,7 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<NewHomePage />} />
+        <Route path="/test" element={<TestComponent />} />
         <Route path="/login" element={<LoginForm />} />
 
         {/* Admin Dashboard */}

@@ -1,20 +1,20 @@
 /* Three.js specific styles */
 
 .canvas-container {
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: -1; /* Set to -1 to be behind content but still visible */
+  width: 100%;
+  height: 100%;
+  z-index: 0; /* Set to 0 to be behind content but still visible */
   overflow: hidden;
   pointer-events: none; /* Allow clicks to pass through */
   opacity: 1 !important; /* Force visibility */
   margin: 0;
   padding: 0;
-  background-color: #000830; /* Fallback color */
+  background-color: #0a2463; /* Fallback color */
 }
 
 /* Ensure canvas is full screen */

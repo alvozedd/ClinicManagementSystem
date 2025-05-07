@@ -18,27 +18,44 @@ export const isInViewport = (element, offset = 0) => {
 // Apply fade-in animation to elements when they enter viewport
 export const setupScrollAnimations = () => {
   try {
-    // Elements to animate
-    const animatedElements = document.querySelectorAll('.animate-on-scroll');
-    if (!animatedElements || animatedElements.length === 0) return () => {};
+    // Wait for DOM to be fully loaded
+    setTimeout(() => {
+      // Elements to animate
+      const animatedElements = document.querySelectorAll('.animate-on-scroll');
+      console.log('Found animate-on-scroll elements:', animatedElements.length);
 
-    const handleScroll = () => {
-      animatedElements.forEach(element => {
-        if (isInViewport(element, 50)) {
-          element.classList.add('animated');
-        }
-      });
-    };
+      if (!animatedElements || animatedElements.length === 0) return;
 
-    // Initial check
-    handleScroll();
+      // Store the handler in the window object so we can reference it in the cleanup function
+      window.handleScrollAnimation = () => {
+        animatedElements.forEach(element => {
+          if (isInViewport(element, 50)) {
+            element.classList.add('animated');
+          }
+        });
+      };
 
-    // Add scroll listener
-    window.addEventListener('scroll', handleScroll);
+      // Initial check
+      window.handleScrollAnimation();
+
+      // Add scroll listener
+      window.addEventListener('scroll', window.handleScrollAnimation);
+
+      // Also trigger on window resize
+      window.addEventListener('resize', window.handleScrollAnimation);
+
+      // Force a check after a short delay to catch any elements that might not be properly detected initially
+      setTimeout(window.handleScrollAnimation, 500);
+    }, 100); // Short delay to ensure DOM is ready
 
     // Return cleanup function
     return () => {
-      window.removeEventListener('scroll', handleScroll);
+      try {
+        window.removeEventListener('scroll', window.handleScrollAnimation);
+        window.removeEventListener('resize', window.handleScrollAnimation);
+      } catch (error) {
+        console.error('Error in cleanup function:', error);
+      }
     };
   } catch (error) {
     console.error('Error in setupScrollAnimations:', error);

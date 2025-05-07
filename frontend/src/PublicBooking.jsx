@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 function PublicBooking() {
   const [name, setName] = useState('');
@@ -36,7 +37,10 @@ function PublicBooking() {
               </svg>
             </div>
           </div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Booking Request Submitted</h2>
+          <Link to="/" className="mt-6 text-center text-3xl font-extrabold text-gray-900 block hover:text-blue-600 transition-colors">
+            UroHealth Central
+          </Link>
+          <h2 className="mt-4 text-center text-2xl font-bold text-gray-900">Booking Request Submitted</h2>
           <p className="mt-2 text-center text-sm text-gray-600">
             Thank you for your booking request. Your appointment has been scheduled.
           </p>
@@ -69,7 +73,9 @@ function PublicBooking() {
             </svg>
           </div>
         </div>
-        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">UroHealth Central</h2>
+        <Link to="/" className="mt-6 text-center text-3xl font-extrabold text-gray-900 block hover:text-blue-600 transition-colors">
+          UroHealth Central
+        </Link>
         <p className="mt-2 text-center text-sm text-gray-600">
           Book your appointment by selecting a preferred date
         </p>

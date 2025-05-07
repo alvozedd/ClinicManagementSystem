@@ -152,8 +152,8 @@ const defaultContent = {
         category: 'Hero',
         type: 'text',
         label: 'Hero Description',
-        value: '20+ years of specialized medical excellence',
-        visible: true
+        value: '',
+        visible: false
       }
     ],
     'About': [
