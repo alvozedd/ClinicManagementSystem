@@ -11,6 +11,14 @@ const os = require('os');
  * @access  Public
  */
 const checkHealth = asyncHandler(async (req, res) => {
+  // Set CORS headers explicitly for health check endpoint
+  const origin = req.headers.origin;
+  if (origin) {
+    res.header('Access-Control-Allow-Origin', origin);
+    res.header('Access-Control-Allow-Credentials', 'true');
+    console.log(`Setting explicit CORS headers for health check from origin: ${origin}`);
+  }
+
   // Check MongoDB connection
   const dbStatus = mongoose.connection.readyState === 1 ? 'connected' : 'disconnected';
   const isConnected = dbStatus === 'connected';

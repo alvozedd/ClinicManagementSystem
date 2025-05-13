@@ -8,6 +8,14 @@ const logger = require('../utils/logger');
 // @route   POST /api/users/login
 // @access  Public
 const authUser = asyncHandler(async (req, res) => {
+  // Set CORS headers for this specific endpoint
+  const origin = req.headers.origin;
+  if (origin) {
+    res.header('Access-Control-Allow-Origin', origin);
+    res.header('Access-Control-Allow-Credentials', 'true');
+    logger.debug('Setting CORS headers for login endpoint', { origin });
+  }
+
   const { username, email, password } = req.body;
 
   // Use either username or email for login
@@ -19,7 +27,12 @@ const authUser = asyncHandler(async (req, res) => {
   }
 
   logger.info('Login attempt initiated', { username: loginIdentifier });
-  logger.debug('Login request received', { body: req.body });
+  logger.debug('Login request received', {
+    body: req.body,
+    headers: req.headers,
+    origin: req.headers.origin,
+    ip: req.ip || req.connection.remoteAddress
+  });
 
   // Find user by username or email
   const user = await User.findOne({
@@ -29,14 +42,17 @@ const authUser = asyncHandler(async (req, res) => {
     ]
   });
 
-  logger.debug('User lookup result', { found: !!user });
+  logger.debug('User lookup result', { found: !!user, identifier: loginIdentifier });
 
   if (user) {
     // Log user details without sensitive information
     logger.debug('User found', {
       _id: user._id,
       role: user.role,
+      username: user.username
     });
+  } else {
+    logger.warn('User not found during login attempt', { identifier: loginIdentifier });
   }
 
   if (user) {
@@ -60,14 +76,14 @@ const authUser = asyncHandler(async (req, res) => {
       res.cookie('refreshToken', refreshToken.token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
+        sameSite: 'none', // Allow cross-site cookies
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       });
 
       // Also set session ID cookie (not HTTP-only so frontend can access it)
       res.cookie('sessionId', sessionId, {
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
+        sameSite: 'none', // Allow cross-site cookies
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
       });
 

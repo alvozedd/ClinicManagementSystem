@@ -74,9 +74,22 @@ app.use(corsMiddleware);
 
 // Let corsMiddleware handle all preflight requests
 app.options('*', (req, res) => {
-  console.log(`Global OPTIONS handler for request from origin: ${req.headers.origin || 'unknown'}`);
-  // The corsMiddleware will have already set the appropriate headers
-  res.status(200).end();
+  const origin = req.headers.origin;
+  console.log(`Global OPTIONS handler for request from origin: ${origin || 'unknown'}`);
+
+  // Set CORS headers explicitly for all OPTIONS requests
+  if (origin) {
+    res.header('Access-Control-Allow-Origin', origin);
+  } else {
+    res.header('Access-Control-Allow-Origin', '*');
+  }
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('Access-Control-Allow-Methods', allowedMethods.join(', '));
+  res.header('Access-Control-Allow-Headers', allowedHeaders.join(', '));
+  res.header('Access-Control-Max-Age', '86400'); // 24 hours
+
+  // Return 204 No Content for preflight requests
+  return res.status(204).end();
 });
 
 // Parse JSON bodies
@@ -715,15 +728,65 @@ app.get('/', (req, res) => {
 // Import health controller
 const { checkHealth } = require('./controllers/healthController');
 
-// Health check endpoint - corsMiddleware will handle CORS headers
+// Health check endpoints with explicit CORS handling
+// Handle OPTIONS preflight requests for health endpoints
+app.options('/health', (req, res) => {
+  const origin = req.headers.origin;
+  console.log(`Health OPTIONS preflight request from origin: ${origin || 'unknown'}`);
+
+  // Set CORS headers explicitly
+  if (origin) {
+    res.header('Access-Control-Allow-Origin', origin);
+  } else {
+    res.header('Access-Control-Allow-Origin', '*');
+  }
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.header('Access-Control-Max-Age', '86400'); // 24 hours
+
+  return res.status(204).end();
+});
+
+app.options('/api/health', (req, res) => {
+  const origin = req.headers.origin;
+  console.log(`API Health OPTIONS preflight request from origin: ${origin || 'unknown'}`);
+
+  // Set CORS headers explicitly
+  if (origin) {
+    res.header('Access-Control-Allow-Origin', origin);
+  } else {
+    res.header('Access-Control-Allow-Origin', '*');
+  }
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.header('Access-Control-Max-Age', '86400'); // 24 hours
+
+  return res.status(204).end();
+});
+
+// Health check endpoint with explicit CORS handling
 app.get('/health', (req, res, next) => {
   console.log(`Health check request from origin: ${req.headers.origin || 'unknown'}`);
+  // Set CORS headers explicitly
+  const origin = req.headers.origin;
+  if (origin) {
+    res.header('Access-Control-Allow-Origin', origin);
+    res.header('Access-Control-Allow-Credentials', 'true');
+  }
   next();
 }, checkHealth);
 
-// API health check endpoint - corsMiddleware will handle CORS headers
+// API health check endpoint with explicit CORS handling
 app.get('/api/health', (req, res, next) => {
   console.log(`API Health check request from origin: ${req.headers.origin || 'unknown'}`);
+  // Set CORS headers explicitly
+  const origin = req.headers.origin;
+  if (origin) {
+    res.header('Access-Control-Allow-Origin', origin);
+    res.header('Access-Control-Allow-Credentials', 'true');
+  }
   next();
 }, checkHealth);
 

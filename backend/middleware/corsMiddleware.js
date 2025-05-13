@@ -32,6 +32,9 @@ const ALLOW_ALL_ORIGINS = true;
 // Debug flag to log detailed CORS information
 const DEBUG_CORS = true; // Set to true for debugging
 
+// Log the allowed origins
+console.log('CORS middleware will allow ALL origins due to ALLOW_ALL_ORIGINS=true');
+
 console.log('CORS middleware initialized with allowed origins:', allowedOrigins.length);
 
 // Comprehensive list of headers to allow
@@ -83,7 +86,7 @@ const corsMiddleware = (req, res, next) => {
   // IMPORTANT: When using credentials, we cannot use wildcard '*' for Access-Control-Allow-Origin
   // We must specify the exact origin or the browser will reject the response
   if (origin) {
-    // If there's an origin header, use it exactly as provided
+    // Always allow the origin that sent the request
     res.header('Access-Control-Allow-Origin', origin);
     if (DEBUG_CORS) console.log(`Setting Access-Control-Allow-Origin: ${origin}`);
   } else {
@@ -111,7 +114,13 @@ const corsMiddleware = (req, res, next) => {
   // Handle preflight requests
   if (req.method === 'OPTIONS') {
     console.log('Handling OPTIONS preflight request from origin:', origin || 'unknown');
-    return res.status(200).end();
+    // Make sure all necessary CORS headers are set for preflight
+    res.header('Access-Control-Allow-Origin', origin || '*');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Allow-Methods', allowedMethods.join(', '));
+    res.header('Access-Control-Allow-Headers', allowedHeaders.join(', '));
+    res.header('Access-Control-Max-Age', '86400'); // 24 hours
+    return res.status(204).end(); // 204 No Content is the proper response for preflight
   }
 
   next();
