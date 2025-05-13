@@ -20,7 +20,7 @@ const noteRoutes = require('./routes/noteRoutes');
 const integratedAppointmentRoutes = require('./routes/integratedAppointmentRoutes');
 const queueRoutes = require('./routes/queueRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
-const notificationRoutes = require('./routes/notificationRoutes');
+// Notification routes removed
 const testRoutes = require('./routes/testRoutes');
 
 // Load environment variables
@@ -121,7 +121,7 @@ app.use('/api/notes', noteRoutes);
 app.use('/api/integrated-appointments', integratedAppointmentRoutes);
 app.use('/api/queue', queueRoutes);
 app.use('/api/uploads', uploadRoutes);
-app.use('/api/notifications', notificationRoutes);
+// Notification routes removed
 
 // Test routes - no authentication required
 app.use('/', testRoutes);

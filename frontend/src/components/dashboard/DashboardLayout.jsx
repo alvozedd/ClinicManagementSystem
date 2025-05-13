@@ -4,8 +4,6 @@ import AuthContext from '../../context/AuthContext';
 import { FaHome, FaSignOutAlt, FaUser, FaCalendarAlt, FaUsers, FaCog, FaFileAlt, FaClipboardList } from 'react-icons/fa';
 import './DashboardStyles.css';
 import DarkModeToggle from './DarkModeToggle';
-import NotificationBadge from './NotificationBadge';
-import NotificationPanel from './NotificationPanel';
 
 const DashboardLayout = ({ children, activeTab, setActiveTab, role }) => {
   const { userInfo, logout } = useContext(AuthContext);
@@ -13,7 +11,6 @@ const DashboardLayout = ({ children, activeTab, setActiveTab, role }) => {
   const location = useLocation();
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [showNotifications, setShowNotifications] = useState(false);
 
   useEffect(() => {
     const handleResize = () => {
@@ -81,7 +78,6 @@ const DashboardLayout = ({ children, activeTab, setActiveTab, role }) => {
             <div className="text-lg font-semibold text-blue-600 dark:text-blue-400">UroHealth</div>
           </div>
           <div className="flex items-center">
-            <NotificationBadge onClick={() => setShowNotifications(!showNotifications)} />
             <DarkModeToggle />
             <div className="text-sm mx-2 text-gray-600 dark:text-gray-300">{userInfo?.name}</div>
             <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold">
@@ -92,10 +88,6 @@ const DashboardLayout = ({ children, activeTab, setActiveTab, role }) => {
       )}
 
       <div className="dashboard-layout flex">
-        {/* Notification Panel */}
-        {showNotifications && (
-          <NotificationPanel onClose={() => setShowNotifications(false)} />
-        )}
 
         {/* Sidebar - hidden on mobile unless menu is open */}
         <aside className={`dashboard-sidebar ${isMobile ? (menuOpen ? 'block fixed inset-0 z-50 pt-16' : 'hidden') : 'block'} bg-white dark:bg-gray-800 shadow-md w-64 min-h-screen`}>
@@ -149,10 +141,7 @@ const DashboardLayout = ({ children, activeTab, setActiveTab, role }) => {
                 <span className="text-sm text-gray-500 dark:text-gray-400">Theme</span>
                 <DarkModeToggle />
               </div>
-              <div className="flex items-center justify-between mb-3 px-3">
-                <span className="text-sm text-gray-500 dark:text-gray-400">Notifications</span>
-                <NotificationBadge onClick={() => setShowNotifications(!showNotifications)} />
-              </div>
+
               <button
                 onClick={handleLogout}
                 className="w-full flex items-center p-3 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-colors"
