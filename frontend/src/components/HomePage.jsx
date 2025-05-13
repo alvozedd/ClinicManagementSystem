@@ -38,14 +38,17 @@ function HomePage() {
   useEffect(() => {
     const fetchContent = async () => {
       try {
-        // Content loading state removed
-        // Use the loadContent utility which handles fallbacks
-        const organizedContent = await loadContent();
+        // Force a refresh to get the latest content
+        console.log('Forcing content refresh on homepage load');
+        const organizedContent = await loadContent(null, true); // Force refresh
         setContent(organizedContent);
+
+        // Log the content for debugging
+        if (organizedContent.footer && organizedContent.footer.Contact) {
+          console.log('Footer Contact items:', organizedContent.footer.Contact);
+        }
       } catch (err) {
         console.error('Error in content loading process:', err);
-      } finally {
-        // Content loading state removed
       }
     };
 
@@ -711,7 +714,7 @@ function HomePage() {
                       </button>
 
                       <button
-                        onClick={() => window.location.href = 'tel:+254722396296'}
+                        onClick={() => window.location.href = 'tel:0722398296'}
                         className="border border-white/50 hover:border-white px-8 sm:px-10 py-3 rounded-md font-medium transition duration-200 text-base sm:text-lg flex items-center justify-center gap-2 call-us-button"
                       >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -892,67 +895,116 @@ function HomePage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   {/* Contact Items */}
                   <ul className="space-y-5">
-                    {content.footer?.['Contact']?.filter(item => item.visible)?.map(contactItem => (
-                      <li key={contactItem.id} className="flex items-start group">
-                        {contactItem.label === 'Address' && (
-                          <>
-                            <div className="bg-blue-900/30 p-2 rounded-lg text-blue-400 mr-4 group-hover:bg-blue-800/50 transition-colors">
-                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                              </svg>
-                            </div>
-                            <div>
-                              <p className="text-sm text-blue-300 mb-1">Our Location</p>
-                              <p className="text-white">{contactItem.value}</p>
-                            </div>
-                          </>
-                        )}
-                        {contactItem.label === 'Phone' && (
-                          <>
-                            <div className="bg-blue-900/30 p-2 rounded-lg text-blue-400 mr-4 group-hover:bg-blue-800/50 transition-colors">
-                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
-                              </svg>
-                            </div>
-                            <div>
-                              <p className="text-sm text-blue-300 mb-1">Phone Number</p>
-                              <a href={`tel:${contactItem.value.replace(/\s+/g, '')}`} className="text-white hover:text-blue-300 transition-colors flex items-center">
-                                {contactItem.value}
-                                <span className="ml-2 bg-blue-600 hover:bg-blue-500 text-xs px-2 py-1 rounded-md transition-colors inline-flex items-center">
-                                  <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
-                                  </svg>
-                                  Call
-                                </span>
-                              </a>
-                            </div>
-                          </>
-                        )}
-                        {contactItem.label === 'Email' && (
-                          <>
-                            <div className="bg-blue-900/30 p-2 rounded-lg text-blue-400 mr-4 group-hover:bg-blue-800/50 transition-colors">
-                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                              </svg>
-                            </div>
-                            <div>
-                              <p className="text-sm text-blue-300 mb-1">Email Address</p>
-                              <a href={`mailto:${contactItem.value}`} className="text-white hover:text-blue-300 transition-colors flex items-center">
-                                {contactItem.value}
-                                <span className="ml-2 bg-blue-600 hover:bg-blue-500 text-xs px-2 py-1 rounded-md transition-colors inline-flex items-center">
-                                  <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                                  </svg>
-                                  Email
-                                </span>
-                              </a>
-                            </div>
-                          </>
-                        )}
-                      </li>
-                    ))}
+                    {/* Address */}
+                    <li className="flex items-start group">
+                      <div className="bg-blue-900/30 p-2 rounded-lg text-blue-400 mr-4 group-hover:bg-blue-800/50 transition-colors">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="text-sm text-blue-300 mb-1">Our Location</p>
+                        <p className="text-white">{getContentValue(content, 'footer', 'Contact', 'Address', '1st Floor, Gatemu House, Kimathi Way, Nyeri, Kenya')}</p>
+                      </div>
+                    </li>
+
+                    {/* Mobile */}
+                    <li className="flex items-start group">
+                      <div className="bg-blue-900/30 p-2 rounded-lg text-blue-400 mr-4 group-hover:bg-blue-800/50 transition-colors">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="text-sm text-blue-300 mb-1">Mobile</p>
+                        <a href="tel:0722398296" className="text-white hover:text-blue-300 transition-colors flex items-center">
+                          0722398296
+                          <span className="ml-2 bg-blue-600 hover:bg-blue-500 text-xs px-2 py-1 rounded-md transition-colors inline-flex items-center">
+                            <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                            </svg>
+                            Call
+                          </span>
+                        </a>
+                      </div>
+                    </li>
+
+                    {/* Office */}
+                    <li className="flex items-start group">
+                      <div className="bg-blue-900/30 p-2 rounded-lg text-blue-400 mr-4 group-hover:bg-blue-800/50 transition-colors">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="text-sm text-blue-300 mb-1">Office</p>
+                        <a href="tel:0722398296" className="text-white hover:text-blue-300 transition-colors flex items-center">
+                          0722398296
+                          <span className="ml-2 bg-blue-600 hover:bg-blue-500 text-xs px-2 py-1 rounded-md transition-colors inline-flex items-center">
+                            <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                            </svg>
+                            Call
+                          </span>
+                        </a>
+                      </div>
+                    </li>
+
+                    {/* Email */}
+                    <li className="flex items-start group">
+                      <div className="bg-blue-900/30 p-2 rounded-lg text-blue-400 mr-4 group-hover:bg-blue-800/50 transition-colors">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                        </svg>
+                      </div>
+                      <div>
+                        <p className="text-sm text-blue-300 mb-1">Email Address</p>
+                        <a href={`mailto:${getContentValue(content, 'footer', 'Contact', 'Email', 'info@urohealthcentral.com')}`} className="text-white hover:text-blue-300 transition-colors flex items-center">
+                          {getContentValue(content, 'footer', 'Contact', 'Email', 'info@urohealthcentral.com')}
+                          <span className="ml-2 bg-blue-600 hover:bg-blue-500 text-xs px-2 py-1 rounded-md transition-colors inline-flex items-center">
+                            <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                            </svg>
+                            Email
+                          </span>
+                        </a>
+                      </div>
+                    </li>
                   </ul>
+
+                  {/* Office Hours */}
+                  <div className="bg-blue-900/20 rounded-xl p-5 border border-blue-800/30">
+                    <h4 className="font-bold text-white mb-4 flex items-center">
+                      <svg className="w-5 h-5 mr-2 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                      </svg>
+                      Office Hours
+                    </h4>
+                    <div className="space-y-3">
+                      <div className="flex items-center">
+                        <div className="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
+                        <div className="flex flex-col sm:flex-row sm:items-center">
+                          <span className="text-blue-200 font-medium">Monday - Friday:</span>
+                          <span className="text-white sm:ml-2">{getContentValue(content, 'contact', 'Office Hours', 'Weekday Hours', '8:00 AM - 5:00 PM')}</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center">
+                        <div className="w-3 h-3 bg-yellow-500 rounded-full mr-3"></div>
+                        <div className="flex flex-col sm:flex-row sm:items-center">
+                          <span className="text-blue-200 font-medium">Saturday:</span>
+                          <span className="text-white sm:ml-2">{getContentValue(content, 'contact', 'Office Hours', 'Saturday Hours', 'By appointment')}</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center">
+                        <div className="w-3 h-3 bg-red-500 rounded-full mr-3"></div>
+                        <div className="flex flex-col sm:flex-row sm:items-center">
+                          <span className="text-blue-200 font-medium">Sunday:</span>
+                          <span className="text-white sm:ml-2">{getContentValue(content, 'contact', 'Office Hours', 'Sunday Hours', 'Closed')}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

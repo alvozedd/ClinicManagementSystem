@@ -2,7 +2,7 @@
  * Enhanced CORS middleware to ensure all necessary headers are allowed
  */
 
-// List of allowed origins
+// List of allowed origins - simplified to avoid duplicates
 const allowedOrigins = [
   // Netlify domains
   'https://urohealthltd.netlify.app',
@@ -19,11 +19,6 @@ const allowedOrigins = [
   'https://www.urohealthcentral.netlify.app',
   // Railway domain for server-to-server communication
   'https://clinicmanagementsystem-production-081b.up.railway.app',
-  // Add all possible variations of the Netlify domain
-  'https://urohealthltd.netlify.app',
-  'http://urohealthltd.netlify.app',
-  'https://www.urohealthltd.netlify.app',
-  'http://www.urohealthltd.netlify.app',
   // Add any other domains that might be used
   'https://urohealth.netlify.app',
   'https://www.urohealth.netlify.app',
@@ -37,26 +32,7 @@ const ALLOW_ALL_ORIGINS = true;
 // Debug flag to log detailed CORS information
 const DEBUG_CORS = true; // Set to true for debugging
 
-// Make sure all Netlify domains are included
-if (!allowedOrigins.includes('https://urohealthltd.netlify.app')) {
-  allowedOrigins.push('https://urohealthltd.netlify.app');
-}
-
-// Add any missing domains that might be used
-const additionalDomains = [
-  'https://urohealth.netlify.app',
-  'https://www.urohealth.netlify.app',
-  'https://urohealthcentral.netlify.app',
-  'https://www.urohealthcentral.netlify.app'
-];
-
-additionalDomains.forEach(domain => {
-  if (!allowedOrigins.includes(domain)) {
-    allowedOrigins.push(domain);
-  }
-});
-
-console.log('Allowed origins:', allowedOrigins);
+console.log('CORS middleware initialized with allowed origins:', allowedOrigins.length);
 
 // Comprehensive list of headers to allow
 const allowedHeaders = [
@@ -104,21 +80,17 @@ const corsMiddleware = (req, res, next) => {
   // Set the Vary header to inform caches that the response varies by Origin
   res.header('Vary', 'Origin');
 
-  // Check if we should allow all origins or just the ones in our list
-  if (ALLOW_ALL_ORIGINS) {
-    // Allow any origin
-    res.header('Access-Control-Allow-Origin', origin || '*');
-    if (DEBUG_CORS) console.log(`Setting Access-Control-Allow-Origin: ${origin || '*'} (all origins allowed)`);
+  // IMPORTANT: When using credentials, we cannot use wildcard '*' for Access-Control-Allow-Origin
+  // We must specify the exact origin or the browser will reject the response
+  if (origin) {
+    // If there's an origin header, use it exactly as provided
+    res.header('Access-Control-Allow-Origin', origin);
+    if (DEBUG_CORS) console.log(`Setting Access-Control-Allow-Origin: ${origin}`);
   } else {
-    // Only allow specific origins
-    if (origin && allowedOrigins.includes(origin)) {
-      res.header('Access-Control-Allow-Origin', origin);
-      if (DEBUG_CORS) console.log(`Setting Access-Control-Allow-Origin: ${origin}`);
-    } else {
-      // No origin in request or not in allowed list, set to wildcard
-      res.header('Access-Control-Allow-Origin', '*');
-      if (DEBUG_CORS) console.log('Setting Access-Control-Allow-Origin: * (fallback)');
-    }
+    // For requests without origin (like from Postman or curl), use wildcard
+    // Note: This won't work with credentials, but those tools don't send credentials by default
+    res.header('Access-Control-Allow-Origin', '*');
+    if (DEBUG_CORS) console.log('Setting Access-Control-Allow-Origin: * (no origin in request)');
   }
 
   // Set credentials to true for all requests
@@ -138,7 +110,7 @@ const corsMiddleware = (req, res, next) => {
 
   // Handle preflight requests
   if (req.method === 'OPTIONS') {
-    console.log('Handling OPTIONS preflight request');
+    console.log('Handling OPTIONS preflight request from origin:', origin || 'unknown');
     return res.status(200).end();
   }
 

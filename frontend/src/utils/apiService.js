@@ -210,17 +210,23 @@ const refreshAccessToken = async () => {
 // API methods
 const apiService = {
   // Content endpoints
-  getContent: async (section = null) => {
+  getContent: async (section = null, timestamp = null) => {
     try {
-      if (DEBUG) console.log(`Fetching content${section ? ` for section: ${section}` : ''}`);
+      console.log(`Fetching content${section ? ` for section: ${section}` : ''}${timestamp ? ` with timestamp: ${timestamp}` : ''}`);
 
-      // Build query string if section is provided
-      const queryString = section ? `?section=${encodeURIComponent(section)}` : '';
+      // Build query string with section and timestamp to prevent caching
+      let queryParams = [];
+      if (section) queryParams.push(`section=${encodeURIComponent(section)}`);
+      if (timestamp) queryParams.push(`t=${timestamp}`);
+      const queryString = queryParams.length > 0 ? `?${queryParams.join('&')}` : '';
 
       // Try direct Railway URL first (most reliable)
       try {
-        if (DEBUG) console.log('First attempt - Using direct Railway URL for content');
-        const response = await fetch(`https://clinicmanagementsystem-production-081b.up.railway.app/api/content${queryString}`, {
+        console.log('First attempt - Using direct Railway URL for content');
+        const railwayUrl = `https://clinicmanagementsystem-production-081b.up.railway.app/api/content${queryString}`;
+        console.log('Fetching from URL:', railwayUrl);
+
+        const response = await fetch(railwayUrl, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -232,15 +238,20 @@ const apiService = {
           cache: 'no-cache'
         });
 
+        console.log('Railway response status:', response.status);
+
         if (response.ok) {
           const data = await response.json();
-          if (DEBUG) console.log(`Successfully fetched ${data.length} content items with direct Railway URL`);
+          console.log(`Successfully fetched ${data.length} content items with direct Railway URL`);
+          console.log('Content data sample:', data.slice(0, 3));
           return data;
         } else {
-          if (DEBUG) console.warn(`Railway URL attempt failed with status: ${response.status}`);
+          console.warn(`Railway URL attempt failed with status: ${response.status}`);
+          const errorText = await response.text();
+          console.warn('Error response:', errorText.substring(0, 200));
         }
       } catch (railwayError) {
-        if (DEBUG) console.warn('Railway URL attempt failed with error:', railwayError);
+        console.warn('Railway URL attempt failed with error:', railwayError);
       }
 
       // Second attempt: Try without API prefix
@@ -287,6 +298,53 @@ const apiService = {
       if (DEBUG) console.error('Error fetching content:', error);
       // Return empty array instead of throwing to prevent UI errors
       return [];
+    }
+  },
+
+  // Get all content items
+  getAllContent: async () => {
+    try {
+      return await apiService.getContent();
+    } catch (error) {
+      console.error('Error in getAllContent:', error);
+      throw error;
+    }
+  },
+
+  // Update content item
+  updateContent: async (contentItem) => {
+    try {
+      console.log('Updating content item:', contentItem);
+
+      const railwayUrl = `https://clinicmanagementsystem-production-081b.up.railway.app/api/content/${contentItem._id}`;
+      console.log('Updating at URL:', railwayUrl);
+
+      const response = await fetch(railwayUrl, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        },
+        mode: 'cors',
+        body: JSON.stringify(contentItem)
+      });
+
+      console.log('Update response status:', response.status);
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Content updated successfully:', data);
+        return data;
+      } else {
+        const errorText = await response.text();
+        console.warn('Error updating content:', errorText.substring(0, 200));
+        throw new Error(`Failed to update content: ${response.status}`);
+      }
+    } catch (error) {
+      console.error('Error in updateContent:', error);
+      throw error;
     }
   },
 
@@ -1788,10 +1846,16 @@ const apiService = {
   },
 
   // Content Management endpoints
-  getContent: async (section) => {
+  getContent: async (section, timestamp = null) => {
     try {
+      // Build query string with section and timestamp to prevent caching
+      let queryParams = [];
+      if (section) queryParams.push(`section=${encodeURIComponent(section)}`);
+      if (timestamp) queryParams.push(`t=${timestamp}`);
+      const queryString = queryParams.length > 0 ? `?${queryParams.join('&')}` : '';
+
       // Always try Railway URL first as it's most reliable
-      const railwayUrl = `https://clinicmanagementsystem-production-081b.up.railway.app/api/content${section ? `?section=${section}` : ''}`;
+      const railwayUrl = `https://clinicmanagementsystem-production-081b.up.railway.app/api/content${queryString}`;
       console.log('First attempt - Using direct Railway URL for content:', railwayUrl);
 
       try {

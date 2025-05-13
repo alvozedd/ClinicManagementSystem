@@ -68,6 +68,21 @@ function LoginForm() {
       let loginSuccess = false;
       let userData = null;
 
+      // Common request options
+      const requestOptions = {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+          'Pragma': 'no-cache',
+          'Expires': '0'
+        },
+        body: JSON.stringify({ username, password }),
+        mode: 'cors',
+        credentials: 'include', // Always include credentials for proper authentication
+        cache: 'no-cache'
+      };
+
       // Approach 1: Try with API service (which has its own fallback mechanisms)
       try {
         console.log('Approach 1: Using apiService.login');
@@ -78,20 +93,11 @@ function LoginForm() {
         console.warn('Approach 1 failed with error:', error);
       }
 
-      // Approach 2: Try direct fetch to the current origin's backend
+      // Approach 2: Try with Railway deployed backend directly
       if (!loginSuccess) {
         try {
-          // Get the current origin (hostname and port)
-          const currentOrigin = window.location.origin;
-          const loginEndpoint = `${currentOrigin}/users/login`;
-
-          console.log('Approach 2: Direct fetch to current origin:', loginEndpoint);
-          const response = await fetch(loginEndpoint, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password }),
-            credentials: 'include'
-          });
+          console.log('Approach 2: Direct fetch to Railway backend');
+          const response = await fetch('https://clinicmanagementsystem-production-081b.up.railway.app/api/users/login', requestOptions);
 
           if (response.ok) {
             userData = await response.json();
@@ -105,22 +111,11 @@ function LoginForm() {
         }
       }
 
-      // Approach 3: Try with local server directly
+      // Approach 3: Try with Railway backend using /users/login endpoint
       if (!loginSuccess) {
         try {
-          console.log('Approach 3: Direct fetch to local server');
-          const response = await fetch('http://localhost:5000/api/users/login', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Cache-Control': 'no-cache, no-store, must-revalidate',
-              'Pragma': 'no-cache',
-              'Expires': '0'
-            },
-            body: JSON.stringify({ username, password }),
-            mode: 'cors',
-            cache: 'no-cache'
-          });
+          console.log('Approach 3: Direct fetch to Railway backend with alternate endpoint');
+          const response = await fetch('https://clinicmanagementsystem-production-081b.up.railway.app/users/login', requestOptions);
 
           if (response.ok) {
             userData = await response.json();
@@ -134,24 +129,11 @@ function LoginForm() {
         }
       }
 
-      // Approach 4: Try with Railway deployed backend directly (with credentials)
+      // Approach 4: Try with local server directly
       if (!loginSuccess) {
         try {
-          console.log('Approach 4: Direct fetch to Railway backend with credentials');
-          const response = await fetch('https://clinicmanagementsystem-production-081b.up.railway.app/api/users/login', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Cache-Control': 'no-cache, no-store, must-revalidate',
-              'Pragma': 'no-cache',
-              'Expires': '0'
-            },
-            body: JSON.stringify({ username, password }),
-            // Include credentials for proper authentication
-            credentials: 'include',
-            mode: 'cors',
-            cache: 'no-cache'
-          });
+          console.log('Approach 4: Direct fetch to local server');
+          const response = await fetch('http://localhost:5000/api/users/login', requestOptions);
 
           if (response.ok) {
             userData = await response.json();

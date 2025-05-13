@@ -136,7 +136,7 @@ function WelcomePage() {
 
           {/* Contact information at the bottom */}
           <div className="mt-8 text-center text-gray-600 text-sm">
-            <p>For any questions, please contact us at: <a href="tel:+254722396296" className="text-blue-600 hover:text-blue-800 font-medium">+254 722 396 296</a></p>
+            <p>For any questions, please contact us at: <a href="tel:0722398296" className="text-blue-600 hover:text-blue-800 font-medium">0722398296</a></p>
           </div>
         </div>
       </div>
@@ -238,18 +238,18 @@ function WelcomePage() {
                 <h2 className="text-xl font-semibold text-white relative z-10">Contact Information</h2>
               </div>
               <div className="p-4 space-y-4">
-                <a href="tel:+254722396296" className="w-full block bg-blue-50 hover:bg-blue-100 py-2 px-4 rounded-md transition duration-200 text-blue-700 font-medium">
+                <a href="tel:0722398296" className="w-full block bg-blue-50 hover:bg-blue-100 py-2 px-4 rounded-md transition duration-200 text-blue-700 font-medium">
                   <div className="flex items-center mb-1">
                     <FaPhone className="text-blue-600 mr-2" />
-                    <span>+254 722 396 296</span>
+                    <span>0722398296</span>
                   </div>
                   <span className="text-sm text-gray-600 ml-6">Mobile</span>
                 </a>
 
-                <a href="tel:+254733396296" className="w-full block bg-blue-50 hover:bg-blue-100 py-2 px-4 rounded-md transition duration-200 text-blue-700 font-medium">
+                <a href="tel:0722398296" className="w-full block bg-blue-50 hover:bg-blue-100 py-2 px-4 rounded-md transition duration-200 text-blue-700 font-medium">
                   <div className="flex items-center mb-1">
                     <FaPhone className="text-blue-600 mr-2" />
-                    <span>+254 733 396 296</span>
+                    <span>0722398296</span>
                   </div>
                   <span className="text-sm text-gray-600 ml-6">Office</span>
                 </a>

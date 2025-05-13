@@ -34,8 +34,7 @@ const DashboardLayout = ({ children, activeTab, setActiveTab, role }) => {
 
     if (role === 'admin') {
       return [
-        { id: 'users', label: 'Users', icon: <FaUser className="text-purple-500" /> },
-        { id: 'content', label: 'Content', icon: <FaFileAlt className="text-yellow-500" /> }
+        { id: 'users', label: 'Users', icon: <FaUser className="text-purple-500" /> }
       ];
     } else if (role === 'doctor') {
       return [

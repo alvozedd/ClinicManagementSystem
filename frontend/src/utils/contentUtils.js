@@ -1,74 +1,54 @@
-import defaultContent from '../data/defaultContent';
-import apiService from './apiService';
+import hardcodedContent from '../data/hardcodedContent';
+
+// Cache for content data with timestamp
+let contentCache = {
+  data: null,
+  timestamp: 0
+};
 
 /**
- * Loads content from the API with fallback to default content
+ * Force a refresh of content on next load (no-op in hardcoded version)
+ */
+export const forceContentRefresh = () => {
+  console.log('Content refresh requested, but using hardcoded content');
+  // No action needed as we're using hardcoded content
+};
+
+/**
+ * Loads hardcoded content
  * @param {string} section - Optional section to filter content
  * @returns {Object} - Organized content by section and category
  */
 export const loadContent = async (section = null) => {
   try {
-    // Try to fetch content from API with multiple attempts
-    let contentData;
-    let apiSuccess = false;
-
-    console.log('Loading content from API, section:', section || 'all');
-
-    try {
-      // Use the dedicated getContent method from apiService
-      contentData = await apiService.getContent(section);
-
-      // Check if we got valid data
-      if (contentData && Array.isArray(contentData) && contentData.length > 0) {
-        console.log('Successfully loaded content from API, items count:', contentData.length);
-        apiSuccess = true;
-      } else {
-        console.warn('API returned empty or invalid content data');
+    // Check if we should use cached content
+    if (contentCache.data) {
+      console.log('Using cached hardcoded content');
+      if (section) {
+        // Return only the requested section
+        return { [section]: contentCache.data[section] };
       }
-    } catch (apiError) {
-      console.error('Error fetching content from API:', apiError);
+      return contentCache.data;
     }
 
-    // If API call succeeded and returned valid data, organize it
-    if (apiSuccess) {
-      console.log('Organizing content data from API');
+    console.log('Loading hardcoded content, section:', section || 'all');
 
-      // Organize content by section and category
-      const organizedContent = {
-        header: {},
-        footer: {},
-        homepage: {},
-        services: {},
-        contact: {}
-      };
+    // Use hardcoded content
+    const content = hardcodedContent;
 
-      contentData.forEach(item => {
-        if (!organizedContent[item.section]) {
-          organizedContent[item.section] = {};
-        }
+    // Update the cache
+    contentCache.data = content;
+    contentCache.timestamp = Date.now();
 
-        if (!organizedContent[item.section][item.category]) {
-          organizedContent[item.section][item.category] = [];
-        }
-
-        organizedContent[item.section][item.category].push(item);
-      });
-
-      console.log('Successfully organized content from API');
-      console.log('Organized content sections:', Object.keys(organizedContent));
-      return organizedContent;
-    } else {
-      // If API call failed or returned empty data, use default content
-      console.warn('Using default content as fallback');
-      const fallbackContent = section ? { [section]: defaultContent[section] } : defaultContent;
-      console.log('Fallback content sections:', Object.keys(fallbackContent));
-      return fallbackContent;
+    // Return the requested section or all content
+    if (section) {
+      return { [section]: content[section] };
     }
+    return content;
   } catch (error) {
-    // If any unexpected error occurs, use default content
-    console.error('Unexpected error in loadContent, using default content:', error);
-    const fallbackContent = section ? { [section]: defaultContent[section] } : defaultContent;
-    return fallbackContent;
+    console.error('Unexpected error in loadContent:', error);
+    // Return the hardcoded content directly
+    return section ? { [section]: hardcodedContent[section] } : hardcodedContent;
   }
 };
 
@@ -179,13 +159,24 @@ export const getContentValue = (content, section, category, label, defaultValue 
     return defaultValue;
   }
 
-  const item = getContentItem(content, section, category, label);
+  // Log all items in this category for debugging
+  console.log(`Items in ${section}.${category}:`, content[section][category].map(item =>
+    `${item.label} (${item.visible !== false ? 'visible' : 'hidden'})`
+  ));
 
-  if (item) {
-    console.log(`Found item for ${section}.${category}.${label} from database:`, item.value);
-    return item.value;
-  } else {
-    console.log(`No item found for ${section}.${category}.${label} in database, using default:`, defaultValue);
+  // Try to find the item with the matching label
+  try {
+    const foundItem = content[section][category].find(item => item.label === label && item.visible !== false);
+
+    if (foundItem) {
+      console.log(`Found matching item for ${section}.${category}.${label}:`, foundItem);
+      return foundItem.type === 'link' ? foundItem.url : foundItem.value;
+    } else {
+      console.log(`No matching item found for ${section}.${category}.${label}, using default:`, defaultValue);
+      return defaultValue;
+    }
+  } catch (error) {
+    console.error(`Error finding item for ${section}.${category}.${label}:`, error);
     return defaultValue;
   }
 };

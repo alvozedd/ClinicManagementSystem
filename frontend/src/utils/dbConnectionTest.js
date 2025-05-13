@@ -25,7 +25,13 @@ export const testDatabaseConnection = async () => {
     for (const endpoint of endpoints) {
       try {
         console.log(`Trying health check at: ${endpoint}`);
-        const response = await fetch(endpoint, {
+        // Add timestamp to prevent caching
+        const timestamp = new Date().getTime();
+        const hasQuery = endpoint.includes('?');
+        const timeParam = hasQuery ? `&_t=${timestamp}` : `?_t=${timestamp}`;
+        const urlWithTimestamp = `${endpoint}${timeParam}`;
+
+        const response = await fetch(urlWithTimestamp, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -35,8 +41,8 @@ export const testDatabaseConnection = async () => {
           },
           cache: 'no-cache',
           mode: 'cors',
-          credentials: 'omit',
-          timeout: 5000 // 5 second timeout
+          credentials: 'include', // Include credentials for authenticated requests
+          // timeout: 5000 // Note: fetch doesn't support timeout option directly
         });
 
         if (response.ok) {

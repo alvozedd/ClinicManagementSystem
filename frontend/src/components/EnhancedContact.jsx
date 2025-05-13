@@ -63,10 +63,10 @@ const EnhancedContact = ({ content, getContentValue }) => {
                     <div>
                       <p className="text-sm text-blue-300 mb-1">Mobile</p>
                       <a
-                        href={`tel:+${getContentValue(content, 'footer', 'Contact', 'Mobile', '0722 396 296').replace(/\s+/g, '')}`}
+                        href="tel:0722398296"
                         className="text-white hover:text-blue-300 font-medium text-lg transition-colors flex items-center"
                       >
-                        {getContentValue(content, 'footer', 'Contact', 'Mobile', '0722 396 296')}
+                        0722398296
                         <span className="ml-2 bg-blue-600 hover:bg-blue-500 text-xs px-2 py-1 rounded-md transition-colors inline-flex items-center">
                           <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
@@ -88,10 +88,10 @@ const EnhancedContact = ({ content, getContentValue }) => {
                     <div>
                       <p className="text-sm text-blue-300 mb-1">Office</p>
                       <a
-                        href={`tel:+${getContentValue(content, 'footer', 'Contact', 'Office', '0733 398 296').replace(/\s+/g, '')}`}
+                        href="tel:0722398296"
                         className="text-white hover:text-blue-300 font-medium text-lg transition-colors flex items-center"
                       >
-                        {getContentValue(content, 'footer', 'Contact', 'Office', '0733 398 296')}
+                        0722398296
                         <span className="ml-2 bg-blue-600 hover:bg-blue-500 text-xs px-2 py-1 rounded-md transition-colors inline-flex items-center">
                           <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>

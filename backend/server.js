@@ -16,7 +16,7 @@ const patientRoutes = require('./routes/patientRoutes');
 const appointmentRoutes = require('./routes/appointmentRoutes');
 const diagnosisRoutes = require('./routes/diagnosisRoutes');
 const noteRoutes = require('./routes/noteRoutes');
-const contentRoutes = require('./routes/contentRoutes');
+// Content routes removed - using hardcoded content
 const integratedAppointmentRoutes = require('./routes/integratedAppointmentRoutes');
 const queueRoutes = require('./routes/queueRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
@@ -72,35 +72,11 @@ app.use(corsMiddleware);
 // We're using our custom CORS middleware instead of the cors package
 // This gives us more control over the CORS headers
 
-// Handle preflight requests at the application level
+// Let corsMiddleware handle all preflight requests
 app.options('*', (req, res) => {
-  // Set CORS headers for OPTIONS requests
-  const origin = req.headers.origin;
-
-  console.log(`Global OPTIONS handler for request from origin: ${origin || 'unknown'}`);
-
-  // Set the Vary header
-  res.header('Vary', 'Origin');
-
-  // Always allow the requesting origin
-  if (origin) {
-    res.header('Access-Control-Allow-Origin', origin);
-    console.log(`Setting Access-Control-Allow-Origin: ${origin}`);
-  } else {
-    res.header('Access-Control-Allow-Origin', '*');
-    console.log('Setting Access-Control-Allow-Origin: *');
-  }
-
-  // Set credentials to true for all requests
-  res.header('Access-Control-Allow-Credentials', 'true');
-
-  // Set other CORS headers
-  res.header('Access-Control-Allow-Methods', allowedMethods.join(', '));
-  res.header('Access-Control-Allow-Headers', allowedHeaders.join(', '));
-  res.header('Access-Control-Max-Age', '86400'); // 24 hours
-
+  console.log(`Global OPTIONS handler for request from origin: ${req.headers.origin || 'unknown'}`);
+  // The corsMiddleware will have already set the appropriate headers
   res.status(200).end();
-  console.log(`Responded to OPTIONS request from ${origin || 'unknown origin'}`);
 });
 
 // Parse JSON bodies
@@ -113,37 +89,10 @@ app.use(cookieParser());
 console.log('CSRF middleware completely removed');
 
 // Helper function to add CORS headers to non-API routes
+// This is a simplified version that just logs the request and passes it to the next middleware
+// The corsMiddleware will handle all the CORS headers
 const addCorsHeaders = (req, res, next) => {
-  const origin = req.headers.origin;
-
-  // Log the request for debugging
-  console.log(`CORS headers for non-API route: ${req.method} ${req.path} from origin: ${origin || 'unknown'}`);
-
-  // Set the Vary header
-  res.header('Vary', 'Origin');
-
-  // Always allow any origin for all routes
-  if (origin) {
-    res.header('Access-Control-Allow-Origin', origin);
-    res.header('Access-Control-Allow-Credentials', 'true');
-    console.log(`CORS headers set for non-API route: ${req.path} from origin: ${origin}`);
-  } else {
-    // For requests without origin, use wildcard
-    res.header('Access-Control-Allow-Origin', '*');
-    console.log(`CORS headers set for non-API route without origin: ${req.path}`);
-  }
-
-  // Set other CORS headers
-  res.header('Access-Control-Allow-Methods', allowedMethods.join(', '));
-  res.header('Access-Control-Allow-Headers', allowedHeaders.join(', '));
-  res.header('Access-Control-Max-Age', '86400'); // 24 hours
-
-  // Handle preflight requests
-  if (req.method === 'OPTIONS') {
-    console.log(`Handling OPTIONS request for ${req.path}`);
-    return res.status(200).end();
-  }
-
+  console.log(`Non-API route request: ${req.method} ${req.path} from origin: ${req.headers.origin || 'unknown'}`);
   next();
 };
 
@@ -155,7 +104,7 @@ app.use('/api/patients', patientRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/diagnoses', diagnosisRoutes);
 app.use('/api/notes', noteRoutes);
-app.use('/api/content', contentRoutes);
+// Content routes removed - using hardcoded content
 app.use('/api/integrated-appointments', integratedAppointmentRoutes);
 app.use('/api/queue', queueRoutes);
 app.use('/api/uploads', uploadRoutes);
@@ -260,15 +209,6 @@ app.delete('/users/:id', (req, res) => {
 // Login route - CORS is handled by the corsMiddleware
 app.post('/users/login', (req, res) => {
   console.log('Received login request at /users/login, forwarding to controller directly');
-
-  // Set CORS headers explicitly for this route
-  const origin = req.headers.origin;
-  if (origin) {
-    res.header('Access-Control-Allow-Origin', origin);
-    res.header('Access-Control-Allow-Credentials', 'true');
-    console.log(`Setting explicit CORS headers for login route, origin: ${origin}`);
-  }
-
   // Import the controller directly
   const { authUser } = require('./controllers/userController');
   // Call the controller function directly
@@ -278,15 +218,6 @@ app.post('/users/login', (req, res) => {
 // Refresh token route - CORS is handled by the corsMiddleware
 app.post('/users/refresh-token', (req, res) => {
   console.log('Received refresh token request at /users/refresh-token, forwarding to controller directly');
-
-  // Set CORS headers explicitly for this route
-  const origin = req.headers.origin;
-  if (origin) {
-    res.header('Access-Control-Allow-Origin', origin);
-    res.header('Access-Control-Allow-Credentials', 'true');
-    console.log(`Setting explicit CORS headers for refresh token route, origin: ${origin}`);
-  }
-
   // Import the controller directly
   const { refreshToken } = require('./controllers/userController');
   // Call the controller function directly
@@ -294,17 +225,8 @@ app.post('/users/refresh-token', (req, res) => {
 });
 
 // Logout route
-app.post('/users/logout', addCorsHeaders, (req, res) => {
+app.post('/users/logout', (req, res) => {
   console.log('Received logout request at /users/logout, forwarding to controller directly');
-
-  // Set CORS headers explicitly for this route
-  const origin = req.headers.origin;
-  if (origin) {
-    res.header('Access-Control-Allow-Origin', origin);
-    res.header('Access-Control-Allow-Credentials', 'true');
-    console.log(`Setting explicit CORS headers for logout route, origin: ${origin}`);
-  }
-
   // Import the controller directly
   const { logoutUser } = require('./controllers/userController');
   // Call the controller function directly
@@ -639,9 +561,7 @@ app.get('/notes/patient/:id', addCorsHeaders, (req, res) => {
   protect(req, res, () => getNotesByPatientId(req, res));
 });
 
-// Content routes - Use the router for both API and non-API paths
-app.use('/api/content', contentRoutes);
-app.use('/content', contentRoutes);
+// Content routes removed - using hardcoded content
 
 // File upload routes
 app.post('/uploads', addCorsHeaders, (req, res) => {
@@ -733,70 +653,7 @@ app.get('/uploads/:filename', addCorsHeaders, (req, res) => {
   protect(req, res, () => getFile(req, res));
 });
 
-// Fallback content route for direct API access without /api prefix
-app.get('/content', (req, res) => {
-  console.log('Received GET request at /content, redirecting to /api/content');
-  // Set CORS headers explicitly for this route
-  const origin = req.headers.origin;
-  if (origin) {
-    res.header('Access-Control-Allow-Origin', origin);
-    res.header('Access-Control-Allow-Credentials', 'true');
-  }
-  // Import the controller directly
-  const { getContent } = require('./controllers/contentController');
-  // Call the controller function directly (public endpoint)
-  getContent(req, res);
-});
-
-app.get('/content/:id', (req, res) => {
-  console.log('Received GET request at /content/:id, redirecting to /api/content/:id');
-  // Set CORS headers explicitly for this route
-  const origin = req.headers.origin;
-  if (origin) {
-    res.header('Access-Control-Allow-Origin', origin);
-    res.header('Access-Control-Allow-Credentials', 'true');
-  }
-  // Import the controller directly
-  const { getContentById } = require('./controllers/contentController');
-  // Call the controller function directly (public endpoint)
-  getContentById(req, res);
-});
-
-app.put('/content/:id', (req, res) => {
-  console.log('Received PUT request at /content/:id, forwarding to controller directly');
-  // Import the controller directly
-  const { updateContent } = require('./controllers/contentController');
-  // Add authentication middleware manually
-  const { protect } = require('./middleware/authMiddleware');
-  // Call middleware then controller
-  protect(req, res, () => {
-    // Only admins can update content
-    if (req.user && req.user.role === 'admin') {
-      updateContent(req, res);
-    } else {
-      res.status(403);
-      throw new Error('Not authorized as an admin');
-    }
-  });
-});
-
-app.delete('/content/:id', (req, res) => {
-  console.log('Received DELETE request at /content/:id, forwarding to controller directly');
-  // Import the controller directly
-  const { deleteContent } = require('./controllers/contentController');
-  // Add authentication middleware manually
-  const { protect } = require('./middleware/authMiddleware');
-  // Call middleware then controller
-  protect(req, res, () => {
-    // Only admins can delete content
-    if (req.user && req.user.role === 'admin') {
-      deleteContent(req, res);
-    } else {
-      res.status(403);
-      throw new Error('Not authorized as an admin');
-    }
-  });
-});
+// Content routes removed - using hardcoded content
 
 // Queue routes
 app.get('/queue/today', addCorsHeaders, (req, res) => {
@@ -849,81 +706,24 @@ app.post('/queue/reset', addCorsHeaders, (req, res) => {
   protect(req, res, () => doctorOrSecretary(req, res, () => resetQueue(req, res)));
 });
 
-// Root route and health check routes
+// Root route - corsMiddleware will handle CORS headers
 app.get('/', (req, res) => {
-  // Set CORS headers explicitly for this route
-  const origin = req.headers.origin;
-  if (origin) {
-    res.header('Access-Control-Allow-Origin', origin);
-    res.header('Access-Control-Allow-Credentials', 'true');
-  }
+  console.log(`Root route request from origin: ${req.headers.origin || 'unknown'}`);
   res.send('API is running...');
 });
 
 // Import health controller
 const { checkHealth } = require('./controllers/healthController');
 
-// Health check endpoint with enhanced CORS handling
+// Health check endpoint - corsMiddleware will handle CORS headers
 app.get('/health', (req, res, next) => {
-  // Set CORS headers explicitly for this route
-  const origin = req.headers.origin;
-
-  console.log(`Health check request from origin: ${origin || 'unknown'}`);
-
-  // Set the Vary header
-  res.header('Vary', 'Origin');
-
-  // Always allow the requesting origin
-  if (origin) {
-    res.header('Access-Control-Allow-Origin', origin);
-    console.log(`Setting Access-Control-Allow-Origin: ${origin} for health check`);
-  } else {
-    // No origin in request, set to wildcard
-    res.header('Access-Control-Allow-Origin', '*');
-    console.log('Setting Access-Control-Allow-Origin: * for health check');
-  }
-
-  // Set credentials to true for all requests
-  res.header('Access-Control-Allow-Credentials', 'true');
-
-  // Set other CORS headers
-  res.header('Access-Control-Allow-Methods', 'GET, OPTIONS');
-  res.header('Access-Control-Allow-Headers', allowedHeaders.join(', '));
-  res.header('Access-Control-Max-Age', '86400'); // 24 hours
-  res.header('Access-Control-Expose-Headers', 'Content-Length, X-Request-Id');
-
+  console.log(`Health check request from origin: ${req.headers.origin || 'unknown'}`);
   next();
 }, checkHealth);
 
-// API health check endpoint with enhanced CORS handling
+// API health check endpoint - corsMiddleware will handle CORS headers
 app.get('/api/health', (req, res, next) => {
-  // Set CORS headers explicitly for this route
-  const origin = req.headers.origin;
-
-  console.log(`API Health check request from origin: ${origin || 'unknown'}`);
-
-  // Set the Vary header
-  res.header('Vary', 'Origin');
-
-  // Always allow the requesting origin
-  if (origin) {
-    res.header('Access-Control-Allow-Origin', origin);
-    console.log(`Setting Access-Control-Allow-Origin: ${origin} for API health check`);
-  } else {
-    // No origin in request, set to wildcard
-    res.header('Access-Control-Allow-Origin', '*');
-    console.log('Setting Access-Control-Allow-Origin: * for API health check');
-  }
-
-  // Set credentials to true for all requests
-  res.header('Access-Control-Allow-Credentials', 'true');
-
-  // Set other CORS headers
-  res.header('Access-Control-Allow-Methods', 'GET, OPTIONS');
-  res.header('Access-Control-Allow-Headers', allowedHeaders.join(', '));
-  res.header('Access-Control-Max-Age', '86400'); // 24 hours
-  res.header('Access-Control-Expose-Headers', 'Content-Length, X-Request-Id');
-
+  console.log(`API Health check request from origin: ${req.headers.origin || 'unknown'}`);
   next();
 }, checkHealth);
 

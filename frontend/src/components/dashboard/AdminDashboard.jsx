@@ -3,7 +3,6 @@ import { FaUserPlus, FaEdit, FaTrash, FaSearch, FaEye, FaEyeSlash } from 'react-
 import DashboardLayout from './DashboardLayout';
 import AuthContext from '../../context/AuthContext';
 import apiService from '../../utils/apiService';
-import ContentManagement from './ContentManagement';
 import './DashboardStyles.css';
 
 const AdminDashboard = () => {
@@ -426,7 +425,6 @@ const AdminDashboard = () => {
   return (
     <DashboardLayout activeTab={activeTab} setActiveTab={setActiveTab} role="admin">
       {activeTab === 'users' && renderUsersTab()}
-      {activeTab === 'content' && <ContentManagement />}
 
       {showAddUserModal && renderAddUserModal()}
       {showEditUserModal && renderEditUserModal()}

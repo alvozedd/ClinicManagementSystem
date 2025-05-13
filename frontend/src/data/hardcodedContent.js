@@ -1,9 +1,9 @@
 /**
- * Default content data for the website
- * This serves as a fallback when the API fails to load content
+ * Hardcoded content data for the website
+ * This replaces the dynamic content loaded from the database
  */
 
-const defaultContent = {
+const hardcodedContent = {
   header: {
     'Branding': [
       {
@@ -54,7 +54,7 @@ const defaultContent = {
         category: 'UroHealth Central Ltd',
         type: 'text',
         label: 'About Text',
-        value: 'Providing specialized urological care with a patient-centered approach since 2010.',
+        value: 'Providing specialized urological care with a patient-centered approach.',
         visible: true
       }
     ],
@@ -74,7 +74,7 @@ const defaultContent = {
         category: 'Contact',
         type: 'text',
         label: 'Mobile',
-        value: '0722 396 296',
+        value: '0722398296',
         visible: true
       },
       {
@@ -83,7 +83,7 @@ const defaultContent = {
         category: 'Contact',
         type: 'text',
         label: 'Office',
-        value: '0733 398 296',
+        value: '0722398296',
         visible: true
       },
       {
@@ -124,6 +124,17 @@ const defaultContent = {
         url: '/login',
         visible: true
       }
+    ],
+    'Legal': [
+      {
+        id: 'footer-legal-1',
+        section: 'footer',
+        category: 'Legal',
+        type: 'text',
+        label: 'Copyright',
+        value: `© ${new Date().getFullYear()} UroHealth Central Ltd. All rights reserved.`,
+        visible: true
+      }
     ]
   },
   homepage: {
@@ -145,15 +156,6 @@ const defaultContent = {
         label: 'Hero Subtitle',
         value: 'Specialist Urological Care',
         visible: true
-      },
-      {
-        id: 'homepage-hero-3',
-        section: 'homepage',
-        category: 'Hero',
-        type: 'text',
-        label: 'Hero Description',
-        value: '',
-        visible: false
       }
     ],
     'About': [
@@ -244,35 +246,6 @@ const defaultContent = {
         type: 'text',
         label: 'Feature',
         value: '30-60 minutes',
-        visible: true
-      }
-    ],
-    'Diagnostics': [
-      {
-        id: 'services-diag-1',
-        section: 'services',
-        category: 'Diagnostics',
-        type: 'text',
-        label: 'Title',
-        value: 'Diagnostics',
-        visible: true
-      },
-      {
-        id: 'services-diag-2',
-        section: 'services',
-        category: 'Diagnostics',
-        type: 'longtext',
-        label: 'Description',
-        value: 'Advanced diagnostic procedures including ultrasound, cystoscopy, and urodynamic studies.',
-        visible: true
-      },
-      {
-        id: 'services-diag-3',
-        section: 'services',
-        category: 'Diagnostics',
-        type: 'text',
-        label: 'Feature',
-        value: 'Accurate Results',
         visible: true
       }
     ],
@@ -401,7 +374,7 @@ const defaultContent = {
         category: 'Contact Information',
         type: 'text',
         label: 'Mobile',
-        value: '0722 396 296',
+        value: '0722398296',
         visible: true
       },
       {
@@ -410,7 +383,7 @@ const defaultContent = {
         category: 'Contact Information',
         type: 'text',
         label: 'Office',
-        value: '0733 398 296',
+        value: '0722398296',
         visible: true
       },
       {
@@ -426,4 +399,4 @@ const defaultContent = {
   }
 };
 
-export default defaultContent;
+export default hardcodedContent;

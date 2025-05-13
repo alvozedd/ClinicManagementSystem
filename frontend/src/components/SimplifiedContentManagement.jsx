@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { FaSave, FaUndo, FaSpinner } from 'react-icons/fa';
+import { FaSave, FaUndo, FaSpinner, FaSync } from 'react-icons/fa';
 import apiService from '../utils/apiService';
-import { loadContent } from '../utils/contentUtils';
+import { loadContent, forceContentRefresh } from '../utils/contentUtils';
 
 function SimplifiedContentManagement() {
   const [content, setContent] = useState({});
@@ -115,7 +115,11 @@ function SimplifiedContentManagement() {
       // Execute all updates in parallel
       if (updatePromises.length > 0) {
         await Promise.all(updatePromises);
-        setSuccess('Content updated successfully!');
+
+        // Force content refresh in the frontend
+        forceContentRefresh();
+
+        setSuccess('Content updated successfully! The changes will be visible on the website.');
 
         // Update the original data to reflect the new values
         setOriginalData(formData);
@@ -145,6 +149,14 @@ function SimplifiedContentManagement() {
           <h2 className="text-lg font-semibold text-gray-800">Website Content Management</h2>
           <p className="text-sm text-gray-600">Edit website content to match your needs</p>
         </div>
+        <button
+          onClick={() => { forceContentRefresh(); setSuccess('Content cache cleared! Refreshing website content...'); setTimeout(() => setSuccess(null), 3000); }}
+          className="px-4 py-2 bg-blue-100 text-blue-700 rounded-md flex items-center hover:bg-blue-200 transition-colors"
+          title="Force refresh content on the website"
+        >
+          <FaSync className="mr-2" />
+          Refresh Website
+        </button>
       </div>
 
       {error && (

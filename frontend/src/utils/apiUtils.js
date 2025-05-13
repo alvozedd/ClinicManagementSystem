@@ -150,25 +150,58 @@ export const getAuthHeaders = () => {
 export const testDatabaseConnection = async () => {
   try {
     console.log('Testing database connection...');
-    const response = await fetch('https://clinicmanagementsystem-production-081b.up.railway.app/api/health', {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Cache-Control': 'no-cache'
-      },
-      mode: 'cors',
-      credentials: 'include',
-      cache: 'no-cache'
-    });
 
-    if (response.ok) {
-      const data = await response.json();
-      console.log('Database connection test result:', data);
-      return data;
-    } else {
-      console.error('Database connection test failed with status:', response.status);
-      return { status: 'error', message: `HTTP error: ${response.status}` };
+    // Try multiple endpoints for health check
+    const endpoints = [
+      'https://clinicmanagementsystem-production-081b.up.railway.app/api/health',
+      'https://clinicmanagementsystem-production-081b.up.railway.app/health',
+      'http://localhost:5000/api/health',
+      'http://localhost:5000/health'
+    ];
+
+    let lastError = null;
+
+    // Try each endpoint until one works
+    for (const endpoint of endpoints) {
+      try {
+        console.log(`Trying health check endpoint: ${endpoint}`);
+
+        // Add timestamp to prevent caching
+        const timestamp = new Date().getTime();
+        const hasQuery = endpoint.includes('?');
+        const timeParam = hasQuery ? `&_t=${timestamp}` : `?_t=${timestamp}`;
+        const urlWithTimestamp = `${endpoint}${timeParam}`;
+
+        const response = await fetch(urlWithTimestamp, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+          },
+          mode: 'cors',
+          credentials: 'include', // Include credentials for authenticated requests
+          cache: 'no-cache'
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Database connection test result:', data);
+          return data;
+        } else {
+          console.warn(`Health check failed with status ${response.status} at ${endpoint}`);
+          lastError = new Error(`HTTP error: ${response.status}`);
+        }
+      } catch (error) {
+        console.warn(`Error with health check endpoint ${endpoint}:`, error);
+        lastError = error;
+      }
     }
+
+    // If we get here, all endpoints failed
+    console.error('All health check attempts failed');
+    return { status: 'error', message: lastError ? lastError.message : 'All health check attempts failed' };
   } catch (error) {
     console.error('Database connection test failed:', error);
     return { status: 'error', message: error.message };
