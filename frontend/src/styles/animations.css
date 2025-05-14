@@ -1,5 +1,15 @@
 /* Enhanced Animation styles for UroHealth Central website */
 
+/* Fix for title text on small screens */
+.hero-title {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+  max-width: 100%;
+  display: block;
+}
+
+
 /* Base animation classes */
 .animate-on-scroll {
   opacity: 0;

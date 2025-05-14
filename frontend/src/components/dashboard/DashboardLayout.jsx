@@ -95,6 +95,27 @@ const DashboardLayout = ({ children, activeTab, setActiveTab, role }) => {
       )}
 
       <div className="dashboard-layout flex">
+        {/* Mobile Bottom Navigation Bar */}
+        {isMobile && (
+          <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 shadow-lg z-30 py-2 px-4">
+            <div className="flex justify-around items-center">
+              {navItems.sort((a, b) => a.priority - b.priority).map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    setActiveTab(item.id);
+                    const currentPath = location.pathname;
+                    navigate(`${currentPath}?tab=${item.id}`);
+                  }}
+                  className={`flex flex-col items-center p-2 ${activeTab === item.id ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-400'}`}
+                >
+                  <span>{item.icon}</span>
+                  <span className="text-xs mt-1">{item.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Sidebar - hidden on mobile unless menu is open */}
         <aside className={`dashboard-sidebar ${isMobile ? (menuOpen ? 'block fixed inset-0 z-50 pt-16' : 'hidden') : 'block'} bg-white dark:bg-gray-800 shadow-md w-64 min-h-screen`}>
