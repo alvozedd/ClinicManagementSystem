@@ -7,6 +7,16 @@
   hyphens: auto;
   max-width: 100%;
   display: block;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  padding: 0 0.5rem;
+}
+
+@media (max-width: 480px) {
+  .hero-title {
+    font-size: 2rem;
+    line-height: 1.1;
+  }
 }
 
 
