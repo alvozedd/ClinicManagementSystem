@@ -79,7 +79,13 @@ const DashboardLayout = ({ children, activeTab, setActiveTab, role }) => {
             <div className="text-lg font-semibold text-blue-600 dark:text-blue-400">UroHealth</div>
           </div>
           <div className="flex items-center">
-            <DarkModeToggle />
+            <button
+              onClick={handleLogout}
+              className="mr-3 text-red-500 hover:text-red-700 dark:hover:text-red-400 p-2"
+              aria-label="Logout"
+            >
+              <FaSignOutAlt size={18} />
+            </button>
             <div className="text-sm mx-2 text-gray-600 dark:text-gray-300 hidden sm:block">{userInfo?.name}</div>
             <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold">
               {userInfo?.name?.charAt(0) || 'U'}
