@@ -722,64 +722,6 @@ function NewHomePage() {
             </>
           )}
         </main>
-
-        {/* Footer */}
-        <footer className="bg-blue-900 text-white py-8">
-          <div className="container mx-auto px-4">
-            <div className="grid md:grid-cols-3 gap-8">
-              <div>
-                <h3 className="text-xl font-bold mb-4">UroHealth Central Ltd</h3>
-                <p className="text-blue-200">
-                  {getContentValue(content, 'footer', 'UroHealth Central Ltd', 'About Text', 'Providing specialized urological care with a patient-centered approach since 2010.')}
-                </p>
-              </div>
-
-              <div>
-                <h3 className="text-xl font-bold mb-4">Contact</h3>
-                <p className="text-blue-200">
-                  {getContentValue(content, 'footer', 'Contact', 'Address', '123 Medical Plaza, Suite 456, Lagos, Nigeria')}
-                </p>
-                <p className="text-blue-200">
-                  Mobile: {getContentValue(content, 'footer', 'Contact', 'Mobile', '+234 123 456 7890')}
-                </p>
-                <p className="text-blue-200">
-                  Email: {getContentValue(content, 'footer', 'Contact', 'Email', 'info@urohealthcentral.com')}
-                </p>
-              </div>
-
-              <div>
-                <h3 className="text-xl font-bold mb-4">Quick Links</h3>
-                <ul className="space-y-2">
-                  <li>
-                    <button
-                      onClick={() => {
-                        setShowBookingForm(true);
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                      }}
-                      className="text-blue-200 hover:text-white transition-colors"
-                    >
-                      Book Appointment
-                    </button>
-                  </li>
-                  <li>
-                    <a href="#contact" className="text-blue-200 hover:text-white transition-colors">
-                      Contact Us
-                    </a>
-                  </li>
-                  <li>
-                    <Link to="/login" className="text-blue-200 hover:text-white transition-colors">
-                      Staff Login
-                    </Link>
-                  </li>
-                </ul>
-              </div>
-            </div>
-
-            <div className="border-t border-blue-800 mt-8 pt-6 text-center text-blue-300">
-              <p>&copy; {new Date().getFullYear()} UroHealth Central Ltd. All rights reserved.</p>
-            </div>
-          </div>
-        </footer>
       </PageLoader>
     </div>
   );
