@@ -24,19 +24,19 @@ const DashboardLayout = ({ children, activeTab, setActiveTab, role }) => {
   // Define navigation items based on role
   const getNavItems = () => {
     const commonItems = [
-      { id: 'patients', label: 'Patients', icon: <FaUsers className="text-blue-500" /> },
-      { id: 'appointments', label: 'Appointments', icon: <FaCalendarAlt className="text-green-600 dark:text-green-400" /> },
-      { id: 'calendar', label: 'Calendar', icon: <FaCalendarAlt className="text-purple-500" /> },
+      { id: 'patients', label: 'Patients', icon: <FaUsers className="text-blue-500" />, priority: 1 },
+      { id: 'appointments', label: 'Appointments', icon: <FaCalendarAlt className="text-green-600 dark:text-green-400" />, priority: 2 },
+      { id: 'calendar', label: 'Calendar', icon: <FaCalendarAlt className="text-purple-500" />, priority: 3 },
     ];
 
     if (role === 'admin') {
       return [
-        { id: 'users', label: 'Users', icon: <FaUser className="text-purple-500" /> }
+        { id: 'users', label: 'Users', icon: <FaUser className="text-purple-500" />, priority: 1 }
       ];
     } else if (role === 'doctor') {
       return [
         ...commonItems,
-        { id: 'notes', label: 'Notes', icon: <FaClipboardList className="text-red-500" /> },
+        { id: 'notes', label: 'Notes', icon: <FaClipboardList className="text-red-500" />, priority: 4 },
       ];
     } else {
       // Secretary
@@ -70,6 +70,7 @@ const DashboardLayout = ({ children, activeTab, setActiveTab, role }) => {
             <button
               onClick={toggleMenu}
               className="mr-4 text-gray-700 dark:text-gray-200 focus:outline-none"
+              aria-label="Open menu"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"></path>
@@ -79,7 +80,7 @@ const DashboardLayout = ({ children, activeTab, setActiveTab, role }) => {
           </div>
           <div className="flex items-center">
             <DarkModeToggle />
-            <div className="text-sm mx-2 text-gray-600 dark:text-gray-300">{userInfo?.name}</div>
+            <div className="text-sm mx-2 text-gray-600 dark:text-gray-300 hidden sm:block">{userInfo?.name}</div>
             <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold">
               {userInfo?.name?.charAt(0) || 'U'}
             </div>
@@ -110,7 +111,8 @@ const DashboardLayout = ({ children, activeTab, setActiveTab, role }) => {
 
             <nav className="flex-1">
               <ul className="space-y-2">
-                {navItems.map((item) => (
+                {/* Sort nav items by priority to ensure patients tab is always first */}
+                {navItems.sort((a, b) => a.priority - b.priority).map((item) => (
                   <li key={item.id}>
                     <button
                       onClick={() => {

@@ -175,6 +175,36 @@ body.dark-mode {
   .sidebar-content {
     overflow-y: auto;
   }
+
+  /* Ensure buttons are always visible */
+  .btn {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    white-space: nowrap;
+  }
+
+  /* Ensure modal forms are scrollable */
+  .fixed.inset-0 {
+    overflow-y: auto;
+  }
+
+  /* Improve form inputs on small screens */
+  .form-input, .form-select {
+    font-size: 16px; /* Prevents iOS zoom on focus */
+  }
+
+  /* Ensure patient tab is always visible */
+  .dashboard-sidebar ul li button {
+    padding: 0.75rem 0.5rem;
+    font-size: 0.875rem;
+  }
+
+  /* Improve appointment booking form scrollability */
+  .fixed.inset-0 > div {
+    max-height: 90vh;
+    overflow-y: auto;
+    margin: auto;
+  }
 }
 
 /* Glass card effects */

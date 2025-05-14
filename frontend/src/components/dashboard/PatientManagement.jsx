@@ -449,8 +449,8 @@ const PatientManagement = ({ role, selectedPatient, onSelectPatient, onBackToPat
   // Add Patient Modal
   const renderAddPatientModal = () => {
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 sm:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto my-auto">
           <h2 className="text-xl font-bold mb-4 dark:text-white">Add New Patient</h2>
 
           <form onSubmit={submitAddPatient}>
@@ -564,8 +564,8 @@ const PatientManagement = ({ role, selectedPatient, onSelectPatient, onBackToPat
   // Edit Patient Modal
   const renderEditPatientModal = () => {
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 sm:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto my-auto">
           <h2 className="text-xl font-bold mb-4 dark:text-white">Edit Patient</h2>
 
           <form onSubmit={submitEditPatient}>
@@ -683,14 +683,15 @@ const PatientManagement = ({ role, selectedPatient, onSelectPatient, onBackToPat
       ) : (
         <>
           <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-bold text-gray-800 dark:text-white">Patient Management</h1>
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">Patient Management</h1>
             <button
               onClick={handleAddPatient}
               className="btn btn-primary flex items-center dark:bg-blue-700 dark:hover:bg-blue-600"
               title="Add Patient"
+              aria-label="Add Patient"
             >
-              <FaUserPlus className="sm:mr-2" />
-              <span className="hidden sm:inline">Add Patient</span>
+              <FaUserPlus className="mr-1 sm:mr-2" />
+              <span className="text-xs sm:text-sm md:text-base">Add</span>
             </button>
           </div>
 
