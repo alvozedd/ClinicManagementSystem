@@ -83,7 +83,7 @@ const hardcodedContent = {
         category: 'Contact',
         type: 'text',
         label: 'Office',
-        value: '0722398296',
+        value: '0720870154',
         visible: true
       },
       {
@@ -92,7 +92,7 @@ const hardcodedContent = {
         category: 'Contact',
         type: 'text',
         label: 'Email',
-        value: 'info@urohealthcentral.com',
+        value: 'urohealth16@gmail.com',
         visible: true
       }
     ],
@@ -154,7 +154,7 @@ const hardcodedContent = {
         category: 'Hero',
         type: 'text',
         label: 'Hero Subtitle',
-        value: 'Specialist Urological Care',
+        value: 'Specialist Urological Solutions',
         visible: true
       }
     ],
@@ -236,7 +236,7 @@ const hardcodedContent = {
         category: 'Consultations',
         type: 'longtext',
         label: 'Description',
-        value: 'Comprehensive evaluation and diagnosis of urological conditions by our expert consultants.',
+        value: 'Comprehensive evaluation and diagnosis of urological conditions by our experienced consultants.',
         visible: true
       },
       {
@@ -245,7 +245,36 @@ const hardcodedContent = {
         category: 'Consultations',
         type: 'text',
         label: 'Feature',
-        value: '30-60 minutes',
+        value: '',
+        visible: true
+      }
+    ],
+    'Diagnostics': [
+      {
+        id: 'services-diag-1',
+        section: 'services',
+        category: 'Diagnostics',
+        type: 'text',
+        label: 'Title',
+        value: 'Diagnostics',
+        visible: true
+      },
+      {
+        id: 'services-diag-2',
+        section: 'services',
+        category: 'Diagnostics',
+        type: 'longtext',
+        label: 'Description',
+        value: 'Advanced diagnostic procedures.',
+        visible: true
+      },
+      {
+        id: 'services-diag-3',
+        section: 'services',
+        category: 'Diagnostics',
+        type: 'text',
+        label: 'Feature',
+        value: 'Accurate Results',
         visible: true
       }
     ],
@@ -316,7 +345,7 @@ const hardcodedContent = {
         category: 'Office Hours',
         type: 'text',
         label: 'Weekday Hours',
-        value: 'Monday - Friday: 8:00 AM - 5:00 PM',
+        value: '8:30 AM - 5:00 PM',
         visible: true
       },
       {
@@ -325,7 +354,7 @@ const hardcodedContent = {
         category: 'Office Hours',
         type: 'text',
         label: 'Saturday Hours',
-        value: 'Saturday: By appointment',
+        value: 'By arrangement',
         visible: true
       },
       {
@@ -334,7 +363,7 @@ const hardcodedContent = {
         category: 'Office Hours',
         type: 'text',
         label: 'Sunday Hours',
-        value: 'Sunday: Closed',
+        value: 'Closed (and public holidays)',
         visible: true
       }
     ],
@@ -383,7 +412,7 @@ const hardcodedContent = {
         category: 'Contact Information',
         type: 'text',
         label: 'Office',
-        value: '0722398296',
+        value: '0720870154',
         visible: true
       },
       {
@@ -392,7 +421,7 @@ const hardcodedContent = {
         category: 'Contact Information',
         type: 'text',
         label: 'Email',
-        value: 'info@urohealthcentral.com',
+        value: 'urohealth16@gmail.com',
         visible: true
       }
     ]
