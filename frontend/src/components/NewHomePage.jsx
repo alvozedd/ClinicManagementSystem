@@ -633,7 +633,7 @@ function NewHomePage() {
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-300 focus:border-blue-500 focus:outline-none"
                         required
                       />
-                      <p className="text-sm text-gray-600 mt-2 italic">Our clinic hours are 8:00 AM to 5:00 PM</p>
+                      <p className="text-sm text-gray-600 mt-2 italic">Our clinic hours are 8:30 AM to 5:00 PM, Saturday by arrangement, closed on Sundays and public holidays</p>
                     </div>
 
                     <div className="mb-4">

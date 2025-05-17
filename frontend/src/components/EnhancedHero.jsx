@@ -19,7 +19,7 @@ const EnhancedHero = ({ content, getContentValue, onBookAppointment }) => {
           </h1>
 
           <p className="text-xl md:text-2xl mb-6 text-blue-200 hero-subtitle">
-            Specialist Urological Care
+            Specialist Urological Solutions
           </p>
 
           {/* Hero description removed as requested */}

@@ -88,10 +88,10 @@ const EnhancedContact = ({ content, getContentValue }) => {
                     <div>
                       <p className="text-sm text-blue-300 mb-1">Office</p>
                       <a
-                        href="tel:0722398296"
+                        href="tel:0720870154"
                         className="text-white hover:text-blue-300 font-medium text-lg transition-colors flex items-center"
                       >
-                        0722398296
+                        0720870154
                         <span className="ml-2 bg-blue-600 hover:bg-blue-500 text-xs px-2 py-1 rounded-md transition-colors inline-flex items-center">
                           <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
@@ -113,10 +113,10 @@ const EnhancedContact = ({ content, getContentValue }) => {
                     <div>
                       <p className="text-sm text-blue-300 mb-1">Email</p>
                       <a
-                        href={`mailto:${getContentValue(content, 'footer', 'Contact', 'Email', 'info@urohealthcentral.com')}`}
+                        href="mailto:urohealth16@gmail.com"
                         className="text-white hover:text-blue-300 font-medium transition-colors flex items-center"
                       >
-                        {getContentValue(content, 'footer', 'Contact', 'Email', 'info@urohealthcentral.com')}
+                        urohealth16@gmail.com
                         <span className="ml-2 bg-blue-600 hover:bg-blue-500 text-xs px-2 py-1 rounded-md transition-colors inline-flex items-center">
                           <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
@@ -139,21 +139,21 @@ const EnhancedContact = ({ content, getContentValue }) => {
                     <div className="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
                     <div className="flex flex-col sm:flex-row sm:items-center">
                       <span className="text-blue-200 font-medium">Monday - Friday:</span>
-                      <span className="text-white sm:ml-2">{getContentValue(content, 'contact', 'Office Hours', 'Weekday Hours', '8:00 AM - 5:00 PM')}</span>
+                      <span className="text-white sm:ml-2">8:30 AM - 5:00 PM</span>
                     </div>
                   </div>
                   <div className="flex items-center">
                     <div className="w-3 h-3 bg-yellow-500 rounded-full mr-3"></div>
                     <div className="flex flex-col sm:flex-row sm:items-center">
                       <span className="text-blue-200 font-medium">Saturday:</span>
-                      <span className="text-white sm:ml-2">{getContentValue(content, 'contact', 'Office Hours', 'Saturday Hours', 'By appointment')}</span>
+                      <span className="text-white sm:ml-2">By arrangement</span>
                     </div>
                   </div>
                   <div className="flex items-center">
                     <div className="w-3 h-3 bg-red-500 rounded-full mr-3"></div>
                     <div className="flex flex-col sm:flex-row sm:items-center">
                       <span className="text-blue-200 font-medium">Sunday:</span>
-                      <span className="text-white sm:ml-2">{getContentValue(content, 'contact', 'Office Hours', 'Sunday Hours', 'Closed')}</span>
+                      <span className="text-white sm:ml-2">Closed (and public holidays)</span>
                     </div>
                   </div>
                 </div>

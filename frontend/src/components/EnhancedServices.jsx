@@ -46,18 +46,13 @@ const EnhancedServices = ({ content, getContentValue }) => {
             </h3>
 
             <p className="text-gray-600 mb-6 leading-relaxed">
-              {getContentValue(content, 'services', 'Consultations', 'Description', 'Comprehensive evaluation and diagnosis of urological conditions by our expert consultants.')}
+              {getContentValue(content, 'services', 'Consultations', 'Description', 'Comprehensive evaluation and diagnosis of urological conditions by our experienced consultants.')}
             </p>
 
             <div className="border-t border-blue-100 pt-4 text-blue-600 font-medium flex items-center">
               <span className="mr-2">
-                {getContentValue(content, 'services', 'Consultations', 'Feature', '30-60 minutes')}
+                {getContentValue(content, 'services', 'Consultations', 'Feature', '')}
               </span>
-              <div className="ml-auto w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center group-hover:bg-blue-100 transition-colors">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
-                </svg>
-              </div>
             </div>
           </div>
 
@@ -74,18 +69,13 @@ const EnhancedServices = ({ content, getContentValue }) => {
             </h3>
 
             <p className="text-gray-600 mb-6 leading-relaxed">
-              {getContentValue(content, 'services', 'Diagnostics', 'Description', 'Advanced diagnostic procedures including ultrasound, cystoscopy, and urodynamic studies.')}
+              {getContentValue(content, 'services', 'Diagnostics', 'Description', 'Advanced diagnostic procedures.')}
             </p>
 
             <div className="border-t border-blue-100 pt-4 text-blue-600 font-medium flex items-center">
               <span className="mr-2">
                 {getContentValue(content, 'services', 'Diagnostics', 'Feature', 'Accurate Results')}
               </span>
-              <div className="ml-auto w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center group-hover:bg-blue-100 transition-colors">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
-                </svg>
-              </div>
             </div>
           </div>
 
@@ -109,11 +99,6 @@ const EnhancedServices = ({ content, getContentValue }) => {
               <span className="mr-2">
                 {getContentValue(content, 'services', 'Treatments', 'Feature', 'Personalized Care')}
               </span>
-              <div className="ml-auto w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center group-hover:bg-blue-100 transition-colors">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
-                </svg>
-              </div>
             </div>
           </div>
         </div>
