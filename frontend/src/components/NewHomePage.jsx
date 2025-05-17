@@ -175,7 +175,7 @@ function NewHomePage() {
                 section: 'homepage',
                 category: 'Hero',
                 label: 'Hero Subtitle',
-                value: 'Specialist Urological Care',
+                value: 'Specialist Urological Solutions',
                 visible: true
               },
               {
@@ -229,7 +229,7 @@ function NewHomePage() {
                 section: 'services',
                 category: 'Consultations',
                 label: 'Description',
-                value: 'Comprehensive evaluation and diagnosis of urological conditions by our expert consultants.',
+                value: 'Comprehensive evaluation and diagnosis of urological conditions by our experienced consultants.',
                 visible: true
               },
               {
@@ -237,7 +237,7 @@ function NewHomePage() {
                 section: 'services',
                 category: 'Consultations',
                 label: 'Feature',
-                value: '30-60 minutes',
+                value: '',
                 visible: true
               }
             ],
@@ -255,7 +255,7 @@ function NewHomePage() {
                 section: 'services',
                 category: 'Diagnostics',
                 label: 'Description',
-                value: 'Advanced diagnostic procedures including ultrasound, cystoscopy, and urodynamic studies.',
+                value: 'Advanced diagnostic procedures.',
                 visible: true
               },
               {
@@ -470,7 +470,7 @@ function NewHomePage() {
           {bookingSuccess ? (
             /* Success message */
             <div className="min-h-screen flex items-center justify-center bg-transparent relative">
-              <StandardBackground />
+              <GradientBackground />
               <div className="absolute inset-0 bg-gradient-to-b from-black/10 to-transparent z-[1]"></div>
               <div className="max-w-2xl mx-auto bg-white rounded-xl shadow-lg p-8 text-center my-12 w-full mx-4 sm:mx-auto relative z-20">
                 <h2 className="text-3xl font-bold text-blue-700 mb-4">Booking Confirmed!</h2>
